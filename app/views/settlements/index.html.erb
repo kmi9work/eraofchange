@@ -1,0 +1,4 @@
+<p>Наши города</p>
+<% @settlements.each do |settlement| %>
+  <p><%= link_to settlement.name, settlement %> - <%= settlement.category %></p>
+<% end -%>
