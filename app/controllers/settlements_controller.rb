@@ -17,6 +17,13 @@ class SettlementsController < ApplicationController
   end
 
   def edit
+    @settlement = Settlement.find_by_id(params[:id])
+  end
+
+  def update
+    @settlement = Settlement.find_by_id(params[:id])
+    @settlement.update(name: params[:name], category: params[:category])
+    redirect_to settlement_path(@settlement)
   end
 
   def destroy
