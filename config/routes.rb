@@ -3,7 +3,8 @@ Rails.application.routes.draw do
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'
   get '/settlements/:id', to: 'settlements#show', as: :settlement
-  get '/settlements/edit/:id', to: 'settlements#edit'
-  get '/settlements/destroy/:id', to: 'settlements#destroy'
+  get '/settlements/:id/edit', to: 'settlements#edit', as: :edit_settlement
+  patch '/settlements/:id', to: 'settlements#update'
+  delete '/settlements/:id', to: 'settlements#destroy', as: :destroy
   root to: 'welcome#index'
 end
