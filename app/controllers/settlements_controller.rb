@@ -13,7 +13,7 @@ class SettlementsController < ApplicationController
 
   def create
     Settlement.create(name: params[:name], category: params[:category])
-    redirect_to action: :index
+    redirect_to '/settlements'
   end
 
   def edit
