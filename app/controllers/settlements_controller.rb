@@ -28,8 +28,8 @@ class SettlementsController < ApplicationController
   end
 
   def destroy
-    #...
+    @settlement = Settlement.find_by_id(params[:id])
     @settlement.destroy
-    #...
+    redirect_to settlements_path
   end
 end
