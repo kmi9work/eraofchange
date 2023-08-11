@@ -2,5 +2,7 @@
 <% @settlements.each do |settlement| %>
   <p><%= link_to settlement.name, settlement %> - <%= settlement.category %></p>
 <% end -%>
+<p>-----------</p>
+<p><%= @settles %></p>
 
 <%= link_to 'Создать населенный пункт', new_settlement_path %>

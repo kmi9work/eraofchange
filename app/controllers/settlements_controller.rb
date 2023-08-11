@@ -1,6 +1,7 @@
 class SettlementsController < ApplicationController
   def index
     @settlements = Settlement.all
+    @settles = SettleService.all
   end
 
   def show
@@ -12,6 +13,8 @@ class SettlementsController < ApplicationController
   end
 
   def create
+    settle = SettleService.new(name: params[:name], category: params[:category])
+    settle.save
     Settlement.create(name: params[:name], category: params[:category])
     redirect_to '/settlements'
   end
