@@ -1,1 +1,5 @@
 <p><%= @settlement.name %> - <%= @settlement.category %></p>
+
+<p><button><%= link_to "Редактировать", edit_settlement_path(@settlement) %></button><p>
+
+<button><%= link_to  "Удалить", destroy_path%></button> 
