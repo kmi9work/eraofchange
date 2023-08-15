@@ -13,7 +13,7 @@ class SettlementsController < ApplicationController
 
   def create
     Settlement.create(name: params[:name], category: params[:category])
-    redirect_to '/settlements'
+    redirect_to('/settlements')
   end
 
   def edit
@@ -24,12 +24,12 @@ class SettlementsController < ApplicationController
     @settlement = Settlement.find_by_id(params[:id])
     Settlement.update(name: params[:name],
                       category: params[:category])
-    redirect_to settlement_path(@settlement)
+    redirect_to(settlement_path(@settlement))
   end
 
   def destroy
     @settlement = Settlement.find_by_id(params[:id])
     @settlement.destroy
-    redirect_to settlements_path
+    redirect_to(settlements_path)
   end
 end
