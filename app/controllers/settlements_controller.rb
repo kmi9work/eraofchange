@@ -33,3 +33,6 @@ class SettlementsController < ApplicationController
     redirect_to(settlements_path)
   end
 end
+#rjvvty
+
+
