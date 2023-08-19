@@ -1,6 +1,9 @@
 <p>Наши города</p>
-<% @settlements.each do |settlement| %>
-  <p><%= link_to settlement.name, settlement %> - <%= settlement.category %></p>
+<% @settles.each do |settlement| %>
+  <p><%= settlement.name %> - <%= settlement.category %></p>
 <% end -%>
 
 <%= link_to 'Создать населенный пункт', new_settlement_path %>
+
+<br>-----------<br>
+<%= @settles %>
