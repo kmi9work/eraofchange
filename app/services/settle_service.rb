@@ -3,7 +3,7 @@ class SettleService
   def self.all
     f = File.open("db/my_db/settle.csv", "r")
     #Открываем файл на чтение
-    str = f.gets
+    str = f.gets.strip
     #Читаем первую строку из файла в переменную str
     settles = []
     while (str.present?)
@@ -17,7 +17,7 @@ class SettleService
       #Берем второе значение из этого массива и кладём его в переменную экземпляра класса category.
       settles.push(settle)
       #Кладём наш экземпляр в конец массива settles.
-      str = f.gets
+      str = f.gets.strip
       #Читаем следующую строку из файла в переменную str
     end
     f.close
