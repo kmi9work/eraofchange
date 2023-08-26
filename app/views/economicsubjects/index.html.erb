@@ -1,0 +1,14 @@
+"Экономические субэекты"
+
+<% @economicsubjects.each do |economicsubject| %>
+  <p><%= link_to economicsubject.name %> - <%= economicsubject.category %> - <%= economicsubject.property %></p>
+<% end -%>
+
+создать
+
+ <%= @economicsubjects %>
+
+
+
+<br>
+<a href="/welcome-index">Назад</a>

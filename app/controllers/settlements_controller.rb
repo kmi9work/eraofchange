@@ -1,6 +1,7 @@
 class SettlementsController < ApplicationController
   def index
-    @settlements = Settlement.all
+    @settlements = Settlement.all 
+    @settles = SettleService.all 
   end
 
   def show
