@@ -11,10 +11,12 @@ class SettlementsController < ApplicationController
 
   def new
     @settlement = Settlement.new
+    @settle = SettleService.new
   end
 
   def create
     Settlement.create(name: params[:name], category: params[:category])
+    SettleService.create(params[:name], params[:category])
     redirect_to('/settlements')
   end
 
@@ -24,7 +26,7 @@ class SettlementsController < ApplicationController
 
   def update
     @settlement = Settlement.find_by_id(params[:id])
-    Settlement.update(name: params[:name],
+    @settlement.update(name: params[:name],
                       category: params[:category])
     redirect_to(settlement_path(@settlement))
   end
