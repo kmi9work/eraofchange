@@ -5,5 +5,13 @@
 
 <%= link_to 'Создать населенный пункт', new_settlement_path %>
 
+<% @economicsubjects.each do |economicsubject| %>
+  <p><%= economicsubject.name %> - <%= economicsubject.category %> - <%= economicsubject.money %></p>
+<% end -%>
+
+
 <br>-----------<br>
 <%= @settles %>
+
+<br>-----------<br>
+<%= @economicsubjects %>

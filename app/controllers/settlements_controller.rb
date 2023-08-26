@@ -2,6 +2,7 @@ class SettlementsController < ApplicationController
   def index
     @settlements = Settlement.all
     @settles = SettleService.all
+    @economicsubjects = EconomicsubjectService.all
   end
 
   def show
@@ -34,3 +35,4 @@ class SettlementsController < ApplicationController
     redirect_to(settlements_path)
   end
 end
+
