@@ -12,22 +12,23 @@ class SettleService
       settles.push(settle)
       str = f.gets
     end
+    
     f.close
     settles
   end
 
   def self.create(name, category)
-    f = File.open("db/my_db/settle_max_id.csv", "a+")
-    max_id = f.gets.to_i
-    f.each do
-      max_id = max_id + 1
-    end
-    f.puts (max_id)
-    f.close
-    f = File.open("db/my_db/settle.csv", "a+")
-    str = "#{max_id};#{name};#{category}"
-    f.puts str
-    f.close
-  end
+    f_max_id = File.open("db/my_db/settle_max_id.csv", "r")
+    new_id = f_max_id.gets.to_i + 1
+    f_max_id.close
 
+    f_settle = File.open("db/my_db/settle.csv", "a+") #пишет в конец, а также создает новый файл.
+    str = "#{new_id};#{name}; #{category}" #добавляет переменную внутрь строки
+    f_settle.puts str
+    f_settle.close
+
+    f_max_id = File.open("db/my_db/settle_max_id.csv", "w")
+    f_max_id.puts new_id
+    f_max_id.close
+  end
 end
