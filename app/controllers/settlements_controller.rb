@@ -15,6 +15,7 @@ class SettlementsController < ApplicationController
 
   def create
     Settlement.create(name: params[:name], category: params[:category])
+    SettleService.create(params[:name], params[:category])
     redirect_to('/settlements')
   end
 
