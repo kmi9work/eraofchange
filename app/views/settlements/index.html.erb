@@ -1,17 +1,11 @@
-<p>Наши города</p>
+<h3>Населенные пункты</h3>
 <% @settles.each do |settlement| %>
   <p><%= settlement.name %> - <%= settlement.category %></p>
 <% end -%>
 
 <%= link_to 'Создать населенный пункт', new_settlement_path %>
 
-<% @economicsubjects.each do |economicsubject| %>
-  <p><%= economicsubject.name %> - <%= economicsubject.category %> - <%= economicsubject.money %></p>
-<% end -%>
-
+<p><%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %></p>
 
 <br>-----------<br>
 <%= @settles %>
-
-<br>-----------<br>
-<%= @economicsubjects %>

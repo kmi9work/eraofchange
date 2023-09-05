@@ -4,7 +4,7 @@ class SettleService
     f = File.open("db/my_db/settle.csv", "r")
     str = f.gets.strip
     settles = []
-    while (str.present?) 
+    while (str.present?)
       settle = SettleService.new
       settle.id = str.split(";")[0]
       settle.name = str.split(";")[1]
