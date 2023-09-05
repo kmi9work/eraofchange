@@ -19,15 +19,16 @@ class EconomicsubjectService
 end
 
 def self.create(id, name, category, money)
-    lines = File.foreach("db/my_db/economicsubject.csv").count
-    f = File.open("db/my_db/economicsubject_max_id.csv", "w")
-    f.puts lines.to_i + 1
-    f.close 
-        f = File.open("db/my_db/economicsubject_max_id.csv", "r")
-    max_id = f.gets.to_i
-    f = File.open("db/my_db/economicsubject.csv", "a+")
-    str = "#{max_id}; #{name}; #{category}; #{money}"
-    f.puts str
-    f.close
-    
-    end
+  f_max_id = File.open("db/my_db/economicsubject_max_id.csv", "r")
+  new_id = f_max_id.gets.to_i + 1
+  f_max_id.close
+
+  f_es = File.open("db/my_db/economicsubject.csv", "a+")
+  str = "#{new_id}; #{name}; #{category}; #{money}"
+  f_es.puts str
+  f_es.close
+
+  f_max_id = File.open("db/my_db/economicsubject_max_id.csv", "w")
+  f_max_id.puts new_id
+  f_max_id.close
+end
