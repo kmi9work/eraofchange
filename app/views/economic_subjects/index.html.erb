@@ -1,4 +1,4 @@
-<h3>Экономические субъекты</h3>
+<h3>Экономические субъекты (<%= @count %>)</h3>
 <% @economic_subjects.each do |economic_subject| %>
   <p><%= economic_subject.name %> - <%= economic_subject.category %> - <%= economic_subject.money %></p>
 <% end -%>

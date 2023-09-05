@@ -1,6 +1,7 @@
 class EconomicSubjectsController < ApplicationController
   def index
     @economic_subjects = EconomicSubjectService.all
+    @count = EconomicSubjectService.count
   end
 
   def show
