@@ -22,8 +22,8 @@ class SettleService
     new_id = f_max_id.gets.to_i + 1
     f_max_id.close
 
-    f_settle = File.open("db/my_db/settle.csv", "a+") #пишет в конец, а также создает новый файл.
-    str = "#{new_id};#{name}; #{category}" #добавляет переменную внутрь строки
+    f_settle = File.open("db/my_db/settle.csv", "a+")
+    str = "#{new_id};#{name}; #{category}"
     f_settle.puts str
     f_settle.close
 
