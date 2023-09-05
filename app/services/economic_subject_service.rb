@@ -31,4 +31,17 @@ class EconomicSubjectService
     f_max_id.puts new_id
     f_max_id.close
   end
+
+  def self.count(id)
+    f = File.open("db/my_db/economicsubject.csv", "r")
+    str = f.gets.strip
+    number_of_ids = 0
+
+    while (str.present?)
+      number_of_ids =+1 
+    end
+    
+    number_of_ids
+  end
+
 end
