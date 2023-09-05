@@ -2,7 +2,7 @@ class SettlementsController < ApplicationController
   def index
     @settlements = Settlement.all
     @settles = SettleService.all
-    @economicsubjects = EconomicsubjectService.all
+    @economic_subjects = EconomicSubjectService.all
   end
 
   def show
