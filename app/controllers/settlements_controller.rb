@@ -6,6 +6,8 @@ class SettlementsController < ApplicationController
 
   def show
     @settlement = Settlement.find_by_id(params[:id])
+    @settle = SettleService.find_by_id(params[:id])
+
   end
 
   def new
