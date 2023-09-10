@@ -14,5 +14,14 @@ Rails.application.routes.draw do
   get '/economic_subjects/:id/edit', to: 'economic_subjects#edit', as: :edit_economic_subject
   patch '/economic_subjects/:id', to: 'economic_subjects#update'
   delete '/economic_subjects/:id', to: 'economic_subjects#destroy', as: :destroy_economic_subject
+  
+  get '/settles', to: 'settles#index'
+  get '/settles/new', to: 'settles#new', as: :new_settle
+  post '/settles', to: 'settles#create'
+  get '/settles/:id', to: 'settles#show', as: :settle
+  get '/settles/:id/edit', to: 'settles#edit', as: :edit_settle
+  patch '/settles/:id', to: 'settles#update'
+  delete '/settles/:id', to: 'settles#destroy', as: :destroy_settle
+  
   root to: 'welcome#index'
 end

@@ -23,7 +23,7 @@ class SettleService
     f_max_id.close
 
     f_settle = File.open("db/my_db/settle.csv", "a+")
-    str = "#{new_id};#{name}; #{category}"
+    str = "#{new_id};#{name};#{category}"
     f_settle.puts str
     f_settle.close
 
@@ -36,15 +36,16 @@ class SettleService
     f = File.open("db/my_db/settle.csv", "r")
     settle = nil
     f.each do |str|
-      read_id = str.split(";")[0]&.to_i 
-      if read_id == settle_id.to_i
-        settle = SettleService.new
-        settle.id = read_id
-        settle.name = str.split(";")[1]
-        settle.category = str.split(";")[2]
-        break
-      end
-    end 
+     read_id = str.split(";")[0]&.to_i
+     if read_id == settle_id.to_i
+       settle = SettleService.new
+       settle.id = read_id
+       settle.name = str.split(";")[1]
+       settle.category = str.split(";")[2]
+       break
+ 
+     end
+    end
     settle
   end
-end
+end   

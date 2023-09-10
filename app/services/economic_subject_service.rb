@@ -23,7 +23,7 @@ class EconomicSubjectService
     f_max_id.close
 
     f_es = File.open("db/my_db/economic_subject.csv", "a+")
-    str = "#{new_id}; #{name}; #{category}; #{money}"
+    str = "#{new_id};#{name};#{category};#{money}"
     f_es.puts str
     f_es.close
 
@@ -42,5 +42,22 @@ class EconomicSubjectService
       str = f.gets
     end
     number_of_ids
+  end
+
+def self.find_by_id(economic_subject_id)
+    f = File.open("db/my_db/economic_subject.csv", "r")
+    economic_subject = nil
+    f.each do |str|
+     read_id = str.split(";")[0]&.to_i
+     if read_id == economic_subject_id.to_i
+       economic_subject = EconomicSubjectService.new
+       economic_subject.id = read_id
+       economic_subject.name = str.split(";")[1]
+       economic_subject.category = str.split(";")[2]
+       economic_subject.money = str.split(";")[3]
+       break
+     end
+    end
+    economic_subject
   end
 end
