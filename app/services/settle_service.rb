@@ -47,4 +47,36 @@ class SettleService
     end
     settle
   end
+
+
+  def self.update(settle_id, new_name, new_category)
+    f = f.File.open("db/my_db/settle.csv", "w")
+   
+    f.each do |str|
+      read_id = str.split(";")[0]&.to_i 
+  
+      if  read_id == settle_id.to_i
+        settle = SettleService.new
+        settle.id = str.split(";")[0]
+        settle.name = str.split(";")[1]
+        settle.category = str.split(";")[2]
+      break
+
+    settle.name = new_name
+    settle.category = new_category
+    
+    f.puts new_name
+    f.puts new_category
+
+    f.close 
+   
+
+
+    end
+    end
+
+
+  end
+
+
 end

@@ -1,0 +1,12 @@
+<h3>Населенные пункты (settles)</h3> 
+<% @settles.each do |settlement| %>
+
+<% link = 'settles/' + settlement.id %>
+
+  <p><%= link_to settlement.name, link %> - <%= settlement.category %></p>
+<% end -%>
+
+
+<%= link_to 'Создать населенный пункт', settles_new_path %>
+<br>
+<%= link_to 'Вернуться на главную', root_path %>

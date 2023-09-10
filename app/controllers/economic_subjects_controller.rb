@@ -5,6 +5,7 @@ class EconomicSubjectsController < ApplicationController
   end
 
   def show
+    @economic_subject = EconomicSubjectService.find_by_id(params[:id])
     
   end
 

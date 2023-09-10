@@ -1,11 +1,14 @@
 <h3>Экономические субъекты (<%= @count %>)</h3>
 <% @economic_subjects.each do |economic_subject| %>
-  <p><%= economic_subject.name %> - <%= economic_subject.category %> - <%= economic_subject.money %></p>
+
+<% link = "economic_subjects/" + economic_subject.id %>
+
+  <p><%= link_to economic_subject.name, link %> - <%= economic_subject.category %> - <%= economic_subject.money %></p>
 <% end -%>
 
 <%= link_to 'Создать экономический субъект', new_economic_subject_path %>
 
 <p><%= link_to 'Перейти к населенным пунктам', settlements_path %></p>
 
-<br>-----------<br>
-<%= @economic_subjects %>
+
+<% @economic_subjects %>
