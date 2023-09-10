@@ -36,16 +36,15 @@ class SettleService
     f = File.open("db/my_db/settle.csv", "r")
     settle = nil
     f.each do |str|
-     read_id = str.split(";")[0]&.to_i
-     if read_id == settle_id.to_i
-       settle = SettleService.new
-       settle.id = read_id
-       settle.name = str.split(";")[1]
-       settle.category = str.split(";")[2]
-       break
- 
-     end
+      read_id = str.split(";")[0]&.to_i
+      if read_id == settle_id.to_i
+        settle = SettleService.new
+        settle.id = read_id
+        settle.name = str.split(";")[1]
+        settle.category = str.split(";")[2]
+        break
+      end
     end
     settle
   end
-end   
+end
