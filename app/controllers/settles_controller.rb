@@ -4,7 +4,7 @@ class SettlesController < ApplicationController
     @settles = SettleService.all
   end
 
- def show
+  def show
     @settle = SettleService.find_by_id(params[:id])
   end
 
@@ -22,11 +22,9 @@ class SettlesController < ApplicationController
   end
 
   def update
-    @settle = SettleService.update(params[:id], params[:name], params[:category])
-    
-    #@settlement = Settlement.find_by_id(params[:id])
-    #@settlement.update(name: params[:name],                       category: params[:category])
-    redirect_to(settlement_path(@settlement))
+    @settle = SettleService.find_by_id(params[:id])
+    @settle.update(name: params[:name], category: params[:category])
+    redirect_to(settle_path(@settle))
   end
 
   def destroy
@@ -34,6 +32,4 @@ class SettlesController < ApplicationController
     @settlement.destroy
     redirect_to(settlements_path)
   end
-
-
 end

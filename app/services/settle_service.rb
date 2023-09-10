@@ -23,7 +23,7 @@ class SettleService
     f_max_id.close
 
     f_settle = File.open("db/my_db/settle.csv", "a+")
-    str = "#{new_id};#{name}; #{category}"
+    str = "#{new_id};#{name};#{category}"
     f_settle.puts str
     f_settle.close
 

@@ -1,4 +1,5 @@
+<p><%= @settle&.name %> - <%= @settle&.category %></p>
 
-<p><%= @settle.name %> - <%= @settle.category %></p>
+<%= link_to 'Редактировать', edit_settle_path(@settle.id) %>
 
 <%= link_to "Вернуться к населенным пунктам", settles_path %>
