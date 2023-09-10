@@ -1,11 +1,13 @@
-<h3>Населенные пункты</h3>
+<h3>Населенные пункты (settles)</h3> 
 <% @settles.each do |settle| %>
-  <p><%= settle.name %> - <%= settle.category %></p>
+  <% link = '/settles/' + settle.id %>
+  <p><%= link_to settle.name, link %> - <%= settle.category %></p>
 <% end -%>
 
-<%= link_to 'Создать населенный пункт', new_settle_path %>
 
+
+
+<%= link_to 'Создать населенный пункт', settles_new_path %>
+<br>
 <p><%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %></p>
-
-<br>-----------<br>
-<%= @settles %>
+<%= link_to 'Вернуться на главную', root_path %>

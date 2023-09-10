@@ -1,4 +1,5 @@
 class SettlesController < ApplicationController
+
   def index
     @settles = SettleService.all
   end
