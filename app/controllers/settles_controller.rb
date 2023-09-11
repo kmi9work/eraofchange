@@ -23,8 +23,8 @@ class SettlesController < ApplicationController
 
   def update
     @settle = SettleService.find_by_id(params[:id])
-    @settle.update(name: params[:name], category: params[:category])
-    redirect_to(settle_path(@settle))
+    @settle.update(params[:name], params[:category])
+    redirect_to(settle_path(@settle.id))
   end
 
   def destroy

@@ -5,15 +5,11 @@ class SettleService
     str = f.gets.strip
     settles = []
     while (str.present?)
-      settle = SettleService.new
-      settle.id = str.split(";")[0]
-      settle.name = str.split(";")[1]
-      settle.category = str.split(";")[2]
-      settles.push(settle)
+      settles.push(split_settle(str))
       str = f.gets
     end
-    
     f.close
+    #чтение всех элементов из файла
     settles
   end
 
@@ -38,45 +34,41 @@ class SettleService
     f.each do |str|
       read_id = str.split(";")[0]&.to_i
       if read_id == settle_id.to_i
-        settle = SettleService.new
-        settle.id = read_id
-        settle.name = str.split(";")[1]
-        settle.category = str.split(";")[2]
+        settle = split_settle(str)
         break
       end
     end
     settle
   end
 
-
-  def self.update(settle_id, new_name, new_category)
-    f = f.File.open("db/my_db/settle.csv", "w")
-   
+  def update(new_name, new_category)
+    f = File.open("db/my_db/settle.csv", "r")
+    settles = []
     f.each do |str|
-      read_id = str.split(";")[0]&.to_i 
-  
-      if  read_id == settle_id.to_i
-        settle = SettleService.new
-        settle.id = str.split(";")[0]
-        settle.name = str.split(";")[1]
-        settle.category = str.split(";")[2]
-      break
+      settle = SettleService.split_settle(str)
+      settles.push(settle)
+    end
+    f.close
+    #чтение всех элементов из файла
 
+    settle = settles.find{|s| s.id.to_i == @id}
     settle.name = new_name
     settle.category = new_category
-    
-    f.puts new_name
-    f.puts new_category
 
-    f.close 
-   
-
-
+    f = File.open("db/my_db/settle.csv", "w")
+    settles.each do |settle|
+      str = "#{settle.id};#{settle.name};#{settle.category}"
+      f.puts str
     end
-    end
-
-
+    f.close
+    #запись всех элементов в файл
   end
 
-
+  def self.split_settle(str)
+    settle = SettleService.new
+    settle.id = str.split(";")[0].to_i
+    settle.name = str.split(";")[1]
+    settle.category = str.split(";")[2]
+    settle
+  end
 end
