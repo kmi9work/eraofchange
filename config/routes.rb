@@ -20,8 +20,10 @@ Rails.application.routes.draw do
   post '/settles', to: 'settles#create'
   get '/settles/:id', to: 'settles#show', as: :settle
   get '/settles/:id/edit', to: 'settles#edit', as: :edit_settle
+  get '/settles/:id/destroy', to: 'settles#destroy', as: :destroy_settle
   patch '/settles/:id', to: 'settles#update'
-  delete '/settles/:id', to: 'settles#destroy', as: :destroy_settle
+
+  #delete '/settles/:id', to: 'settles#destroy', as: :destroy_settle
   
   root to: 'welcome#index'
 end

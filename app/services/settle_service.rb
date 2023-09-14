@@ -1,16 +1,7 @@
 class SettleService
   attr_accessor :id, :name, :category
   def self.all 
-    f = File.open("db/my_db/settle.csv", "r")
-    str = f.gets.strip
-    settles = []
-    while (str.present?)
-      settles.push(split_settle(str))
-      str = f.gets
-    end
-    f.close
-    #чтение всех элементов из файла
-    settles
+    self.reads_from_settle
   end
 
   def self.create(name, category)
@@ -42,11 +33,11 @@ class SettleService
   end
 
   def update(new_name, new_category)
-    f = File.open("db/my_db/settle.csv", "r")
+   f = File.open("db/my_db/settle.csv", "r")
     settles = []
     f.each do |str|
       settle = SettleService.split_settle(str)
-      settles.push(settle)
+     settles.push(settle)
     end
     f.close
     #чтение всех элементов из файла
@@ -55,12 +46,15 @@ class SettleService
     settle.name = new_name
     settle.category = new_category
 
+   
+
     f = File.open("db/my_db/settle.csv", "w")
     settles.each do |settle|
       str = "#{settle.id};#{settle.name};#{settle.category}"
       f.puts str
-    end
+   end
     f.close
+
     #запись всех элементов в файл
   end
 
@@ -71,4 +65,55 @@ class SettleService
     settle.category = str.split(";")[2]
     settle
   end
+
+
+  def destroy
+    f = File.open("db/my_db/settle.csv", "r")
+    settles = []
+    f.each do |str|
+      settle = SettleService.split_settle(str)
+      settles.push(settle)
+    end
+    f.close
+    #чтение всех элементов из файла
+
+    settle = settles.find{|s| s.id.to_i == @id}
+    settle.id = nil
+    settle.name = nil
+    settle.category = nil
+
+
+    f = File.open("db/my_db/settle.csv", "w")
+    settles.each do |settle|
+      if settle.id != nil
+        str = "#{settle.id};#{settle.name};#{settle.category}"
+        else next
+      end
+
+      f.puts str
+    end
+    f.close
+    
+
+
+
+    #запись всех элементов в файл
+
+
+  end
+
+    def self.reads_from_settle  #чтение всех элементов из файла
+  
+       f = File.open("db/my_db/settle.csv", "r")
+    str = f.gets.strip
+    settles = []
+    while (str.present?)
+      settles.push(split_settle(str))
+      str = f.gets
+    end
+    f.close
+
+    settles
+    end
+
 end
