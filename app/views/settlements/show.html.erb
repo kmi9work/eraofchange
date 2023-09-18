@@ -1,7 +1,7 @@
 <p><%= @settlement.name %> - <%= @settlement.category %></p>
+
 <%= link_to 'Редактировать', edit_settlement_path(@settlement) %>
+
 <%= button_to 'Удалить', settlement_path(@settlement), method: :delete %>
-<br>
+
 <%= link_to 'Населенные пункты', settlements_path %>
-<br>
-<p><%= @settle&.name %> - <%= @settle&.category %></p>

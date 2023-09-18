@@ -1,16 +1,8 @@
 class SettleService
   attr_accessor :id, :name, :category
   def self.all 
-    f = File.open("db/my_db/settle.csv", "r")
-    str = f.gets.strip
-    settles = []
-    while (str.present?)
-      settles.push(split_settle(str))
-      str = f.gets
-    end
-    f.close
+    settle = read_from_file
     #чтение всех элементов из файла
-    settles
   end
 
   def self.create(name, category)
@@ -42,28 +34,23 @@ class SettleService
   end
 
   def update(new_name, new_category)
-    f = File.open("db/my_db/settle.csv", "r")
-    settles = []
-    f.each do |str|
-      settle = SettleService.split_settle(str)
-      settles.push(settle)
-    end
-    f.close
+    settles = SettleService.read_from_file
     #чтение всех элементов из файла
 
     settle = settles.find{|s| s.id.to_i == @id}
     settle.name = new_name
     settle.category = new_category
 
-    f = File.open("db/my_db/settle.csv", "w")
-    settles.each do |settle|
-      str = "#{settle.id};#{settle.name};#{settle.category}"
-      f.puts str
-    end
-    f.close
+    SettleService.write_to_file(settles)
     #запись всех элементов в файл
   end
 
+  def destroy
+    settles = SettleService.read_from_file
+    settle = settles.delete_if{|s| s.id.to_i == @id}
+    settles = SettleService.write_to_file(settles)
+  end
+  
   def self.split_settle(str)
     settle = SettleService.new
     settle.id = str.split(";")[0].to_i
@@ -71,4 +58,25 @@ class SettleService
     settle.category = str.split(";")[2]
     settle
   end
+
+  def self.read_from_file
+    f = File.open("db/my_db/settle.csv", "r")
+    settles = []
+    f.each do |str|
+      settle = SettleService.split_settle(str)
+      settles.push(settle)
+    end
+    f.close
+    settles
+  end
+
+  def self.write_to_file(settles)
+    f = File.open("db/my_db/settle.csv", "w")
+    settles.each do |settle|
+      str = "#{settle.id};#{settle.name};#{settle.category}"
+      f.puts str
+    end
+    f.close
+  end
+
 end

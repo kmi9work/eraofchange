@@ -2,4 +2,6 @@
 
 <%= link_to 'Редактировать', edit_settle_path(@settle.id) %>
 
+<%= button_to 'Удалить', settle_path(@settle.id), method: :delete %>
+
 <%= link_to "Вернуться к населенным пунктам", settles_path %>
