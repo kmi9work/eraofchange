@@ -41,19 +41,14 @@ class SettleService
     settle.name = new_name
     settle.category = new_category
 
-    settles = SettleService.write_to_file(settles)
+    SettleService.write_to_file(settles)
     #запись всех элементов в файл
   end
 
   def destroy
     settles = SettleService.read_from_file
-    #чтение всех элементов из файла
-
-    settle = settles.find{|s| s.id.to_i == @id}
-    settles.delete(settle)
-    
+    settle = settles.delete_if{|s| s.id.to_i == @id}
     settles = SettleService.write_to_file(settles)
-    #запись всех элементов в файл
   end
   
   def self.split_settle(str)
