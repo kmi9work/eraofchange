@@ -3,9 +3,6 @@
   <p><%= settlement.name %> - <%= settlement.category %></p>
 <% end -%>
 
-<%= link_to 'Создать населенный пункт', new_settlement_path %>
+<p><%= link_to 'Создать населенный пункт', new_settlement_path %></p>
 
 <p><%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %></p>
-
-<br>-----------<br>
-<%= @settlements %>
