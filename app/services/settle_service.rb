@@ -1,7 +1,7 @@
 class SettleService
   attr_accessor :id, :name, :category
   def self.all 
-    self.reads_from_settle
+      self.read_from_file
   end
 
   def self.create(name, category)
@@ -33,30 +33,25 @@ class SettleService
   end
 
   def update(new_name, new_category)
+
    f = File.open("db/my_db/settle.csv", "r")
-    settles = []
-    f.each do |str|
-      settle = SettleService.split_settle(str)
-     settles.push(settle)
-    end
-    f.close
+   settles = []
+   f.each do |str|
+   settle = SettleService.split_settle(str)
+   settles.push(settle)
+   end
+   f.close
+
     #чтение всех элементов из файла
 
     settle = settles.find{|s| s.id.to_i == @id}
     settle.name = new_name
     settle.category = new_category
 
-   
-
-    f = File.open("db/my_db/settle.csv", "w")
-    settles.each do |settle|
-      str = "#{settle.id};#{settle.name};#{settle.category}"
-      f.puts str
-   end
-    f.close
-
-    #запись всех элементов в файл
+   write_to_file(settles)    #запись всех элементов в файл
   end
+
+
 
   def self.split_settle(str)
     settle = SettleService.new
@@ -70,41 +65,22 @@ class SettleService
   def destroy
     f = File.open("db/my_db/settle.csv", "r")
     settles = []
-    f.each do |str|
+      f.each do |str|
       settle = SettleService.split_settle(str)
       settles.push(settle)
     end
     f.close
-    #чтение всех элементов из файла
-
-    settle = settles.find{|s| s.id.to_i == @id}
-    settle.id = nil
-    settle.name = nil
-    settle.category = nil
-
-
-    f = File.open("db/my_db/settle.csv", "w")
-    settles.each do |settle|
-      if settle.id != nil
-        str = "#{settle.id};#{settle.name};#{settle.category}"
-        else next
-      end
-
-      f.puts str
-    end
-    f.close
     
+    settle_to_delete = []
+    settle_to_delete[0]  = settles.find{|s| s.id.to_i == @id}
+    settles = settles - settle_to_delete 
 
-
-
-    #запись всех элементов в файл
-
-
+    write_to_file(settles)
   end
 
-    def self.reads_from_settle  #чтение всех элементов из файла
   
-       f = File.open("db/my_db/settle.csv", "r")
+  def self.read_from_file  #чтение всех элементов из файла
+    f = File.open("db/my_db/settle.csv", "r")
     str = f.gets.strip
     settles = []
     while (str.present?)
@@ -114,6 +90,29 @@ class SettleService
     f.close
 
     settles
+  end
+
+  def read_from_file
+    f = File.open("db/my_db/settle.csv", "r")
+    settles = []
+      f.each do |str|
+      settle = SettleService.split_settle(str)
+      settles.push(settle)
     end
+    f.close
+    
+    settles
+  end
+
+
+
+  def write_to_file(settles)
+    f = File.open("db/my_db/settle.csv", "w")
+    settles.each do |settle|
+      str = "#{settle.id};#{settle.name};#{settle.category}"
+      f.puts str
+    end
+    f.close
+  end
 
 end
