@@ -1,0 +1,12 @@
+<h3>Предприятия (facilities)</h3> 
+
+<% @facilities.each do |facility| %>
+  <% link = "/facilities/#{facility.id}" %>
+  <p><%= link_to facility.name, link  %> - <%= facility.category %> - <%= facility.price %> - <%= facility.level %> - <%= facility.location %> </p>
+<% end -%>
+  
+
+<p><%= link_to 'Создать предприятие', new_facility_path %></p>
+
+<p><%= link_to 'Вернуться на главную', root_path %></p>
+

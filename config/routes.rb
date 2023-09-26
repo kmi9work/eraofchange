@@ -31,5 +31,17 @@ Rails.application.routes.draw do
   patch '/eco_subjects/:id', to: 'eco_subjects#update'
   delete '/eco_subjects/:id', to: 'eco_subjects#destroy', as: :destroy_eco_subject
   
+
+  get '/facilities', to: 'facilities#index'
+  get '/facilities/new', to: 'facilities#new', as: :new_facility
+  post '/facilities', to: 'facilities#create'
+  get '/facilities/:id', to: 'facilities#show', as: :facility
+  get '/facilities/:id/edit', to: 'facilities#edit', as: :edit_facility
+  get '/facilities/:id/destroy', to: 'facilities#destroy', as: :destroy_facility
+
+  
+  patch '/facilities/:id', to: 'facilities#update'
+
+
   root to: 'welcome#index'
 end
