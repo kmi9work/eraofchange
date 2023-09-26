@@ -22,6 +22,14 @@ Rails.application.routes.draw do
   get '/settles/:id/edit', to: 'settles#edit', as: :edit_settle
   patch '/settles/:id', to: 'settles#update'
   delete '/settles/:id', to: 'settles#destroy', as: :destroy_settle
+
+  get '/eco_subjects', to: 'eco_subjects#index'
+  get '/eco_subjects/new', to: 'eco_subjects#new', as: :new_eco_subject
+  post '/eco_subjects', to: 'eco_subjects#create'
+  get '/eco_subjects/:id', to: 'eco_subjects#show', as: :eco_subject
+  get '/eco_subjects/:id/edit', to: 'eco_subjects#edit', as: :edit_eco_subject
+  patch '/eco_subjects/:id', to: 'eco_subjects#update'
+  delete '/eco_subjects/:id', to: 'eco_subjects#destroy', as: :destroy_eco_subject
   
   root to: 'welcome#index'
 end
