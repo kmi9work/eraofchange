@@ -1,0 +1,9 @@
+<form action="/facilities/<%= @facility&.id %>" method="patch">
+  <p>Название: <input type="text" name="name" value="<%= @facility&.name %>"/></p>
+  <p>Категория: <input type="text" name="category" value="<%= @facility&.category %>"/></p>
+  <p>Цена: <input type="text" name="price" value="<%= @facility&.price %>"/></p>
+  <p>Уровень: <input type="text" name="level" value=<%= @facility&.level %>></p>
+  <p>Место: <input type="text" name="location" value=<%= @facility&.location %>></p>
+
+    <p><input type="submit"></p>
+</form>
