@@ -1,8 +1,22 @@
-<h3>Населенные пункты</h3>
-<% @settlements.each do |settlement| %>
-  <p><%= settlement.name %> - <%= settlement.category %></p>
-<% end -%>
+<div id="page">
+  <div id="header">
+    <h3>Населенные пункты</h3>
+  </div>
+  <div id="content">
+    <div id="left"></div>
+    <div id="center">
+      <% @settlements.each do |settlement| %>
+        <p><%= settlement.name %> - <%= settlement.category %></p>
+      <% end -%>
+    </div>
+    <div id="right">
+      <p>
+        <%= link_to 'Создать населенный пункт', new_settlement_path %>
+      </p>
 
-<p><%= link_to 'Создать населенный пункт', new_settlement_path %></p>
-
-<p><%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %></p>
+      <p>
+        <%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %>
+      </p>
+    </div>
+  </div>
+</div>
