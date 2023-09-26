@@ -1,4 +1,7 @@
 <p><%= @economic_subject&.name %> - <%= @economic_subject&.category %> - <%= @economic_subject&.money %></p>
 
-<br>
+<%= link_to 'Редактировать', edit_economic_subject_path(@economic_subject) %>
+
+<%= button_to 'Удалить', economic_subject_path(@economic_subject), method: :delete %>
+
 <%= link_to 'Вернуться к экономическим субъектам', economic_subjects_path %>

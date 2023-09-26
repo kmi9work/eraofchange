@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_03_185207) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_19_215119) do
+  create_table "economic_subjects", force: :cascade do |t|
+    t.string "name"
+    t.string "category"
+    t.string "money"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "settlements", force: :cascade do |t|
     t.string "name"
     t.string "category"
