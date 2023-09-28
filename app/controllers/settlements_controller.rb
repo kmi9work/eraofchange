@@ -25,7 +25,7 @@ class SettlementsController < ApplicationController
     @settlement = Settlement.find_by_id(params[:id])
     @settlement.update(name: params[:name],
                       category: params[:category])
-    redirect_to(settlement_path(@settlement))
+    redirect_to(settlements_path)
   end
 
   def destroy

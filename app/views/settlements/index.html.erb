@@ -1,23 +1,69 @@
-<div id="page">
-  <div id="header">
-    <h3>Населенные пункты</h3>
-  </div>
-  <div id="content">
-    <div id="left"></div>
-    <div id="center">
-      <% @settlements.each do |settlement| %>
-        <% link = "/settlements/#{settlement.id}" %>
-        <p><%= link_to settlement.name, link %> - <%= settlement.category %></p>
-      <% end -%>
-    </div>
-    <div id="right">
-      <p>
-        <%= link_to 'Создать населенный пункт', new_settlement_path %>
-      </p>
+<style type="text/css">
+  td, th{
+    padding: 5px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .left{
+    text-align: left;
+  }
+  ul{
+    margin: 0px;
+  }
+  table tr:hover{
+    background-color: #09afff;
+  }
+  #settlements{
+/*    border: 5px solid black;*/
+    border-width: 5px;
+    border-color: black;
+    border-style: solid;
+  }
+  h1{
+    padding: 1px 2px;
+  }
+</style>
+<h1 id="settlements">Эпоха перемен</h1>
 
-      <p>
-        <%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %>
-      </p>
-    </div>
-  </div>
-</div>
+<h2>Населенные пункты</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th class="first">Название</th>
+      <th>Категория</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @settlements.each do |settlement| %>
+      <% link = "/settlements/#{settlement.id}" %>
+      <tr>
+        <td><%= link_to settlement.name, link %></td>
+        <td>
+          <% if settlement.category == 'town' %>
+            <b><%= settlement.category %></b>
+          <% else %>
+            <%= settlement.category %>
+          <% end -%>
+        </td>
+        <td class="left">
+          <ul>
+            <li><%= link_to 'Редактировать', edit_settlement_path(settlement) %></li>
+            <li><%= button_to 'Удалить', settlement_path(settlement), method: :delete %></li>
+          </ul>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+
+<hr>
+
+<p>
+  <%= link_to 'Создать населенный пункт', new_settlement_path %>
+</p> <br>
+
+<p>
+  <%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %>
+</p>

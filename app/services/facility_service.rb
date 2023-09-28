@@ -2,7 +2,7 @@ class FacilityService
 
 attr_accessor :id, :name, :category, :price, :level, :location
 
-def self.all 
+  def self.all
     facility = read_from_file
     #чтение всех элементов из файла
   end
