@@ -1,0 +1,18 @@
+<h3>Предприятия (plants)</h3> 
+<%@plants.each do |plant| %>
+ 
+ <%link = "/plants/#{plant.id}" %>
+	       
+          <%=plant.id %> - 
+ <%= link_to plant.name, link %> - 
+        	<%=plant.category %> - 
+        	<%=plant.price %> - 
+        	<%=plant.level%> - 
+        	<%=plant.location %>
+          <br>
+<% end -%>
+<br>
+<%= link_to "Создать новое предприятие", new_plant_path %>
+<br>
+
+<%= link_to "На главную", root_path %>
