@@ -1,0 +1,11 @@
+<p><%= @plant&.name %> - <%= @plant&.category %> -  <%= @plant&.price %> - <%= @plant&.level %> - <%= @plant&.location %>
+
+<br>
+<%= link_to "Редактировать предприятие", edit_plants_path %>
+<br>
+
+<%= link_to "Удалить предприятие", destroy_plant_path %>
+<br>
+
+<%= link_to "К предприятиям", plants_path %>
+
