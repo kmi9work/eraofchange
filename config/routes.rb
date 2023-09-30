@@ -38,10 +38,15 @@ Rails.application.routes.draw do
   get '/facilities/:id', to: 'facilities#show', as: :facility
   get '/facilities/:id/edit', to: 'facilities#edit', as: :edit_facility
   get '/facilities/:id/destroy', to: 'facilities#destroy', as: :destroy_facility
-
-  
   patch '/facilities/:id', to: 'facilities#update'
 
+  get '/plants', to: 'plants#index'
+  get '/plants/new', to: "plants#new", as: :new_plant
+  post '/plants', to: 'plants#create'
+  get '/plants/:id', to: 'plants#show', as: :plant
+  get '/plants/:id/edit', to: 'plants#edit', as: :edit_plants
+  patch '/plants/:id', to: 'plants#update'
+  get '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
 
   root to: 'welcome#index'
 end

@@ -1,0 +1,55 @@
+<h3>Предприятия (plants)</h3> 
+
+<table style="border: 2px">
+  <thead>
+    <tr>
+      <th>Номер</th>
+      <th>Предприятие</th>
+      <th>Категория</th>
+      <th>Цена</th>
+      <th>Уровень</th>
+      <th>Место</th>
+     </tr>
+  </thead>
+
+  <tbody>
+    <% @plants.each do |plant| %>
+      <% link = "/plants/#{plant.id}" %>
+      <tr>
+        <td><%= plant.id %></td>
+        <td><%= link_to plant.name, link %> </td>
+        <td><%= plant.category %> </td>
+        <td><%= plant.price %> </td>
+        <td><%= plant.level %>  </td>
+        <td><%= plant.location %> </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+
+<br>
+<br>
+<br>
+<%= link_to "Создать новое предприятие", new_plant_path %>
+<br>
+
+<%= link_to "На главную", root_path %>
+
+<style>
+  table {
+    border: 1px solid black;
+    border-right: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    width: 100%;
+    text-align:left;
+
+
+  }
+  tbody {
+    border: 1px solid black;
+    border-right: none;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+  }
+</style>
