@@ -1,9 +1,91 @@
-<h3>Экономические субъекты (EconomicSubjects)</h3>
-<% @economic_subjects.each do |economic_subject| %>
-  <% link = "/economic_subjects/#{economic_subject.id}" %>
-  <p><%= link_to economic_subject.name, link %> - <%= economic_subject.category %> - <%= economic_subject.money %></p>
-<% end -%>
+<style type="text/css">
+  
+  h1{
+    border-style: solid;
+    color: white;
+    background-color: #0d4349;
+    text-align: left;
+    padding: 15px 20px;
+  }
+
+  h2{
+    border-style: none;
+    background-color: #a4b8ba;  
+    text-align: left;
+    padding: 10px 15px;
+  } 
+
+  table{
+    border-collapse: collapse;
+    width: 30%;
+  }
+
+  td, th{
+    text-align: center;
+    vertical-align: middle;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+  }
+
+   thead tr{
+    background-color: #9ac1c4;
+    font-size: 16px;
+  } 
+
+  .left{
+    text-align: left;
+    padding-inline-start: 20px;
+  }
+
+  tbody tr{
+    font-size: 14px;
+  }
+
+  tbody tr:hover td{
+    background-color: #b7edf2;
+  }
+
+  tbody tr:nth-child(even){
+    background: #E0FFFF
+  }
+
+</style>
+
+<h1>Эпоха перемен</h1>
+
+<h2>Экономические субъекты (EconomicSubjects)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Категория</th>
+      <th>Количество денег</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @economic_subjects.each do |economic_subject| %>
+    <% link = "/economic_subjects/#{economic_subject.id}" %>
+      <tr>
+        <td><%= link_to economic_subject.name, link %></td>
+        <td><%= economic_subject.category %></td>
+        <td><%= economic_subject.money %></td>
+        <td>
+          <ul class="left">
+           <li><%= link_to 'Редактировать', edit_economic_subject_path(economic_subject) %></li>   
+           <li><%= button_to 'Удалить', economic_subject_path(economic_subject), method: :delete %></li>
+          </ul>
+        </td>
+      </tr>
+    <% end -%>  
+  </tbody>
+</table>
+
+<br><hr><br>
 
 <p><%= link_to 'Создать экономический субъект', new_economic_subject_path %></p>
 
-<p><%= link_to 'Перейти к населенным пунктам (Settlements)', settlements_path %></p>
+<p><%= link_to 'Вернуться на главную', root_path %></p>
+
