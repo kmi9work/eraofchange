@@ -1,6 +1,7 @@
 class PlantsController < ApplicationController
   def index
     @plants = Plant.all
+    render 'index', layout: false
   end
 
   def show
