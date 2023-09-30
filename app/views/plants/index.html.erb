@@ -1,9 +1,6 @@
-<!DOCTYPE html> 
-
-
 <h3>Предприятия (plants)</h3> 
 
-<table style="; ; border:2px">
+<table style="border: 2px">
   <thead>
     <tr>
       <th>Номер</th>
@@ -16,21 +13,18 @@
   </thead>
 
   <tbody>
-  <%count = 0 %>
-  <%@plants.each do |plant| %>
-  <%link = "/plants/#{plant.id}" %>
-  <%count += 1 %>
-    <tr>
-      <td><%=plant.id %></td>
-      <td><%=link_to plant.name, link %> </td>
-      <td><%=plant.category %> </td>
-      <td><%=plant.price %> </td>
-      <td><%=plant.level%>  </td>
-      <td><%=plant.location %> </td>
-      <% end -%>
-    </tr>
-    
-    </tbody>
+    <% @plants.each do |plant| %>
+      <% link = "/plants/#{plant.id}" %>
+      <tr>
+        <td><%= plant.id %></td>
+        <td><%= link_to plant.name, link %> </td>
+        <td><%= plant.category %> </td>
+        <td><%= plant.price %> </td>
+        <td><%= plant.level %>  </td>
+        <td><%= plant.location %> </td>
+      </tr>
+    <% end -%>
+  </tbody>
 </table>
 
 <br>
@@ -41,35 +35,21 @@
 
 <%= link_to "На главную", root_path %>
 
-
-
 <style>
-table {
-  border: 1px solid black;
-  border-right: 1px solid black;
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
-  width: 100%;
-  text-align:left;
-
- 
-}
-<%  for num in 1..count do%>
-tbody {
+  table {
     border: 1px solid black;
-  border-right: none;
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
-
- <%  if num.odd? %>
- 
-  background-color: white;
-
-  <% else %>
-  background-color: gray;
-  <% end -%>
-  <% end -%>
-}
+    border-right: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    width: 100%;
+    text-align:left;
 
 
+  }
+  tbody {
+    border: 1px solid black;
+    border-right: none;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+  }
 </style>

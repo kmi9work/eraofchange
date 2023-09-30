@@ -1,6 +1,4 @@
 class PlantsController < ApplicationController
-
-
   def index
     @plants = Plant.all
   end
@@ -18,7 +16,6 @@ class PlantsController < ApplicationController
     			level: params[:level], location: params[:location])
     redirect_to('/plants')
   end
-  
 
   def edit
     @plant = Plant.find_by_id(params[:id])
@@ -37,9 +34,3 @@ class PlantsController < ApplicationController
     redirect_to(plants_path)
   end
 end
-
-
-
-
-
-
