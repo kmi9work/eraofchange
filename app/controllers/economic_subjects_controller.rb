@@ -24,7 +24,7 @@ class EconomicSubjectsController < ApplicationController
   def update
     @economic_subject = EconomicSubject.find_by_id(params[:id])
     @economic_subject.update(name: params[:name], category: params[:category], money: params[:money])
-    redirect_to(economic_subject_path(@economic_subject))
+    redirect_to(economic_subjects_path)
   end
 
   def destroy
