@@ -1,4 +1,4 @@
-<h3>Экономические субъекты (EcoSubjects) (<%= @count %>)</h3>
+<h2>Экономические субъекты (EcoSubjects) (<%= @count %>)</h2>
 <% @eco_subjects. each do |eco_subject| %>
   <% link = "/eco_subjects/#{eco_subject.id}" %>
   <p><%= link_to eco_subject.name, link %> - <%= eco_subject.category %> - <%= eco_subject.money %></p>
