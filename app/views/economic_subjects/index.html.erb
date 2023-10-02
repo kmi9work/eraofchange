@@ -59,7 +59,7 @@
         <td><%= economic_subject.money %></td>
         <td>
           <%= link_to 'Редактировать', edit_economic_subject_path(economic_subject), class: 'btn1' %>
-          <%= button_to 'Удалить', economic_subject_path(economic_subject), method: :delete, class: 'btn2', id: "delete-#{economic_subject}" %>
+          <%= button_to 'Удалить', economic_subject_path(economic_subject), method: :delete, class: 'btn2', id: "delete-#{economic_subject.id}" %>
         </td>
       </tr>
     <% end -%>  

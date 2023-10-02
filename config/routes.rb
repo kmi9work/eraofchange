@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resources :guilds
+  resources :merchants
+  resources :families
+  resources :players
   get '/settlements', to: 'settlements#index'
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'

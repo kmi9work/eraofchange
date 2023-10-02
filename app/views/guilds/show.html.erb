@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @guild %>
+
+<div>
+  <%= link_to "Редактировать", edit_guild_path(@guild) %> |
+  <%= link_to "Все гильдии", guilds_path %>
+
+  <%= button_to "Удалить", @guild, method: :delete %>
+</div>

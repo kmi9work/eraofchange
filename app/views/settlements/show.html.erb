@@ -1,5 +1,12 @@
 <p><%= @settlement.name %> - <%= @settlement.category %></p>
 
+Предприятия в городе:<br>
+<% @settlement.plants.each do |plant| %>
+  <p> <%= link_to plant.name, plant %> </p>
+<% end -%>
+
+<hr>
+
 <%= link_to 'Редактировать', edit_settlement_path(@settlement) %>
 
 <%= button_to 'Удалить', settlement_path(@settlement), method: :delete %>

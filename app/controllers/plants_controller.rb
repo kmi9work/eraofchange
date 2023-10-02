@@ -5,7 +5,7 @@ class PlantsController < ApplicationController
   end
 
   def show
-    @plant = Plant.find_by_id(params[:id])
+    @plant = Plant.find(params[:id])
   end
 
   def new

@@ -10,11 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_28_131932) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_02_174536) do
   create_table "economic_subjects", force: :cascade do |t|
     t.string "name"
     t.string "category"
     t.string "money"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "families", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "guilds", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "merchants", force: :cascade do |t|
+    t.string "name"
+    t.integer "plant_id"
+    t.integer "guild_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -25,6 +45,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_28_131932) do
     t.integer "price"
     t.string "level"
     t.string "location"
+    t.integer "economic_subject_id"
+    t.string "economic_subject_type"
+    t.integer "settlement_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "players", force: :cascade do |t|
+    t.string "name"
+    t.integer "family_id"
+    t.integer "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

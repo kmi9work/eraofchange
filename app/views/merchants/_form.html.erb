@@ -1,0 +1,17 @@
+<%= form_with(model: merchant) do |form| %>
+  <% if merchant.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(merchant.errors.count, "error") %> prohibited this merchant from being saved:</h2>
+
+      <ul>
+        <% merchant.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

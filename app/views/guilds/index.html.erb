@@ -1,0 +1,27 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Гильдии</h1>
+
+<div id="guilds">
+  <table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @guilds.each do |guild| %>
+    <% link = "/guilds/#{guild.id}" %>
+      <tr>
+        <td><%= link_to guild.name, link %></td>
+        <td>
+          <%= link_to 'Редактировать', edit_guild_path(guild), class: 'btn1' %>
+          <%= button_to 'Удалить', guild_path(guild), method: :delete, class: 'btn2', id: "delete-#{guild.id}" %>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+
+<%= link_to "Создать новую гильдию", new_guild_path %>

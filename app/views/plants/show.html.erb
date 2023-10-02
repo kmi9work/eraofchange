@@ -1,4 +1,8 @@
-<p><%= @plant&.name %> - <%= @plant&.category %> -  <%= @plant&.price %> - <%= @plant&.level %> - <%= @plant&.location %>
+<p> Название: <%= @plant.name %> </p>
+<p> Категория: <%= @plant.category %> </p>
+<p> Цена: <%= @plant.price %> </p>
+<p> Уровень: <%= @plant.level %> </p>
+<p> Населенный пункт: <%= link_to @plant.settlement&.name, @plant.settlement %> </p>
 
 <br>
 <%= link_to "Редактировать предприятие", edit_plants_path %>
