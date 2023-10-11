@@ -3,6 +3,13 @@ Rails.application.routes.draw do
   resources :merchants
   resources :families
   resources :players
+
+  get '/players/:id/edit', to: 'players#edit'
+  get '/players/:id/destroy', to: 'players#destroy'
+
+  get '/families/:id/edit', to: 'families#edit'
+  get '/families/:id/destroy', to: 'families#destroy'
+
   get '/settlements', to: 'settlements#index'
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'

@@ -1,10 +1,22 @@
 <p style="color: green"><%= notice %></p>
+<div>
+<p> Имя семьи: <%= render @family %> </p>
+<p> Собственность семьи:
 
-<%= render @family %>
+  <% if @family.player_id == nil%>
+    <p> Игроки в семье:
+
+    <% else %>
+
+   <p> Игроки в семье: 
+  <% end %>
+
+</div>
 
 <div>
   <%= link_to "Edit this family", edit_family_path(@family) %> |
+<p>
   <%= link_to "Back to families", families_path %>
-
+<p>
   <%= button_to "Destroy this family", @family, method: :delete %>
 </div>

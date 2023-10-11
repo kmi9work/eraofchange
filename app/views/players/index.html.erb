@@ -1,14 +1,35 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Players</h1>
-
+<h1>Игроки</h1>
+<%= link_to "Создать нового игрока", new_player_path %>
 <div id="players">
-  <% @players.each do |player| %>
-    <%= render player %>
-    <p>
-      <%= link_to "Show this player", player %>
-    </p>
-  <% end %>
-</div>
 
-<%= link_to "New player", new_player_path %>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Имя</th>
+      <th scope="col">Редактировать</th>
+      <th scope="col">Удалить</th>
+    </tr>
+ </thead>
+
+
+  <% @players.each do |player| %>
+  <% link_to_edit = "/players/#{player.id}/edit"%>
+  <% link_to_detroy = "/players/#{player.id}/destroy"%>
+
+
+  <tbody>
+    <tr>
+      <th scope="row"><%= player.id %></th>
+      <td><%= link_to player.name, player  %> </td> 
+      <td><%= link_to "Редактировать игрока", link_to_edit %></td>
+      <td><%= link_to "Удалить игрока", link_to_detroy %></td>
+    </tr>
+    </tbody>
+<% end %>
+</table>
+ 
+
+

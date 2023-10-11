@@ -1,14 +1,33 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Families</h1>
-
+<h1>Семьи </h1>
+<%= link_to "Создать новую семью", new_family_path %>
 <div id="families">
-  <% @families.each do |family| %>
-    <%= render family %>
-    <p>
-      <%= link_to "Show this family", family %>
-    </p>
-  <% end %>
 </div>
 
-<%= link_to "New family", new_family_path %>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Имя</th>
+      <th scope="col">Редактировать</th>
+      <th scope="col">Удалить</th>
+    </tr>
+ </thead>
+  <% @families.each do |family| %>
+   <% link_to_edit = "/families/#{family.id}/edit"%>
+   <% link_to_destroy = "/families/#{family.id}/destroy"%>
+  <tbody>
+    <tr>
+      <th scope="row"><%= family.id %></th>
+      <td><%= link_to family.name, family %></td>
+      <td><%= link_to "Редактировать семью", link_to_edit %></td>
+      <td><%= link_to "Удалить семью", link_to_destroy %></td>
+    </tr>
+    </tbody>
+<% end %>
+</table>
+ 
+
+
+

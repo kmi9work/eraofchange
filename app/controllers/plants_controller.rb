@@ -1,37 +1,42 @@
 class PlantsController < ApplicationController
+before_action :set_plant, only: %i[ show edit update destroy ]
+
   def index
     @plants = Plant.all
-    render 'index', layout: false
   end
 
   def show
-    @plant = Plant.find(params[:id])
   end
 
   def new
     @plant = Plant.new
   end
 
-  def create
-    Plant.create(name: params[:name], category: params[:category], price: params[:price], 
-    			level: params[:level], location: params[:location])
-    redirect_to('/plants')
+  def edit
   end
 
-  def edit
-    @plant = Plant.find_by_id(params[:id])
+  def create
+    @plant = Plant.new(plant_params)
   end
 
   def update
-    @plant = Plant.find_by_id(params[:id])
-    @plant.update(name: params[:name], category: params[:category], price: params[:price], 
-    			level: params[:level], location: params[:location])
-    redirect_to(plants_path)
   end
 
   def destroy
-    @plant = Plant.find_by_id(params[:id])
     @plant.destroy
     redirect_to(plants_path)
   end
+
+  private
+  # Use callbacks to share common setup or constraints between actions.
+  def set_plant
+    @plant = Plant.find(params[:id])
+  end
+
+    # Only allow a list of trusted parameters through.
+  def plant_params
+    params.require(:plant).permit(:name, :category, :price, :level, :location)
+  end
+
+
 end
