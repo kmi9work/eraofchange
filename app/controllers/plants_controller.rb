@@ -19,7 +19,23 @@ before_action :set_plant, only: %i[ show edit update destroy ]
     @plant = Plant.new(plant_params)
   end
 
+  def create
+    @plant = Plant.new(plant_params)
+    if @plant.save
+        redirect_to plant_url(@plant)
+    else
+        render :new, status: :unprocessable_entity
+    end
+  end
+
+
+
   def update
+     if @plant.update(plant_params)
+        redirect_to plant_url(@plant)
+    else
+        render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
@@ -40,3 +56,8 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
 
 end
+
+
+
+
+  
