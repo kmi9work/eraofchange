@@ -1,6 +1,9 @@
-<h3>Создать населенный пункт</h3>
-<form action="/settlements" method="post">
-  <p>Название: <input type="text" name="name"/></p>
-  <p>Категория: <input type="text" name="category"/></p>
-  <p><input type="submit"/></p>
-</form>
+<h2>Создать новый населенный пункт</h2>
+
+<%= render "form", settlement: @settlement %>
+
+<br><hr>
+
+<div>
+  <%= link_to "Все населенные пункты", settlements_path %>
+</div>
