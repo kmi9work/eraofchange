@@ -13,19 +13,19 @@
       <th scope="col">Редактировать</th>
       <th scope="col">Удалить</th>
     </tr>
- </thead>
+  </thead>
   <% @families.each do |family| %>
-   <% link_to_edit = "/families/#{family.id}/edit"%>
-   <% link_to_destroy = "/families/#{family.id}/destroy"%>
-  <tbody>
-    <tr>
-      <th scope="row"><%= family.id %></th>
-      <td><%= link_to family.name, family %></td>
-      <td><%= link_to "Редактировать семью", link_to_edit %></td>
-      <td><%= link_to "Удалить семью", link_to_destroy %></td>
-    </tr>
+    <% link_to_edit = "/families/#{family.id}/edit"%>
+    <% link_to_destroy = "/families/#{family.id}/destroy"%>
+    <tbody>
+      <tr>
+        <th scope="row"><%= family.id %></th>
+        <td><%= link_to family.name, family %></td>
+        <td><%= link_to "Редактировать семью", link_to_edit %></td>
+        <td><%= link_to "Удалить семью", link_to_destroy %></td>
+      </tr>
     </tbody>
-<% end %>
+  <% end %>
 </table>
  
 

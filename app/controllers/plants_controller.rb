@@ -17,24 +17,29 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
   def create
     @plant = Plant.new(plant_params)
+    if @plant.save
+      redirect_to plant_url(@plant), notice: "Plant was successfully created."
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def create
     @plant = Plant.new(plant_params)
     if @plant.save
-        redirect_to plant_url(@plant)
+      redirect_to plant_url(@plant)
     else
-        render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_entity
     end
   end
 
 
 
   def update
-     if @plant.update(plant_params)
-        redirect_to plant_url(@plant)
+    if @plant.update(plant_params)
+      redirect_to plant_url(@plant)
     else
-        render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -44,17 +49,15 @@ before_action :set_plant, only: %i[ show edit update destroy ]
   end
 
   private
-  # Use callbacks to share common setup or constraints between actions.
-  def set_plant
-    @plant = Plant.find(params[:id])
-  end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_plant
+      @plant = Plant.find(params[:id])
+    end
 
-    # Only allow a list of trusted parameters through.
-  def plant_params
-    params.require(:plant).permit(:name, :category, :price, :level, :location)
-  end
-
-
+      # Only allow a list of trusted parameters through.
+    def plant_params
+      params.require(:plant).permit(:name, :category, :price, :level, :location)
+    end
 end
 
 
