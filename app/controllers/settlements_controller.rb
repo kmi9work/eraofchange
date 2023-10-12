@@ -1,11 +1,11 @@
 class SettlementsController < ApplicationController
+  before_action :set_settlement, only: %i[ show edit update destroy ]
   
   def index
     @settlements = Settlement.all
   end
 
   def show
-    @settlement = Settlement.find_by_id(params[:id])
   end
 
   def new
@@ -13,25 +13,38 @@ class SettlementsController < ApplicationController
   end
 
   def create
-    Settlement.create(name: params[:name], category: params[:category])
-    redirect_to('/settlements')
+    @settlement = Settlement.new(settlement_params)
+      if @settlement.save
+        redirect_to settlement_url(@settlement)#, notice: "Населенный пункт успешно создан."
+      else
+        render :new, status: :unprocessable_entity
+      end
   end
 
   def edit
-    @settlement = Settlement.find_by_id(params[:id])
   end
 
   def update
-    @settlement = Settlement.find_by_id(params[:id])
-    @settlement.update(name: params[:name],
-                      category: params[:category])
-    redirect_to(settlements_path)
+    if @settlement.update(settlement_params)
+        redirect_to settlement_url(@settlement)#, notice: "Запись успешно обновлена."
+      else
+        render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @settlement = Settlement.find_by_id(params[:id])
     @settlement.destroy
-    redirect_to(settlements_path)
+    redirect_to(settlements_path)#, notice: "Запись успешно удалена."
   end
-end
 
+  private
+    
+    def set_settlement
+      @settlement = Settlement.find(params[:id])
+    end
+
+    def settlement_params
+      params.require(:settlement).permit(:name, :category)
+    end
+
+end

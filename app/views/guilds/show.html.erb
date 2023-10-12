@@ -2,6 +2,13 @@
 
 <%= render @guild %>
 
+Купцы в гильдии:<br>
+<% @guild.merchants.each do |merchant| %>
+  <p> <%= link_to merchant.name, merchant %> </p>
+<% end -%>
+
+<hr>
+
 <div>
   <%= link_to "Редактировать", edit_guild_path(@guild) %> |
   <%= link_to "Все гильдии", guilds_path %>

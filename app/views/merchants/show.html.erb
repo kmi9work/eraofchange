@@ -1,10 +1,21 @@
 <p style="color: green"><%= notice %></p>
 
-<%= render @merchant %>
+<h2>Купец: <%= render @merchant %></h2> 
+
+<p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
+
+<p>Предприятия:<br>
+  <% @merchant.plants.each do |plant| %>
+  <li> <%= link_to plant.name, plant %> </li>
+  <% end -%>
+</p>
+
+<p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
+
+<hr>
 
 <div>
-  <%= link_to "Edit this merchant", edit_merchant_path(@merchant) %> |
-  <%= link_to "Back to merchants", merchants_path %>
-
-  <%= button_to "Destroy this merchant", @merchant, method: :delete %>
+  <%= link_to "Редактировать", edit_merchant_path(@merchant) %>
+  <%= button_to "Удалить", @merchant, method: :delete %>
+  <%= link_to "Все купцы", merchants_path %>
 </div>

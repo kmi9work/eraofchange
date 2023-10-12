@@ -35,6 +35,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_02_174536) do
     t.string "name"
     t.integer "plant_id"
     t.integer "guild_id"
+    t.integer "player_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

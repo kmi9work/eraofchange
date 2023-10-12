@@ -4,9 +4,9 @@
 
 <div id="players">
   <% @players.each do |player| %>
-    <%= render player %>
+    <% link = "/players/#{player.id}" %>
     <p>
-      <%= link_to "Show this player", player %>
+      <%= link_to player.name, link %>
     </p>
   <% end %>
 </div>

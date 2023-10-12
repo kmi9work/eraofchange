@@ -1,5 +1,10 @@
-<form action="/settlements/<%= @settlement.id %>" method="patch">
-  <p>Название: <input type="text" name="name" value="<%= @settlement.name %>"/></p>
-  <p>Категория: <input type="text" name="category" value="<%= @settlement.category %>"/></p>
-  <p><input type="submit"></p>
-</form>
+<h2>Редактировать населенный пункт</h2>
+
+<%= render "form", settlement: @settlement %>
+
+<br>
+
+<div>
+  <%= link_to "Показать населенный пункт", @settlement %> |
+  <%= link_to "Все населенные пункты", settlements_path %>
+</div>

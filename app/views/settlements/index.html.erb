@@ -1,3 +1,5 @@
+<p style="color: green"><%= notice %></p>
+
 <h2>Населенные пункты</h2>
 
 <table>
@@ -13,17 +15,11 @@
       <% link = "/settlements/#{settlement.id}" %>
       <tr>
         <td><%= link_to settlement.name, link %></td>
-        <td>
-          <% if settlement.category == 'town' %>
-            <b><%= settlement.category %></b>
-          <% else %>
-            <%= settlement.category %>
-          <% end -%>
-        </td>
+        <td><%= settlement.category %></td>
         <td class="left">
           <ul>
-            <li><%= link_to 'Редактировать', edit_settlement_path(settlement) %></li>
-            <li><%= button_to 'Удалить', settlement_path(settlement), method: :delete %></li>
+            <%= link_to 'Редактировать', edit_settlement_path(settlement), class: 'btn1'%>
+            <%= button_to 'Удалить', settlement_path(settlement), method: :delete, class: 'btn2' %>
           </ul>
         </td>
       </tr>
@@ -33,10 +29,4 @@
 
 <hr>
 
-<p>
-  <%= link_to 'Создать населенный пункт', new_settlement_path %>
-</p> <br>
-
-<p>
-  <%= link_to 'Перейти к экономическим субъектам', economic_subjects_path %>
-</p>
+<p><%= link_to 'Создать населенный пункт', new_settlement_path, class: 'btn'  %></p> 

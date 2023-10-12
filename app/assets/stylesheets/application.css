@@ -54,7 +54,7 @@ thead tr{
 
 .left{
   text-align: left;
-  padding-inline-start: 20px;
+  padding-inline-start: 5px;
 }
 
 tbody tr{
@@ -70,4 +70,40 @@ tbody tr:hover td{
 }
 */
 .delete-button {
+}
+
+.btn1, .btn2{
+    background-color: #93a5a7;
+    color: white;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    float: left;
+    border: 1px solid;
+    font-size: 12px;
+  }
+
+.btn1:hover{
+    background-color:#a4bab1;
+}
+
+.btn2:hover{
+    background-color:#d28e87;
+}
+
+.btn{
+   background-color: #729894;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    float: left;
+    border: 2px solid;
+}
+
+.btn:hover{
+    background-color:#b3c3c5;
 }

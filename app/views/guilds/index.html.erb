@@ -1,9 +1,8 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Гильдии</h1>
+<h2>Гильдии</h2>
 
-<div id="guilds">
-  <table class="table table-striped">
+<table>
   <thead>
     <tr>
       <th>Название</th>
@@ -12,16 +11,20 @@
   </thead>
   <tbody>
     <% @guilds.each do |guild| %>
-    <% link = "/guilds/#{guild.id}" %>
+      <% link = "/guilds/#{guild.id}" %>
       <tr>
         <td><%= link_to guild.name, link %></td>
-        <td>
-          <%= link_to 'Редактировать', edit_guild_path(guild), class: 'btn1' %>
-          <%= button_to 'Удалить', guild_path(guild), method: :delete, class: 'btn2', id: "delete-#{guild.id}" %>
+        <td class="left">
+          <ul>
+            <%= link_to 'Редактировать', edit_guild_path(guild), class: 'btn1' %>
+            <%= button_to 'Удалить', guild_path(guild), method: :delete, class: 'btn2', id: "delete-#{guild.id}" %>
+          </ul>
         </td>
       </tr>
     <% end -%>
   </tbody>
 </table>
 
-<%= link_to "Создать новую гильдию", new_guild_path %>
+<hr>
+
+<p><%= link_to "Создать новую гильдию", new_guild_path, class: 'btn' %></p>

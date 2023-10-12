@@ -1,6 +1,7 @@
 <p style="color: green"><%= notice %></p>
 
 <%= render @player %>
+<p> Купец: <%= link_to @player.merchant&.name, @player.merchant %> </p>
 
 <div>
   <%= link_to "Edit this player", edit_player_path(@player) %> |
