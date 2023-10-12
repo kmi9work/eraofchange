@@ -17,19 +17,19 @@ class MerchantsController < ApplicationController
 
   def create
     @merchant = Merchant.new(merchant_params)
-      if @merchant.save
-        redirect_to merchant_url(@merchant)#, notice: "Купец успешно создан."
-      else
-        render :new, status: :unprocessable_entity
-      end
+    if @merchant.save
+      redirect_to merchant_url(@merchant), notice: "Купец успешно создан."
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def update
-      if @merchant.update(merchant_params)
-        redirect_to merchant_url(@merchant)#, notice: "Запись успешно обновлена."
-      else
-        render :edit, status: :unprocessable_entity
-      end
+    if @merchant.update(merchant_params)
+      redirect_to merchant_url(@merchant), notice: "Запись успешно обновлена."
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy

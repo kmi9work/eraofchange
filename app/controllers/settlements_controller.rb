@@ -14,11 +14,11 @@ class SettlementsController < ApplicationController
 
   def create
     @settlement = Settlement.new(settlement_params)
-      if @settlement.save
-        redirect_to settlement_url(@settlement)#, notice: "Населенный пункт успешно создан."
-      else
-        render :new, status: :unprocessable_entity
-      end
+    if @settlement.save
+      redirect_to settlement_url(@settlement), notice: "Населенный пункт успешно создан."
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def edit
@@ -26,15 +26,15 @@ class SettlementsController < ApplicationController
 
   def update
     if @settlement.update(settlement_params)
-        redirect_to settlement_url(@settlement)#, notice: "Запись успешно обновлена."
-      else
-        render :edit, status: :unprocessable_entity
+      redirect_to settlement_url(@settlement), notice: "Запись успешно обновлена."
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     @settlement.destroy
-    redirect_to(settlements_path)#, notice: "Запись успешно удалена."
+    redirect_to(settlements_path), notice: "Запись успешно удалена."
   end
 
   private
