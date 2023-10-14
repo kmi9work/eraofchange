@@ -18,7 +18,7 @@ class GuildsController < ApplicationController
   def create
     @guild = Guild.new(guild_params)
     if @guild.save
-      redirect_to guild_url(@guild)#, notice: "Guild was successfully created."
+      redirect_to guild_url(@guild), notice: "Гильдия успешно создана."
     else
       render :new, status: :unprocessable_entity
     end
@@ -26,7 +26,7 @@ class GuildsController < ApplicationController
 
   def update
     if @guild.update(guild_params)
-      redirect_to guild_url(@guild)#, notice: "Guild was successfully updated."
+      redirect_to guild_url(@guild), notice: "Запись успешно обновлена."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -35,7 +35,7 @@ class GuildsController < ApplicationController
   def destroy
     @guild.destroy
 
-    redirect_to guilds_url, notice: "Guild was successfully destroyed."
+    redirect_to guilds_url, notice: "Запись успешно удалена."
   end
 
   private

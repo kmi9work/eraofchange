@@ -1,17 +1,16 @@
 <p style="color: green"><%= notice %></p>
 
-<%= render @guild %>
+<h2>Гильдия: <%= @guild.name %></h2>
 
 Купцы в гильдии:<br>
-<% @guild.merchants.each do |merchant| %>
-  <p> <%= link_to merchant.name, merchant %> </p>
-<% end -%>
+  <% @guild.merchants.each do |merchant| %>
+    <li><%= link_to merchant.name, merchant %></li>
+  <% end -%>
 
 <hr>
 
 <div>
   <%= link_to "Редактировать", edit_guild_path(@guild) %> |
   <%= link_to "Все гильдии", guilds_path %>
-
   <%= button_to "Удалить", @guild, method: :delete %>
 </div>
