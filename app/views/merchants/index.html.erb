@@ -1,14 +1,32 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Merchants</h1>
+<h2>Купцы</h2>
 
-<div id="merchants">
-  <% @merchants.each do |merchant| %>
-    <%= render merchant %>
-    <p>
-      <%= link_to "Show this merchant", merchant %>
-    </p>
-  <% end %>
-</div>
+<table>
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @merchants.each do |merchant| %>
+      <% link = "/merchants/#{merchant.id}" %>
+      <tr>
+        <td><%= link_to merchant.name, link %></td>
+        <td class="left">
+          <ul>
+            <%= link_to 'Редактировать', edit_merchant_path(merchant), class: 'btn1' %>
+            <%= button_to 'Удалить', merchant_path(merchant), method: :delete, class: 'btn2', id: "delete-#{merchant.id}" %>
+          </ul>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
 
-<%= link_to "New merchant", new_merchant_path %>
+<hr>
+
+<%= link_to "Добавить купца", new_merchant_path, class: 'btn' %>
+
+<%= link_to "На главную", root_path, class: 'btn' %>

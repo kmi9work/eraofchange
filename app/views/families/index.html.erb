@@ -1,7 +1,12 @@
 <p style="color: green"><%= notice %></p>
 
 <h1>Семьи </h1>
-<%= link_to "Создать новую семью", new_family_path %>
+  <table class="table">
+    <thead>
+        <th scope="col"><%= link_to "Создать новую семью", new_family_path %></th>
+    </thead>
+  </table>
+
 <div id="families">
 </div>
 
@@ -16,18 +21,17 @@
   </thead>
   <% @families.each do |family| %>
     <% link_to_edit = "/families/#{family.id}/edit"%>
-    <% link_to_destroy = "/families/#{family.id}/destroy"%>
+    <% link_to_destroy = "/families/#{family.id}/destroy" #убрать потом%>
     <tbody>
       <tr>
         <th scope="row"><%= family.id %></th>
         <td><%= link_to family.name, family %></td>
         <td><%= link_to "Редактировать семью", link_to_edit %></td>
-        <td><%= link_to "Удалить семью", link_to_destroy %></td>
+        <td><%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2', id: "delete-#{family.id}"%></td>
       </tr>
     </tbody>
   <% end %>
 </table>
  
-
 
 

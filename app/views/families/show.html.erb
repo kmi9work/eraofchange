@@ -1,17 +1,18 @@
 <p style="color: green"><%= notice %></p>
 <div>
-  <p> Имя семьи: <%= render @family %> </p>
-  <p> Собственность семьи: </p>
+  <p> Имя семьи: <%= @family.name %> </p>
 
-  <% if @family.player_id == nil%>
-    <p> Игроки в семье: </p>
-  <% else %>
-    <p> Игроки в семье: </p>
-  <% end %>
+  <p> Купцы в семье: 
+    <% array = @family.merchants.to_a %>
+      <% array.each do | merchant|%>
+      <p> <%= link_to merchant.name, merchant %></p>
+  <p> <% end %> </p>  
+
+  <p> Собственность семьи: <p>
 </div>
 
 <div>
-  <%= link_to "Edit this family", edit_family_path(@family) %>
-  <p><%= link_to "Back to families", families_path %> </p>
-  <p><%= button_to "Destroy this family", @family, method: :delete %></p>
+  <%= link_to "Редактировать семью", edit_family_path(@family) %>
+  <p><%= link_to "Назад к семьям", families_path %> </p>
+  <p><%= button_to "Удалить семью", @family, method: :delete %></p>
 </div>

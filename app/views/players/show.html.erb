@@ -1,6 +1,6 @@
 <p style="color: green"><%= notice %></p>
 <div>
-  <p> Имя игрока <%= render @player %> </p>
+  <p> Имя игрока: <%= @player.name %> </p>
 
   <% if @player.merchant_id == nil%>
     <p>Купец: (ИГРОКУ ПОКА НЕ НАЗНАЧЕН КУПЕЦ)</p>
@@ -12,15 +12,7 @@
   
   <% end %>
 
-  <% if @player.family_id == nil%>
-    <p> Семья: (ИГРОК ПОКА НЕ В СЕМЬЕ)</p>
-
-  <% else %>
-    <% link_to_family = "/families/#{@player.family.id}" %>
-    
-    <p> Семья: <%= link_to @player.family.name, link_to_family %> </p>
-  <% end %>
-</div>
+ </div>
 
 
 

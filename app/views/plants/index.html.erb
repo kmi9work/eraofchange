@@ -1,56 +1,41 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>First</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<h1>Предприятия</h1>
 
-    <%= stylesheet_link_tag "bootstrap.min" %>
-    <%= javascript_importmap_tags %>
-  </head>
-
-  <body>
-    <h1> <%= link_to 'Эпоха перемен', root_path %> </h1>
-    <h3>Предприятия (plants)</h3>
-
-    <table style="border: 2px" class="table table-striped">
-      <thead>
-        <tr>
-          <th>Номер</th>
-          <th>Предприятие</th>
-          <th>Категория</th>
-          <th>Цена</th>
-          <th>Уровень</th>
-          <th>Место</th>
-         </tr>
-      </thead>
-
+  <table class="table">
+ 	  <thead>
+ 	    	<th scope="col"><%= link_to "Создать новое предприятие", new_plant_path %></th>
+    </thead>
+  </table>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Предприятие</th>
+        <th scope="col">Редактировать</th>
+        <th scope="col">Категория</th>
+        <th scope="col">Цена</th>
+        <th scope="col">Уровень</th>
+        <th scope="col">Место</th>
+        <th scope="col">Удалить</th>
+      </tr>
+    </thead>
       <tbody>
         <% @plants.each do |plant| %>
           <% link = "/plants/#{plant.id}" %>
-          <tr>
-            <td><%= plant.id %></td>
-            <td><%= link_to plant.name, link %> </td>
-            <td><%= plant.category %> </td>
-            <td><%= plant.price %> </td>
-            <td><%= plant.level %>  </td>
-            <td><%= plant.location %> </td>
-          </tr>
-        <% end -%>
-      </tbody>
-    </table>
-
-    <br>
-    <br>
-    <br>
-    <%= link_to "Создать новое предприятие", new_plant_path %>
-    <br>
-
-    <%= link_to "На главную", root_path %>
-  </body>
+          <% link_to_edit = "/plants/#{plant.id}/edit"%>
+      <tr>
+        <td scope="row"><%= plant.id %></th>
+        <td><%= link_to plant.name, link  %> </td>
+        <td><%= link_to "Редактировать предприятие", link_to_edit %></td>
+        <td><%= plant.category  %> </td>
+        <td><%= plant.price  %> </td>
+        <td><%= plant.level  %> </td>
+        <td><%= plant.location  %> </td>          
+        <td><%= button_to "Удалить предприятие", destroy_plant_path(plant), 
+                  method: :delete %></td>
+      </tr>
+      <% end -%>  
+      </body>
+  </table>
 </html>
-
-
-
 

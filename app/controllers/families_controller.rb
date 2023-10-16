@@ -18,7 +18,7 @@ class FamiliesController < ApplicationController
   def create
     @family = Family.new(family_params)
     if @family.save
-      redirect_to family_url(@family), notice: "Family was successfully created."
+      redirect_to family_url(@family), notice: "Семья успешно создана."
     else
       render :new, status: :unprocessable_entity
     end
@@ -26,7 +26,7 @@ class FamiliesController < ApplicationController
 
   def update
     if @family.update(family_params)
-      redirect_to family_url(@family), notice: "Family was successfully updated."
+      redirect_to family_url(@family), notice: "Семья успешно изменена."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -34,7 +34,7 @@ class FamiliesController < ApplicationController
 
   def destroy
     @family.destroy
-    redirect_to families_url, notice: "Family was successfully destroyed."
+    redirect_to families_url, notice: "Семья успешно удалена."
   end
 
   private

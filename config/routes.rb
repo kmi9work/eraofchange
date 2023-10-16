@@ -4,12 +4,6 @@ Rails.application.routes.draw do
   resources :families
   resources :players
 
-  get '/players/:id/edit', to: 'players#edit'
-  get '/players/:id/destroy', to: 'players#destroy'
-
-  get '/families/:id/edit', to: 'families#edit'
-  get '/families/:id/destroy', to: 'families#destroy'
-
   get '/settlements', to: 'settlements#index'
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'
@@ -57,7 +51,7 @@ Rails.application.routes.draw do
   get '/plants/:id', to: 'plants#show', as: :plant
   get '/plants/:id/edit', to: 'plants#edit', as: :edit_plants
   patch '/plants/:id', to: 'plants#update'
-  get '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
+  delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
 
   root to: 'welcome#index'
 end

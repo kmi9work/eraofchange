@@ -10,7 +10,8 @@
 <%= link_to "Редактировать предприятие", edit_plants_path %>
 <br>
 
-<%= link_to "Удалить предприятие", destroy_plant_path %>
+<td><%= button_to "Удалить предприятие", destroy_plant_path, 
+                  method: :delete %></td>
 <br>
 
 <%= link_to "К предприятиям", plants_path %>

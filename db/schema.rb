@@ -21,7 +21,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_02_174536) do
 
   create_table "families", force: :cascade do |t|
     t.string "name"
-    t.integer "player_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -35,6 +34,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_02_174536) do
   create_table "merchants", force: :cascade do |t|
     t.string "name"
     t.integer "plant_id"
+    t.integer "family_id"
     t.integer "guild_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -55,7 +55,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_02_174536) do
 
   create_table "players", force: :cascade do |t|
     t.string "name"
-    t.integer "family_id"
     t.integer "merchant_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
