@@ -1,21 +1,30 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Купец: <%= render @merchant %></h2> 
+<h2>Купец: <%= @merchant.name %></h2> 
 
-<p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
+  <p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
 
-<p>Предприятия:<br>
+  <p>Предприятия:<br>
   <% @merchant.plants.each do |plant| %>
-  <li> <%= link_to plant.name, plant %> </li>
+    <li><%= link_to plant.name, plant %> </li>
   <% end -%>
-</p>
+  </p>
 
-<p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
+  <p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
+  <% link_to_family = "/families/#{@merchant.family_id}" %>
 
-<hr>
+  <% if @merchant.family_id == nil %>
+    <p>Семья: Купец не в семье.
+
+  <% else %>
+    <% name_of_family = Family.find(@merchant.family_id).name %>
+    <p>Семья:  <%= link_to name_of_family,  link_to_family %> </p>
+  <% end %>
+
+  <hr>
 
 <div>
-  <%= link_to "Редактировать", edit_merchant_path(@merchant) %>
-  <%= button_to "Удалить", @merchant, method: :delete %>
+  <%= link_to "Редактировать", edit_merchant_path(@merchant) %> |
   <%= link_to "Все купцы", merchants_path %>
+  <%= button_to "Удалить", @merchant, method: :delete %>
 </div>

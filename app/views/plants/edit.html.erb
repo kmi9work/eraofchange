@@ -1,9 +1,10 @@
-<form action="/plants/<%= @plant.id %>" method="patch">
-  <p>Название: <input type="text" name="name" value="<%= @plant.name %>"/></p>
-  <p>Категория: <input type="text" name="category" value="<%= @plant.category %>"/></p>
-  <p>Цена: <input type="text" name="price" value="<%= @plant.price %>"/></p>
-  <p>Уровень: <input type="text" name="level" value="<%= @plant.level %>"/></p>
-  <p>Место: <input type="text" name="location"value="<%= @plant.location %>"/></p>
-<p><input type="submit"></p>
-</form>
+<h1>Редактирование предприятия</h1>
 
+
+<%= render "form", plant: @plant %>
+
+<br>
+
+<div>
+  <%= link_to "Назад к предпритиям", plants_path %>
+</div>

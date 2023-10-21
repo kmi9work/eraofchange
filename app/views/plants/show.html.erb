@@ -1,3 +1,5 @@
+<p style="color: green"><%= notice %></p>
+
 <p> Название: <%= @plant.name %> </p>
 <p> Категория: <%= @plant.category %> </p>
 <p> Цена: <%= @plant.price %> </p>
@@ -10,7 +12,8 @@
 <%= link_to "Редактировать предприятие", edit_plants_path %>
 <br>
 
-<%= link_to "Удалить предприятие", destroy_plant_path %>
+<td><%= button_to "Удалить предприятие", destroy_plant_path, 
+                  method: :delete %></td>
 <br>
 
 <%= link_to "К предприятиям", plants_path %>

@@ -1,37 +1,66 @@
 class PlantsController < ApplicationController
+before_action :set_plant, only: %i[ show edit update destroy ]
+
   def index
     @plants = Plant.all
-    render 'index', layout: false
   end
 
   def show
-    @plant = Plant.find(params[:id])
   end
 
   def new
     @plant = Plant.new
   end
 
-  def create
-    Plant.create(name: params[:name], category: params[:category], price: params[:price], 
-    			level: params[:level], location: params[:location])
-    redirect_to('/plants')
+  def edit
   end
 
-  def edit
-    @plant = Plant.find_by_id(params[:id])
+  def create
+    @plant = Plant.new(plant_params)
+    if @plant.save
+      redirect_to plant_url(@plant), notice: "Plant was successfully created."
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
+
+  def create
+    @plant = Plant.new(plant_params)
+    if @plant.save
+      redirect_to plant_url(@plant)
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+
 
   def update
-    @plant = Plant.find_by_id(params[:id])
-    @plant.update(name: params[:name], category: params[:category], price: params[:price], 
-    			level: params[:level], location: params[:location])
-    redirect_to(plants_path)
+    if @plant.update(plant_params)
+      redirect_to plant_url(@plant)
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @plant = Plant.find_by_id(params[:id])
     @plant.destroy
     redirect_to(plants_path)
   end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_plant
+      @plant = Plant.find(params[:id])
+    end
+
+      # Only allow a list of trusted parameters through.
+    def plant_params
+      params.require(:plant).permit(:name, :category, :price, :level, :location)
+    end
 end
+
+
+
+
+  
