@@ -2,13 +2,17 @@
 
 <h2>Купец: <%= @merchant.name %></h2> 
 
-  <p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
+<p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
 
-  <p>Предприятия:<br>
-  <% @merchant.plants.each do |plant| %>
-    <li><%= link_to plant.name, plant %> </li>
-  <% end -%>
-  </p>
+<div>
+  Предприятия:<br>
+  <ul>
+    <% @merchant.plants.each do |plant| %>
+      <li><%= link_to plant.name, plant %> </li>
+    <% end -%>
+  </ul>
+</div>
+
 
   <p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
   <% link_to_family = "/families/#{@merchant.family_id}" %>
@@ -25,6 +29,6 @@
 
 <div>
   <%= link_to "Редактировать", edit_merchant_path(@merchant) %> |
-  <%= link_to "Все купцы", merchants_path %>
   <%= button_to "Удалить", @merchant, method: :delete %>
+  <%= link_to "Все купцы", merchants_path %>
 </div>

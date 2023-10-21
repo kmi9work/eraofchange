@@ -1,6 +1,6 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Населенный пункт: <%= render @settlement %></h2> 
+<h2>Населенный пункт: <%= @settlement.name %> - <%= @settlement.category %></h2> 
 
 Предприятия в городе:<br>
 <% @settlement.plants.each do |plant| %>
@@ -9,8 +9,8 @@
 
 <hr>
 
-<%= link_to 'Редактировать', edit_settlement_path(@settlement) %>
-
-<%= button_to 'Удалить', settlement_path(@settlement), method: :delete %>
-
-<%= link_to 'Населенные пункты', settlements_path %>
+<div>
+  <%= link_to 'Редактировать', edit_settlement_path(@settlement) %> |
+  <%= link_to 'Населенные пункты', settlements_path %>
+  <%= button_to 'Удалить', settlement_path(@settlement), method: :delete %>
+</div>

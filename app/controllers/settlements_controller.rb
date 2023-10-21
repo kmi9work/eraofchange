@@ -34,7 +34,7 @@ class SettlementsController < ApplicationController
 
   def destroy
     @settlement.destroy
-    redirect_to(settlements_path), notice: "Запись успешно удалена."
+    redirect_to settlements_path, notice: "Запись успешно удалена."
   end
 
   private
