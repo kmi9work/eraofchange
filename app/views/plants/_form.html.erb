@@ -1,0 +1,24 @@
+<%= form_with(model: plant) do |form| %>
+  <% if plant.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(plant.errors.count, "error") %> prohibited this plant from being saved:</h2>
+
+      <ul>
+        <% plant.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <p>Название: <%= form.text_field :name %></p>
+    <p>Категория: <%= form.text_field :category %></p>
+    <p>Цена: <%= form.text_field :price %></p>
+    <p>Уровень: <%= form.text_field :level %></p>
+    <p>Местоположение: <%= form.text_field :location %></p>
+    <%= form.submit %>
+  </div>
+<% end %>
+
+
