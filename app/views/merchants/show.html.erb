@@ -11,15 +11,15 @@
   </p>
 
   <p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
-      <% link_to_family = "/families/#{@merchant.family_id}" %> 
-        
-        <% if @merchant.family_id == nil %>
-            <p>Семья: Купец не в семье.
-        
-        <% else %> 
-            <% name_of_family = Family.find(@merchant.family_id).name %> 
-            <p>Семья:  <%= link_to name_of_family,  link_to_family %> </p>
-        <% end %> 
+  <% link_to_family = "/families/#{@merchant.family_id}" %>
+
+  <% if @merchant.family_id == nil %>
+    <p>Семья: Купец не в семье.
+
+  <% else %>
+    <% name_of_family = Family.find(@merchant.family_id).name %>
+    <p>Семья:  <%= link_to name_of_family,  link_to_family %> </p>
+  <% end %>
 
   <hr>
 
