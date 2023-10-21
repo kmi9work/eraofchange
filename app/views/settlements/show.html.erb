@@ -1,4 +1,6 @@
-<p><%= @settlement.name %> - <%= @settlement.category %></p>
+<p style="color: green"><%= notice %></p>
+
+<h2>Населенный пункт: <%= render @settlement %></h2> 
 
 Предприятия в городе:<br>
 <% @settlement.plants.each do |plant| %>
