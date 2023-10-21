@@ -1,11 +1,14 @@
+
 <p style="color: green"><%= notice %></p>
 
 <h2>Гильдия: <%= @guild.name %></h2>
 
 Купцы в гильдии:<br>
-  <% @guild.merchants.each do |merchant| %>
-    <li><%= link_to merchant.name, merchant %></li>
-  <% end -%>
+  <ul>
+    <% @guild.merchants.each do |merchant| %>
+      <li><%= link_to merchant.name, merchant %></li>
+    <% end -%>
+  </ul>
 
 <hr>
 
