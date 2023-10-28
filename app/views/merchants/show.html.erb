@@ -1,8 +1,7 @@
 <p style="color: green"><%= notice %></p>
 
 <h2>Купец: <%= @merchant.name %></h2> 
-
-<p>Гильдия: <%= link_to @merchant.guild&.name, @merchant.guild %></p>
+<p>Гильдия: <%= link_to_if @merchant.guild, @merchant.guild&.name, guild_path(@merchant.guild) %></p>
 
 <div>
   Предприятия:<br>
@@ -14,12 +13,11 @@
 </div>
 
 
-  <p>Игрок: <%= link_to @merchant.player&.name, @merchant.player %> </p>
+  <p>Игрок: <%= link_to_if @merchant.player&.name, @merchant.player %> </p>
   <% link_to_family = "/families/#{@merchant.family_id}" %>
 
   <% if @merchant.family_id == nil %>
     <p>Семья: Купец не в семье.
-
   <% else %>
     <% name_of_family = Family.find(@merchant.family_id).name %>
     <p>Семья:  <%= link_to name_of_family,  link_to_family %> </p>
