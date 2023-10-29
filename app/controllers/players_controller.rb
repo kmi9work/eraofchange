@@ -49,7 +49,7 @@ class PlayersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def player_params
-      params.require(:player).permit(:name)
+      params.require(:player).permit(:name, :merchant_id)
     end
 end
 

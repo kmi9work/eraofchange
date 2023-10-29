@@ -10,7 +10,8 @@
 <hr>
 
 <div>
-  <%= link_to 'Редактировать', edit_settlement_path(@settlement) %> |
-  <%= link_to 'Населенные пункты', settlements_path %>
-  <%= button_to 'Удалить', settlement_path(@settlement), method: :delete %>
+  <%= link_to 'Редактировать', edit_settlement_path(@settlement), class: 'btn1' %>
+  <%= button_to 'Удалить', settlement_path(@settlement), method: :delete, class: 'btn2' %>
+  <br><br>
+  <%= link_to 'Все населенные пункты', settlements_path, class: 'btn' %>
 </div>
