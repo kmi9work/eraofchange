@@ -4,9 +4,9 @@ before_action :set_plant, only: %i[ show edit update destroy ]
   def index
     @plants = Plant.all
   end
-
+    
   def show
-  end
+      end
 
   def new
     @plant = Plant.new
@@ -36,7 +36,7 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
 
   def update
-    if @plant.update(plant_params)
+    if @plant.update(plant_params,)
       redirect_to plant_url(@plant)
     else
       render :edit, status: :unprocessable_entity
@@ -52,11 +52,18 @@ before_action :set_plant, only: %i[ show edit update destroy ]
     # Use callbacks to share common setup or constraints between actions.
     def set_plant
       @plant = Plant.find(params[:id])
+
+
     end
 
       # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :category, :price, :level, :location)
+
+      params.require(:plant).permit(:name, :category, :price, :level, 
+        :location, :economic_subject_type, :economic_subject_id)
+
+   
+
     end
 end
 

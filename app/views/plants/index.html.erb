@@ -12,7 +12,7 @@
         <th scope="col">#</th>
         <th scope="col">Предприятие</th>
         <th scope="col">Редактировать</th>
-        <th scope="col">Категория</th>
+        <th scope="col">Экономический субъект</th>
         <th scope="col">Цена</th>
         <th scope="col">Уровень</th>
         <th scope="col">Место</th>
@@ -27,7 +27,7 @@
         <td scope="row"><%= plant.id %></th>
         <td><%= link_to plant.name, link  %> </td>
         <td><%= link_to "Редактировать предприятие", link_to_edit %></td>
-        <td><%= plant.category  %> </td>
+        <td><%= link_to plant.economic_subject&.name, plant.economic_subject   %> </td>
         <td><%= plant.price  %> </td>
         <td><%= plant.level  %> </td>
         <td><%= plant.location  %> </td>          
