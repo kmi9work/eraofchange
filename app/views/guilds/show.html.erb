@@ -3,11 +3,18 @@
 <h2>Гильдия: <%= @guild.name %></h2>
 
 Купцы в гильдии:<br>
-  <ul>
-    <% @guild.merchants.each do |merchant| %>
-      <li><%= link_to merchant.name, merchant %></li>
-    <% end -%>
-  </ul>
+<ul>
+  <% @guild.merchants.each do |merchant| %>
+    <li><%= link_to merchant.name, merchant %></li>
+  <% end -%>
+</ul>
+
+Предприятия в гильдии:<br>
+<ul>
+  <% @guild.plants.each do |plant| %>
+    <li><%= link_to plant.name, plant %></li>
+  <% end -%>
+</ul>
 
 <hr>
 

@@ -5,7 +5,6 @@ class CreatePlants < ActiveRecord::Migration[7.0]
       t.string :category
       t.integer :price
       t.string :level
-      t.string :location
       t.integer :economic_subject_id
       t.string :economic_subject_type
       t.integer :settlement_id

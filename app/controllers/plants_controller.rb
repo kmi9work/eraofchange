@@ -1,5 +1,5 @@
 class PlantsController < ApplicationController
-before_action :set_plant, only: %i[ show edit update destroy ]
+  before_action :set_plant, only: %i[ show edit update destroy ]
 
   def index
     @plants = Plant.all
@@ -17,6 +17,7 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
   def create
     @plant = Plant.new(plant_params)
+    write_economic_subject
     if @plant.save
       redirect_to plant_url(@plant), notice: "Plant was successfully created."
     else
@@ -24,17 +25,10 @@ before_action :set_plant, only: %i[ show edit update destroy ]
     end
   end
 
-  def create
-    @plant = Plant.new(plant_params)
-    if @plant.save
-      redirect_to plant_url(@plant)
-    else
-      render :new, status: :unprocessable_entity
-    end
-  end
-
   def update
-    if @plant.update(plant_params)
+    @plant.assign_attributes(plant_params)
+    write_economic_subject
+    if @plant.save
       redirect_to plant_url(@plant)
     else
       render :edit, status: :unprocessable_entity
@@ -54,7 +48,13 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
       # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :category, :price, :level, :settlement_id)
+      params.require(:plant).permit(:name, :category, :price, :level)
+    end
+
+    def write_economic_subject
+      es_id, es_type = params[:plant][:economic_subject].split('_')
+      @plant.economic_subject_id = es_id
+      @plant.economic_subject_type = es_type
     end
 end
 
