@@ -13,7 +13,7 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    <p>Игрок: <%= form.select :merchant_id, options_for_select(Merchant.all.collect{ |m| [m.name, m.id] }, player.merchant_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+    <p>Купец: <%= form.select :merchant_id, options_for_select(Merchant.all.collect{ |m| [m.name, m.id] }, player.merchant_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
     <%= form.submit 'Отправить'%>
   </div>
 <% end %>
