@@ -5,6 +5,13 @@
 # Merchant(id: integer, name: string, plant_id: integer, family_id: integer, guild_id: integer, created_at: datetime, updated_at: datetime)
 
 
+# Player.destroy_all
+# Merchant.destroy_all
+# Family.destroy_all
+# Guild.destroy_all
+# Plant.destroy_all
+# Settlement.destroy_all
+
 Player.create(name: "Жопкин", merchant_id: 1 )
 Player.create(name: "Борис", merchant_id: 2)
 Player.create(name: "Манюня", merchant_id: 3)

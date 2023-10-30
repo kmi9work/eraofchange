@@ -1,4 +1,4 @@
- <%= form_with(model: merchant) do |form| %>
+<%= form_with(model: merchant) do |form| %>
   <% if merchant.errors.any? %>
    <div style="color: red">
      <h2><%= pluralize(merchant.errors.count, "error") %> prohibited this merchant from being saved:</h2>
@@ -14,4 +14,4 @@
   Семья: <%= form.select :family_id, options_for_select(Family.all.collect{ |f| [f.name, f.id] },   merchant.family_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
   <%= form.submit('Отправить') %>
 
-  <% end %>
+<% end %>

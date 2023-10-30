@@ -12,16 +12,15 @@
   <% end %>
 
     <div>
-
+      <p>Название: <%= form.text_field :name %></p>
+      <p>Категория: <%= form.text_field :category %></p>
+      <p>Цена: <%= form.text_field :price %></p>
+      <p>Уровень: <%= form.text_field :level %></p>
   
-<%array = Guild.all.collect{ |g| [g.name, g.id.to_s + "_" + g.class.to_s] } %>
+      <% es_with_types = (Guild.all + Merchant.all).collect{ |e| [e.name, "#{e.id}_#{e.class}"] } %>
 
-      <p>Добавить в гильдию: <%= form.select :economic_subject_id, options_for_select(Guild.all.collect{ |g| [g.name, g.id.to_s + "_" + g.class.to_s] }), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
-        
-        <%= form.submit ('Отправить')%>
-      </p>
-      
-      <p>Добавить купцу: <%= form.select :economic_subject_id, options_for_select(Merchant.all.collect{ |m| [m.name, m.id] }), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+      <p>
+        Передать гильдии/купцу: <%= form.select :economic_subject, options_for_select(es_with_types), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
       </p>
       
       <%= form.submit ('Отправить') %>
