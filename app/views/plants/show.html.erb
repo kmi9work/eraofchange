@@ -1,20 +1,25 @@
 <p style="color: green"><%= notice %></p>
 
-<p> Название: <%= @plant.name %> </p>
+<h2>Название: <%= @plant.name %></h2>
+
 <p> Категория: <%= @plant.category %> </p>
 <p> Цена: <%= @plant.price %> </p>
 <p> Уровень: <%= @plant.level %> </p>
-<p> Населенный пункт: <%= link_to @plant.settlement&.name, @plant.settlement %> </p>
+
+<% if @plant.settlement_id == nil %>
+ <p>Населенный пункт: не выбран</p>
+<% else %>
+ <% name_of_settlement = Settlement.find(@plant.settlement_id).name %>
+ <p>Населенный пункт: <%= link_to name_of_settlement %> </p>
+<% end -%>
+
 <p> Купец: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %> </p>
 
 <hr>
-<br>
-<%= link_to "Редактировать предприятие", edit_plants_path %>
-<br>
 
-<td><%= button_to "Удалить предприятие", destroy_plant_path, 
-                  method: :delete %></td>
-<br>
-
-<%= link_to "К предприятиям", plants_path %>
-
+<div>
+  <%= link_to "Редактировать", edit_plant_path, class: 'btn1' %>
+  <%= button_to "Удалить", destroy_plant_path, method: :delete,  class: 'btn2'%></td>
+  <br><br>
+  <%= link_to "Все предприятия", plants_path, class: 'btn'  %>
+</div>

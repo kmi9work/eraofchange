@@ -1,23 +1,19 @@
 <p style="color: green"><%= notice %></p>
-<div>
-  <p> Имя игрока: <%= @player.name %> </p>
 
-  <% if @player.merchant_id == nil%>
-    <p>Купец: (ИГРОКУ ПОКА НЕ НАЗНАЧЕН КУПЕЦ)</p>
+<h2>Имя игрока: <%= @player.name %></h2>
 
-  <% else %>
-    <% link_to_merchant = "/merchants/#{@player.merchant.id}/" %>
+<% if @player.merchant_id == nil%>
+ <p>Купец: не назначен</p>
+<% else %>
+ <% link_to_merchant = "/merchants/#{@player.merchant.id}/" %>
+ <p>Купец: <%= link_to @player.merchant.name, link_to_merchant %></p>
+<% end %>
 
-    <p>Купец: <%= link_to @player.merchant.name, link_to_merchant %></p>
-  
-  <% end %>
-
- </div>
-
-
+<hr>
 
 <div>
-  <%= link_to "Редактировать игрока", edit_player_path(@player) %> |
-  <%= link_to "Назад к игрокам", players_path %>
-  <%= button_to "Удалить игрока", @player, method: :delete %>
+  <%= link_to "Редактировать", edit_player_path(@player), class: 'btn1' %>
+  <%= button_to "Удалить", @player, method: :delete, class: 'btn2' %>
+  <br><br>
+  <%= link_to "Все игроки", players_path, class: 'btn'%>
 </div>

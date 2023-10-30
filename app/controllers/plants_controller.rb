@@ -33,8 +33,6 @@ before_action :set_plant, only: %i[ show edit update destroy ]
     end
   end
 
-
-
   def update
     if @plant.update(plant_params)
       redirect_to plant_url(@plant)
@@ -56,7 +54,7 @@ before_action :set_plant, only: %i[ show edit update destroy ]
 
       # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :category, :price, :level, :location)
+      params.require(:plant).permit(:name, :category, :price, :level, :settlement_id)
     end
 end
 

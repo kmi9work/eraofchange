@@ -49,7 +49,7 @@ Rails.application.routes.draw do
   get '/plants/new', to: "plants#new", as: :new_plant
   post '/plants', to: 'plants#create'
   get '/plants/:id', to: 'plants#show', as: :plant
-  get '/plants/:id/edit', to: 'plants#edit', as: :edit_plants
+  get '/plants/:id/edit', to: 'plants#edit', as: :edit_plant
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
 
