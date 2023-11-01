@@ -12,7 +12,9 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
+    <p>Купцы: <%= form.select :merchant_ids, options_for_select(Merchant.all.collect{ |s| [s.name, s.id] }, guild.merchant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 
     <%= form.submit 'Отправить' %>
   </div>
 <% end %>
+

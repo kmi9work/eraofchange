@@ -32,7 +32,7 @@ Family.create(name: "Петровы")
 Family.create(name: "Сидоровы")
 
 Guild.create(name: "Забавники")
-Guild.create(name: "Каменьщики")
+Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
 Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Merchant")
