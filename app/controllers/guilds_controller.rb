@@ -10,9 +10,11 @@ class GuildsController < ApplicationController
 
   def new
     @guild = Guild.new
+    @merch = Merchant.where(guild_id: nil)
   end
 
   def edit
+    @merch = Merchant.where(guild_id: nil)
   end
 
   def create
@@ -46,6 +48,6 @@ class GuildsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def guild_params
-      params.require(:guild).permit(:name, :merchant_ids => [])
+      params.require(:guild).permit(:name, :merchant_ids => [], :plant_ids => [])
     end
 end

@@ -1,0 +1,33 @@
+<p style="color: green"><%= notice %></p>
+
+<h2>Категории предприятий</h2>
+  
+<table>
+  <thead>
+    <tr>
+      <th>№</th>
+      <th>Название категории</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%  @plant_categories.each do |plant_category|%>
+    <tr>
+      <td><%=  plant_category.id %></td>
+      <td><%= link_to plant_category.name, plant_category %></td>
+      </td>
+      <td class="left">
+        <ul>
+          <%=  link_to "Редактировать", edit_plant_category_path(plant_category), class: 'btn1' %>
+          <%= button_to "Удалить", plant_category_path(plant_category), method: :delete, class: 'btn2' %>
+        <% end -%>
+        </ul>
+      </td>
+     </tr>
+
+  </tbody>
+</table>
+
+<hr>
+
+<%= link_to "New plant category", new_plant_category_path %>
