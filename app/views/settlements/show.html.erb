@@ -1,11 +1,25 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Населенный пункт: <%= @settlement.name %> - <%= @settlement.category %></h2> 
+<h2>Населенный пункт: <%= @settlement.name %></h2>
 
-Предприятия в городе:<br>
-<% @settlement.plants.each do |plant| %>
-  <p> <%= link_to plant.name, plant %> </p>
+<p>
+Категория населеннного пункта: 
+<% if @settlement.settlement_category_id == nil %>
+ не выбрана
+<% else %>
+ <% link_to_settlement_category = "/settlement_categories/#{@settlement.settlement_category.id}" %>
+ <%= link_to @settlement.settlement_category.name, link_to_settlement_category %>
 <% end -%>
+</p>
+
+<p>
+Предприятия в городе:<br>
+ <ul>
+  <% @settlement.plants.each do |plant| %>
+  <li><%= link_to plant.name, plant %></li>
+  <% end -%>
+ </ul>
+</p>
 
 <hr>
 

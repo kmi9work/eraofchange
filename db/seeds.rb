@@ -35,13 +35,6 @@ Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
-Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Merchant")
-Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild")
-Plant.create(name: "Пивная", economic_subject_id: 3,economic_subject_type: "Merchant")
-Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild")
-Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant")
-Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild")
-
 Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Merchant")
 Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild")
 Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Merchant")
@@ -49,12 +42,13 @@ Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type:
 Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant")
 Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild")
 
+SettlementCategory.create(name: "Город")
+SettlementCategory.create(name: "Деревня")
 
-
-Settlement.create(name: "Москва", category: "Город")
-Settlement.create(name: "Тверь", category: "Город")
-Settlement.create(name: "Рязань", category: "Город")
-Settlement.create(name: "Хатавки", category: "Город")
-Settlement.create(name: "Гадюкино", category: "Город")
-Settlement.create(name: "Холмищи", category: "Город")
+Settlement.create(name: "Москва", settlement_category_id: 1)
+Settlement.create(name: "Тверь", settlement_category_id: 1)
+Settlement.create(name: "Рязань", settlement_category_id: 1)
+Settlement.create(name: "Хатавки", settlement_category_id: 2)
+Settlement.create(name: "Гадюкино", settlement_category_id: 2)
+Settlement.create(name: "Холмищи", settlement_category_id: 2)
 

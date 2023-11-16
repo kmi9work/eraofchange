@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :settlement_categories
   resources :guilds
   resources :merchants
   resources :families
