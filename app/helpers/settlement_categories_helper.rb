@@ -1,0 +1,2 @@
+module SettlementCategoriesHelper
+end

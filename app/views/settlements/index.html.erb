@@ -7,6 +7,7 @@
     <tr>
       <th>Название</th>
       <th>Категория</th>
+      <th>Предприятия</th>
       <th>Действие</th>
     </tr>
   </thead>
@@ -15,7 +16,23 @@
       <% link = "/settlements/#{settlement.id}" %>
       <tr>
         <td><%= link_to settlement.name, link %></td>
-        <td><%= settlement.category %></td>
+        <td>
+          <% if settlement.settlement_category == nil %>
+           Не выбрана
+          <% else %>
+           <%= link_to settlement.settlement_category&.name, link %>
+          <% end -%>
+        </td>
+        <td>
+          <% if settlement.plants == blank? %>
+           Не выбрано
+          <% else %>
+           <% array = settlement.plants.to_a %>
+           <% array.each do |plant|%>
+            <%= link_to plant.name, plant %>
+           <% end -%>
+          <% end -%>
+        </td>
         <td class="left">
           <ul>
             <%= link_to 'Редактировать', edit_settlement_path(settlement), class: 'btn1'%>

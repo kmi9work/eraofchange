@@ -16,7 +16,7 @@
     <% @plants.each do |plant| %>
      <% link = "/plants/#{plant.id}" %>
      <tr>
-      <td><%= plant.id %></th>
+      <td><%= plant.id %></td>
       <td><%= link_to plant.name, link %></td>
       <td><%= plant.category %> </td>
       <td><%= plant.price %></td>
@@ -25,7 +25,8 @@
         <% if plant.settlement == nil %>
          Не выбран
         <% else %>
-         <%= link_to plant.settlement&.name, link %>
+         <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
+         <%= link_to plant.settlement&.name, link_to_settlement %>
         <% end -%>
       </td>
       <td class="left">

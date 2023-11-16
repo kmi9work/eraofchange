@@ -5,13 +5,15 @@
 <p> Категория: <%= @plant.category %> </p>
 <p> Цена: <%= @plant.price %> </p>
 <p> Уровень: <%= @plant.level %> </p>
-
+<p>
+Населенный пункт:
 <% if @plant.settlement_id == nil %>
- <p>Населенный пункт: не выбран</p>
+ не выбран
 <% else %>
- <% name_of_settlement = Settlement.find(@plant.settlement_id).name %>
- <p>Населенный пункт: <%= link_to name_of_settlement %> </p>
+ <% link_to_settlement = "/settlements/#{@plant.settlement.id}" %>
+ <%= link_to @plant.settlement.name, link_to_settlement %>
 <% end -%>
+</p>
 
 <p> Гильдия/купец: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %> </p>
 
@@ -23,3 +25,6 @@
   <br><br>
   <%= link_to "Все предприятия", plants_path, class: 'btn'  %>
 </div>
+
+
+ 

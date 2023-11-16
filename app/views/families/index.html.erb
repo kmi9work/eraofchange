@@ -1,37 +1,43 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Семьи </h1>
-  <table class="table">
-    <thead>
-        <th scope="col"><%= link_to "Создать новую семью", new_family_path %></th>
-    </thead>
-  </table>
-
-<div id="families">
-</div>
-
+<h2>Семьи</h2>
+  
 <table class="table">
   <thead>
     <tr>
       <th scope="col">#</th>
       <th scope="col">Имя</th>
-      <th scope="col">Редактировать</th>
-      <th scope="col">Удалить</th>
+      <th scope="col">Купцы в семье</th>
+      <th scope="col">Действия</th>
     </tr>
   </thead>
-  <% @families.each do |family| %>
-    <% link_to_edit = "/families/#{family.id}/edit"%>
-    <% link_to_destroy = "/families/#{family.id}/destroy" #убрать потом%>
-    <tbody>
-      <tr>
-        <th scope="row"><%= family.id %></th>
-        <td><%= link_to family.name, family %></td>
-        <td><%= link_to "Редактировать семью", link_to_edit %></td>
-        <td><%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2', id: "delete-#{family.id}"%></td>
-      </tr>
-    </tbody>
-  <% end %>
+  <tbody>
+    <% @families.each do |family| %>
+     <% link = "/families/#{family.id}" %>
+     <tr>
+      <td scope="row"><%= family.id %></td>
+      <td><%= link_to family.name, link %></td>
+      <td>
+        <% if family.merchant_ids == blank? %>
+         Не выбран
+        <% else %>
+         <% array = family.merchants.to_a %>
+         <% array.each do |merchant|%>
+          <%= link_to merchant.name, merchant %>
+         <% end -%>
+        <% end -%>
+      </td>
+      <td>
+        <ul>
+          <%= link_to "Редактировать семью", edit_family_path(family), class: 'btn1' %>
+          <%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2', id: "delete-#{family.id}"%>
+        </ul>
+      </td>
+     </tr>
+    <% end -%> 
+  </tbody>
 </table>
- 
 
+<hr>
 
+<%= link_to "Создать новую семью", new_family_path, class: 'btn' %>

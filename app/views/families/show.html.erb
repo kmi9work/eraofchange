@@ -1,18 +1,26 @@
 <p style="color: green"><%= notice %></p>
+
 <div>
-  <p> Имя семьи: <%= @family.name %> </p>
+  <h2>Имя семьи: <%= @family.name %></h2>
 
-  <p> Купцы в семье: 
+  <p>
+    Купцы в семье:<br>
+    <ul>
     <% array = @family.merchants.to_a %>
-      <% array.each do | merchant|%>
-      <p> <%= link_to merchant.name, merchant %></p>
-  <p> <% end %> </p>  
+    <% array.each do | merchant|%>    
+     <li><%= link_to merchant.name, merchant %></li>
+    <% end -%> 
+    </ul> 
+  </p>
 
-  <p> Собственность семьи: <p>
+  <p>Собственность семьи: </p>
 </div>
+
+<hr>
 
 <div>
   <%= link_to "Редактировать семью", edit_family_path(@family) %>
-  <p><%= link_to "Назад к семьям", families_path %> </p>
-  <p><%= button_to "Удалить семью", @family, method: :delete %></p>
+  <%= button_to "Удалить семью", @family, method: :delete %>
+  <br>
+  <%= link_to "Назад к семьям", families_path %>
 </div>

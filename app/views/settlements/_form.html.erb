@@ -1,7 +1,7 @@
 <%= form_with(model: settlement) do |form| %>
   <% if settlement.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(settlement.errors.count, "error") %> prohibited this settlement from being saved:</h2>
+      <h2>Всего ошибок: <%= settlement.errors.count %>. Населенный пункт не сохранен:</h2>
 
       <ul>
         <% settlement.errors.each do |error| %>
@@ -13,7 +13,10 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    <p>Категория: <%= form.text_field :category %></p>
+
+    <p>Категория НП: <%= form.select :settlement_category_id, options_for_select(SettlementCategory.all.collect{ |s| [s.name, s.id] }, settlement.settlement_category_id), {include_blank: true}, class: 'form-select', style: "width: 200px" %></p>
+
+    <p>Предприятия: <%= form.select :plant_ids, options_for_select(Plant.all.collect{ |p| [p.name, p.id] }, settlement.plant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     
     <%= form.submit 'Отправить' %>
   </div>

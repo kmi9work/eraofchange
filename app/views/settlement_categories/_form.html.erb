@@ -1,0 +1,20 @@
+<%= form_with(model: settlement_category) do |form| %>
+  <% if settlement_category.errors.any? %>
+    <div style="color: red">
+      <h2>Всего ошибок: <%= settlement_category.errors.count %>. Категория населенного пункта не сохранена:</h2>
+
+      <ul>
+        <% settlement_category.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <p>Название: <%= form.text_field :name %></p>
+    <p>Населенные пункты: <%= form.select :settlement_ids, options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, 
+    settlement_category.settlement_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <%= form.submit 'Отправить' %>
+  </div>
+<% end %>
