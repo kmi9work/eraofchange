@@ -1,3 +1,3 @@
 class PlantCategory < ApplicationRecord
-	belongs_to :plant, optional: true
+	has_many :plants
 end

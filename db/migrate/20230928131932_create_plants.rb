@@ -2,7 +2,7 @@ class CreatePlants < ActiveRecord::Migration[7.0]
   def change
     create_table :plants do |t|
       t.string :name
-      t.integer :plant_category_id #Антон + seeds.
+      t.integer :plant_category_id
       t.integer :price
       t.integer :level
       t.integer :economic_subject_id

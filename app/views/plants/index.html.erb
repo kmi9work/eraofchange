@@ -18,11 +18,10 @@
      <tr>
       <td><%= plant.id %></th>
       <td><%= link_to plant.name, link %></td>
-      <td><% pl = PlantCategory.find(plant.plant_category_id) %>
-        <%= pl.name %> </td>
+      <td><%= plant.plant_category&.name %> </td>
       <td><%= plant.price %></td>
       <td><%= plant.level %></td>
-      <td> <% if plant.settlement.present? %>
+      <td> <% if plant.settlement.blank? %>
          Не выбран
         <% else %>
          <%= link_to plant.settlement&.name, link %> </td>
