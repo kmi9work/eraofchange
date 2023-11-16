@@ -1,0 +1,37 @@
+<p style="color: green"><%= notice %></p>
+
+<h2>Категории населенных пунктов</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Населенные пункты в категории</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @settlement_categories.each do |settlement_category| %>
+     <% link = "/settlement_categories/#{settlement_category.id}" %>
+     <tr>
+      <td><%= link_to settlement_category.name, link %></td>
+      <td>
+        <% array = settlement_category.settlements.to_a %>
+        <% array.each do |settlement|%>
+         <%= link_to settlement.name, settlement %>
+        <% end -%>
+      </td>
+      <td class="left">
+        <ul>
+          <%= link_to 'Редактировать', edit_settlement_category_path(settlement_category), class: 'btn1'%>
+          <%= button_to 'Удалить', settlement_category_path(settlement_category), method: :delete, class: 'btn2' %>
+        </ul>
+        </td>
+     </tr>
+    <% end -%>
+  </tbody>
+</table>
+
+<hr>
+
+<%= link_to "Добавить категорию населенного пункта", new_settlement_category_path, class: 'btn' %>

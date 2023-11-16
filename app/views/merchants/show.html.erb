@@ -21,22 +21,23 @@
 
 <p>
   Игрок:
-  <% if @merchant.player.blank? %>
+  <% if @merchant.player_id == nil %>
     Купец не отнесен к игроку
   <% else %>
-    <%= link_to @merchant.player&.name, @merchant.player %>
+    <% link_to_player = "/players/#{@merchant.player_id}/" %>
+    <% name_of_player = Player.find(@merchant.player_id).name %>
+    <%= link_to name_of_player, link_to_player %>
   <% end %>
 </p>
-<% link_to_family = "/families/#{@merchant.family_id}" %>
-  
 
 <p>
   <% if @merchant.family_id.blank? %>
     Купец не в семье.
     <%= render "form_family", merchant: @merchant %>
   <% else %>
+    <% link_to_family = "/families/#{@merchant.family_id}" %>
     <% name_of_family = Family.find(@merchant.family_id).name %>
-    Семья:  <%= link_to name_of_family,  link_to_family %>
+    <%= link_to name_of_family,  link_to_family %>
   <% end %>
 </p>
 <hr>

@@ -16,7 +16,7 @@
     <% @plants.each do |plant| %>
      <% link = "/plants/#{plant.id}" %>
      <tr>
-      <td><%= plant.id %></th>
+      <td><%= plant.id %></td>
       <td><%= link_to plant.name, link %></td>
       <td><%= plant.plant_category&.name %> </td>
       <td><%= plant.price %></td>
@@ -24,14 +24,14 @@
       <td> <% if plant.settlement.blank? %>
          Не выбран
         <% else %>
-         <%= link_to plant.settlement&.name, link %> </td>
+         <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
+         <%= link_to plant.settlement&.name, link_to_settlement %>
         <% end -%>
       </td>
       <td class="left">
         <ul>
           <%= link_to 'Редактировать', edit_plant_path(plant), class: 'btn1'%>
           <%= button_to 'Удалить', destroy_plant_path(plant), method: :delete, class: 'btn2'%>
-          
         </ul>
       </td>
      </tr>

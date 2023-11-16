@@ -5,12 +5,12 @@
 # Merchant(id: integer, name: string, plant_id: integer, family_id: integer, guild_id: integer, created_at: datetime, updated_at: datetime)
 
 
-Player.destroy_all
-Merchant.destroy_all
-Family.destroy_all
-Guild.destroy_all
-Plant.destroy_all
-Settlement.destroy_all
+# Player.destroy_all
+# Merchant.destroy_all
+# Family.destroy_all
+# Guild.destroy_all
+# Plant.destroy_all
+# Settlement.destroy_all
 
 Player.create(name: "Жопкин", merchant_id: 1 )
 Player.create(name: "Борис", merchant_id: 2)
@@ -52,14 +52,14 @@ Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type:
 Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
 Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
 
-Plant.create(name: "Рудник") 
-Plant.create(name: "Каменоломня")
-Plant.create(name: "Золотой рудник")
 
-Settlement.create(name: "Москва")
-Settlement.create(name: "Тверь")
-Settlement.create(name: "Рязань")
-Settlement.create(name: "Хатавки")
-Settlement.create(name: "Гадюкино")
-Settlement.create(name: "Холмищи")
+SettlementCategory.create(name: "Город")
+SettlementCategory.create(name: "Деревня")
+
+Settlement.create(name: "Москва", settlement_category_id: 1)
+Settlement.create(name: "Тверь", settlement_category_id: 1)
+Settlement.create(name: "Рязань", settlement_category_id: 1)
+Settlement.create(name: "Хатавки", settlement_category_id: 2)
+Settlement.create(name: "Гадюкино", settlement_category_id: 2)
+Settlement.create(name: "Холмищи", settlement_category_id: 2)
 
