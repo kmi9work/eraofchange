@@ -5,12 +5,12 @@
 # Merchant(id: integer, name: string, plant_id: integer, family_id: integer, guild_id: integer, created_at: datetime, updated_at: datetime)
 
 
-# Player.destroy_all
-# Merchant.destroy_all
-# Family.destroy_all
-# Guild.destroy_all
-# Plant.destroy_all
-# Settlement.destroy_all
+Player.destroy_all
+Merchant.destroy_all
+Family.destroy_all
+Guild.destroy_all
+Plant.destroy_all
+Settlement.destroy_all
 
 Player.create(name: "Жопкин", merchant_id: 1 )
 Player.create(name: "Борис", merchant_id: 2)
@@ -35,21 +35,26 @@ Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
-Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Merchant")
-Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild")
-Plant.create(name: "Пивная", economic_subject_id: 3,economic_subject_type: "Merchant")
-Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild")
-Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant")
-Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild")
+PlantCategory.create(name: "Добывающее")
+PlantCategory.create(name: "Перерабатывающее")
 
-Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Merchant")
-Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild")
-Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Merchant")
-Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild")
-Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant")
-Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild")
+Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+Plant.create(name: "Пивная", economic_subject_id: 3,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
 
+Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
+Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
 
+Plant.create(name: "Рудник") 
+Plant.create(name: "Каменоломня")
+Plant.create(name: "Золотой рудник")
 
 Settlement.create(name: "Москва", category: "Город")
 Settlement.create(name: "Тверь", category: "Город")

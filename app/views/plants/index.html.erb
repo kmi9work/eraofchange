@@ -18,20 +18,21 @@
      <tr>
       <td><%= plant.id %></th>
       <td><%= link_to plant.name, link %></td>
-      <td><%= plant.category %> </td>
+      <td><% pl = PlantCategory.find(plant.plant_category_id) %>
+        <%= pl.name %> </td>
       <td><%= plant.price %></td>
       <td><%= plant.level %></td>
-      <td>
-        <% if plant.settlement == nil %>
+      <td> <% if plant.settlement.present? %>
          Не выбран
         <% else %>
-         <%= link_to plant.settlement&.name, link %>
+         <%= link_to plant.settlement&.name, link %> </td>
         <% end -%>
       </td>
       <td class="left">
         <ul>
           <%= link_to 'Редактировать', edit_plant_path(plant), class: 'btn1'%>
           <%= button_to 'Удалить', destroy_plant_path(plant), method: :delete, class: 'btn2'%>
+          
         </ul>
       </td>
      </tr>
