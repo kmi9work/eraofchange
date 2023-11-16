@@ -14,7 +14,7 @@ class GuildsController < ApplicationController
   end
 
   def edit
-    @merch = Merchant.where(guild_id: nil)
+    @merch = Merchant.where(guild_id: [nil, @guild.id])
   end
 
   def create
