@@ -1,0 +1,11 @@
+<p style="color: green"><%= notice %></p>
+
+<h2><%= @recource.name %></h2>
+<p>Стоимость: <%= @recource.price %></p>
+
+<div>
+  <%= link_to "Редактировать", edit_recource_path(@recource), class: 'btn1' %>
+  <%= button_to "Удалить", @recource, method: :delete, class: 'btn2'  %>
+  <br><br>
+  <%= link_to "Все ресурсы", recources_path, class: 'btn' %>
+</div>

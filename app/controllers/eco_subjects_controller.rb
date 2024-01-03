@@ -35,3 +35,70 @@ class EcoSubjectsController < ApplicationController
   end
 end
 
+
+ 
+def aad(s)
+ s = 1
+ d = 0
+ a = 2 
+ n = 22
+  while(d<n)
+    d+=1
+    s=s*a
+  end 
+   puts s
+end   
+
+d = 0
+  n = 3
+  while(d<n)
+   d+=1
+   puts "--"
+  end 
+
+
+
+def sum
+  d = [ ]
+  arr = [1,2,3]
+  var = [1,2,3]
+  var.each do |i,a|
+   d = i+1
+   puts d
+ end
+end
+
+
+ def sum
+  arr = [1,2,3,4]
+  s = 0
+  arr.each do |i|
+    s=s+i
+  end 
+  puts s 
+ end 
+
+ def sum
+  arr = [1,2,3,4]
+  s = 0
+  for i in  arr do 
+    s=s+i
+  end 
+  puts s 
+ end 
+
+def sum
+  arr = [1,2,3]
+  var = [1,2,3]
+  d = [ ]
+  a = 0
+  b = 0
+  arr.each do |i|
+    a = i
+   end 
+   var.each do |i|
+    b = i
+  end
+  d = arr[a]
+  puts d
+end
