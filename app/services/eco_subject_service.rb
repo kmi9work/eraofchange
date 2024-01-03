@@ -94,4 +94,3 @@ class EcoSubjectService
   end
 
 end
-
