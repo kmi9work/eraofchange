@@ -16,7 +16,7 @@
 
     <p>Категория НП: <%= form.select :settlement_category_id, options_for_select(SettlementCategory.all.collect{ |s| [s.name, s.id] }, settlement.settlement_category_id), {include_blank: true}, class: 'form-select', style: "width: 200px" %></p>
 
-    <p>Предприятия: <%= form.select :plant_ids, options_for_select(Plant.all.collect{ |p| [p.name, p.id] }, settlement.plant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <p>Предприятия: <%= form.select :plant_ids, options_for_select(@plt.collect{ |p| [p.name, p.id] },   settlement.plant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     
     <%= form.submit 'Отправить' %>
   </div>

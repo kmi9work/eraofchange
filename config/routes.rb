@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :plant_types
+  resources :models
   resources :plant_categories
   resources :settlement_categories
   resources :guilds

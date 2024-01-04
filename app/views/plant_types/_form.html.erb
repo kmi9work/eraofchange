@@ -1,0 +1,18 @@
+<%= form_with(model: plant_type) do |form| %>
+  <% if plant_type.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(plant_type.errors.count, "error") %> prohibited this plant_type from being saved:</h2>
+
+      <ul>
+        <% plant_type.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+    <div>
+    <p>Название категории: <%= form.text_field :name %></p>
+    <%= form.submit('Отправить') %>
+  </div>
+<% end %>

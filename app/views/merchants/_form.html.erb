@@ -13,11 +13,15 @@
 
   <div>
     <p>Имя купца: <%= form.text_field :name %></p>
+
+ 
+
+
     
     <p>Игрок: <%= form.select :player_id, options_for_select(Player.all.collect{ |pl| [pl.name, pl.id] },   merchant.player_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
     <p>Гильдия: <%= form.select :guild_id, options_for_select(Guild.all.collect{ |g| [g.name, g.id] },   merchant.guild_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
     
-    <p>Предприятие: <%= form.select :plant_ids, options_for_select(Plant.all.collect{ |p| [p.name, p.id] },   merchant.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <p>Предприятие: <%= form.select :plant_ids, options_for_select(@plt.collect{ |p| [p.name, p.id] },   merchant.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 
     <p>Семья: <%= form.select :family_id, options_for_select(Family.all.collect{ |f| [f.name, f.id] },   merchant.family_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 

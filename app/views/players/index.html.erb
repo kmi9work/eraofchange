@@ -18,7 +18,7 @@
       <td><%= player.id %></td>
       <td><%= link_to player.name, player %></td>
       <td>
-        <% if player.merchant == nil %>
+        <% if player.merchant.blank? %>
          Не выбран
         <% else %>
          <%= link_to player.merchant&.name, link %>

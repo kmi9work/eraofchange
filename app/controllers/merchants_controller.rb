@@ -1,3 +1,4 @@
+
 class MerchantsController < ApplicationController
   before_action :set_merchant, only: %i[ show edit update destroy ]
 
@@ -10,10 +11,13 @@ class MerchantsController < ApplicationController
 
   def new
     @merchant = Merchant.new
+    @plt = Plant.where(economic_subject_id: nil)
   end
 
   def edit
+    @plt = Plant.where(economic_subject_id: [nil, @merchant.id]) 
   end
+
 
   def create
     @merchant = Merchant.new(merchant_params)
