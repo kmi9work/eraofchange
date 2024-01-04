@@ -1,9 +1,0 @@
-<p><%= @facility&.name %> - <%= @facility&.category %> -  <%= @facility&.price %> - <%= @facility&.level %> - <%= @facility&.location %>
-	
-</p>
-
-<%= link_to 'Редактировать', edit_facility_path(@facility&.id) %>
-<br>
-<%= link_to 'Удалить', destroy_facility_path(@facility.id)%>
-<br>
-<%= link_to 'Вернуться к предприятиям', facilities_path %>

@@ -12,17 +12,25 @@
   <% end %>
 
     <div>
-      <p>Название: <%= form.text_field :name %></p>
-      <p>Категория: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |s| [s.name, s.id] }, plant.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
-      <p>Цена: <%= form.text_field :price %></p>
-      <p>Уровень: <%= form.text_field :level %></p>
-      <p>Населенный пункт: <%= form.select :settlement_id, options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, plant.settlement_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
-  
-      <% es_with_types = (Guild.all + Merchant.all).collect{ |e| [e.name, "#{e.id}_#{e.class}"] } %>
+      <p>Название: <% form.text_field :name %></p>
+      <p>Тип: <%= form.select :plant_type_id, options_for_select(PlantType.all.collect{ |pt| [pt.name, pt.id] }, plant.plant_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
+        <% es_with_types = (Guild.all + Merchant.all).collect{ |e| [e.name, "#{e.id}_#{e.class}"] } %>
       <p>
-        Передать гильдии/купцу: <%= form.select :economic_subject, options_for_select(es_with_types), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+        Владелец: <%= form.select :economic_subject, options_for_select(es_with_types), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+
+
+      <p>Населенный пункт: <%= form.select :settlement_id, options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, plant.settlement_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+      <p>Уровень: <%= form.text_field :level %></p>
+
+
       </p>
+
+      <p>Категория: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |s| [s.name, s.id] }, plant.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+     
+    
+  
+    
       
       <%= form.submit ('Отправить') %>
   

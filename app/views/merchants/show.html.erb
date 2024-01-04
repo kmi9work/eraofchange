@@ -21,7 +21,7 @@
 
 <p>
   Игрок:
-  <% if @merchant.player_id == nil %>
+  <% if @merchant.player_id.blank? %>
     Купец не отнесен к игроку
   <% else %>
     <% link_to_player = "/players/#{@merchant.player_id}/" %>

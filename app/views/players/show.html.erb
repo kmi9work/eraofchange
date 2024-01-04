@@ -2,7 +2,7 @@
 
 <h2>Имя игрока: <%= @player.name %></h2>
 
-<% if @player.merchant_id == nil%>
+<% if @player.merchant_id.blank?%>
  <p>Купец: не назначен</p>
 <% else %>
  <% link_to_merchant = "/merchants/#{@player.merchant.id}/" %>

@@ -1,9 +1,0 @@
-<h2>Экономические субъекты (EcoSubjects) (<%= @count %>)</h2>
-<% @eco_subjects. each do |eco_subject| %>
-  <% link = "/eco_subjects/#{eco_subject.id}" %>
-  <p><%= link_to eco_subject.name, link %> - <%= eco_subject.category %> - <%= eco_subject.money %></p>
-<% end -%>
-
-<p><%= link_to 'Создать экономический субъект', new_eco_subject_path %></p>
-
-<p><%= link_to 'Вернуться на главную', root_path %></p>

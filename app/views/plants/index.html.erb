@@ -1,5 +1,7 @@
 <h1>Предприятия</h1>
 
+
+
 <table>
   <thead>
     <tr>
@@ -17,12 +19,20 @@
      <% link = "/plants/#{plant.id}" %>
      <tr>
       <td><%= plant.id %></td>
-      <td><%= link_to plant.name, link %></td>
+          <% if plant.economic_subject_type == "Guild" %>
+          <% proprietor = "гильдии" %>
+          <% else %>
+          <% proprietor = "купца" %>
+          <% end  %>
+      <td>
+        <% name_of_plant = "#{plant.plant_type&.name}" + " #{proprietor}" + " #{plant.economic_subject&.name}" %> 
+          <%= link_to name_of_plant, link %>
+      </td>
       <td><%= plant.plant_category&.name %> </td>
-      <td><%= plant.price %></td>
+      <td><%#= plant.price %></td>
       <td><%= plant.level %></td>
       <td> <% if plant.settlement.blank? %>
-         Не выбран
+         Не выбран (сделать partial)
         <% else %>
          <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
          <%= link_to plant.settlement&.name, link_to_settlement %>

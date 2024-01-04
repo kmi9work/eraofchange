@@ -4,7 +4,7 @@
 
 <p>
 Категория населеннного пункта: 
-<% if @settlement.settlement_category_id == nil %>
+<% if @settlement.settlement_category_id.blank? %>
  не выбрана
 <% else %>
  <% link_to_settlement_category = "/settlement_categories/#{@settlement.settlement_category.id}" %>
