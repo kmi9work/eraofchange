@@ -37,7 +37,7 @@ class GuildsController < ApplicationController
   def destroy
     @guild.destroy
 
-    redirect_to guilds_url, notice: "Запись успешно удалена."
+    redirect_to guilds_url, notice: "Запись успешно удалена.//"
   end
 
   private
