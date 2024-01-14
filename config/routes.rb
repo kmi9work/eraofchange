@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :recources
+  resources :resources
   resources :plant_categories
   resources :settlement_categories
   resources :guilds

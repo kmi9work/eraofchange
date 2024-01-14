@@ -1,2 +1,0 @@
-class Recource < ApplicationRecord
-end

@@ -58,7 +58,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_20_214007) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "recources", force: :cascade do |t|
+  create_table "resources", force: :cascade do |t|
     t.string "name"
     t.integer "price"
     t.datetime "created_at", null: false

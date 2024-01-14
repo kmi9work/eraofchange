@@ -1,10 +1,10 @@
-<%= form_with(model: recource) do |form| %>
-  <% if recource.errors.any? %>
+<%= form_with(model: resource) do |form| %>
+  <% if resource.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(recource.errors.count, "error") %> prohibited this recource from being saved:</h2>
+      <h2><%= pluralize(resource.errors.count, "error") %> prohibited this resource from being saved:</h2>
 
       <ul>
-        <% recource.errors.each do |error| %>
+        <% resource.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
       </ul>

@@ -32,7 +32,7 @@
     <tr>
       <td>Не выбрана категория</td>
       <td>
-        <% @settl.each do |settlement|%>
+        <% @settlements_without_category.each do |settlement|%>
          <% link_to_settlement = "/settlements/#{settlement.id}" %>
          <%= link_to settlement&.name, link_to_settlement %>
         <% end -%>
