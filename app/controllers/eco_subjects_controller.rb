@@ -34,4 +34,3 @@ class EcoSubjectsController < ApplicationController
     redirect_to('/eco_subjects')
   end
 end
-

@@ -29,6 +29,15 @@
         </td>
      </tr>
     <% end -%>
+    <tr>
+      <td>Не выбрана категория</td>
+      <td>
+        <% @settlements_without_category.each do |settlement|%>
+         <% link_to_settlement = "/settlements/#{settlement.id}" %>
+         <%= link_to settlement&.name, link_to_settlement %>
+        <% end -%>
+      </td>
+    </tr>
   </tbody>
 </table>
 
