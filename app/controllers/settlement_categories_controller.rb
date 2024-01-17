@@ -3,6 +3,7 @@ class SettlementCategoriesController < ApplicationController
 
   def index
     @settlement_categories = SettlementCategory.all
+    @settlements_without_category = Settlement.where(settlement_category_id: nil)
   end
 
   def show
