@@ -10,7 +10,7 @@ class SettlementsController < ApplicationController
 
   def new
     @settlement = Settlement.new
-    @plt = Plant.where(settlement_id: nil)
+    @plts = Plant.where(settlement_id: nil)
   end
 
   def create
@@ -23,7 +23,7 @@ class SettlementsController < ApplicationController
   end
 
   def edit
-    @plt = Plant.where(settlement_id: [nil, @settlement.id])
+    @plts = Plant.where(settlement_id: [nil, @settlement.id])
   end
 
   def update

@@ -11,7 +11,7 @@ class PlantsController < ApplicationController
   def new
     @plant = Plant.new
   end
-    
+
   def edit
   end
 

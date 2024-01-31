@@ -1,15 +1,6 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Название: <%= @plant.plant_type.name %>   
-
- <% if @plant.economic_subject_type == "Guild" %> 
- <%= "гильдии" %>  
- <%else %>
- <%= "купца" %>
- <%end %>
-
- <%= @plant.economic_subject&.name%>
-</h2>
+<h2>Название: <%=  @plant.name_of_plant %></h2>
 
 <p> Категория: <%= @plant.plant_category.name %></p>
 

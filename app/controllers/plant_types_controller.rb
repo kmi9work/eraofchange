@@ -1,7 +1,7 @@
 class PlantTypesController < ApplicationController
   before_action :set_plant_type, only: %i[ show edit update destroy ]
 
-    def index
+  def index
     @plant_types = PlantType.all
   end
 
