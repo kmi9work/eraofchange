@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @credit %>
+
+<div>
+  <%= link_to "Edit this credit", edit_credit_path(@credit) %> |
+  <%= link_to "Back to credits", credits_path %>
+
+  <%= button_to "Destroy this credit", @credit, method: :delete %>
+</div>

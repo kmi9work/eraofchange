@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  troop_type: one
+  is_hired: false
+  army: one
+
+two:
+  troop_type: two
+  is_hired: false
+  army: two

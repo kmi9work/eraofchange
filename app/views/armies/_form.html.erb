@@ -1,0 +1,32 @@
+<%= form_with(model: army) do |form| %>
+  <% if army.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(army.errors.count, "error") %> prohibited this army from being saved:</h2>
+
+      <ul>
+        <% army.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :region_id, style: "display: block" %>
+    <%= form.text_field :region_id %>
+  </div>
+
+  <div>
+    <%= form.label :player_id, style: "display: block" %>
+    <%= form.text_field :player_id %>
+  </div>
+
+  <div>
+    <%= form.label :army_size_id, style: "display: block" %>
+    <%= form.text_field :army_size_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

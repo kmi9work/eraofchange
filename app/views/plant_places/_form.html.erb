@@ -1,0 +1,27 @@
+<%= form_with(model: plant_place) do |form| %>
+  <% if plant_place.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(plant_place.errors.count, "error") %> prohibited this plant_place from being saved:</h2>
+
+      <ul>
+        <% plant_place.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, style: "display: block" %>
+    <%= form.text_field :title %>
+  </div>
+
+  <div>
+    <%= form.label :plant_place_type, style: "display: block" %>
+    <%= form.text_field :plant_place_type %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @ideologist_type %>
+
+<div>
+  <%= link_to "Edit this ideologist type", edit_ideologist_type_path(@ideologist_type) %> |
+  <%= link_to "Back to ideologist types", ideologist_types_path %>
+
+  <%= button_to "Destroy this ideologist type", @ideologist_type, method: :delete %>
+</div>

@@ -80,3 +80,6 @@ Settlement.create(name: "Хатавки", settlement_category_id: 2)
 Settlement.create(name: "Гадюкино", settlement_category_id: 2)
 Settlement.create(name: "Холмищи", settlement_category_id: 2)
 
+Resource.create(name: "Бревна", price: "1")
+Resource.create(name: "Руда", price: "100")
+Resource.create(name: "Зерно", price: "10")

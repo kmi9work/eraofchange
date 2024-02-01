@@ -1,0 +1,32 @@
+<%= form_with(model: troop) do |form| %>
+  <% if troop.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(troop.errors.count, "error") %> prohibited this troop from being saved:</h2>
+
+      <ul>
+        <% troop.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :troop_type_id, style: "display: block" %>
+    <%= form.text_field :troop_type_id %>
+  </div>
+
+  <div>
+    <%= form.label :is_hired, style: "display: block" %>
+    <%= form.check_box :is_hired %>
+  </div>
+
+  <div>
+    <%= form.label :army_id, style: "display: block" %>
+    <%= form.text_field :army_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @fossil_type %>
+
+<div>
+  <%= link_to "Edit this fossil type", edit_fossil_type_path(@fossil_type) %> |
+  <%= link_to "Back to fossil types", fossil_types_path %>
+
+  <%= button_to "Destroy this fossil type", @fossil_type, method: :delete %>
+</div>

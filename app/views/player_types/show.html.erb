@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @player_type %>
+
+<div>
+  <%= link_to "Edit this player type", edit_player_type_path(@player_type) %> |
+  <%= link_to "Back to player types", player_types_path %>
+
+  <%= button_to "Destroy this player type", @player_type, method: :delete %>
+</div>

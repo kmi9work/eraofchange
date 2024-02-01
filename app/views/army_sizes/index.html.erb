@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Army sizes</h1>
+
+<div id="army_sizes">
+  <% @army_sizes.each do |army_size| %>
+    <%= render army_size %>
+    <p>
+      <%= link_to "Show this army size", army_size %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New army size", new_army_size_path %>

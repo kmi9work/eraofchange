@@ -1,0 +1,2 @@
+module BuildingPlacesHelper
+end

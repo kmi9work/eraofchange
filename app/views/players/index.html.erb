@@ -21,7 +21,8 @@
         <% if player.merchant.blank? %>
          Не выбран
         <% else %>
-         <%= link_to player.merchant&.name, link %>
+         <% link_to_merchant = "/merchants/#{player.merchant.id}" %>
+         <%= link_to player.merchant&.name, link_to_merchant %>
         <% end -%>
       </td>
       <td class="left">

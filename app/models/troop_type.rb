@@ -1,0 +1,2 @@
+class TroopType < ApplicationRecord
+end

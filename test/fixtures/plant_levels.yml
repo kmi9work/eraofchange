@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  level: 1
+  deposit: 1
+  charge: 1
+  formula: 
+  price: 
+  max_product: 1
+
+two:
+  level: 1
+  deposit: 1
+  charge: 1
+  formula: 
+  price: 
+  max_product: 1

@@ -1,0 +1,2 @@
+class FossilType < ApplicationRecord
+end

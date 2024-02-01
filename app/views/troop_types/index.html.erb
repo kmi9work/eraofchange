@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Troop types</h1>
+
+<div id="troop_types">
+  <% @troop_types.each do |troop_type| %>
+    <%= render troop_type %>
+    <p>
+      <%= link_to "Show this troop type", troop_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New troop type", new_troop_type_path %>

@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Building types</h1>
+
+<div id="building_types">
+  <% @building_types.each do |building_type| %>
+    <%= render building_type %>
+    <p>
+      <%= link_to "Show this building type", building_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New building type", new_building_type_path %>
