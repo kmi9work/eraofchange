@@ -22,13 +22,14 @@
         Владелец: <%= form.select :economic_subject, options_for_select(es_with_types), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
       </p>
 
-
       <p>
         Населенный пункт: <%= form.select :settlement_id, options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, plant.settlement_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
       </p>
       <p>Уровень: <%= form.text_field :level %></p>
 
-      <p>Категория: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |s| [s.name, s.id] }, plant.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+      <p>
+        Категория: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |s| [s.name, s.id] }, plant.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+      </p>
       
       <%= form.submit ('Отправить') %>
   
