@@ -1,13 +1,13 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Название: <%= @plant.name %></h2>
+<h2>Название: <%=  @plant.name_of_plant %></h2>
 
-<p> Категория: </p>
-<p> Цена: <%= @plant.price %> </p>
+<p> Категория: <%= @plant.plant_category.name %></p>
+
 <p> Уровень: <%= @plant.level %> </p>
 <p>
 Населенный пункт:
-<% if @plant.settlement_id == nil %>
+<% if @plant.settlement_id.blank? %>
  не выбран
 <% else %>
  <% link_to_settlement = "/settlements/#{@plant.settlement.id}" %>

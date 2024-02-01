@@ -162,6 +162,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "plant_types", force: :cascade do |t|
+    t.string "name"
+    t.integer "plant_category_id"
+    t.integer "plant_yield"
+    t.integer "resources_id"
+    t.integer "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "plant_category_id"

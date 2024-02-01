@@ -10,9 +10,11 @@ class FamiliesController < ApplicationController
 
   def new
     @family = Family.new
+    @guildless_merchants = Merchant.where(guild_id: nil)
   end
 
   def edit
+    @guildless_merchants = Merchant.where(guild_id: [nil, @family.id])
   end
 
   def create

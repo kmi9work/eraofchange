@@ -1,0 +1,34 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Тип предприятия</h1>
+<%= link_to "Создать новый тип предприятия", new_plant_type_path %>
+<table>
+  <thead>
+    <tr>
+      <th>№</th>
+      <th>Предприятие</th>
+      <th>Категория</th>
+      <th>Производительность</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+<div id="plant_types">
+  <% @plant_types.each do |plant_type| %>
+    <tr>
+    <td><%= plant_type.id %></td>
+    <td><%= link_to plant_type.name, plant_type %></td>
+    <td> Производительность </th>
+    <td> Производительность </th>
+    <td>   
+      <%= link_to 'Редактировать', edit_plant_type_path(plant_type), class: 'btn1' %>
+      <%= button_to 'Удалить', plant_type_path(plant_type), method: :delete, class: 'btn2' %>
+    </td>
+    <p>
+  </p>
+  <% end -%>
+</div>
+
+
+
+

@@ -18,7 +18,7 @@
       <td scope="row"><%= family.id %></td>
       <td><%= link_to family.name, link %></td>
       <td>
-        <% if family.merchant_ids == blank? %>
+        <% if family.merchant_ids.blank? %>
          Не выбран
         <% else %>
          <% array = family.merchants.to_a %>

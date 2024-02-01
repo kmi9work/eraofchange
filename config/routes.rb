@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :political_actions
   resources :political_action_types
   resources :resources
+  resources :plant_types
   resources :plant_categories
   resources :settlement_categories
   resources :guilds

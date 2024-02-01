@@ -1,12 +1,10 @@
 <h1>Предприятия</h1>
-
 <table>
   <thead>
     <tr>
       <th>№</th>
       <th>Предприятие</th>
       <th>Категория</th>
-      <th>Цена</th>
       <th>Уровень</th>
       <th>Населенный пункт</th>
       <th>Действия</th>
@@ -17,15 +15,15 @@
      <% link = "/plants/#{plant.id}" %>
      <tr>
       <td><%= plant.id %></td>
-      <td><%= link_to plant.name, link %></td>
-      <td><%= plant.plant_category&.name %> </td>
-      <td><%= plant.price %></td>
+      <td><%= link_to plant.name_of_plant, link %></td>
+      <td><%= plant.plant_category&.name %></td>
       <td><%= plant.level %></td>
-      <td> <% if plant.settlement.blank? %>
-         Не выбран
+      <td>
+        <% if plant.settlement.blank? %>
+          Не выбран
         <% else %>
-         <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
-         <%= link_to plant.settlement&.name, link_to_settlement %>
+          <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
+          <%= link_to plant.settlement&.name, link_to_settlement %>
         <% end -%>
       </td>
       <td class="left">
