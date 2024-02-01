@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @building_type %>
+
+<div>
+  <%= link_to "Edit this building type", edit_building_type_path(@building_type) %> |
+  <%= link_to "Back to building types", building_types_path %>
+
+  <%= button_to "Destroy this building type", @building_type, method: :delete %>
+</div>

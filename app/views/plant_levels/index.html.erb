@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Plant levels</h1>
+
+<div id="plant_levels">
+  <% @plant_levels.each do |plant_level| %>
+    <%= render plant_level %>
+    <p>
+      <%= link_to "Show this plant level", plant_level %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New plant level", new_plant_level_path %>

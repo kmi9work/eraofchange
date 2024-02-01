@@ -1,0 +1,37 @@
+<%= form_with(model: building) do |form| %>
+  <% if building.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(building.errors.count, "error") %> prohibited this building from being saved:</h2>
+
+      <ul>
+        <% building.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :comment, style: "display: block" %>
+    <%= form.text_field :comment %>
+  </div>
+
+  <div>
+    <%= form.label :params, style: "display: block" %>
+    <%= form.text_field :params %>
+  </div>
+
+  <div>
+    <%= form.label :building_level_id, style: "display: block" %>
+    <%= form.text_field :building_level_id %>
+  </div>
+
+  <div>
+    <%= form.label :settlement_id, style: "display: block" %>
+    <%= form.text_field :settlement_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

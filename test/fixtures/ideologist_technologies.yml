@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  requirements: 
+  params: 
+  ideologist_type: one
+
+two:
+  title: MyString
+  requirements: 
+  params: 
+  ideologist_type: two

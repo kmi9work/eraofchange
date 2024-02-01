@@ -1,4 +1,25 @@
 Rails.application.routes.draw do
+  resources :credits
+  resources :troops
+  resources :armies
+  resources :army_sizes
+  resources :troop_types
+  resources :plant_places
+  resources :fossil_types
+  resources :regions
+  resources :countries
+  resources :buildings
+  resources :building_levels
+  resources :building_types
+  resources :building_places
+  resources :plant_levels
+  resources :jobs
+  resources :humen
+  resources :player_types
+  resources :ideologist_types
+  resources :ideologist_technologies
+  resources :political_actions
+  resources :political_action_types
   resources :resources
   resources :plant_categories
   resources :settlement_categories

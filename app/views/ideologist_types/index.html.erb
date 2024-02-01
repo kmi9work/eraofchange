@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Ideologist types</h1>
+
+<div id="ideologist_types">
+  <% @ideologist_types.each do |ideologist_type| %>
+    <%= render ideologist_type %>
+    <p>
+      <%= link_to "Show this ideologist type", ideologist_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New ideologist type", new_ideologist_type_path %>

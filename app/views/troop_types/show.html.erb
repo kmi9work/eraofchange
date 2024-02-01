@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @troop_type %>
+
+<div>
+  <%= link_to "Edit this troop type", edit_troop_type_path(@troop_type) %> |
+  <%= link_to "Back to troop types", troop_types_path %>
+
+  <%= button_to "Destroy this troop type", @troop_type, method: :delete %>
+</div>

@@ -1,0 +1,2 @@
+module FossilTypesHelper
+end

@@ -1,0 +1,2 @@
+class BuildingPlace < ApplicationRecord
+end

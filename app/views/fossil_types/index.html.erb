@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Fossil types</h1>
+
+<div id="fossil_types">
+  <% @fossil_types.each do |fossil_type| %>
+    <%= render fossil_type %>
+    <p>
+      <%= link_to "Show this fossil type", fossil_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New fossil type", new_fossil_type_path %>

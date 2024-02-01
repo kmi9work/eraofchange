@@ -1,0 +1,2 @@
+class ArmySize < ApplicationRecord
+end

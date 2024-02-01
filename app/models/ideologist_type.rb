@@ -1,0 +1,2 @@
+class IdeologistType < ApplicationRecord
+end

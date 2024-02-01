@@ -1,0 +1,47 @@
+<%= form_with(model: plant_level) do |form| %>
+  <% if plant_level.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(plant_level.errors.count, "error") %> prohibited this plant_level from being saved:</h2>
+
+      <ul>
+        <% plant_level.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :level, style: "display: block" %>
+    <%= form.number_field :level %>
+  </div>
+
+  <div>
+    <%= form.label :deposit, style: "display: block" %>
+    <%= form.number_field :deposit %>
+  </div>
+
+  <div>
+    <%= form.label :charge, style: "display: block" %>
+    <%= form.number_field :charge %>
+  </div>
+
+  <div>
+    <%= form.label :formula, style: "display: block" %>
+    <%= form.text_field :formula %>
+  </div>
+
+  <div>
+    <%= form.label :price, style: "display: block" %>
+    <%= form.text_field :price %>
+  </div>
+
+  <div>
+    <%= form.label :max_product, style: "display: block" %>
+    <%= form.number_field :max_product %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

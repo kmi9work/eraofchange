@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @troop %>
+
+<div>
+  <%= link_to "Edit this troop", edit_troop_path(@troop) %> |
+  <%= link_to "Back to troops", troops_path %>
+
+  <%= button_to "Destroy this troop", @troop, method: :delete %>
+</div>

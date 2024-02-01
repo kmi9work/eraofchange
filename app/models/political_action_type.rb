@@ -1,0 +1,2 @@
+class PoliticalActionType < ApplicationRecord
+end

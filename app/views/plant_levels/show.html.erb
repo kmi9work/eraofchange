@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @plant_level %>
+
+<div>
+  <%= link_to "Edit this plant level", edit_plant_level_path(@plant_level) %> |
+  <%= link_to "Back to plant levels", plant_levels_path %>
+
+  <%= button_to "Destroy this plant level", @plant_level, method: :delete %>
+</div>

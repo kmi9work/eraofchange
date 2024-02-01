@@ -1,0 +1,2 @@
+module ArmySizesHelper
+end
