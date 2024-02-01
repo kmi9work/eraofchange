@@ -11,11 +11,11 @@ class MerchantsController < ApplicationController
 
   def new
     @merchant = Merchant.new
-    @plts = Plant.where(economic_subject_id: nil)
+    @ownerless_plants = Plant.where(economic_subject_id: nil)
   end
 
   def edit
-    @plts = Plant.where(economic_subject_id: [nil, @merchant.id]) 
+    @ownerless_plants = Plant.where(economic_subject_id: [nil, @merchant.id])
   end
 
   def create

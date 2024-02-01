@@ -15,7 +15,7 @@
 
 
     <p>Название: <%= form.text_field :name %></p>
-    <p>Купцы: <%= form.select :merchant_ids, (@merches.collect{ |s| [s.name, s.id] }, , family.merchant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <p>Купцы: <%= form.select :merchant_ids, (@guildless_merchants.collect{ |s| [s.name, s.id] }, , family.merchant_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     <%= form.submit "Отправить" %>
   </div>
 <% end %>

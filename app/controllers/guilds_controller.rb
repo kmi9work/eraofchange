@@ -10,13 +10,13 @@ class GuildsController < ApplicationController
 
   def new
     @guild = Guild.new
-    @merches = Merchant.where(guild_id: nil)
-    @plts = Plant.where(economic_subject_id: nil)
+    @guildless_merchants = Merchant.where(guild_id: nil)
+    @ownerless_plants = Plant.where(economic_subject_id: nil)
   end
 
   def edit
-    @merches = Merchant.where(guild_id: [nil, @guild.id])
-    @plts = Plant.where(economic_subject_id: [nil, @guild.id]) 
+    @guildless_merchants = Merchant.where(guild_id: [nil, @guild.id])
+    @ownerless_plants = Plant.where(economic_subject_id: [nil, @guild.id])
   end
 
   def create
