@@ -11,20 +11,20 @@
     </tr>
   </thead>
   <tbody>
-    <% @settlement_categories.each do |settlement_category| %>
-     <% link = "/settlement_categories/#{settlement_category.id}" %>
+    <% @settlement_types.each do |settlement_type| %>
+     <% link = "/settlement_types/#{settlement_type.id}" %>
      <tr>
-      <td><%= link_to settlement_category.name, link %></td>
+      <td><%= link_to settlement_type.name, link %></td>
       <td>
-        <% array = settlement_category.settlements.to_a %>
+        <% array = settlement_type.settlements.to_a %>
         <% array.each do |settlement|%>
          <%= link_to settlement.name, settlement %>
         <% end -%>
       </td>
       <td class="left">
         <ul>
-          <%= link_to 'Редактировать', edit_settlement_category_path(settlement_category), class: 'btn1'%>
-          <%= button_to 'Удалить', settlement_category_path(settlement_category), method: :delete, class: 'btn2' %>
+          <%= link_to 'Редактировать', edit_settlement_type_path(settlement_type), class: 'btn1'%>
+          <%= button_to 'Удалить', settlement_type_path(settlement_type), method: :delete, class: 'btn2' %>
         </ul>
         </td>
      </tr>
@@ -43,4 +43,4 @@
 
 <hr>
 
-<%= link_to "Добавить категорию населенного пункта", new_settlement_category_path, class: 'btn' %>
+<%= link_to "Добавить категорию населенного пункта", new_settlement_type_path, class: 'btn' %>

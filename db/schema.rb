@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
+ActiveRecord::Schema[7.0].define(version: 2024_02_20_175008) do
   create_table "armies", force: :cascade do |t|
     t.integer "region_id", null: false
     t.integer "player_id", null: false
@@ -175,7 +175,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
   create_table "plants", force: :cascade do |t|
     t.string "name"
     t.integer "plant_category_id"
-    t.integer "price"
+    t.integer "plant_type_id"
     t.integer "level"
     t.integer "economic_subject_id"
     t.string "economic_subject_type"
@@ -186,15 +186,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
 
   create_table "player_types", force: :cascade do |t|
     t.string "title"
-    t.integer "ideologist_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["ideologist_type_id"], name: "index_player_types_on_ideologist_type_id"
   end
 
   create_table "players", force: :cascade do |t|
     t.string "name"
-    t.integer "merchant_id"
+    t.integer "human_id"
+    t.integer "plant_id"
+    t.integer "player_type_id"
+    t.integer "settlement_id"
+    t.integer "credit_id"
+    t.integer "army_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -233,7 +236,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "settlement_categories", force: :cascade do |t|
+  create_table "settlement_types", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -241,7 +244,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
 
   create_table "settlements", force: :cascade do |t|
     t.string "name"
-    t.integer "settlement_category_id"
+    t.integer "settlement_type_id"
+    t.integer "region_id"
+    t.integer "player_id"
+    t.integer "plant_place_id"
+    t.integer "building_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -270,7 +277,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
   add_foreign_key "buildings", "building_levels"
   add_foreign_key "buildings", "settlements"
   add_foreign_key "ideologist_technologies", "ideologist_types"
-  add_foreign_key "player_types", "ideologist_types"
   add_foreign_key "political_actions", "players"
   add_foreign_key "political_actions", "political_action_types"
   add_foreign_key "troops", "armies"

@@ -18,11 +18,11 @@
       <td><%= player.id %></td>
       <td><%= link_to player.name, player %></td>
       <td>
-        <% if player.merchant.blank? %>
+        <% if player.player_type_id.blank? %>
          Не выбран
         <% else %>
-         <% link_to_merchant = "/merchants/#{player.merchant.id}" %>
-         <%= link_to player.merchant&.name, link_to_merchant %>
+         <% #link_to_player_type_id = "/merchants/#{player.merchant.id}" %>
+         <%= player.player_type&.title%>
         <% end -%>
       </td>
       <td class="left">

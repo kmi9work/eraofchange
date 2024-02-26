@@ -2,7 +2,14 @@ class CreatePlayers < ActiveRecord::Migration[7.0]
   def change
     create_table :players do |t|
       t.string :name
-      t.integer :merchant_id
+      t.integer :human_id
+      t.integer :plant_id
+      t.integer :player_type_id
+      t.integer :settlement_id
+      t.integer :credit_id
+      t.integer :army_id
+      t.integer :political_action
+
       t.timestamps
     end
   end

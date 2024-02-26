@@ -4,20 +4,20 @@
 
 <p>
 Категория населеннного пункта: 
-<% if @settlement.settlement_category_id.blank? %>
+<% if @settlement.settlement_type_id.blank? %>
  не выбрана
 <% else %>
- <% link_to_settlement_category = "/settlement_categories/#{@settlement.settlement_category.id}" %>
- <%= link_to @settlement.settlement_category.name, link_to_settlement_category %>
+ <% link_to_settlement_type = "/settlement_types/#{@settlement.settlement_type.id}" %>
+ <%= link_to @settlement.settlement_type.name, link_to_settlement_type %>
 <% end -%>
 </p>
 
 <p>
 Предприятия в городе:<br>
  <ul>
-  <% @settlement.plants.each do |plant| %>
-  <li><%= link_to plant.name, plant %></li>
-  <% end -%>
+  <%# @settlement.plant_places.each do |plant| %>
+  <li><%#= link_to plant.name, plant %></li>
+  <%# end -%>
  </ul>
 </p>
 
