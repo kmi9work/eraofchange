@@ -165,21 +165,25 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
   create_table "plant_types", force: :cascade do |t|
     t.string "name"
     t.integer "plant_category_id"
+    t.integer "fossil_type_id"
     t.integer "plant_yield"
     t.integer "resources_id"
-    t.integer "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "plants", force: :cascade do |t|
-    t.string "name"
+    t.string "comments"
+    t.integer "player_id"
+    t.integer "guild_id"
+    t.integer "plant_level_id"
     t.integer "plant_category_id"
-    t.integer "price"
-    t.integer "level"
+    t.integer "plant_type_id"
+    t.integer "plant_place_id"
     t.integer "economic_subject_id"
     t.string "economic_subject_type"
     t.integer "settlement_id"
+    t.integer "recource_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -194,7 +198,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
 
   create_table "players", force: :cascade do |t|
     t.string "name"
-    t.integer "merchant_id"
+    t.integer "family_id"
+    t.integer "guild_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

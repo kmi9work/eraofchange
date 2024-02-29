@@ -4,7 +4,7 @@
 
 <p> Категория: <%= @plant.plant_category.name %></p>
 
-<p> Уровень: <%= @plant.level %> </p>
+<p> Уровень: <%= @plant.plant_level %> </p>
 <p>
 Населенный пункт:
 <% if @plant.settlement_id.blank? %>
@@ -15,7 +15,7 @@
 <% end -%>
 </p>
 
-<p> Гильдия/купец: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %> </p>
+<p> Гильдия/игровой персонаж: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %> </p>
 
 <hr>
 

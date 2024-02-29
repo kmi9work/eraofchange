@@ -1,5 +1,5 @@
 class Family < ApplicationRecord
-  has_many :merchants
+  has_many :players
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
 end

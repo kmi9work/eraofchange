@@ -7,7 +7,7 @@
     <tr>
       <th>№</th>
       <th>Имя игрока</th>
-      <th>Купец</th>
+      <th>Семья</th>
       <th>Действия</th>
     </tr>
   </thead>
@@ -18,11 +18,11 @@
       <td><%= player.id %></td>
       <td><%= link_to player.name, player %></td>
       <td>
-        <% if player.merchant.blank? %>
-         Не выбран
+        <% if player.family.blank? %>
+         Не выбрана
         <% else %>
-         <% link_to_merchant = "/merchants/#{player.merchant.id}" %>
-         <%= link_to player.merchant&.name, link_to_merchant %>
+         <% link_to_family = "/families/#{player.family.id}" %>
+         <%= link_to player.family&.name, link_to_family %>
         <% end -%>
       </td>
       <td class="left">

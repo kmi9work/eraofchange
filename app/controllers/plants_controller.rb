@@ -48,7 +48,7 @@ class PlantsController < ApplicationController
 
       # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:name, :level, :settlement_id, :plant_category_id, :plant_type_id)
+      params.require(:plant).permit(:guild_id, :player_id, :plant_level_id, :plant_category_id, :plant_place_id)
     end
 
     def write_economic_subject

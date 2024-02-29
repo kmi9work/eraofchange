@@ -10,11 +10,9 @@ class FamiliesController < ApplicationController
 
   def new
     @family = Family.new
-    @guildless_merchants = Merchant.where(guild_id: nil)
   end
 
   def edit
-    @guildless_merchants = Merchant.where(guild_id: [nil, @family.id])
   end
 
   def create
@@ -45,6 +43,6 @@ class FamiliesController < ApplicationController
     end
 
     def family_params
-      params.require(:family).permit(:name, :merchant_ids => [])
+      params.require(:family).permit(:name, :player_ids => [])
     end
 end

@@ -2,11 +2,11 @@
 
 <h2>Имя игрока: <%= @player.name %></h2>
 
-<% if @player.merchant_id.blank?%>
- <p>Купец: не назначен</p>
+<% if @player.family_id.blank?%>
+ <p>Семья не выбрана</p>
 <% else %>
- <% link_to_merchant = "/merchants/#{@player.merchant.id}/" %>
- <p>Купец: <%= link_to @player.merchant.name, link_to_merchant %></p>
+ <% link_to_family = "/families/#{@player.family.id}/" %>
+ <p>Семья: <%= link_to @player.family.name, link_to_family %></p>
 <% end %>
 
 <hr>

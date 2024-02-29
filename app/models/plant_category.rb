@@ -1,3 +1,3 @@
 class PlantCategory < ApplicationRecord
-	has_many :plants
+	has_many :plant_types
 end

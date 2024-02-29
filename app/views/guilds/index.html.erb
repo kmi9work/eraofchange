@@ -6,7 +6,9 @@
   <thead>
     <tr>
       <th>Название</th>
-      <th>Действие</th>
+      <th>Игровые персонажи в гильдии</th>
+      <th>Предприятия в гильдии</th>
+      <th>Действия</th>
     </tr>
   </thead>
   <tbody>
@@ -14,6 +16,25 @@
       <% link = "/guilds/#{guild.id}" %>
       <tr>
         <td><%= link_to guild.name, link %></td>
+        <td> <% if guild.player_ids.blank? %>
+         Не выбран
+        <% else %>
+         <% array = guild.players.to_a %>
+         <% array.each do |player|%>
+          <%= link_to player.name, player %>
+         <% end -%>
+        <% end -%>
+        </td>
+        <td>
+          <% if guild.plant_ids.blank? %>
+           Не выбрано
+          <% else %>
+           <% array = guild.plants.to_a %>
+           <% array.each do |plant|%>
+            <%= link_to plant.name, plant %>
+           <% end -%>
+          <% end -%>
+        </td>
         <td class="left">
           <ul>
             <%= link_to 'Редактировать', edit_guild_path(guild), class: 'btn1' %>

@@ -10,12 +10,10 @@ class GuildsController < ApplicationController
 
   def new
     @guild = Guild.new
-    @guildless_merchants = Merchant.where(guild_id: nil)
     @ownerless_plants = Plant.where(economic_subject_id: nil)
   end
 
   def edit
-    @guildless_merchants = Merchant.where(guild_id: [nil, @guild.id])
     @ownerless_plants = Plant.where(economic_subject_id: [nil, @guild.id])
   end
 
@@ -50,6 +48,6 @@ class GuildsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def guild_params
-      params.require(:guild).permit(:name, :merchant_ids => [], :plant_ids => [])
+      params.require(:guild).permit(:name, :player_ids => [], :plant_ids => [])
     end
 end

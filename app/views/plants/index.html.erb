@@ -17,7 +17,7 @@
       <td><%= plant.id %></td>
       <td><%= link_to plant.name_of_plant, link %></td>
       <td><%= plant.plant_category&.name %></td>
-      <td><%= plant.level %></td>
+      <td><%= plant.plant_level %></td>
       <td>
         <% if plant.settlement.blank? %>
           Не выбран

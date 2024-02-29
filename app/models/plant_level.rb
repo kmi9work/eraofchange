@@ -1,4 +1,5 @@
 class PlantLevel < ApplicationRecord
+  
   # Общая структура формулы производства:
   # formula: {
   #   from: [
