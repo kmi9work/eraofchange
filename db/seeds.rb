@@ -70,12 +70,13 @@ PlantType.create(name: "Рудник")
 
 
 
-SettlementCategory.create(name: "Город")
+SettlementCategory.create(name: "Село")
+sc1 = SettlementCategory.create(name: "Город")
 SettlementCategory.create(name: "Деревня")
 
-Settlement.create(name: "Москва", settlement_category_id: 1)
-Settlement.create(name: "Тверь", settlement_category_id: 1)
-Settlement.create(name: "Рязань", settlement_category_id: 1)
+Settlement.create(name: "Москва", settlement_category_id: sc1.id)
+Settlement.create(name: "Тверь", settlement_category_id: sc1.id)
+Settlement.create(name: "Рязань", settlement_category_id: sc1.id)
 Settlement.create(name: "Хатавки", settlement_category_id: 2)
 Settlement.create(name: "Гадюкино", settlement_category_id: 2)
 Settlement.create(name: "Холмищи", settlement_category_id: 2)
@@ -83,3 +84,32 @@ Settlement.create(name: "Холмищи", settlement_category_id: 2)
 Resource.create(name: "Бревна", price: "1")
 Resource.create(name: "Руда", price: "100")
 Resource.create(name: "Зерно", price: "10")
+
+
+
+bt1 = BuildingType.create(name: "Церковь")
+bt2 = BuildingType.create(name: "Гарнизон")
+bt3 = BuildingType.create(name: "Рынок")
+bt4 = BuildingType.create(name: "Укрепления")
+
+bl1 = BuildingLevel.create(level: 1, price: {gold: 1000}, params: {income: 2000}, building_type: bt3)
+bl2 = BuildingLevel.create(level: 2, price: {gold: 2000}, params: {income: 4000}, building_type: bt3)
+bl3 = BuildingLevel.create(level: 3, price: {gold: 4000}, params: {income: 8000}, building_type: bt3)
+
+b1 = Building.create(comment: "Рынок второго уровня", building_level: bl2)
+b1 = Building.create(comment: "Рынок третьего уровня", building_level: bl3)
+
+puts "Проверка"
+puts b1.comment
+puts "#{b1.building_level.building_type.name} #{b1.building_level.level} уровня"
+
+puts b2.comment
+puts "#{b2.building_level.building_type.name} #{b2.building_level.level} уровня"
+
+puts bt3.name
+bt3.building_levels.each do |bl| 
+	puts bl.level
+	bl.buildings.each do |b|
+		puts b.comment
+	end
+end
