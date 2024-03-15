@@ -9,24 +9,14 @@
         <% end %>
       </ul>
     </div>
-  <% end %>
+ <% end %>
 
   <div>
-    <%= form.label :region_id, style: "display: block" %>
-    <%= form.text_field :region_id %>
-  </div>
+    <p>Размер: <%= form.select :army_size_id, options_for_select(ArmySize.all.collect{ |a_s| [a_s.name, a_s.id]}, army.army_size_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-  <div>
-    <%= form.label :player_id, style: "display: block" %>
-    <%= form.text_field :player_id %>
-  </div>
+    <p>Принадлежит игроку: <%= form.select :player_id, options_for_select(Player.all.collect{ |p| [p.name, p.id]}, army.player_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-  <div>
-    <%= form.label :army_size_id, style: "display: block" %>
-    <%= form.text_field :army_size_id %>
-  </div>
+   <p>Регион: <%= form.select :region_id, options_for_select(Region.all.collect{ |r| [r.title, r.id]}, army.region_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-  <div>
-    <%= form.submit %>
-  </div>
-<% end %>
+    <%= form.submit 'Отправить'%>
+    <% end -%>

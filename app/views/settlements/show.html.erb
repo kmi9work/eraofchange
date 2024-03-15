@@ -3,12 +3,19 @@
 <h2>Населенный пункт: <%= @settlement.name %></h2>
 
 <p>
-Категория населеннного пункта: 
+Тип владения:
 <% if @settlement.settlement_type_id.blank? %>
  не выбрана
 <% else %>
- <% link_to_settlement_type = "/settlement_types/#{@settlement.settlement_type.id}" %>
- <%= link_to @settlement.settlement_type.name, link_to_settlement_type %>
+ <%= link_to @settlement.settlement_type.name, settlement_type_path(@settlement.settlement_type_id) %>
+<% end -%>
+</p>
+
+Тип владения:
+<% if @settlement.region_id.blank? %>
+ не выбрана
+<% else %>
+ <%= @settlement.region.title %>
 <% end -%>
 </p>
 

@@ -3,7 +3,7 @@ class CreatePlantPlaces < ActiveRecord::Migration[7.0]
     create_table :plant_places do |t|
       t.string :title
       t.string :plant_place_type
-
+      t.integer :settlement_id
       t.timestamps
     end
   end

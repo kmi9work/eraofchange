@@ -13,7 +13,8 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    <p>Купец: <%= form.select :merchant_id, options_for_select(Merchant.all.collect{ |m| [m.name, m.id] }, player.merchant_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+    <p>Должность: <%= form.select :job_id, options_for_select(Job.all.collect{ |j| [j.name, j.id] }, player.job_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+    <p>Тип игрока: <%= form.select :player_type_id, options_for_select(PlayerType.all.collect{ |pt| [pt.title, pt.id] }, player.player_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
     <%= form.submit 'Отправить'%>
   </div>
 <% end %>

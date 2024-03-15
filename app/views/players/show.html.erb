@@ -5,9 +5,14 @@
 <% if @player.player_type_id.blank?%>
  <p>Тип игрока: не назначен</p>
 <% else %>
- <% #link_to_merchant = "/merchants/#{@player.merchant.id}/" %>
- <p>Тип игрока: <%= @player.player_type.title %></p>
+ <p>Тип игрока: <%= link_to @player.player_type.title, player_type_path(@player) %></p>
 <% end %>
+
+ <p> <% if @player.job.blank?%>
+ <p>Должность: не назначен</p>
+     <% else %>
+    Должность: <%= @player.job.name %></p>
+     <% end %>
 
 <hr>
 

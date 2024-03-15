@@ -4,13 +4,13 @@
   <h2>Имя семьи: <%= @family.name %></h2>
 
   <p>
-    Купцы в семье:<br>
+    Игроки в семье:<br>
     <ul>
-    <% array = @family.merchants.to_a %>
-    <% array.each do | merchant|%>    
-     <li><%= link_to merchant.name, merchant %></li>
+    <%@family.players.each do |player|%>
+    <li><%= link_to player.name, player %></li>
     <% end -%> 
-    </ul> 
+
+    </ul>
   </p>
 
   <p>Собственность семьи: </p>

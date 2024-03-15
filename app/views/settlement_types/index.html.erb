@@ -12,12 +12,10 @@
   </thead>
   <tbody>
     <% @settlement_types.each do |settlement_type| %>
-     <% link = "/settlement_types/#{settlement_type.id}" %>
      <tr>
-      <td><%= link_to settlement_type.name, link %></td>
+      <td><%= link_to settlement_type.name, settlement_type_path(settlement_type) %></td>
       <td>
-        <% array = settlement_type.settlements.to_a %>
-        <% array.each do |settlement|%>
+        <% settlement_type.settlements.each do |settlement|%>
          <%= link_to settlement.name, settlement %>
         <% end -%>
       </td>
@@ -28,15 +26,7 @@
         </ul>
         </td>
      </tr>
-    <% end -%>
-    <tr>
-      <td>Не выбрана категория</td>
-      <td>
-        <% @settlements_without_category.each do |settlement|%>
-         <% link_to_settlement = "/settlements/#{settlement.id}" %>
-         <%= link_to settlement&.name, link_to_settlement %>
-        <% end -%>
-      </td>
+          <% end -%>
     </tr>
   </tbody>
 </table>

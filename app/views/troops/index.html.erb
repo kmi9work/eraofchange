@@ -1,14 +1,28 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Troops</h1>
+<h1>Отряды</h1>
+<%= link_to "Создать новый отряд", new_troop_path %>
 
-<div id="troops">
-  <% @troops.each do |troop| %>
-    <%= render troop %>
-    <p>
-      <%= link_to "Show this troop", troop %>
-    </p>
+ <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Название</th>
+      <th scope="col">Параметры</th>
+      <th scope="col">Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+<div id="troops"><% @troops.each do |troop| %>
+     <td><%= troop.troop_type.id %></td>
+     <td><%= link_to troop.troop_type.title, troop_path(troop) %></td>
+     <td> Параметры </td>
+     <td> <%= link_to "Редактировать отряд", edit_troop_path(troop), class: 'btn1' %>
+    <%= button_to "Удалить отряд", troop_path(troop), method: :delete, class:'btn2', id: "delete-#{troop.id}"%></td>
+
+    </tr>
   <% end %>
 </div>
+  </tbody>
+</table>
 
-<%= link_to "New troop", new_troop_path %>

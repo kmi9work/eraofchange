@@ -1,14 +1,34 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Armies</h1>
+<h1>Армии</h1>
+<%= link_to "Создать новую армию", new_army_path, class: 'btn' %>
+ <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Размер армии</th>
+      <th scope="col">Принадлежит игроку</th>
+      <th scope="col">Принадлежит региону</th>
+      <th scope="col">Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @armies.each do |army| %>
+     <tr>
+      <td scope="row"><%= army.id %></td>
+      <td>
+          <%= link_to army.army_size.name, army_path(army) %></td>
+      <td><%= army.player.name %></td>
+      <td><%= army.region.title%></td>
+      <td><%= link_to "Редактировать армию", edit_army_path(army), class: 'btn1' %>
+          <%= button_to "Удалить армию", army_path(army), method: :delete, class: 'btn2', id: "delete-#{army.id}"%></td>
+        </ul>
+      </td>
+     </tr>
+    <% end -%>
+  </tbody>
+</table>
 
-<div id="armies">
-  <% @armies.each do |army| %>
-    <%= render army %>
-    <p>
-      <%= link_to "Show this army", army %>
-    </p>
-  <% end %>
-</div>
+<hr>
 
-<%= link_to "New army", new_army_path %>
+
