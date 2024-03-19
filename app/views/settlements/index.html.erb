@@ -35,7 +35,7 @@
           <% if settlement.player.blank? %>
           НП никому не принадлежит
             <% else %>
-            <%= link_to settlement.player.name, player_path(settlement.player) %>
+              <%= link_to settlement.player.name, player_path(settlement.player) %>
           <% end -%>
 
 

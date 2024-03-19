@@ -5,9 +5,9 @@
 <p>
 Тип владения:
 <% if @settlement.settlement_type_id.blank? %>
- не выбрана
+ Не выбрана
 <% else %>
- <%= link_to @settlement.settlement_type.name, settlement_type_path(@settlement.settlement_type_id) %>
+  <%= link_to @settlement.settlement_type.name, settlement_type_path(@settlement.settlement_type_id) %>
 <% end -%>
 </p>
 
@@ -15,7 +15,7 @@
 <% if @settlement.region_id.blank? %>
  не выбрана
 <% else %>
- <%= @settlement.region.title %>
+  <%= @settlement.region.title %>
 <% end -%>
 </p>
 
