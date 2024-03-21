@@ -1,14 +1,11 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Player types</h1>
+<h2>Типы игровых персонажей</h2>
 
 <div id="player_types">
   <% @player_types.each do |player_type| %>
     <%= render player_type %>
-    <p>
-      <%= link_to "Show this player type", player_type %>
-    </p>
   <% end %>
 </div>
 
-<%= link_to "New player type", new_player_type_path %>
+<%= link_to "Добавить тип игрового персонажа", new_player_type_path %>

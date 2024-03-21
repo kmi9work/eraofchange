@@ -11,10 +11,12 @@ class GuildsController < ApplicationController
   def new
     @guild = Guild.new
     @ownerless_plants = Plant.where(economic_subject_id: nil)
+    @guildless_players = Player.where(guild_id: nil)
   end
 
   def edit
     @ownerless_plants = Plant.where(economic_subject_id: [nil, @guild.id])
+    @guildless_players = Player.where(guild_id: [nil, @guild.id])
   end
 
   def create

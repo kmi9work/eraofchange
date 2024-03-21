@@ -4,4 +4,15 @@
     <%= fossil_type.title %>
   </p>
 
+  <p>
+    <strong>Тип предприятия:</strong>
+     <% if fossil_type.plant_type_ids.blank? %>
+      Не выбран
+     <% else %>
+      <% fossil_type.plant_types.each do |plant_type|%>
+       <%= link_to plant_type.name, plant_type %>
+      <% end -%>
+     <% end -%>
+  </p>
+
 </div>

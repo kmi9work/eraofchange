@@ -24,4 +24,14 @@
     <%= credit.duration %>
   </p>
 
+  <p>
+    <strong>Игровой персонаж:</strong>
+    <% if credit.player_id.blank?%>
+     Не выбран
+    <% else %>
+     <% link_to_player = "/players/#{credit.player_id}/" %>
+     <%= link_to credit.player&.name, link_to_player %>
+    <% end -%>
+  </p>
+
 </div>

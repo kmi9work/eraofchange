@@ -1,14 +1,7 @@
 class Plant < ApplicationRecord
-  belongs_to :player, optional: true
-  belongs_to :guild, optional: true
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
-
-  belongs_to :plant_type, optional: true
-  belongs_to :settlement, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true
-  belongs_to :plant_category, optional: true
-  
   
   def name_of_plant
     if economic_subject_type == "Guild"
@@ -17,7 +10,7 @@ class Plant < ApplicationRecord
       proprietor = "купца"
     end
 
-    plant_name = "#{plant_type&.name}" + " #{proprietor}" + " #{economic_subject&.name}"
+    plant_name = "#{@plant_type&.title}" + " #{proprietor}" + " #{economic_subject&.name}"
   end
 
   def upgrade!

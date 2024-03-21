@@ -1,14 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Political action types</h1>
+<h2>Виды политических действий</h2>
 
 <div id="political_action_types">
   <% @political_action_types.each do |political_action_type| %>
     <%= render political_action_type %>
     <p>
-      <%= link_to "Show this political action type", political_action_type %>
+      <%= link_to "Показать вид политических действий", political_action_type %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New political action type", new_political_action_type_path %>
+<%= link_to "Добавить новый вид политических действий", new_political_action_type_path %>

@@ -17,8 +17,7 @@
   </div>
 
   <div>
-    <%= form.label :plant_place_type, style: "display: block" %>
-    <%= form.text_field :plant_place_type %>
+   Категория предприятия: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |pc| [pc.name, pc.id] }, plant_place.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
   </div>
 
   <div>

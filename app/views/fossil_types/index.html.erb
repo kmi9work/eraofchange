@@ -1,14 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Fossil types</h1>
+<h2>Виды ископаемых</h2>
 
 <div id="fossil_types">
   <% @fossil_types.each do |fossil_type| %>
     <%= render fossil_type %>
     <p>
-      <%= link_to "Show this fossil type", fossil_type %>
+      <%= link_to "Показать", fossil_type %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New fossil type", new_fossil_type_path %>
+<%= link_to "Добавить новый вид ископаемых", new_fossil_type_path %>

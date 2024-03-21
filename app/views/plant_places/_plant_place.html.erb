@@ -5,8 +5,16 @@
   </p>
 
   <p>
-    <strong>Plant place type:</strong>
-    <%= plant_place.plant_place_type %>
+    <strong>Категория предприятия:</strong>
+     <% if plant_place.plant_category.blank? %>
+      Не выбрана
+     <% else %>
+      <% link_to_plant_category = "/plant_categories/#{plant_place.plant_category.id}" %>
+      <%= link_to plant_place.plant_category&.name, link_to_plant_category %>
+     <% end -%>
   </p>
 
 </div>
+
+
+

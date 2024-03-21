@@ -12,7 +12,15 @@
   <% end %>
 
     <div>
+
     <p>Тип предприятия: <%= form.text_field :name %></p>
+
+    <p>Категория предприятия: <%= form.select :plant_category_id, options_for_select(PlantCategory.all.collect{ |pc| [pc.name, pc.id] }, plant_type.plant_category_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+
+    <p>Уровень предприятия: <%= form.select :plant_level_ids, options_for_select(PlantLevel.all.collect{ |pl| [pl.level, pl.id] }, plant_type.plant_level_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+
+    <p>Вид ископаемого <%= form.select :fossil_type_id, options_for_select(FossilType.all.collect{ |ft| [ft.title, ft.id] }, plant_type.fossil_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+
     <%= form.submit('Отправить') %>
-  </div>
+    </div>
 <% end %>

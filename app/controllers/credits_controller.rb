@@ -65,6 +65,6 @@ class CreditsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def credit_params
-      params.require(:credit).permit(:sum, :deposit, :procent, :start_year, :duration)
+      params.require(:credit).permit(:sum, :deposit, :procent, :start_year, :duration, :player_id)
     end
 end

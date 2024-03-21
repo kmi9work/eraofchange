@@ -1,4 +1,6 @@
 class PoliticalAction < ApplicationRecord
-  belongs_to :political_action_type
-  belongs_to :player
+    belongs_to :player, optional: true
+
+    has_many :political_action_types
+
 end

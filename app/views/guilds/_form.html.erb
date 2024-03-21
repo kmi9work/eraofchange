@@ -12,11 +12,12 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    <p>Игровые персонажи: <%= form.select :player_ids, options_for_select(Player.all.collect{ |p| [p.name, p.id] }, guild.player_ids), {include_blank: true}, class: 'form-select', style: "width: 200px" %></p>
+    
+    <p>Игровые персонажи: <%= form.select :player_ids, options_for_select(@guildless_players.collect{ |p| [p.name, p.id] }, guild.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 
 
-    <p>Предприятие: <%= form.select :plant_ids, options_for_select(@ownerless_plants.collect{ |p| [p.name, p.id] }, guild.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <p>Предприятия: <%= form.select :plant_ids, options_for_select(@ownerless_plants.collect{ |p| [p.comments, p.id] }, guild.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    
     <%= form.submit 'Отправить' %>
   </div>
 <% end %>
-

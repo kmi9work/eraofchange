@@ -1,5 +1,8 @@
 class PlantLevel < ApplicationRecord
-  
+    belongs_to :plant_type, optional: true
+
+    has_many :plants
+      
   # Общая структура формулы производства:
   # formula: {
   #   from: [

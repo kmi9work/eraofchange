@@ -12,7 +12,6 @@
   </thead>
   <tbody>
     <% @resources.each do |resource|%>
-     <% link = "/resources/#{resource.id}"%>
      <tr>
       <td><%= link_to resource.name, resource %></td>
       <td><%= resource.price %></td>

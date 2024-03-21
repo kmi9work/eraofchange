@@ -63,7 +63,7 @@ class PlantCategoriesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_category_params
-      params.fetch(:plant_category, {}).permit(:name)
+      params.fetch(:plant_category).permit(:name, :plant_type_ids => [], :plant_place_ids => [])
     end
 end
 

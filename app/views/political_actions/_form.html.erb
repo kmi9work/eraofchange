@@ -32,11 +32,10 @@
   </div>
 
   <div>
-    <%= form.label :player_id, style: "display: block" %>
-    <%= form.text_field :player_id %>
+    Игровой персонаж: <%= form.select :player_id, options_for_select(Player.all.collect{ |p| [p.name, p.id] }, political_action.player_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
   </div>
 
-  <div>
+   <div>
     <%= form.submit %>
   </div>
 <% end %>

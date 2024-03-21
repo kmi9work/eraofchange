@@ -1,11 +1,41 @@
 <p style="color: green"><%= notice %></p>
 
-<%= @plant_type.name %>
+<h2>Название: <%= @plant_type.name %></h2>
 
+<p>
+  Категория предприятия:
+  <% if @plant_type.plant_category.blank? %>
+    Не выбрана
+  <% else %>
+    <% link_to_plant_category = "/plant_categories/#{@plant_type.plant_category.id}" %>
+    <%= link_to @plant_type.plant_category&.name, link_to_plant_category %>
+  <% end -%>
+</p>
+
+<p>
+  Уровень предприятия:
+  <% if @plant_type.plant_level_ids.blank? %>
+    Не выбран
+  <% else %>
+    <% @plant_type.plant_levels.each do |plant_level|%>
+     <%= link_to plant_level.level, plant_level %>
+    <% end -%>
+  <% end -%>
+</p>
+
+<p>
+  Вид ископаемого:
+  <% if @plant_type.fossil_type.blank? %>
+    Не выбран
+  <% else %>
+    <% link_to_fossil_type = "/fossil_types/#{@plant_type.fossil_type.id}" %>
+    <%= link_to @plant_type.fossil_type&.title, link_to_fossil_type %>
+  <% end -%>
+</p>
 
 <div>
-  <%= link_to "Edit this plant type", edit_plant_type_path(@plant_type) %> |
-  <%= link_to "Back to plant types", plant_types_path %>
+  <%= link_to "Редактировать", edit_plant_type_path(@plant_type) %> |
+  <%= link_to "Назад к типам предприятий", plant_types_path %>
 
-  <%= button_to "Destroy this plant type", @plant_type, method: :delete %>
+  <%= button_to "Удалить", @plant_type, method: :delete %>
 </div>

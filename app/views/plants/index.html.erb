@@ -1,35 +1,41 @@
-<h1>Предприятия</h1>
+<h2>Предприятия</h2>
 <table>
   <thead>
     <tr>
-      <th>№</th>
       <th>Предприятие</th>
-      <th>Категория</th>
+      <th>Комментарий</th>
       <th>Уровень</th>
-      <th>Населенный пункт</th>
+      <th>Место для предприятия</th>
+      <th>Владелец</th>
       <th>Действия</th>
     </tr>
   </thead>
   <tbody>
     <% @plants.each do |plant| %>
-     <% link = "/plants/#{plant.id}" %>
      <tr>
-      <td><%= plant.id %></td>
-      <td><%= link_to plant.name_of_plant, link %></td>
-      <td><%= plant.plant_category&.name %></td>
-      <td><%= plant.plant_level %></td>
+      <td><%= link_to plant.name_of_plant, plant %></td>
+      <td><%= plant.comments %></td>
       <td>
-        <% if plant.settlement.blank? %>
+        <% if plant.plant_level.blank? %>
           Не выбран
         <% else %>
-          <% link_to_settlement = "/settlements/#{plant.settlement.id}" %>
-          <%= link_to plant.settlement&.name, link_to_settlement %>
+          <% link_to_plant_level = "/plant_levels/#{plant.plant_level.id}" %>
+          <%= link_to plant.plant_level&.level, link_to_plant_level %>
         <% end -%>
       </td>
+      <td>
+        <% if plant.plant_place.blank? %>
+          Не выбрано
+        <% else %>
+          <% link_to_plant_place = "/plant_places/#{plant.plant_place.id}" %>
+          <%= link_to plant.plant_place&.title, link_to_plant_place %>
+        <% end -%>
+      </td>
+      <td><%= link_to plant.economic_subject&.name, plant.economic_subject %></td>
       <td class="left">
         <ul>
-          <%= link_to 'Редактировать', edit_plant_path(plant), class: 'btn1'%>
-          <%= button_to 'Удалить', destroy_plant_path(plant), method: :delete, class: 'btn2'%>
+          <%= link_to 'Редактировать', edit_plant_path(plant), class: 'btn1' %>
+          <%= button_to 'Удалить', destroy_plant_path(plant), method: :delete, class: 'btn2' %>
         </ul>
       </td>
      </tr>
@@ -40,3 +46,6 @@
 <hr>
 
 <%= link_to "Добавить предприятие", new_plant_path, class: 'btn' %>
+ 
+
+ 

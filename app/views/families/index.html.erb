@@ -17,10 +17,9 @@
       <td><%= link_to family.name, link %></td>
       <td>
         <% if family.player_ids.blank? %>
-         Не выбрана
+         Не выбраны
         <% else %>
-         <% array = family.players.to_a %>
-         <% array.each do |player|%>
+          <% family.players.each do |player|%>
           <%= link_to player.name, player %>
          <% end -%>
         <% end -%>

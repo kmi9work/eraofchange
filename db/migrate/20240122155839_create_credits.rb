@@ -6,6 +6,7 @@ class CreateCredits < ActiveRecord::Migration[7.0]
       t.float :procent
       t.integer :start_year
       t.integer :duration
+      t.integer :player_id
 
       t.timestamps
     end

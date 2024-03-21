@@ -1,12 +1,18 @@
 <div id="<%= dom_id player_type %>">
   <p>
-    <strong>Title:</strong>
-    <%= player_type.title %>
+    <strong>Название типа игрового персонажа:</strong>
+    <%= link_to player_type.title, player_type %>
   </p>
 
   <p>
-    <strong>Ideologist type:</strong>
-    <%= player_type.ideologist_type_id %>
+    <strong>Игровые персонажи:</strong>
+    <% if player_type.player_ids.blank? %>
+     Не выбраны
+    <% else %>
+     <% player_type.players.each do |player|%>
+      <%= link_to player.name, player %>
+      <% end -%>
+    <% end -%>
   </p>
 
 </div>

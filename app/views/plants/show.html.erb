@@ -1,21 +1,30 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Название: <%=  @plant.name_of_plant %></h2>
+<h2>Название: <%= @plant.name_of_plant %></h2>
 
-<p> Категория: <%= @plant.plant_category.name %></p>
+<p>Комментарий: <%= @plant.comments %></p>
 
-<p> Уровень: <%= @plant.plant_level %> </p>
+<p> 
+  Уровень:
+  <% if @plant.plant_level.blank? %>
+   Не выбран
+  <% else %>
+   <% link_to_plant_level = "/plant_levels/#{@plant.plant_level.id}" %>
+   <%= link_to @plant.plant_level&.level, link_to_plant_level %>
+  <% end -%>
+</p>
+
 <p>
-Населенный пункт:
-<% if @plant.settlement_id.blank? %>
- не выбран
-<% else %>
- <% link_to_settlement = "/settlements/#{@plant.settlement.id}" %>
- <%= link_to @plant.settlement.name, link_to_settlement %>
+  Место для предприятия:
+  <% if @plant.plant_place.blank? %>
+   не выбрано
+  <% else %>
+   <% link_to_plant_place = "/plant_places/#{@plant.plant_place.id}" %>
+   <%= link_to @plant.plant_place&.title, link_to_plant_place %>
 <% end -%>
 </p>
 
-<p> Гильдия/игровой персонаж: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %> </p>
+<p>Гильдия/игровой персонаж: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %></p>
 
 <hr>
 

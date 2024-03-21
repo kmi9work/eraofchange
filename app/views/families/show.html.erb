@@ -1,14 +1,13 @@
 <p style="color: green"><%= notice %></p>
 
 <div>
-  <h2>Имя семьи: <%= @family.name %></h2>
+  <h2>Фамилия семьи: <%= @family.name %></h2>
 
   <p>
     Игровые персонажи в семье:<br>
     <ul>
-      <% array = @family.players.to_a %>
-      <% array.each do |player|%>
-       <li><%= link_to player.name, player %></li>
+      <% @family.players.each do |player|%>
+        <li><%= link_to player.name, player %></li>
       <% end -%> 
     </ul> 
   </p>

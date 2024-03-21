@@ -51,36 +51,29 @@ Resource.create(name: "Руда", price: "100")
 Resource.create(name: "Зерно", price: "10")
 
 
-#Merchant.create(name: "Забава", plant_id:1, family_id: 1, guild_id:1)
-#Merchant.create(name: "Верещага", plant_id:2, family_id:2, guild_id:2)
-#Merchant.create(name: "Любава", plant_id:3, family_id:3, guild_id:3)
-#Merchant.create(name: "Добрыня", plant_id:4, family_id:1, guild_id:1)
-#Merchant.create(name: "Купава", plant_id:5, family_id:2, guild_id:2)
-#Merchant.create(name: "Алтын", plant_id:6, family_id:3, guild_id:3)
+bt1 = BuildingType.create(name: "Церковь")
+bt2 = BuildingType.create(name: "Гарнизон")
+bt3 = BuildingType.create(name: "Рынок")
+bt4 = BuildingType.create(name: "Укрепления")
 
-# Plant.create(name: "Лесопилка", 
-# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+bl1 = BuildingLevel.create(level: 1, price: {gold: 1000}, params: {income: 2000}, building_type: bt3)
+bl2 = BuildingLevel.create(level: 2, price: {gold: 2000}, params: {income: 4000}, building_type: bt3)
+bl3 = BuildingLevel.create(level: 3, price: {gold: 4000}, params: {income: 8000}, building_type: bt3)
 
-#Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 2,plant_type_id: 2, level: 1)
+b1 = Building.create(comment: "Рынок второго уровня", building_level: bl2)
+b1 = Building.create(comment: "Рынок третьего уровня", building_level: bl3)
 
-# PlantType.create(name: "Рудник")
-# PlantType.create(name: "Золотой рудник")
-# PlantType.create(name: "Каменоломня")
-# PlantType.create(name: "Делянка")
+puts "Проверка"
+puts b1.comment
+puts "#{b1.building_level.building_type.name} #{b1.building_level.level} уровня"
 
-# PlantType.create(name: "Мастерская каменотёса")
-# PlantType.create(name: "Рудник")
+puts b2.comment
+puts "#{b2.building_level.building_type.name} #{b2.building_level.level} уровня"
 
-
-
+puts bt3.name
+bt3.building_levels.each do |bl| 
+	puts bl.level
+	bl.buildings.each do |b|
+		puts b.comment
+	end
+end

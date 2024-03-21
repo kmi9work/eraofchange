@@ -4,7 +4,6 @@ class CreatePoliticalActions < ActiveRecord::Migration[7.0]
       t.integer :year
       t.integer :success
       t.json :params
-      t.references :political_action_type, null: false, foreign_key: true
       t.references :player, null: false, foreign_key: true
 
       t.timestamps

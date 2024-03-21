@@ -3,8 +3,8 @@
 <%= render @plant_level %>
 
 <div>
-  <%= link_to "Edit this plant level", edit_plant_level_path(@plant_level) %> |
-  <%= link_to "Back to plant levels", plant_levels_path %>
+  <%= link_to "Редактировать", edit_plant_level_path(@plant_level) %> |
+  <%= link_to "Назад к уровням предприятий", plant_levels_path %>
 
-  <%= button_to "Destroy this plant level", @plant_level, method: :delete %>
+  <%= button_to "Удалить", @plant_level, method: :delete %>
 </div>

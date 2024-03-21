@@ -12,16 +12,14 @@
   <% end %>
 
   <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+    Название: <%= form.text_field :title %>
   </div>
 
   <div>
-    <%= form.label :ideologist_type_id, style: "display: block" %>
-    <%= form.text_field :ideologist_type_id %>
+    Игровой персонаж: <%= form.select :player_ids, options_for_select(Player.all.collect{ |p| [p.name, p.id] }, player_type.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit 'Отправить' %>
   </div>
 <% end %>

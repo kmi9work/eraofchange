@@ -13,6 +13,11 @@
 
   <div>
     <p>Название категории: <%= form.text_field :name %></p>
+
+    <p>Типы предприятий: <%= form.select :plant_type_ids, options_for_select(PlantType.all.collect{ |pt| [pt.name, pt.id] }, plant_category.plant_type_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+
+    <p>Места для предприятий: <%= form.select :plant_place_ids, options_for_select(PlantPlace.all.collect{ |pp| [pp.title, pp.id] }, plant_category.plant_place_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+
     <%= form.submit('Отправить') %>
   </div>
 <% end %>

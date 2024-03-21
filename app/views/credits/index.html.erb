@@ -1,14 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Credits</h1>
+<h2>Кредиты</h2>
 
 <div id="credits">
   <% @credits.each do |credit| %>
     <%= render credit %>
     <p>
-      <%= link_to "Show this credit", credit %>
+      <%= link_to "Показать кредит", credit %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New credit", new_credit_path %>
+<%= link_to "Добавить новый кредит", new_credit_path %>

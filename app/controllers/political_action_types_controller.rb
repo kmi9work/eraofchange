@@ -65,6 +65,6 @@ class PoliticalActionTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def political_action_type_params
-      params.require(:political_action_type).permit(:title, :action, :params)
+      params.require(:political_action_type).permit(:title, :action, :params, :political_action_id)
     end
 end

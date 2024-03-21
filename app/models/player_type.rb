@@ -1,3 +1,3 @@
 class PlayerType < ApplicationRecord
-  belongs_to :ideologist_type
+  has_many :players
 end

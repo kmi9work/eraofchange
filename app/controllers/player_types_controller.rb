@@ -65,6 +65,6 @@ class PlayerTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def player_type_params
-      params.require(:player_type).permit(:title, :ideologist_type_id)
+      params.require(:player_type).permit(:title, :player_ids => [])
     end
 end

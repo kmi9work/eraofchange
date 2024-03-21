@@ -1,14 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Plant levels</h1>
+<h2>Уровни предприятий</h2>
 
 <div id="plant_levels">
   <% @plant_levels.each do |plant_level| %>
     <%= render plant_level %>
     <p>
-      <%= link_to "Show this plant level", plant_level %>
+      <%= link_to "Показать", plant_level %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New plant level", new_plant_level_path %>
+<%= link_to "Добавить уровень предприятия", new_plant_level_path %>
