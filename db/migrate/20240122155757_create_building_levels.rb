@@ -4,7 +4,7 @@ class CreateBuildingLevels < ActiveRecord::Migration[7.0]
       t.integer :level
       t.json :price
       t.json :params
-      t.references :building_type, null: false, foreign_key: true
+      t.references :building_type, foreign_key: true
 
       t.timestamps
     end

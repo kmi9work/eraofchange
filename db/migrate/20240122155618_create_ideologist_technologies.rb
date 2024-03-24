@@ -4,7 +4,7 @@ class CreateIdeologistTechnologies < ActiveRecord::Migration[7.0]
       t.string :title
       t.json :requirements
       t.json :params
-      t.references :ideologist_type, null: false, foreign_key: true
+      t.references :ideologist_type, foreign_key: true
 
       t.timestamps
     end
