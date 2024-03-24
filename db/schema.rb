@@ -12,9 +12,9 @@
 
 ActiveRecord::Schema[7.0].define(version: 2024_02_20_175008) do
   create_table "armies", force: :cascade do |t|
-    t.integer "region_id", null: false
-    t.integer "player_id", null: false
-    t.integer "army_size_id", null: false
+    t.integer "region_id"
+    t.integer "player_id"
+    t.integer "army_size_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["army_size_id"], name: "index_armies_on_army_size_id"
@@ -34,7 +34,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_20_175008) do
     t.integer "level"
     t.json "price"
     t.json "params"
-    t.integer "building_type_id", null: false
+    t.integer "building_type_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["building_type_id"], name: "index_building_levels_on_building_type_id"
@@ -110,7 +110,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_20_175008) do
     t.string "title"
     t.json "requirements"
     t.json "params"
-    t.integer "ideologist_type_id", null: false
+    t.integer "ideologist_type_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["ideologist_type_id"], name: "index_ideologist_technologies_on_ideologist_type_id"
@@ -255,9 +255,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_02_20_175008) do
   end
 
   create_table "troops", force: :cascade do |t|
-    t.integer "troop_type_id", null: false
     t.boolean "is_hired"
-    t.integer "army_id", null: false
+    t.integer "troop_type_id"
+    t.integer "army_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["army_id"], name: "index_troops_on_army_id"
