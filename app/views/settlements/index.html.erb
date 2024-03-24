@@ -7,32 +7,39 @@
     <tr>
       <th>Название</th>
       <th>Категория</th>
-      <th>Предприятия</th>
+      <th>Места для предприятий</th>
+      <th>Регион</th>
+      <th>Принадлежит</th>
+      <th>Постройки</th>
       <th>Действие</th>
     </tr>
   </thead>
   <tbody>
     <% @settlements.each do |settlement| %>
-      <% link = "/settlements/#{settlement.id}" %>
       <tr>
-        <td><%= link_to settlement.name, link %></td>
+        <td><%= link_to settlement.name, settlement_path(settlement) %></td>
         <td>
-          <% if settlement.settlement_category.blank? %>
-           Не выбрана
+          <% if settlement.settlement_type.blank? %>
+            Не выбрана
           <% else %>
-           <% link_to_settlement_category = "/settlement_categories/#{settlement.settlement_category.id}" %>
-           <%= link_to settlement.settlement_category&.name, link_to_settlement_category %>
+            <%= link_to settlement.settlement_type&.name, settlement_type_path(settlement.settlement_type_id)%>
           <% end -%>
         </td>
         <td>
-          <% if settlement.plants.blank? %>
-           Не выбрано
+          Места для предприятий
+        </td>
+        <td>
+          <%= link_to settlement.region.title, region_path(settlement.region) %>
+        </td>
+        <td>
+          <% if settlement.player.blank? %>
+            НП никому не принадлежит
           <% else %>
-           <% array = settlement.plants.to_a %>
-           <% array.each do |plant|%>
-            <%= link_to plant.name, plant %>
-           <% end -%>
+            <%= link_to settlement.player.name, player_path(settlement.player) %>
           <% end -%>
+        </td>
+        <td>
+          Постройки
         </td>
         <td class="left">
           <ul>

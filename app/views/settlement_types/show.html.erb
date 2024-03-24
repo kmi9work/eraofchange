@@ -1,0 +1,21 @@
+<p style="color: green"><%= notice %></p>
+
+<h2>Категория населенного пункта: <%= @settlement_type.name %></h2>
+ 
+<p>
+  Населенные пункты в категории:<br>
+  <ul>
+    <% @settlement_type.settlements.each do |settlement| %>
+    <li><%= link_to settlement.name, settlement %></li>
+    <% end -%>
+  </ul>
+</p>
+
+<hr>
+
+<div>
+  <%= link_to "Редактировать", edit_settlement_type_path(@settlement_type), class: 'btn1' %>
+  <%= button_to "Удалить", @settlement_type, method: :delete, class: 'btn2' %>
+  <br><br>
+  <%= link_to "Все категории населенных пунктов", settlement_types_path, class: 'btn' %>
+</div>

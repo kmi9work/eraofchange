@@ -1,14 +1,26 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Countries</h1>
+<h2>Государства</h2>
 
-<div id="countries">
-  <% @countries.each do |country| %>
-    <%= render country %>
-    <p>
-      <%= link_to "Show this country", country %>
-    </p>
-  <% end %>
-</div>
-
-<%= link_to "New country", new_country_path %>
+<table>
+  <thead>
+    <tr>
+      <th>Номер</th>
+      <th>Название</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @countries.each do |country| %>
+      <tr>
+        <td><%= country.id %></td>
+        <td><%= link_to country.title, country_path(country) %></td>
+        <td>
+          <%= link_to 'Редактировать', edit_country_path(country), class: 'btn1'%>
+          <%= button_to 'Удалить', country_path(country), method: :delete, class: 'btn2' %>
+        </td>
+     </tr>
+    <% end %>
+  </tbody>
+</table>
+<p><%= link_to 'Добавить государство', new_country_path, class: 'btn' %></p>

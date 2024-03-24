@@ -1,14 +1,26 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Building levels</h1>
 
-<div id="building_levels">
-  <% @building_levels.each do |building_level| %>
-    <%= render building_level %>
-    <p>
-      <%= link_to "Show this building level", building_level %>
-    </p>
-  <% end %>
-</div>
+<h1>Уровни постройки</h1>
+<%= link_to "Создать новый уровень постройки", new_building_level_path, class: 'btn' %>
+ <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Уровень постройки</th>
+      <th scope="col">Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @building_levels.each do |building_level| %>
+     <tr>
+      <td scope="row"><%= building_level.id %></td>
+      <td><%= building_level.level %></td>
+      <td><%= link_to "Редактировать уровень постройки", edit_building_level_path(building_level), class: 'btn1' %>
+          <%= button_to "Удалить уровень постройки", building_level_path(building_level), method: :delete, class: 'btn2', id: "delete-#{building_level.id}"%></td>
+     </tr>
+    <% end -%>
+  </tbody>
+</table>
 
-<%= link_to "New building level", new_building_level_path %>
+<hr>

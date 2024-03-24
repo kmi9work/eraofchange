@@ -1,10 +1,15 @@
 <p style="color: green"><%= notice %></p>
 
-<%= render @army %>
+<%= @army.army_size.name%>
+<p>
+
+<% @army.troops.each do |troop| %>
+<p><%= troop.troop_type.title  %> </p>
+<% end %>
 
 <div>
-  <%= link_to "Edit this army", edit_army_path(@army) %> |
-  <%= link_to "Back to armies", armies_path %>
+  <%= link_to "Редактировать армию", edit_army_path(@army) %> |
+  <%= link_to "Вернуться к армиям", armies_path %>
 
-  <%= button_to "Destroy this army", @army, method: :delete %>
+  <%= button_to "Удалить армию", @army, method: :delete %>
 </div>

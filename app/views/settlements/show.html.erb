@@ -3,21 +3,28 @@
 <h2>Населенный пункт: <%= @settlement.name %></h2>
 
 <p>
-Категория населеннного пункта: 
-<% if @settlement.settlement_category_id.blank? %>
- не выбрана
+Тип владения:
+<% if @settlement.settlement_type_id.blank? %>
+  не выбрана
 <% else %>
- <% link_to_settlement_category = "/settlement_categories/#{@settlement.settlement_category.id}" %>
- <%= link_to @settlement.settlement_category.name, link_to_settlement_category %>
+  <%= link_to @settlement.settlement_type.name, settlement_type_path(@settlement.settlement_type_id) %>
+<% end -%>
+</p>
+
+Тип владения:
+<% if @settlement.region_id.blank? %>
+  не выбрана
+<% else %>
+  <%= @settlement.region.title %>
 <% end -%>
 </p>
 
 <p>
 Предприятия в городе:<br>
  <ul>
-  <% @settlement.plants.each do |plant| %>
-  <li><%= link_to plant.name, plant %></li>
-  <% end -%>
+  <%# @settlement.plant_places.each do |plant| %>
+  <li><%#= link_to plant.name, plant %></li>
+  <%# end -%>
  </ul>
 </p>
 
