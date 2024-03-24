@@ -21,6 +21,10 @@
   </div>
 
   <div>
+    Места для предприятияй: <%= form.select :plant_place_ids, options_for_select(PlantPlace.all.collect{ |pp| [pp.title, pp.id] }, fossil_type.plant_place_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

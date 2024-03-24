@@ -14,6 +14,18 @@
      <% end -%>
   </p>
 
+  <p>
+    <strong>Виды ископаемых:</strong>
+     <% if plant_place.fossil_type_ids.blank? %>
+      Не выбраны
+     <% else %>
+      <% plant_place.fossil_types.each do |fossil_type|%>
+       <%= link_to fossil_type.title, fossil_type %>
+      <% end -%>
+     <% end -%>
+  </p>
+
+
 </div>
 
 

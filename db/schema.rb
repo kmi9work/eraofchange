@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
+ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
   create_table "armies", force: :cascade do |t|
     t.integer "region_id", null: false
     t.integer "player_id", null: false
@@ -92,6 +92,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_22_155839) do
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "fossil_types_plant_places", force: :cascade do |t|
+    t.integer "fossil_type_id"
+    t.integer "plant_place_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fossil_type_id"], name: "index_fossil_types_plant_places_on_fossil_type_id"
+    t.index ["plant_place_id"], name: "index_fossil_types_plant_places_on_plant_place_id"
   end
 
   create_table "guilds", force: :cascade do |t|

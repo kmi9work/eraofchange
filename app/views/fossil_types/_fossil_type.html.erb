@@ -15,4 +15,15 @@
      <% end -%>
   </p>
 
+   <p>
+    <strong>Места для предприятий:</strong>
+     <% if fossil_type.plant_place_ids.blank? %>
+      Не выбраны
+     <% else %>
+      <% fossil_type.plant_places.each do |plant_place|%>
+       <%= link_to plant_place.title, plant_place %>
+      <% end -%>
+     <% end -%>
+  </p>
+
 </div>

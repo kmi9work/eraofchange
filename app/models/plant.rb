@@ -10,7 +10,7 @@ class Plant < ApplicationRecord
       proprietor = "купца"
     end
 
-    plant_name = "#{@plant_type&.title}" + " #{proprietor}" + " #{economic_subject&.name}"
+    plant_name = "#{@plant_type&.name}" + " #{proprietor}" + " #{economic_subject&.name}"
   end
 
   def upgrade!

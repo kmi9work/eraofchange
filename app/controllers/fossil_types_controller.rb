@@ -65,6 +65,6 @@ class FossilTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def fossil_type_params
-      params.require(:fossil_type).permit(:title, :plant_type_ids => [])
+      params.require(:fossil_type).permit(:title, :plant_type_ids => [], :plant_place_ids => [])
     end
 end

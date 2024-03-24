@@ -12,9 +12,8 @@
   </thead>
   <tbody>
     <% @families.each do |family| %>
-     <% link = "/families/#{family.id}" %>
      <tr>
-      <td><%= link_to family.name, link %></td>
+      <td><%= link_to family.name, family %></td>
       <td>
         <% if family.player_ids.blank? %>
          Не выбраны

@@ -77,3 +77,4 @@ bt3.building_levels.each do |bl|
 		puts b.comment
 	end
 end
+
