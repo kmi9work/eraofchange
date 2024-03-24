@@ -5,7 +5,6 @@
 <table>
   <thead>
     <tr>
-      <th>№</th>
       <th>Имя игрока</th>
       <th>Тип игрока</th>
       <th>Должность</th>
@@ -17,52 +16,50 @@
   </thead>
   <tbody>
     <% @players.each do |player| %>
-     <tr>
-      <td><%= player.id %></td>
-      <td><%= link_to player.name, player_path(player) %></td>
-      <td>
-        <% if player.player_type_id.blank? %>
-         Не выбран
-        <% else %>
-         <%= link_to player.player_type&.title, player_type_path(player) %>
-        <% end -%>
-      </td>
-
-      <td>
-        <% if player.job_id.blank? %>
-        Не выбран
-
-        <% else %>
-         <%= link_to player.job.name, job_path(player) %>
-        <% end -%>
-      </td>
-      <td>
-        <% if player.family.blank? %>
-        Игрок не в семье
+      <tr>
+        <td><%= link_to player.name, player_path(player) %></td>
+        <td>
+          <% if player.player_type_id.blank? %>
+            Не выбран
           <% else %>
-          <%= link_to player.family.name, family_path(player) %>
-        <% end -%>
-      </td>
-      <td>
-        <% if player.human.blank? %>
-        Игрок не приписан к человеку
-        <% else %>
-        <%= link_to player.human.name, human_path(player) %>
-        <% end -%>
+            <%= link_to player.player_type&.title, player_type_path(player) %>
+          <% end -%>
+        </td>
 
-      </td>
-      <td>
-        <% player.armies.each do |army| %>
-        <%= link_to army.army_size.name, army_path(army) %>
-         <% end -%>
-      </td>
-      <td class="left">
-        <ul>
-          <%= link_to "Редактировать", edit_player_path(player), class: 'btn1' %>
-          <%= button_to "Удалить", player_path(player), method: :delete, class: 'btn2' %>
-        </ul>
-      </td>
-     </tr>
+        <td>
+          <% if player.job_id.blank? %>
+            Не выбран
+          <% else %>
+            <%= link_to player.job.name, job_path(player) %>
+          <% end -%>
+        </td>
+        <td>
+          <% if player.family.blank? %>
+            Игрок не в семье
+          <% else %>
+            <%= link_to player.family.name, family_path(player) %>
+          <% end -%>
+        </td>
+        <td>
+          <% if player.human.blank? %>
+            Игрок не приписан к человеку
+          <% else %>
+            <%= link_to player.human.name, human_path(player) %>
+          <% end -%>
+
+        </td>
+        <td>
+          <% player.armies.each do |army| %>
+            <%= link_to army.army_size.name, army_path(army) %>
+          <% end -%>
+        </td>
+        <td class="left">
+          <ul>
+            <%= link_to "Редактировать", edit_player_path(player), class: 'btn1' %>
+            <%= button_to "Удалить", player_path(player), method: :delete, class: 'btn2' %>
+          </ul>
+        </td>
+      </tr>
     <% end -%>
   </tbody>
 </table>

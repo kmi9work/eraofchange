@@ -3,16 +3,16 @@
 <h2>Имя игрока: <%= @player.name %></h2>
 
 <% if @player.player_type_id.blank?%>
- <p>Тип игрока: не назначен</p>
+  <p>Тип игрока: не назначен</p>
 <% else %>
- <p>Тип игрока: <%= link_to @player.player_type.title, player_type_path(@player) %></p>
+  <p>Тип игрока: <%= link_to @player.player_type.title, player_type_path(@player) %></p>
 <% end %>
 
- <p> <% if @player.job.blank?%>
- <p>Должность: не назначен</p>
-     <% else %>
-    Должность: <%= @player.job.name %></p>
-     <% end %>
+<% if @player.job.blank?%>
+  <p>Должность: не назначен</p>
+<% else %>
+  <p>Должность: <%= @player.job.name %></p>
+<% end %>
 
 <hr>
 

@@ -20,28 +20,26 @@
         <td><%= link_to settlement.name, settlement_path(settlement) %></td>
         <td>
           <% if settlement.settlement_type.blank? %>
-           Не выбрана
+            Не выбрана
           <% else %>
             <%= link_to settlement.settlement_type&.name, settlement_type_path(settlement.settlement_type_id)%>
           <% end -%>
         </td>
         <td>
-          места для предприятий
+          Места для предприятий
         </td>
         <td>
           <%= link_to settlement.region.title, region_path(settlement.region) %>
         </td>
         <td>
           <% if settlement.player.blank? %>
-          НП никому не принадлежит
-            <% else %>
+            НП никому не принадлежит
+          <% else %>
             <%= link_to settlement.player.name, player_path(settlement.player) %>
           <% end -%>
-
-
         </td>
         <td>
-          постройки
+          Постройки
         </td>
         <td class="left">
           <ul>

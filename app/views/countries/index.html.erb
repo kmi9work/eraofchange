@@ -11,16 +11,16 @@
     </tr>
   </thead>
   <tbody>
-  <div id="countries">
-   <tr><% @countries.each do |country| %>
-      <td><%= country.id %></td>
-      <td><%= link_to country.title, country_path(country) %></td>
-      <td><%= link_to 'Редактировать', edit_country_path(country), class: 'btn1'%>
+    <% @countries.each do |country| %>
+      <tr>
+        <td><%= country.id %></td>
+        <td><%= link_to country.title, country_path(country) %></td>
+        <td>
+          <%= link_to 'Редактировать', edit_country_path(country), class: 'btn1'%>
           <%= button_to 'Удалить', country_path(country), method: :delete, class: 'btn2' %>
-      </td>
-   </tr>
+        </td>
+     </tr>
     <% end %>
-  </div>
   </tbody>
 </table>
 <p><%= link_to 'Добавить государство', new_country_path, class: 'btn' %></p>

@@ -13,25 +13,23 @@
   </thead>
   <tbody>
     <% @families.each do |family| %>
-     <tr>
-      <td scope="row"><%= family.id %></td>
-      <td><%= link_to family.name, family_path(family) %></td>
-      <td>
-        <% if family.player_ids.blank? %>
-         Не выбран
-        <% else %>
-         <% family.players.each do |player|%>
-          <%= link_to player.name, player %>
-         <% end -%>
-        <% end -%>
-      </td>
-      <td>
-        <ul>
+      <tr>
+        <td scope="row"><%= family.id %></td>
+        <td><%= link_to family.name, family_path(family) %></td>
+        <td>
+          <% if family.player_ids.blank? %>
+            Не выбран
+          <% else %>
+            <% family.players.each do |player|%>
+              <%= link_to player.name, player %>
+            <% end -%>
+          <% end -%>
+        </td>
+        <td>
           <%= link_to "Редактировать семью", edit_family_path(family), class: 'btn1' %>
           <%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2', id: "delete-#{family.id}"%>"%>
-        </ul>
-      </td>
-     </tr>
+        </td>
+      </tr>
     <% end -%> 
   </tbody>
 </table>

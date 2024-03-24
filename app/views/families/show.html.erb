@@ -6,10 +6,9 @@
   <p>
     Игроки в семье:<br>
     <ul>
-    <%@family.players.each do |player|%>
-    <li><%= link_to player.name, player %></li>
-    <% end -%> 
-
+      <%@family.players.each do |player|%>
+        <li><%= link_to player.name, player %></li>
+      <% end -%> 
     </ul>
   </p>
 

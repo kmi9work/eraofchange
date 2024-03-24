@@ -13,8 +13,8 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    <p>Населенные пункты: <%= form.select :settlement_ids, options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, 
-    settlement_type.settlement_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+    <% opts = options_for_select(Settlement.all.collect{ |s| [s.name, s.id] }, settlement_type.settlement_ids) %>
+    <p>Населенные пункты: <%= form.select :settlement_ids, opts, {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     <%= form.submit 'Отправить' %>
   </div>
 <% end %>

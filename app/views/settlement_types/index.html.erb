@@ -12,21 +12,19 @@
   </thead>
   <tbody>
     <% @settlement_types.each do |settlement_type| %>
-     <tr>
-      <td><%= link_to settlement_type.name, settlement_type_path(settlement_type) %></td>
-      <td>
-        <% settlement_type.settlements.each do |settlement|%>
-         <%= link_to settlement.name, settlement %>
-        <% end -%>
-      </td>
-      <td class="left">
-        <ul>
+      <tr>
+        <td><%= link_to settlement_type.name, settlement_type_path(settlement_type) %></td>
+        <td>
+          <% settlement_type.settlements.each do |settlement|%>
+            <%= link_to settlement.name, settlement %>
+          <% end -%>
+        </td>
+        <td class="left">
           <%= link_to 'Редактировать', edit_settlement_type_path(settlement_type), class: 'btn1'%>
           <%= button_to 'Удалить', settlement_type_path(settlement_type), method: :delete, class: 'btn2' %>
-        </ul>
         </td>
-     </tr>
-          <% end -%>
+      </tr>
+    <% end -%>
     </tr>
   </tbody>
 </table>

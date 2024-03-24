@@ -13,16 +13,17 @@
     </tr>
   </thead>
   <tbody>
-<div id="troops"><% @troops.each do |troop| %>
-     <td><%= troop.troop_type.id %></td>
-     <td><%= link_to troop.troop_type.title, troop_path(troop) %></td>
-     <td> Параметры </td>
-     <td> <%= link_to "Редактировать отряд", edit_troop_path(troop), class: 'btn1' %>
-    <%= button_to "Удалить отряд", troop_path(troop), method: :delete, class:'btn2', id: "delete-#{troop.id}"%></td>
-
-    </tr>
-  <% end %>
-</div>
+    <% @troops.each do |troop| %>
+      <tr>
+        <td><%= troop.troop_type.id %></td>
+        <td><%= link_to troop.troop_type.title, troop_path(troop) %></td>
+        <td> Параметры </td>
+        <td> 
+          <%= link_to "Редактировать отряд", edit_troop_path(troop), class: 'btn1' %>
+          <%= button_to "Удалить отряд", troop_path(troop), method: :delete, class:'btn2', id: "delete-#{troop.id}"%> 
+        </td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 

@@ -12,14 +12,15 @@
   </thead>
   <tbody>
     <% @humen.each do |human| %>
-    <tr>
-      <td scope="row"><%= human.id %></td>
-      <td><%= link_to human.name, human_path(human) %></td>
-      <td><%= link_to "Редактировать человека", edit_human_path(human), class: 'btn1' %>
-          <%= button_to "Удалить человека", human_path(human), method: :delete, class: 'btn2', id: "delete"%></td>
-         </ul>
-      </td>
-     </tr>
+      <tr>
+        <td scope="row"><%= human.id %></td>
+        <td><%= link_to human.name, human_path(human) %></td>
+        <td>
+          <%= link_to "Редактировать человека", edit_human_path(human), class: 'btn1' %>
+          <%= button_to "Удалить человека", human_path(human), method: :delete, class: 'btn2', id: "delete"%>
+        </td>
+        </td>
+      </tr>
     <% end -%>
   </tbody>
 </table>

@@ -13,14 +13,11 @@
   </thead>
   <tbody>
     <% @building_levels.each do |building_level| %>
-
      <tr>
       <td scope="row"><%= building_level.id %></td>
       <td><%= building_level.level %></td>
       <td><%= link_to "Редактировать уровень постройки", edit_building_level_path(building_level), class: 'btn1' %>
           <%= button_to "Удалить уровень постройки", building_level_path(building_level), method: :delete, class: 'btn2', id: "delete-#{building_level.id}"%></td>
-        </ul>
-      </td>
      </tr>
     <% end -%>
   </tbody>

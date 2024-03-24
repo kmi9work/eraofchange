@@ -2,7 +2,7 @@
 
 <h1>Регионы</h1>
 <%= link_to "Создать новый регион", new_region_path, class: 'btn' %>
- <table class="table">
+<table class="table">
   <thead>
     <tr>
       <th scope="col">#</th>
@@ -13,15 +13,15 @@
   </thead>
   <tbody>
     <% @regions.each do |region| %>
-     <tr>
-      <td scope="row"><%= region.id %></td>
-      <td><%= link_to region.title, region_path(region) %></td>
-      <td>параметры </td>
-      <td><%= link_to "Редактировать регион", edit_region_path(region), class: 'btn1' %>
-          <%= button_to "Удалить регион", region_path(region), method: :delete, class: 'btn2', id: "delete-#{region.id}"%></td>
-        </ul>
-      </td>
-     </tr>
+      <tr>
+        <td scope="row"><%= region.id %></td>
+        <td><%= link_to region.title, region_path(region) %></td>
+        <td>Параметры</td>
+        <td>
+          <%= link_to "Редактировать регион", edit_region_path(region), class: 'btn1' %>
+          <%= button_to "Удалить регион", region_path(region), method: :delete, class: 'btn2', id: "delete-#{region.id}" %>
+        </td>
+      </tr>
     <% end -%>
   </tbody>
 </table>
