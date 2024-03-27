@@ -1,14 +1,14 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Army sizes</h1>
+<h1>Размеры армий</h1>
 
 <div id="army_sizes">
   <% @army_sizes.each do |army_size| %>
     <%= render army_size %>
     <p>
-      <%= link_to "Show this army size", army_size %>
+      <%= link_to "Редактировать размер армии", army_size %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New army size", new_army_size_path %>
+<%= link_to "Создать размер армии", new_army_size_path %>

@@ -16,7 +16,7 @@
     
     <p>Семья: <%= form.select :family_id, options_for_select(Family.all.collect{ |f| [f.name, f.id] }, player.family_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-    <p>Тип игрового персонажа: <%= form.select :player_type_id, options_for_select(PlayerType.all.collect{ |pt| [pt.title, pt.id] }, player.player_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+    <p>Тип игрока: <%= form.select :player_type_id, options_for_select(PlayerType.all.collect{ |pt| [pt.title, pt.id] }, player.player_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
     <p>Кредит: <%= form.select :credit_ids, options_for_select(Credit.all.collect{ |c| [c.sum, c.id] }, player.credit_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 
@@ -24,6 +24,7 @@
 
     <p>Предприятия: <%= form.select :plant_ids, options_for_select(Plant.all.collect{ |p| [p.comments, p.id] }, player.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     
+    <p>Должность: <%= form.select :job_id, options_for_select(Job.all.collect{ |j| [j.name, j.id] }, player.job_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
     <%= form.submit 'Отправить' %>
 
   </div>

@@ -1,3 +1,3 @@
 class Credit < ApplicationRecord
-	belongs_to :player, optional: true
+  belongs_to :player, optional: true
 end

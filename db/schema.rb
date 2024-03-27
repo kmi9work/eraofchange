@@ -188,14 +188,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "plant_place_id"
     t.integer "economic_subject_id"
     t.string "economic_subject_type"
+    t.integer "settlement_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "player_types", force: :cascade do |t|
     t.string "title"
+    t.integer "ideologist_type_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["ideologist_type_id"], name: "index_player_types_on_ideologist_type_id"
   end
 
   create_table "players", force: :cascade do |t|
@@ -278,6 +281,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
   add_foreign_key "buildings", "building_levels"
   add_foreign_key "buildings", "settlements"
   add_foreign_key "ideologist_technologies", "ideologist_types"
+  add_foreign_key "player_types", "ideologist_types"
   add_foreign_key "political_actions", "players"
   add_foreign_key "political_actions", "political_action_types"
   add_foreign_key "troops", "armies"

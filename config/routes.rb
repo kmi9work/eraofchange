@@ -23,7 +23,7 @@ Rails.application.routes.draw do
   resources :resources
   resources :plant_types
   resources :plant_categories
-  resources :settlement_categories
+  resources :settlement_types
   resources :guilds
   resources :merchants
   resources :families

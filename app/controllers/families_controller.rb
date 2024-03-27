@@ -10,9 +10,11 @@ class FamiliesController < ApplicationController
 
   def new
     @family = Family.new
+    @familyless_players = Player.where(family_id: nil)
   end
 
   def edit
+    @familyless_players = Player.where(family_id: [nil, @family.id])
   end
 
   def create

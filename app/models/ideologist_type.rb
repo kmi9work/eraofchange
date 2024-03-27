@@ -1,2 +1,0 @@
-class IdeologistType < ApplicationRecord
-end

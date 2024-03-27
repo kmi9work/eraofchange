@@ -2,8 +2,6 @@
 
 one:
   title: MyString
-  ideologist_type: one
 
 two:
   title: MyString
-  ideologist_type: two

@@ -1,14 +1,29 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Troop types</h1>
+<h2>Типы отрядов</h2>
+<%= link_to "New troop type", new_troop_type_path %>
 
-<div id="troop_types">
-  <% @troop_types.each do |troop_type| %>
-    <%= render troop_type %>
-    <p>
-      <%= link_to "Show this troop type", troop_type %>
-    </p>
-  <% end %>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Название отряда</th>
+      <th scope="col">Параметры</th>
+      <th scope="col">Действия</th>
+     </tr>
+  </thead>
+  <tbody>
+    <% @troop_types.each do |troop_type| %>
+      <tr>
+        <td scope="row"><%= troop_type.id %></td>
+        <td><%= link_to troop_type.title, troop_type_path(troop_type.id) %></td>
+        <td>params</td>
+        <td>
+          <%= link_to "Редактировать", edit_troop_type_path(troop_type), class: 'btn1'%>
+          <%= button_to "Удалить", troop_type_path(troop_type), method: :delete, class: 'btn2'%>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
 </div>
 
-<%= link_to "New troop type", new_troop_type_path %>

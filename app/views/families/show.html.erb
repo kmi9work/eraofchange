@@ -4,14 +4,13 @@
   <h2>Фамилия семьи: <%= @family.name %></h2>
 
   <p>
-    Игровые персонажи в семье:<br>
+    Игроки в семье:<br>
     <ul>
       <% @family.players.each do |player|%>
         <li><%= link_to player.name, player %></li>
       <% end -%> 
     </ul> 
   </p>
-
 </div>
 
 <hr>

@@ -1,6 +1,6 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Имя игрового персонажа: <%= @player.name %></h2>
+<h2>Имя игрока: <%= @player.name %></h2>
 
 <% if @player.family_id.blank?%>
  <p>Семья не выбрана</p>
@@ -10,10 +10,16 @@
 <% end %>
 
 <% if @player.player_type_id.blank?%>
- <p>Тип игрового персонажа не выбран</p>
+ <p>Тип игрока не выбран</p>
 <% else %>
  <% link_to_player_type = "/player_types/#{@player.player_type.id}/" %>
- <p>Тип игрового персонажа: <%= link_to @player.player_type.title, link_to_player_type %></p>
+ <p>Тип игрока: <%= link_to @player.player_type.title, link_to_player_type %></p>
+<% end %>
+
+<% if @player.job.blank?%>
+  <p>Должность: не назначен</p>
+<% else %>
+  <p>Должность: <%= @player.job.name %></p>
 <% end %>
 
 <% if @player.guild_id.blank? %>

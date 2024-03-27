@@ -13,9 +13,7 @@
 
   <div>
     <p>Название: <%= form.text_field :name %></p>
-    
-    <p>Игровой персонаж: <%= form.select :player_ids, options_for_select(Player.all.collect{ |p| [p.name, p.id] }, family.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
-    
+    <p>Игроки: <%= form.select :player_ids, (@familyless_players.collect{ |fp| [fp.name, fp.id]} ), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
     <%= form.submit "Отправить" %>
   </div>
 <% end %>
