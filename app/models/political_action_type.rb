@@ -1,3 +1,3 @@
 class PoliticalActionType < ApplicationRecord
-	belongs_to :political_action, optional: true
+	has_many :political_actions, dependent: :destroy
 end

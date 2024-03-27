@@ -15,21 +15,22 @@
     <% @guilds.each do |guild| %>
       <tr>
         <td><%= link_to guild.name, guild %></td>
-        <td> <% if guild.player_ids.blank? %>
-         Не выбраны
-        <% else %>
-          <% guild.players.each do |player|%>
-          <%= link_to player.name, player %>
-         <% end -%>
-        <% end -%>
+        <td> 
+          <% if guild.player_ids.blank? %>
+            Не выбраны
+          <% else %>
+            <% guild.players.each do |player|%>
+              <%= link_to player.name, player %>
+            <% end -%>
+          <% end -%>
         </td>
         <td>
           <% if guild.plant_ids.blank? %>
-           Не выбраны
+            Не выбраны
           <% else %>
             <% guild.plants.each do |plant|%>
-            <%= link_to plant.name_of_plant, plant %> 
-           <% end -%>
+              <%= link_to plant.name_of_plant, plant %> 
+            <% end -%>
           <% end -%>
         </td>
         <td class="left">

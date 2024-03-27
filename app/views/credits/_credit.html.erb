@@ -27,10 +27,10 @@
   <p>
     <strong>Игровой персонаж:</strong>
     <% if credit.player_id.blank?%>
-     Не выбран
+      Не выбран
     <% else %>
-     <% link_to_player = "/players/#{credit.player_id}/" %>
-     <%= link_to credit.player&.name, link_to_player %>
+      <% link_to_player = "/players/#{credit.player_id}/" %>
+      <%= link_to credit.player&.name, link_to_player %>
     <% end -%>
   </p>
 

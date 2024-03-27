@@ -169,6 +169,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
   create_table "plant_places", force: :cascade do |t|
     t.string "title"
     t.integer "plant_category_id"
+    t.integer "settlement_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -183,7 +184,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "plants", force: :cascade do |t|
     t.string "comments"
-    t.integer "player_id"
     t.integer "plant_level_id"
     t.integer "plant_place_id"
     t.integer "economic_subject_id"
@@ -211,20 +211,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.string "title"
     t.json "action"
     t.json "params"
-    t.integer "political_action_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["political_action_id"], name: "index_political_action_types_on_political_action_id"
   end
 
   create_table "political_actions", force: :cascade do |t|
     t.integer "year"
     t.integer "success"
     t.json "params"
-    t.integer "player_id", null: false
+    t.integer "player_id"
+    t.integer "political_action_type_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["player_id"], name: "index_political_actions_on_player_id"
+    t.index ["political_action_type_id"], name: "index_political_actions_on_political_action_type_id"
   end
 
   create_table "regions", force: :cascade do |t|
@@ -278,8 +278,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
   add_foreign_key "buildings", "building_levels"
   add_foreign_key "buildings", "settlements"
   add_foreign_key "ideologist_technologies", "ideologist_types"
-  add_foreign_key "political_action_types", "political_actions"
   add_foreign_key "political_actions", "players"
+  add_foreign_key "political_actions", "political_action_types"
   add_foreign_key "troops", "armies"
   add_foreign_key "troops", "troop_types"
 end

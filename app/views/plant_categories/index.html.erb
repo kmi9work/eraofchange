@@ -13,33 +13,33 @@
   </thead>
   <tbody>
     <% @plant_categories.each do |plant_category|%>
-    <tr>
-      <td><%= link_to plant_category.name, plant_category %></td>
-      <td>
-        <% if plant_category.plant_type_ids.blank? %>
-         Нет типов предприятий
-        <% else %>
-         <% plant_category.plant_types.each do |plant_type|%>
-          <%= link_to plant_type.name, plant_type %>
-         <% end -%>
-        <% end -%>
-      </td>
-      <td>
-        <% if plant_category.plant_place_ids.blank? %>
-         Не выбраны места для предприятий
-        <% else %>
-         <% plant_category.plant_places.each do |plant_place|%>
-          <%= link_to plant_place.title, plant_place %>
-         <% end -%>
-        <% end -%>
-      </td>
-      <td class="left">
-        <ul>
-          <%= link_to "Редактировать", edit_plant_category_path(plant_category), class: 'btn1' %>
-          <%= button_to "Удалить", plant_category_path(plant_category), method: :delete, class: 'btn2' %>
-        </ul>
-      </td>
-     </tr>
+      <tr>
+        <td><%= link_to plant_category.name, plant_category %></td>
+        <td>
+          <% if plant_category.plant_type_ids.blank? %>
+            Нет типов предприятий
+          <% else %>
+            <% plant_category.plant_types.each do |plant_type|%>
+              <%= link_to plant_type.name, plant_type %>
+            <% end -%>
+          <% end -%>
+        </td>
+        <td>
+          <% if plant_category.plant_place_ids.blank? %>
+            Не выбраны места для предприятий
+          <% else %>
+            <% plant_category.plant_places.each do |plant_place|%>
+              <%= link_to plant_place.title, plant_place %>
+            <% end -%>
+          <% end -%>
+        </td>
+        <td class="left">
+          <ul>
+            <%= link_to "Редактировать", edit_plant_category_path(plant_category), class: 'btn1' %>
+            <%= button_to "Удалить", plant_category_path(plant_category), method: :delete, class: 'btn2' %>
+          </ul>
+        </td>
+      </tr>
     <% end -%>
   </tbody>
 </table>
