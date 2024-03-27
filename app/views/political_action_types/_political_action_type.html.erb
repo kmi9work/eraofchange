@@ -14,4 +14,14 @@
     <%= political_action_type.params %>
   </p>
 
+  <p>
+    <strong>Политичеcкое действие:</strong>
+    <% if political_action_type.political_action_id.blank?%>
+     Не выбрано
+    <% else %>
+    
+     <%= link_to political_action_type.political_action&.year, political_action_path %>
+    <% end -%>
+  </p>
+
 </div>

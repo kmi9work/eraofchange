@@ -2,34 +2,34 @@
 
 <h2>Семьи</h2>
   
-<table class="table">
+<table>
   <thead>
     <tr>
-      <th scope="col">#</th>
-      <th scope="col">Имя</th>
-      <th scope="col">Игроки в семье</th>
-      <th scope="col">Действия</th>
+      <th>Фамилии семей</th>
+      <th>Игровые персонажи в семье</th>
+      <th>Действия</th>
     </tr>
   </thead>
   <tbody>
     <% @families.each do |family| %>
-      <tr>
-        <td scope="row"><%= family.id %></td>
-        <td><%= link_to family.name, family_path(family) %></td>
-        <td>
-          <% if family.player_ids.blank? %>
-            Не выбран
-          <% else %>
-            <% family.players.each do |player|%>
-              <%= link_to player.name, player %>
-            <% end -%>
-          <% end -%>
-        </td>
-        <td>
+     <tr>
+      <td><%= link_to family.name, family %></td>
+      <td>
+        <% if family.player_ids.blank? %>
+         Не выбраны
+        <% else %>
+          <% family.players.each do |player|%>
+          <%= link_to player.name, player %>
+         <% end -%>
+        <% end -%>
+      </td>
+      <td class="left">
+        <ul>
           <%= link_to "Редактировать семью", edit_family_path(family), class: 'btn1' %>
-          <%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2', id: "delete-#{family.id}"%>"%>
-        </td>
-      </tr>
+          <%= button_to "Удалить семью", family_path(family), method: :delete, class: 'btn2' %>
+        </ul>
+      </td>
+     </tr>
     <% end -%> 
   </tbody>
 </table>

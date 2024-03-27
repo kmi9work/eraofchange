@@ -27,6 +27,10 @@
   </div>
 
   <div>
+    Политическое действие: <%= form.select :political_action_id, options_for_select(PoliticalAction.all.collect{ |pa| [pa.year, pa.id] }, political_action_type.political_action_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

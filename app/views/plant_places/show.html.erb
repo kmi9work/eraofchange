@@ -3,8 +3,8 @@
 <%= render @plant_place %>
 
 <div>
-  <%= link_to "Edit this plant place", edit_plant_place_path(@plant_place) %> |
-  <%= link_to "Back to plant places", plant_places_path %>
+  <%= link_to "Редактировать", edit_plant_place_path(@plant_place) %> |
+  <%= link_to "Назад к местам для предприятий", plant_places_path %>
 
-  <%= button_to "Destroy this plant place", @plant_place, method: :delete %>
+  <%= button_to "Удалить", @plant_place, method: :delete %>
 </div>

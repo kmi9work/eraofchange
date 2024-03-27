@@ -6,18 +6,37 @@
   <thead>
     <tr>
       <th>Название</th>
-      <th>Действие</th>
+      <th>Игровые персонажи в гильдии</th>
+      <th>Предприятия у гильдии</th>
+      <th>Действия</th>
     </tr>
   </thead>
   <tbody>
     <% @guilds.each do |guild| %>
-      <% link = "/guilds/#{guild.id}" %>
       <tr>
-        <td><%= link_to guild.name, link %></td>
+        <td><%= link_to guild.name, guild %></td>
+        <td> 
+          <% if guild.player_ids.blank? %>
+            Не выбраны
+          <% else %>
+            <% guild.players.each do |player|%>
+              <%= link_to player.name, player %>
+            <% end -%>
+          <% end -%>
+        </td>
+        <td>
+          <% if guild.plant_ids.blank? %>
+            Не выбраны
+          <% else %>
+            <% guild.plants.each do |plant|%>
+              <%= link_to plant.name_of_plant, plant %> 
+            <% end -%>
+          <% end -%>
+        </td>
         <td class="left">
           <ul>
             <%= link_to 'Редактировать', edit_guild_path(guild), class: 'btn1' %>
-            <%= button_to 'Удалить', guild_path(guild), method: :delete, class: 'btn2', id: "delete-#{guild.id}" %>
+            <%= button_to 'Удалить', guild_path(guild), method: :delete, class: 'btn2' %>
           </ul>
         </td>
       </tr>

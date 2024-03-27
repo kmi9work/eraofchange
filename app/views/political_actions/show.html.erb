@@ -3,8 +3,8 @@
 <%= render @political_action %>
 
 <div>
-  <%= link_to "Edit this political action", edit_political_action_path(@political_action) %> |
-  <%= link_to "Back to political actions", political_actions_path %>
+  <%= link_to "Редактировать", edit_political_action_path(@political_action) %> |
+  <%= link_to "Назад к политическим действиям", political_actions_path %>
 
-  <%= button_to "Destroy this political action", @political_action, method: :delete %>
+  <%= button_to "Удалить", @political_action, method: :delete %>
 </div>

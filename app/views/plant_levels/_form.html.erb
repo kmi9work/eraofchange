@@ -42,6 +42,10 @@
   </div>
 
   <div>
+     Тип предприятия: <%= form.select :plant_type_id, options_for_select(PlantType.all.collect{ |pt| [pt.name, pt.id] }, plant_level.plant_type_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

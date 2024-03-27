@@ -1,6 +1,19 @@
 <p style="color: green"><%= notice %></p>
 
-<h2>Категория предприятия: <%= @plant_category.name %></h2> 
+<h2>Категория предприятия: <%= @plant_category.name %></h2>
+
+<p>
+  <% if @plant_category.plant_type_ids.blank? %>
+   Нет типов предприятия
+  <% else %>
+   Типы предприятий:<br>
+   <ul>
+    <% @plant_category.plant_types.each do |plant_type| %>
+     <li><%= link_to plant_type.name, plant_type %></li>
+    <% end -%> 
+   </ul>
+  <% end %> 
+</p>
 
 <div>
   <%= link_to "Редактировать категорию предприятия", edit_plant_category_path(@plant_category) %>

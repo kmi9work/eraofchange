@@ -1,34 +1,55 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Тип предприятия</h1>
-<%= link_to "Создать новый тип предприятия", new_plant_type_path %>
+<h2>Типы предприятия</h2>
+
 <table>
   <thead>
     <tr>
-      <th>№</th>
-      <th>Предприятие</th>
-      <th>Категория</th>
-      <th>Производительность</th>
+      <th>Тип предприятие</th>
+      <th>Категория предприятия</th>
+      <th>Уровень предприятия</th>
+      <th>Вид ископаемого</th>
       <th>Действия</th>
     </tr>
   </thead>
   <tbody>
-<div id="plant_types">
-  <% @plant_types.each do |plant_type| %>
+    <% @plant_types.each do |plant_type| %>
     <tr>
-    <td><%= plant_type.id %></td>
-    <td><%= link_to plant_type.name, plant_type %></td>
-    <td> Производительность </th>
-    <td> Производительность </th>
-    <td>   
-      <%= link_to 'Редактировать', edit_plant_type_path(plant_type), class: 'btn1' %>
-      <%= button_to 'Удалить', plant_type_path(plant_type), method: :delete, class: 'btn2' %>
-    </td>
-    <p>
-  </p>
+      <td><%= link_to plant_type.name, plant_type %></td>
+      <td>
+        <% if plant_type.plant_category.blank? %>
+         Не выбрана
+        <% else %>
+         <% link_to_plant_category = "/plant_categories/#{plant_type.plant_category.id}" %>
+         <%= link_to plant_type.plant_category&.name, link_to_plant_category %>
+        <% end -%>
+      </td>
+      <td>
+        <% if plant_type.plant_level_ids.blank? %>
+         Не выбран
+        <% else %>
+         <% plant_type.plant_levels.each do |plant_level|%>
+          <%= link_to plant_level.level, plant_level %>
+         <% end -%>
+        <% end -%>
+      </td>
+      <td>
+        <% if plant_type.fossil_type.blank? %>
+         Не выбран
+        <% else %>
+         <% link_to_fossil_type = "/fossil_types/#{plant_type.fossil_type.id}" %>
+         <%= link_to plant_type.fossil_type&.title, link_to_fossil_type %>
+        <% end -%>
+      </td>
+      <td>
+        <%= link_to 'Редактировать', edit_plant_type_path(plant_type), class: 'btn1' %>
+        <%= button_to 'Удалить', plant_type_path(plant_type), method: :delete, class: 'btn2' %>
+      </td>
+    </tr>
   <% end -%>
-</div>
+ </body>
+</table>
 
+<hr>
 
-
-
+<%= link_to "Создать новый тип предприятия", new_plant_type_path %>

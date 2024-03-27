@@ -29,4 +29,14 @@
     <%= plant_level.max_product %>
   </p>
 
+  <p>
+    <strong>Тип предприятия:</strong>
+    <% if plant_level.plant_type.blank? %>
+     Не выбран
+    <% else %>
+     <% link_to_plant_type = "/plant_types/#{plant_level.plant_type.id}" %>
+     <%= link_to plant_level.plant_type&.name, link_to_plant_type %>
+    <% end -%>
+  </p>
+
 </div>

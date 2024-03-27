@@ -10,7 +10,7 @@ class Player < ApplicationRecord
   has_many :settlements
   has_many :armies
   has_many :credits
-  has_many :political_action
+  has_many :political_actions
 
-  #validates :name, presence: { message: "Поле Имя должно быть заполнено" }
+  validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 end

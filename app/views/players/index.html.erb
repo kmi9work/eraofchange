@@ -9,57 +9,77 @@
       <th>Тип игрока</th>
       <th>Должность</th>
       <th>Семья</th>
-      <th>Человек</th>
+      <th>Кредиты</th>
+      <th>Политические действия</th>
+      <th>Имя в жизни</th>
       <th>Армия</th>
       <th>Действия</th>
     </tr>
   </thead>
   <tbody>
     <% @players.each do |player| %>
-      <tr>
-        <td><%= link_to player.name, player_path(player) %></td>
-        <td>
-          <% if player.player_type_id.blank? %>
-            Не выбран
-          <% else %>
-            <%= link_to player.player_type&.title, player_type_path(player) %>
+     <tr>
+      <td><%= link_to player.name, player %></td>
+      <td>
+        <% if player.player_type.blank? %>
+          Не выбран
+        <% else %>
+          <% link_to_player_type = "/player_types/#{player.player_type.id}" %>
+          <%= link_to player.player_type&.title, link_to_player_type %>
+        <% end -%>
+      </td>
+      <td>
+        <% if player.job_id.blank? %>
+          Не выбран
+        <% else %>
+          <%= link_to player.job.name, job_path(player) %>
+        <% end -%>
+      </td>
+      <td>
+        <% if player.family.blank? %>
+          Не выбрана
+        <% else %>
+          <% link_to_family = "/families/#{player.family.id}" %>
+          <%= link_to player.family&.name, link_to_family %>
+        <% end -%>
+      </td>
+      <td>
+        <% if player.credit_ids.blank? %>
+          Нет кредита
+        <% else %>
+          <% player.credits.each do |credit|%>
+            <%= link_to credit.sum, credit %>
           <% end -%>
-        </td>
-
-        <td>
-          <% if player.job_id.blank? %>
-            Не выбран
-          <% else %>
-            <%= link_to player.job.name, job_path(player) %>
-          <% end -%>
-        </td>
-        <td>
-          <% if player.family.blank? %>
-            Игрок не в семье
-          <% else %>
-            <%= link_to player.family.name, family_path(player) %>
-          <% end -%>
-        </td>
-        <td>
-          <% if player.human.blank? %>
-            Игрок не приписан к человеку
-          <% else %>
-            <%= link_to player.human.name, human_path(player) %>
-          <% end -%>
-
-        </td>
-        <td>
-          <% player.armies.each do |army| %>
-            <%= link_to army.army_size.name, army_path(army) %>
-          <% end -%>
-        </td>
-        <td class="left">
-          <ul>
-            <%= link_to "Редактировать", edit_player_path(player), class: 'btn1' %>
-            <%= button_to "Удалить", player_path(player), method: :delete, class: 'btn2' %>
-          </ul>
-        </td>
-      </tr>
+        <% end -%>
+      </td>
+      <td>
+        <% if player.political_action_ids.blank? %>
+         Нет политичеcких действий
+        <% else %>
+         <% player.political_actions.each do |political_action|%>
+          <%= link_to political_action.year, political_action %>
+         <% end -%>
+        <% end -%>
+      </td>
+      <td>
+        <% if player.human.blank? %>
+          Игрок не приписан к человеку
+        <% else %>
+          <%= link_to player.human.name, human_path(player) %>
+        <% end -%>
+      </td>
+      <td>
+        <% player.armies.each do |army| %>
+          <%= link_to army.army_size.name, army_path(army) %>
+        <% end -%>
+      </td>
+      <td class="left">
+        <ul>
+          <%= link_to "Редактировать", edit_player_path(player), class: 'btn1' %>
+          <%= button_to "Удалить", player_path(player), method: :delete, class: 'btn2' %>
+        </ul>
+      </td>
+     </tr>
     <% end -%>
   </tbody>
 </table>

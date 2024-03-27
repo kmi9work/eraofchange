@@ -17,6 +17,14 @@
   </div>
 
   <div>
+    Типы предприятий: <%= form.select :plant_type_ids, options_for_select(PlantType.all.collect{ |pt| [pt.name, pt.id] }, fossil_type.plant_type_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
+  </div>
+
+  <div>
+    Места для предприятияй: <%= form.select :plant_place_ids, options_for_select(PlantPlace.all.collect{ |pp| [pp.title, pp.id] }, fossil_type.plant_place_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

@@ -65,6 +65,6 @@ class PlantLevelsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_level_params
-      params.require(:plant_level).permit(:level, :deposit, :charge, :formula, :price, :max_product)
+      params.require(:plant_level).permit(:level, :deposit, :charge, :formula, :price, :max_product, :plant_type_id, :plant_ids => [])
     end
 end

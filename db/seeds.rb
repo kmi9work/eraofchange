@@ -49,6 +49,9 @@ Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
+PlantCategory.create(name: "Добывающее")
+PlantCategory.create(name: "Перерабатывающее")
+
 Country.create(title: "Русь")
 Country.create(title: "Большая орда")
 Country.create(title: "Крымское ханство")
@@ -112,9 +115,8 @@ Troop.create(troop_type_id: 4, is_hired: true, army_id: 1 )
 
 
 # Plant.create(name: "Лесопилка", 
-
-Plant.create(name: "Мастерская каменотёса", settlement_id: 1)
-Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
+# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
 # Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
 # Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
 # Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)

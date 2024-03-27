@@ -2,10 +2,18 @@
 
 <h2>Имя игрока: <%= @player.name %></h2>
 
-<% if @player.player_type_id.blank?%>
-  <p>Тип игрока: не назначен</p>
+<% if @player.family_id.blank?%>
+ <p>Семья не выбрана</p>
 <% else %>
-  <p>Тип игрока: <%= link_to @player.player_type.title, player_type_path(@player) %></p>
+ <% link_to_family = "/families/#{@player.family.id}/" %>
+ <p>Семья: <%= link_to @player.family.name, link_to_family %></p>
+<% end %>
+
+<% if @player.player_type_id.blank?%>
+ <p>Тип игрока не выбран</p>
+<% else %>
+ <% link_to_player_type = "/player_types/#{@player.player_type.id}/" %>
+ <p>Тип игрока: <%= link_to @player.player_type.title, link_to_player_type %></p>
 <% end %>
 
 <% if @player.job.blank?%>
@@ -13,6 +21,39 @@
 <% else %>
   <p>Должность: <%= @player.job.name %></p>
 <% end %>
+
+<% if @player.guild_id.blank? %>
+ <p>Гильдия не выбрана</p>
+<% else %>
+ <% link_to_guild = "/guilds/#{@player.guild.id}/" %>
+ <p>Гильдия: <%= link_to @player.guild.name, link_to_guild %></p>
+<% end %>
+
+<p>
+  <% if @player.credit_ids.blank? %>
+   Кредитов нет
+   <% else %>
+   Кредиты:<br>
+   <ul>
+    <% @player.credits.each do |credit| %>
+     <li><%= link_to credit.sum, credit %></li>
+    <% end -%> 
+   </ul>
+  <% end %> 
+</p>
+
+<p>
+  <% if @player.political_action_ids.blank? %>
+   Политических действий нет
+   <% else %>
+   Политичекие действия:<br>
+   <ul>
+    <% @player.political_actions.each do |political_action| %>
+     <li><%= link_to political_action.year, political_action %></li>
+    <% end -%> 
+   </ul>
+  <% end %> 
+</p>
 
 <hr>
 

@@ -64,6 +64,6 @@ class PlantTypesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def plant_type_params
       #params.fetch(:plant_type, {})
-      params.permit(:name)
+      params.require(:plant_type).permit(:name, :plant_category_id, :fossil_type_id, :plant_level_ids => [])
     end
 end

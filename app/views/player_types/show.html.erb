@@ -3,8 +3,8 @@
 <%= render @player_type %>
 
 <div>
-  <%= link_to "Edit this player type", edit_player_type_path(@player_type) %> |
-  <%= link_to "Back to player types", player_types_path %>
+  <%= link_to "Редактировать", edit_player_type_path(@player_type) %> |
+  <%= link_to "Все типы игровых персонажей", player_types_path %>
 
-  <%= button_to "Destroy this player type", @player_type, method: :delete %>
+  <%= button_to "Удалить", @player_type, method: :delete %>
 </div>

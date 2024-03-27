@@ -1,18 +1,16 @@
 <p style="color: green"><%= notice %></p>
 
 <div>
-  <h2>Имя семьи: <%= @family.name %></h2>
+  <h2>Фамилия семьи: <%= @family.name %></h2>
 
   <p>
     Игроки в семье:<br>
     <ul>
-      <%@family.players.each do |player|%>
+      <% @family.players.each do |player|%>
         <li><%= link_to player.name, player %></li>
       <% end -%> 
-    </ul>
+    </ul> 
   </p>
-
-  <p>Собственность семьи: </p>
 </div>
 
 <hr>

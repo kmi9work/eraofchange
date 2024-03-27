@@ -2,17 +2,17 @@
 
 <h2>Гильдия: <%= @guild.name %></h2>
 
-Купцы в гильдии:<br>
+Игровые персонажи в гильдии:<br>
 <ul>
-  <% @guild.merchants.each do |merchant| %>
-    <li><%= link_to merchant.name, merchant %></li>
+  <% @guild.players.each do |player| %>
+     <li><%= link_to player.name, player %></li>
   <% end -%>
 </ul>
 
 Предприятия у гильдии:<br>
 <ul>
   <% @guild.plants.each do |plant| %>
-    <li><%= link_to plant.name, plant %></li>
+    <li><%= link_to plant.comments, plant %></li>
   <% end -%>
 </ul>
 

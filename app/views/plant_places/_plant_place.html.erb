@@ -5,8 +5,28 @@
   </p>
 
   <p>
-    <strong>Plant place type:</strong>
-    <%= plant_place.plant_place_type %>
+    <strong>Категория предприятия:</strong>
+     <% if plant_place.plant_category.blank? %>
+      Не выбрана
+     <% else %>
+      <% link_to_plant_category = "/plant_categories/#{plant_place.plant_category.id}" %>
+      <%= link_to plant_place.plant_category&.name, link_to_plant_category %>
+     <% end -%>
   </p>
 
+  <p>
+    <strong>Виды ископаемых:</strong>
+     <% if plant_place.fossil_type_ids.blank? %>
+      Не выбраны
+     <% else %>
+      <% plant_place.fossil_types.each do |fossil_type|%>
+       <%= link_to fossil_type.title, fossil_type %>
+      <% end -%>
+     <% end -%>
+  </p>
+
+
 </div>
+
+
+

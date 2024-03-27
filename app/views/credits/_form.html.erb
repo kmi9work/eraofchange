@@ -37,6 +37,10 @@
   </div>
 
   <div>
+    Игровой персонаж: <%= form.select :player_id, options_for_select(Player.all.collect{ |p| [p.name, p.id] }, credit.player_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
