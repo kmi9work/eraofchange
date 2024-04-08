@@ -5,6 +5,6 @@
 <div>
   <%= link_to "Edit this building", edit_building_path(@building) %> |
   <%= link_to "Back to buildings", buildings_path %>
-
+  <%= button_to 'Улучшить здание', upgrade_path, method: :patch %></li>
   <%= button_to "Destroy this building", @building, method: :delete %>
 </div>

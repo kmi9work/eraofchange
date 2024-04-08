@@ -20,11 +20,25 @@
 </p>
 
 <p>
-Предприятия в городе:<br>
+Построить во владении:<br>
+  <li><%= button_to 'Построить церковь', build_church_path, method: :post %></li>
+  <li><%= button_to 'Построить рынок', build_market_path, method: :post %></li>
+
+  <li><%= button_to 'Построить форт', build_fort_path, method: :post %></li>
+  <li><%= button_to 'Разместить гарнизон', build_garrison_path, method: :post %></li>
+</p>
+
+<p>
+Постройки во владении:<br>
  <ul>
-  <%# @settlement.plant_places.each do |plant| %>
-  <li><%#= link_to plant.name, plant %></li>
-  <%# end -%>
+  <% @settlement.buildings.each do |building| %>
+  <li>
+      <%= link_to building.building_level.name, building_path(building) %>
+     <%= building.id %>
+      <%= button_to 'Улучшить здание', building_upgrade_path(building.id), method: :patch %>
+
+  </li>
+  <% end -%>
  </ul>
 </p>
 

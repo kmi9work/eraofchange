@@ -85,20 +85,42 @@ Army.create(region_id: 1, player_id: 6, army_size_id: 3)
 
 
 
-BuildingType.create(title: "Церковь")
-BuildingType.create(title: "Храм")
-BuildingType.create(title: "Рынок")
-BuildingType.create(title: "Форт")
+BuildingType.create(title: "Религиозная постройка")
+BuildingType.create(title: "Оборонительная постройка")
+BuildingType.create(title: "Торговая постройка")
+BuildingType.create(title: "Размер гарнизона")
 
-BuildingLevel.create(level: 1, building_type_id: 1)
-BuildingLevel.create(level: 2, building_type_id: 1)
-BuildingLevel.create(level: 3, building_type_id: 1)
+
+
+BuildingLevel.create(level: 1, building_type_id: 1, name: "Часовня")
+BuildingLevel.create(level: 2, building_type_id: 1, name: "Храм")
+BuildingLevel.create(level: 3, building_type_id: 1, name: "Монастырь")
+
+
+
+BuildingLevel.create(level: 1, building_type_id: 2, name: "Форт")
+BuildingLevel.create(level: 2, building_type_id: 2, name: "Крепость")
+BuildingLevel.create(level: 3, building_type_id: 2, name: "Кремль")
+
+
+
+BuildingLevel.create(level: 1, building_type_id: 3, name: "Базар")
+BuildingLevel.create(level: 2, building_type_id: 3, name: "Рынок")
+BuildingLevel.create(level: 3, building_type_id: 3, name: "Ярмарка")
+
+
+BuildingLevel.create(level: 1, building_type_id: 4, name: "Караул")
+BuildingLevel.create(level: 2, building_type_id: 4, name: "Гарнизон")
+BuildingLevel.create(level: 3, building_type_id: 4, name: "Казармы")
+
+
 
 Building.create(building_level_id: 1, settlement_id: 1)
-Building.create(building_level_id: 2, settlement_id: 1)
+Building.create(building_level_id: 2, settlement_id: 2)
 Building.create(building_level_id: 3, settlement_id: 1)
-
-Building.create(settlement_id: 1)
+Building.create(building_level_id: 4, settlement_id: 2)
+Building.create(building_level_id: 5, settlement_id: 1)
+Building.create(building_level_id: 6, settlement_id: 2)
 
 
 TroopType.create(title: "Легкая пехота")

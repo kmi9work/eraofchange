@@ -57,6 +57,18 @@ class BuildingsController < ApplicationController
     end
   end
 
+
+  def upgrade
+    @building_to_upgrade = Building.find(params[:id])
+    if @building_to_upgrade.building_level.level < 3
+      next_level = @building_to_upgrade.building_level.level + 1
+      required_building_type = @building_to_upgrade.building_level.building_type
+      @building_to_upgrade.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
+      @building_to_upgrade.save
+    end
+  end
+
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_building
