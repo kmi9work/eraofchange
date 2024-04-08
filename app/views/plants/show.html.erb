@@ -7,21 +7,27 @@
 <p> 
   Уровень:
   <% if @plant.plant_level.blank? %>
-   Не выбран
+    Не выбран
   <% else %>
-   <% link_to_plant_level = "/plant_levels/#{@plant.plant_level.id}" %>
-   <%= link_to @plant.plant_level&.level, link_to_plant_level %>
+    <% link_to_plant_level = "/plant_levels/#{@plant.plant_level.id}" %>
+    <%= link_to @plant.plant_level&.level, link_to_plant_level %>
   <% end -%>
 </p>
 
+
+<%= link_to @plant.upgrade!, @plant.plant_level %>
+
+<p><%= button_to "Улучшить предприятие", upgrade_plant_path, method: :put %></p>
+
+<br><br>
 <p>
   Место для предприятия:
-  <% if @plant.plant_place.blank? %>
-   не выбрано
+    <% if @plant.plant_place.blank? %>
+      не выбрано
   <% else %>
-   <% link_to_plant_place = "/plant_places/#{@plant.plant_place.id}" %>
-   <%= link_to @plant.plant_place&.title, link_to_plant_place %>
-<% end -%>
+    <% link_to_plant_place = "/plant_places/#{@plant.plant_place.id}" %>
+    <%= link_to @plant.plant_place&.title, link_to_plant_place %>
+  <% end -%>
 </p>
 
 <p>Гильдия/игровой персонаж: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %></p>
@@ -30,10 +36,12 @@
 
 <div>
   <%= link_to "Редактировать", edit_plant_path, class: 'btn1' %>
-  <%= button_to "Удалить", destroy_plant_path, method: :delete,  class: 'btn2'%></td>
+  <%= button_to "Удалить", destroy_plant_path, method: :delete,  class: 'btn2'%>
   <br><br>
   <%= link_to "Все предприятия", plants_path, class: 'btn'  %>
 </div>
 
+<br>
 
- 
+
+

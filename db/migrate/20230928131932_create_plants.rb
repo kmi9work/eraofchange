@@ -1,4 +1,4 @@
-class CreatePlants < ActiveRecord::Migration[7.0]
+lclass CreatePlants < ActiveRecord::Migration[7.0]
   def change
     create_table :plants do |t|
       t.string :comments

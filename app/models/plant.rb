@@ -10,10 +10,19 @@ class Plant < ApplicationRecord
       proprietor = "купца"
     end
 
-    plant_name = "#{@plant_type&.name}" + " #{proprietor}" + " #{economic_subject&.name}"
-  end
+    plant_name = "#{self.plant_level&.plant_type&.name}" + " #{proprietor}" + " #{self.economic_subject&.name}"
+  end 
 
   def upgrade!
+    level = self.plant_level&.level
+    if self.plant_level&.level < 3
+      pl = PlantLevel.find_by(level: level + 1, plant_type_id: self.plant_level.plant_type_id)
+      self.plant_level = pl
+      self.plant_level.save
+      return self.plant_level.level
+    end
+  end
+
     # Чтобы метод можно было проверить - нужно для начала сохранить несколько PlantLevel.
     # Метод должен увеличивать уровень предприятия. 
     # Пример запуска (как должно быть):
@@ -25,7 +34,7 @@ class Plant < ApplicationRecord
     # => 2
     # Метод должен сменить plant_level на новый plant_level с более высоким уровнем того же типа, если он есть (plant_type_id).
     # Если удалось повысить уровень - вернуть в методе новый уровень. Если не удалось - метод должен вернуть nil.
-  end
+  
 
   def pawn!
     # Заложить предприятие. Пометить предприятие как заложенное. Вывести стоимость.
