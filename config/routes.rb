@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :buildings
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade
+  patch '/buildings/:id/building_upgrade', to: 'building#building_upgrade', as: :building_upgrade
 
   resources :building_levels
   resources :building_types
@@ -42,7 +43,7 @@ Rails.application.routes.draw do
   post '/settlements/:id/build_fort', to: 'settlements#build_fort', as: :build_fort
   post '/settlements/:id/build_garrison', to: 'settlements#build_garrison', as: :build_garrison
   patch '/settlements/:id', to: 'settlements#update'
-  patch '/settlements/:id/building_upgrade', to: 'settlements#building_upgrade', as: :building_upgrade
+  # patch '/settlements/:id/building_upgrade', to: 'building#building_upgrade', as: :building_upgrade
   delete '/settlements/:id', to: 'settlements#destroy', as: :destroy
   
   get '/economic_subjects', to: 'economic_subjects#index'

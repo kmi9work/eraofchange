@@ -11,7 +11,7 @@
 <% end -%>
 </p>
 
-Тип владения:
+Регион владения:
 <% if @settlement.region_id.blank? %>
   не выбрана
 <% else %>
@@ -34,8 +34,7 @@
   <% @settlement.buildings.each do |building| %>
   <li>
       <%= link_to building.building_level.name, building_path(building) %>
-     <%= building.id %>
-      <%= button_to 'Улучшить здание', building_upgrade_path(building.id), method: :patch %>
+      <%= button_to 'Улучшить здание', building_upgrade_path, method: :patch %>
 
   </li>
   <% end -%>

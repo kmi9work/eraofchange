@@ -17,7 +17,7 @@ class SettlementsController < ApplicationController
     @settlement = Settlement.new(settlement_params)
     respond_to do |format|
     if @settlement.save
-        format.html { redirect_to settlement_url(@settlement), notice: "settlement was successfully created." }
+        # format.html { redirect_to settlement_url(@settlement), notice: "settlement was successfully created." }
         format.json { render :show, status: :created, location: @settlement }
       redirect_to settlement_url(@settlement), notice: "Населенный пункт успешно создан."
     else
@@ -56,57 +56,36 @@ class SettlementsController < ApplicationController
 
   def build_church
     @settlement = Settlement.find(params[:id])
-    which_settlement = @settlement.id
-    which_building = BuildingLevel.find_by(name: "Часовня")
-    Building.create(settlement_id: which_settlement, building_level: which_building)
+    @settlement.build_church
     redirect_to settlement_url(@settlement), notice: "Во владении построена часовня."
   end
 
   def build_market
     @settlement = Settlement.find(params[:id])
-    which_settlement = @settlement.id
-    which_building = BuildingLevel.find_by(name: "Базар" )
-    Building.create(settlement_id: which_settlement, building_level: which_building)
+    @settlement.build_market
     redirect_to settlement_url(@settlement), notice: "Во владении построен рынок."
   end
 
 
   def build_fort
     @settlement = Settlement.find(params[:id])
-    if @settlement.settlement_type.name == "Город"
-      which_settlement = @settlement.id
-      which_building = BuildingLevel.find_by(name: "Форт" )
-      Building.create(settlement_id: which_settlement, building_level: which_building)
-    else
-      puts "В деревне нельзя строить оборонительные сооружения"
-    end
-    redirect_to settlement_url(@settlement), notice: "Во владении построен рынок."
+    @settlement.build_fort
+    redirect_to settlement_url(@settlement), notice: "Во владении построен форт."
   end
 
   def build_garrison
     @settlement = Settlement.find(params[:id])
-    if @settlement.settlement_type.name == "Город"
-      which_settlement = @settlement.id
-      which_building = BuildingLevel.find_by(name: "Караул" )
-      Building.create(settlement_id: which_settlement, building_level: which_building)
-    else
-      puts "В деревне нельзя размещать гарнизон"
-    end
-    redirect_to settlement_url(@settlement), notice: "Во владении построен рынок."
+    @settlement.build_garrison
+    redirect_to settlement_url(@settlement), notice: "Во владении размещен гарнизон."
   end
 
   def building_upgrade
-    #byebug
-    #@which_settlement = Settlement.find(params[:id])
-    @building_to_upgrade = Building.find_by(params[:id])
-    if @building_to_upgrade.building_level.level < 3
-    next_level = @building_to_upgrade.building_level.level + 1
-      required_building_type = @building_to_upgrade.building_level.building_type
-      @building_to_upgrade.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
-      @building_to_upgrade.save
-    end
-        #redirect_to settlement_url(@settlement)
+    @building_to_up = Building.find(params[:id])
+    @building_to_up.building_upgrade
+      #redirect_to settlement_url(@settlement)
    end
+
+# building1 = Settlement.find_by(id: 1).buildings.find_by(id: 33)
 
 
   private

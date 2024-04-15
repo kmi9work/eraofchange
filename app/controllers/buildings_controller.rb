@@ -59,14 +59,10 @@ class BuildingsController < ApplicationController
 
 
   def upgrade
-    @building_to_upgrade = Building.find(params[:id])
-    if @building_to_upgrade.building_level.level < 3
-      next_level = @building_to_upgrade.building_level.level + 1
-      required_building_type = @building_to_upgrade.building_level.building_type
-      @building_to_upgrade.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
-      @building_to_upgrade.save
-    end
-  end
+    @building_to_upgrade = Building.find(params[:id ])
+    @building_to_upgrade.upgrade
+    redirect_back(fallback_location: root_path) #с redirect_to :back были проблемы
+      end
 
 
   private

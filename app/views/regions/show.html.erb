@@ -1,6 +1,12 @@
 <p style="color: green"><%= notice %></p>
 
-<%= render @region %>
+    <strong>Название региона:</strong>
+    <%= @region.title %>
+  </p>
+
+  <p>
+    <strong>Общественный порядок в регионе:</strong>
+    <%= @region.public_order%>
 
 <div>
   <%= link_to "Edit this region", edit_region_path(@region) %> |

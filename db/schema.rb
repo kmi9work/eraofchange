@@ -201,6 +201,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "player_type_id"
     t.integer "family_id"
     t.integer "guild_id"
+    t.json "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -242,6 +243,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "settlement_types", force: :cascade do |t|
     t.string "name"
+    t.json "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

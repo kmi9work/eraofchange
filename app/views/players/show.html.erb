@@ -43,6 +43,32 @@
 </p>
 
 <p>
+  <% if @player.settlements.blank? %>
+   У игрока нет городов
+   <% else %>
+   Города:<br>
+   <ul>
+    <% @player.settlements.each do |settlement| %>
+     <li><%= link_to settlement.name, settlement %></li>
+    <% end -%>
+   </ul>
+  <% end %>
+</p>
+
+<p>
+  <% if @player.armies.blank? %>
+   У игрока нет городов
+   <% else %>
+   Армии:<br>
+   <ul>
+    <% @player.armies.each do |army| %>
+     <li><%= link_to army.army_size.name, army %></li>
+    <% end -%>
+   </ul>
+  <% end %>
+</p>
+
+<p>
   <% if @player.political_action_ids.blank? %>
    Политических действий нет
    <% else %>
@@ -54,6 +80,17 @@
    </ul>
   <% end %> 
 </p>
+
+Прибыль игрока:
+
+ <%= @player.player_income  %>
+</p>
+
+Расходы игрока на армию:
+
+ <%= @player.player_military_outlays  %>
+</p>
+
 
 <hr>
 
