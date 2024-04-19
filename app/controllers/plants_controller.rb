@@ -40,6 +40,12 @@ class PlantsController < ApplicationController
     redirect_to(plants_path)
   end
 
+  def upgrade
+    @plant_to_upgrade = Plant.find(params[:id])
+    @plant_to_upgrade.upgrade!
+    redirect_back(fallback_location: plant_path)
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_plant

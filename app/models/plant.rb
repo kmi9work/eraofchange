@@ -2,6 +2,8 @@ class Plant < ApplicationRecord
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true
+
+  MAX_LEVEL_PLANT = 3
   
   def name_of_plant
     if economic_subject_type == "Guild"
@@ -15,12 +17,13 @@ class Plant < ApplicationRecord
 
   def upgrade!
     level = self.plant_level&.level
-    if self.plant_level&.level < 3
+    if level < MAX_LEVEL_PLANT
       pl = PlantLevel.find_by(level: level + 1, plant_type_id: self.plant_level.plant_type_id)
       self.plant_level = pl
       self.plant_level.save
-      return self.plant_level.level
+      return pl
     end
+    return nil
   end
 
     # Чтобы метод можно было проверить - нужно для начала сохранить несколько PlantLevel.

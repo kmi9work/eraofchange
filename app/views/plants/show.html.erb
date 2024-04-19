@@ -14,12 +14,9 @@
   <% end -%>
 </p>
 
+<p><%= button_to "Улучшить предприятие", upgrade_plant_path, method: :patch %></p>
 
-<%= link_to @plant.upgrade!, @plant.plant_level %>
-
-<p><%= button_to "Улучшить предприятие", upgrade_plant_path, method: :put %></p>
-
-<br><br>
+<br>
 <p>
   Место для предприятия:
     <% if @plant.plant_place.blank? %>
