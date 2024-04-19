@@ -150,10 +150,9 @@ PlantType.create(name: "Поля пшеницы")
 
 PlantLevel.create(level: "1", deposit: "800", charge: "100", price: {"доски" => 50, "металл" => 10}, max_product: "200", plant_type_id: 1)
 PlantLevel.create(level: "2", deposit: "2400", charge: "300", price: {"доски" => 100, "металл" => 20}, max_product: "450", plant_type_id: 1)
-PlantLevel.create(level: "3", deposit: "5600", charge: "500", price: {"доски" => 150, "каменный кирпич" => 100 "металл" => 30}, max_product: "800", plant_type_id: 1)
+PlantLevel.create(level: "3", deposit: "5600", charge: "500", price: {"доски" => 150, "каменный кирпич" => 100, "металл" => 30}, max_product: "800", plant_type_id: 1)
 PlantLevel.create(level: "1", deposit: "1500", charge: "100", price: {"каменный кирпич" => 50, "металл" => 15, "инструменты" => 5}, max_product: "20", plant_type_id: 2)
 PlantLevel.create(level: "2", deposit: "4500", charge: "300", price: {"каменный кирпич" => 100, "металл" => 30, "инструменты" => 10}, max_product: "30", plant_type_id: 2)
 PlantLevel.create(level: "3", deposit: "10500", charge: "500", price: {"каменный кирпич" => 200, "металл" => 60, "инструменты" => 20}, max_product: "40", plant_type_id: 2)
 
 
-params: {"income" => 1000})

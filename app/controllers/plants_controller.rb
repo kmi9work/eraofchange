@@ -43,7 +43,7 @@ class PlantsController < ApplicationController
   def upgrade
     @plant_to_upgrade = Plant.find(params[:id])
     @plant_to_upgrade.upgrade!
-    redirect_back(fallback_location: plant_path)
+    redirect_back(fallback_location: plant_path(@plant_to_upgrade))
   end
 
   private
