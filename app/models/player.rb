@@ -14,60 +14,37 @@ class Player < ApplicationRecord
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
-  SMALL_ARMY = 1        #Малая армия
-  MEDIUM_SIZE_ARMY = 2  #Средняя армия
-  LARGE_ARMY = 3        #Большая армия
   PLAYABLE_REGION = 1
 
-
-
-  def add_small_army
-    army_type = ArmySize.find_by_id(SMALL_ARMY)
-    Army.create(player_id: self.id, army_size: army_type, region_id: PLAYABLE_REGION)
+  def add_army(army_size_id, region_id)
+    self.armies.create(army_size_id: army_size_id, region_id: region_id)
   end
 
-  def add_medium_size_army
-    army_type = ArmySize.find_by_id(MEDIUM_SIZE_ARMY)
-    Army.create(player_id: self.id, army_size: army_type, region_id: PLAYABLE_REGION)
-  end
-
-  def add_large_army
-    army_type = ArmySize.find_by_id(LARGE_ARMY)
-    Army.create(player_id: self.id, army_size: army_type, region_id: PLAYABLE_REGION)
-  end
-
-  def player_income
-    income = 0
-    added_income = 0
-    self.settlements.each do |settle|
-      income = income + settle.settlement_type.params["income"]
-      settle.buildings.each do |build|
-        if build.building_level.building_type == BuildingType.find_by_id(Settlement::TRADE_BUILDING)
-          added_income = build.building_level.params["income"]
-        end
-      income = income + added_income
-      end
-    end
-    income
+  def income
+    self.settlements.sum{|s| s.income}
   end
 
   def player_military_outlays
-    gold_needed = 0
-    rations_needed = 0
-    arms_needed = 0
-    armour_needed = 0
-    horses_needed = 0
+    cost = {}
     self.armies.each do |army|
-      gold_needed = gold_needed + army.army_size.params["gold"]
-      rations_needed = rations_needed + army.army_size.params["rations"]
-      arms_needed = arms_needed + army.army_size.params["arms"]
-      armour_needed = armour_needed + army.army_size.params["armour"]
-      horses_needed = horses_needed + army.army_size.params["horses"]
+      buy_cost = army.army_size&.params&.dig('buy_cost')
+      next unless buy_cost
+      buy_cost.each do |res_id, value|
+        cost[res_id] ||= 0
+        cost[res_id] += value
+      end
     end
-    outlays = "Игрок должен внести за армии: золота #{gold_needed}, провизии #{rations_needed},
-              оружия #{arms_needed}, доспехов #{armour_needed}, лошадей #{horses_needed}."
-    outlays
+    cost
   end
 
-
- end
+  def run_political_action(political_action_type_id, year, success, options)
+    if success
+      pat = PoliticalActionType.find_by_id(political_action_type_id)
+      result = pat.execute_success(options)
+      self.political_actions.create(year: year, success: success, params: result)
+    else
+      result = pat.execute_fail(options)
+      self.political_actions.create(year: year, success: success)
+    end
+  end
+end

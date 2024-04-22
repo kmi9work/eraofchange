@@ -6,35 +6,20 @@ class Settlement < ApplicationRecord
   has_many :buildings
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
-  RELIGIOUS_BUILDING = 1 #"Религиозная постройка"
-  DEFENCE_BUILDING = 2 #"Обронительная постройка"
-  TRADE_BUILDING = 3 #"Торговая постройка"
-  GUARDING_TROOP = 4  #"Размер постройка"
-
-  FIRST_LEVEL = 1 #Первый уровень
-
-  TOWN_SETTLEMENT_TYPE = 1 #"Тип поселения - город"
-  VILLAGE_SETTLEMENT_TYPE = 2 #"Тип поселения - деревня"
-
-
-
-
+  def income
+    self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
+  end
 
   def build_church
-    already_there = false
-    self.buildings.each do |build|
-      if build.building_level.building_type == BuildingType.find_by_id(RELIGIOUS_BUILDING)
-        already_there = true
-      end
-    end
-      unless already_there == true
-        building_type = BuildingType.find_by_id(RELIGIOUS_BUILDING)
-        which_building = BuildingLevel.find_by(level: FIRST_LEVEL, building_type: building_type)
-        Building.create(settlement_id: self.id, building_level: which_building)
-      else
-        puts "Во владении уже есть религиозная постройка."
-      end
+    already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == BuildingType::RELIGIOUS}
 
+    if already_there
+      {building: nil, msg: "Во владении уже есть религиозная постройка."}
+    else
+      which_building = BuildingLevel.find_by(level: BuildingLevel::FIRST_LEVEL, building_type_id: BuildingType::RELIGIOUS)
+      b = Building.create(settlement_id: self.id, building_level: which_building)
+      {building: b, msg: "Во владении построено #{which_building&.name}."}
+    end
   end
 
   def build_fort
@@ -45,7 +30,7 @@ class Settlement < ApplicationRecord
       end
     end
     unless already_there == true
-      if self.settlement_type ==  SettlementType.find_by_id(TOWN_SETTLEMENT_TYPE)
+      if self.settlement_type ==  SettlementType.find_by_id(SettlementType::TOWN)
         building_type = BuildingType.find_by_id(DEFENCE_BUILDING)
         which_building = BuildingLevel.find_by(level: FIRST_LEVEL, building_type: building_type)
         Building.create(settlement_id: self.id, building_level: which_building)
@@ -84,7 +69,7 @@ class Settlement < ApplicationRecord
     end
 
     unless already_there == true
-      if self.settlement_type ==  SettlementType.find_by_id(TOWN_SETTLEMENT_TYPE)
+      if self.settlement_type ==  SettlementType.find_by_id(SettlementType::TOWN)
           building_type = BuildingType.find_by_id(GUARDING_TROOP)
           which_building = BuildingLevel.find_by(level: FIRST_LEVEL, building_type: building_type)
           Building.create(settlement_id: self.id, building_level: which_building)

@@ -43,8 +43,6 @@ class SettlementsController < ApplicationController
     end
   end
 
-
-
   def destroy
     @settlement.destroy
 
@@ -56,8 +54,8 @@ class SettlementsController < ApplicationController
 
   def build_church
     @settlement = Settlement.find(params[:id])
-    @settlement.build_church
-    redirect_to settlement_url(@settlement), notice: "Во владении построена часовня."
+    result = @settlement.build_church
+    redirect_to settlement_url(@settlement), notice: result[:msg]
   end
 
   def build_market
@@ -82,6 +80,7 @@ class SettlementsController < ApplicationController
   def building_upgrade
     @building_to_up = Building.find(params[:id])
     @building_to_up.building_upgrade
+
       #redirect_to settlement_url(@settlement)
    end
 

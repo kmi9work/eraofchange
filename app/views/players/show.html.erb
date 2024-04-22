@@ -81,16 +81,8 @@
   <% end %> 
 </p>
 
-Прибыль игрока:
-
- <%= @player.player_income  %>
-</p>
-
-Расходы игрока на армию:
-
- <%= @player.player_military_outlays  %>
-</p>
-
+Прибыль игрока: <%= @player.income  %><br>
+Расходы игрока на армию: <%= render_cost(@player.player_military_outlays) %><br>
 
 <hr>
 

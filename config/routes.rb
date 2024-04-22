@@ -10,8 +10,7 @@ Rails.application.routes.draw do
   resources :countries
   resources :buildings
 
-  patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade
-  patch '/buildings/:id/building_upgrade', to: 'building#building_upgrade', as: :building_upgrade
+  patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
 
   resources :building_levels
   resources :building_types

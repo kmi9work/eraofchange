@@ -41,22 +41,11 @@ class PlayersController < ApplicationController
     redirect_to ("/players/")
   end
 
-  def add_small_army
-    @player.add_small_army
+  def add_army
+    army_size_id = params[:army_size_id]
+    region_id = params[:region_id]
+    @player.add_army(army_size_id, region_id)
   end
-
-  def add_medium_size_army
-    @player.add_medium_size_army
-  end
-
-  def add_large_army
-    @player.add_large_army
-  end
-
-
-
-
-
 
   private
     # Use callbacks to share common setup or constraints between actions.

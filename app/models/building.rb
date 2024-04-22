@@ -3,16 +3,20 @@ class Building < ApplicationRecord
   belongs_to :settlement, optional: true
   BUIDING_MAX_LEVEL = 3
 
-
-  def upgrade #возникла проблема с !.
-    if self.building_level.level < BUIDING_MAX_LEVEL
-      next_level = self.building_level.level + 1
+  def upgrade!
+    level = self.building_level&.level
+    if level < BUIDING_MAX_LEVEL
+      next_level = level + 1
       required_building_type = self.building_level.building_type
       self.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
       self.save
-      return self.building_level
+      return {building_level: self.building_level, msg: "Новый уровень постройки: #{self.building_level&.name}"}
     end
-    return nil
+    return {building_level: nil, msg: "Уровень максимальный. Улучшить невозможно."}
+  end
+
+  def income
+    self.building_level&.params&.dig("income").to_i
   end
 
   # def building_upgrade

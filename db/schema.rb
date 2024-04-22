@@ -208,7 +208,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "political_action_types", force: :cascade do |t|
     t.string "title"
-    t.json "action"
+    t.string "action"
     t.json "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -236,7 +236,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "resources", force: :cascade do |t|
     t.string "name"
-    t.integer "price"
+    t.string "identificator"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

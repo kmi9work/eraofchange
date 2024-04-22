@@ -23,22 +23,20 @@
 Построить во владении:<br>
   <li><%= button_to 'Построить церковь', build_church_path, method: :post %></li>
   <li><%= button_to 'Построить рынок', build_market_path, method: :post %></li>
-
   <li><%= button_to 'Построить форт', build_fort_path, method: :post %></li>
   <li><%= button_to 'Разместить гарнизон', build_garrison_path, method: :post %></li>
 </p>
 
 <p>
-Постройки во владении:<br>
- <ul>
-  <% @settlement.buildings.each do |building| %>
-  <li>
-      <%= link_to building.building_level.name, building_path(building) %>
-      <%= button_to 'Улучшить здание', building_upgrade_path, method: :patch %>
-
-  </li>
-  <% end -%>
- </ul>
+  Постройки во владении:<br>
+  <ul>
+    <% @settlement.buildings.each do |building| %>
+      <li>
+        <%= link_to building.building_level&.name, building_path(building) %>
+        <%= button_to 'Улучшить здание', upgrade_building_path(building), method: :patch %>
+      </li>
+    <% end -%>
+  </ul>
 </p>
 
 <hr>

@@ -59,10 +59,10 @@ class BuildingsController < ApplicationController
 
 
   def upgrade
-    @building_to_upgrade = Building.find(params[:id ])
-    @building_to_upgrade.upgrade
-    redirect_back(fallback_location: root_path) #с redirect_to :back были проблемы
-      end
+    @building_to_upgrade = Building.find(params[:id])
+    result = @building_to_upgrade.upgrade!
+    redirect_back(fallback_location: building_path(@building_to_upgrade), notice: result[:msg])
+  end
 
 
   private
