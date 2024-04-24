@@ -155,7 +155,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "charge"
     t.json "formula"
     t.json "price"
-    t.integer "max_product"
+    t.json "max_product"
     t.integer "plant_type_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -234,7 +234,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "resources", force: :cascade do |t|
     t.string "name"
-    t.integer "price"
+    t.string "indentificator"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

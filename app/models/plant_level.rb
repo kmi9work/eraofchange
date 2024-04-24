@@ -2,6 +2,8 @@ class PlantLevel < ApplicationRecord
     belongs_to :plant_type, optional: true
 
     has_many :plants
+
+    MAX_LEVEL_PLANT = 3
       
   # Общая структура формулы производства:
   # formula: {

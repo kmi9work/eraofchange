@@ -93,35 +93,14 @@ Building.create(building_level_id: 1, settlement_id: 1)
 Building.create(building_level_id: 2, settlement_id: 1)
 Building.create(building_level_id: 3, settlement_id: 1)
 
-Building.create(settlement_id: 1)
-
-
 TroopType.create(title: "Легкая пехота")
 TroopType.create(title: "Конница")
 TroopType.create(title: "Рыцари")
 TroopType.create(title: "Пушки")
 
 Troop.create(troop_type_id: 2, is_hired: true, army_id: 1 )
-
 Troop.create(troop_type_id: 3, is_hired: true, army_id: 1 )
-
 Troop.create(troop_type_id: 4, is_hired: true, army_id: 1 )
-
-
-
-# Plant.create(name: "Лесопилка", 
-# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 2, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Merchant", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_type: "Guild", plant_category_id: 1, level: 1)
 
 Settlement.create(name: "Москва", settlement_type_id: 1)
 Settlement.create(name: "Тверь", settlement_type_id: 1)
@@ -130,30 +109,105 @@ Settlement.create(name: "Хатавки", settlement_type_id: 2)
 Settlement.create(name: "Гадюкино", settlement_type_id: 2)
 Settlement.create(name: "Холмищи", settlement_type_id: 2)
 
-Resource.create(name: "Бревна", price: "1")
-Resource.create(name: "Руда", price: "100")
-Resource.create(name: "Зерно", price: "10")
+Resource.create(name: "Доски", indentificator: "boards")
+Resource.create(name: "Металл", indentificator: "metal")
+Resource.create(name: "Каменный кирпич", indentificator: "stone_brick")
+Resource.create(name: "Инструменты", indentificator: "tools")
+Resource.create(name: "Бревна", indentificator: "beam")
+Resource.create(name: "Оружие", indentificator: "weapon")
+Resource.create(name: "Драгоценный металл", indentificator: "gems")
+Resource.create(name: "Драгоценная руда", indentificator: "gem_ore")
+Resource.create(name: "Провизия", indentificator: "food")
+Resource.create(name: "Камень", indentificator: "stone")
+Resource.create(name: "Mука", indentificator: "flour")
+Resource.create(name: "Доспехи", indentificator: "armor")
+Resource.create(name: "Зерно", indentificator: "grain")
+Resource.create(name: "Лошади", indentificator: "horses")
+Resource.create(name: "Mясо", indentificator: "meat")
+Resource.create(name: "Pоскошь", indentificator: "luxury")
+Resource.create(name: "Железная руда", indentificator: "metal_ore")
 
 PlantCategory.create(name: "Добывающее")
 PlantCategory.create(name: "Перерабатывающее")
 
-PlantType.create(name: "Лесопилка")
-PlantType.create(name: "Кузница")
-PlantType.create(name: "Плавильня")
-PlantType.create(name: "Трактир")
-PlantType.create(name: "Мельница")
-PlantType.create(name: "Делянка")
-PlantType.create(name: "Ферма")
-PlantType.create(name: "Железный рудник")
-PlantType.create(name: "Каменоломня")
-PlantType.create(name: "Поля пшеницы")
+PlantType.create(name: "Лесопилка", plant_category_id: 2)
+PlantType.create(name: "Кузница", plant_category_id: 2)
+PlantType.create(name: "Плавильня", plant_category_id: 2)
+PlantType.create(name: "Трактир", plant_category_id: 2)
+PlantType.create(name: "Мельница", plant_category_id: 2)
+PlantType.create(name: "Делянка", plant_category_id: 1)
+PlantType.create(name: "Ферма", plant_category_id: 1)
+PlantType.create(name: "Железный рудник", plant_category_id: 1)
+PlantType.create(name: "Каменоломня", plant_category_id: 1)
+PlantType.create(name: "Поля пшеницы", plant_category_id: 1)
 
-PlantLevel.create(level: "1", deposit: "800", charge: "100", price: {"доски" => 50, "металл" => 10}, max_product: "200", plant_type_id: 1)
-PlantLevel.create(level: "2", deposit: "2400", charge: "300", price: {"доски" => 100, "металл" => 20}, max_product: "450", plant_type_id: 1)
-PlantLevel.create(level: "3", deposit: "5600", charge: "500", price: {"доски" => 150, "каменный кирпич" => 100 "металл" => 30}, max_product: "800", plant_type_id: 1)
-PlantLevel.create(level: "1", deposit: "1500", charge: "100", price: {"каменный кирпич" => 50, "металл" => 15, "инструменты" => 5}, max_product: "20", plant_type_id: 2)
-PlantLevel.create(level: "2", deposit: "4500", charge: "300", price: {"каменный кирпич" => 100, "металл" => 30, "инструменты" => 10}, max_product: "30", plant_type_id: 2)
-PlantLevel.create(level: "3", deposit: "10500", charge: "500", price: {"каменный кирпич" => 200, "металл" => 60, "инструменты" => 20}, max_product: "40", plant_type_id: 2)
+PlantLevel.create(level: "1", deposit: "800",   charge: "100", price: {"boards" => 50, "metal" => 10},
+                  max_product: {"boards" => 200}, plant_type_id: 1)
+PlantLevel.create(level: "2", deposit: "2400",  charge: "300", price: {"boards" => 100, "metal" => 20},
+                  max_product: {"boards" => 450}, plant_type_id: 1)
+PlantLevel.create(level: "3", deposit: "5600",  charge: "500", price: {"boards" => 150, "stone_brick" => 100, "metal" => 30},
+                  max_product: {"boards" => 800}, plant_type_id: 1)
 
+PlantLevel.create(level: "1", deposit: "1500",  charge: "100", price: {"stone_brick" => 50, "metal" => 15, "tools" => 5},
+                  max_product: {"tools" => 20}, plant_type_id: 2)
+PlantLevel.create(level: "2", deposit: "4500",  charge: "300", price: {"stone_brick" => 100, "metal" => 30, "tools" => 10},
+                  max_product: {"tools" => 30, "weapon" => 20}, plant_type_id: 2)
+PlantLevel.create(level: "3", deposit: "10500", charge: "500", price: {"stone_brick" => 200, "metal" => 60, "tools" => 20},
+                  max_product: {"tools" => 40, "weapon" => 30, "armor" => 20}, plant_type_id: 2)
 
-params: {"income" => 1000})
+PlantLevel.create(level: "1", deposit: "1000",  charge: "100", price: {"stone_brick" => 100, "tools" => 1},
+                  max_product: {"metal" => 150, "gems" => 75}, plant_type_id: 3)
+PlantLevel.create(level: "2", deposit: "3000",  charge: "300", price: {"stone_brick" => 200, "tools" => 2},
+                  max_product: {"metal" => 250, "gems" => 150}, plant_type_id: 3)
+PlantLevel.create(level: "3", deposit: "6000",  charge: "500", price: {"stone_brick" => 300, "metal" => 30, "tools" => 4},
+                  max_product: {"metal" => 450, "gems" => 300}, plant_type_id: 3)
+
+PlantLevel.create(level: "1", deposit: "1200",  charge: "100", price: {"beam"=> 40, "stone_brick" => 70, "metal" => 5},
+                  max_product: {"food" => 50}, plant_type_id: 4)
+PlantLevel.create(level: "2", deposit: "3600",  charge: "200", price: {"beam"=> 80, "stone_brick" => 140, "metal" => 10},
+                  max_product: {"food" => 100}, plant_type_id:4)
+PlantLevel.create(level: "3", deposit: "8400",  charge: "300", price: {"beam"=> 140, "stone_brick" => 300, "metal" => 20},
+                  max_product: {"food" => 150}, plant_type_id: 4)
+
+PlantLevel.create(level: "1", deposit: "500",  charge: "100", price: {"boards"=> 20, "stone" => 20, "metal" => 5},
+                  max_product: {"flour" => 300}, plant_type_id: 5)
+PlantLevel.create(level: "2", deposit: "1500",  charge: "300", price: {"boards"=> 40, "stone" => 30, "metal" => 10},
+                  max_product: {"flour" => 600}, plant_type_id:5)
+PlantLevel.create(level: "3", deposit: "3500",  charge: "500", price: {"boards"=> 100, "stone" => 40, "metal" => 20},
+                  max_product: {"flour" => 1000}, plant_type_id: 5)
+
+PlantLevel.create(level: "1", deposit: "800",  charge: "100", price: {"metal" => 10, "tools" => 3},
+                  max_product: {"beam" => 100}, plant_type_id: 6)
+PlantLevel.create(level: "2", deposit: "2000",  charge: "200", price: {"metal" => 20, "tools" => 5},
+                  max_product: {"beam" => 200}, plant_type_id:6)
+PlantLevel.create(level: "3", deposit: "3600",  charge: "300", price: {"metal" => 30, "tools" => 7},
+                  max_product: {"beam" => 300}, plant_type_id: 6)
+
+PlantLevel.create(level: "1", deposit: "1200",  charge: "100", price: {"boards" => 100, "grain" => 50},
+                  max_product: {"meat" => 100}, plant_type_id: 7)
+PlantLevel.create(level: "2", deposit: "2600",  charge: "200", price: {"boards" => 120, "grain" => 60},
+                  max_product: {"meat" => 150, "horses" => 6}, plant_type_id:7)
+PlantLevel.create(level: "3", deposit: "4400",  charge: "300", price: {"boards" => 150, "grain" => 80},
+                  max_product: {"meat" => 200, "horses" =>12}, plant_type_id: 7)
+
+PlantLevel.create(level: "1", deposit: "2000",   charge: "200", price: {"boards" => 100, "metal" => 10, "tools" => 8},
+                  max_product: {"metal_ore" => 250}, plant_type_id: 8)
+PlantLevel.create(level: "2", deposit: "5500",  charge: "400", price: {"boards" => 200, "metal" => 20, "tools" => 10},
+                  max_product: {"metal_ore" => 600}, plant_type_id: 8)
+PlantLevel.create(level: "3", deposit: "10500",  charge: "600", price: {"boards" => 300, "metal" => 40, "tools" => 12},
+                  max_product: {"metal_ore" => 1000}, plant_type_id: 8)
+
+PlantLevel.create(level: "1", deposit: "1200",   charge: "100", price: {"boards" => 50, "metal" => 10, "tools" => 4},
+                  max_product: {"stone" => 100}, plant_type_id: 9)
+PlantLevel.create(level: "2", deposit: "3400",  charge: "200", price: {"boards" => 100, "metal" => 20, "tools" => 6},
+                  max_product: {"stone" => 200}, plant_type_id: 9)
+PlantLevel.create(level: "3", deposit: "6900",  charge: "300", price: {"boards" => 150, "metal" => 40, "tools" => 8},
+                  max_product: {"stone" => 350}, plant_type_id: 9)
+
+PlantLevel.create(level: "1", deposit: "600",   charge: "100", price: {"grain" => 50, "tools" => 2},
+                  max_product: {"grain" => 100}, plant_type_id: 10)
+PlantLevel.create(level: "2", deposit: "1500",  charge: "200", price: {"grain" => 60, "tools" => 4},
+                  max_product: {"grain" => 200}, plant_type_id: 10)
+PlantLevel.create(level: "3", deposit: "2700",  charge: "300", price: {"grain" => 70, "tools" => 6},
+                  max_product: {"grain" => 300}, plant_type_id: 10)
+
