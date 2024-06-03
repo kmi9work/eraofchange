@@ -29,7 +29,7 @@
           Места для предприятий
         </td>
         <td>
-          <%= link_to settlement.region.title, region_path(settlement.region) %>
+          <%= link_to settlement&.region&.title, region_path(settlement.region) %>
         </td>
         <td>
           <% if settlement.player.blank? %>

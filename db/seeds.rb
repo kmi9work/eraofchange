@@ -98,7 +98,7 @@ Army.create(region_id: 1, player_id: 6, army_size_id: 3)
 BuildingType.create(title: "Религиозная постройка")
 BuildingType.create(title: "Оборонительная постройка")
 BuildingType.create(title: "Торговая постройка")
-BuildingType.create(title: "Размер гарнизона")
+BuildingType.create(title: "Гарнизон")
 
 
 

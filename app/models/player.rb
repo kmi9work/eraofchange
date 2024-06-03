@@ -14,7 +14,6 @@ class Player < ApplicationRecord
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
-  PLAYABLE_REGION = 1
 
   def add_army(army_size_id, region_id)
     self.armies.create(army_size_id: army_size_id, region_id: region_id)

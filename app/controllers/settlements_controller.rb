@@ -52,40 +52,11 @@ class SettlementsController < ApplicationController
     end
   end
 
-  def build_church
+  def build(bulding_type)
     @settlement = Settlement.find(params[:id])
-    result = @settlement.build_church
+    result = @settlement.build(bulding_type)
     redirect_to settlement_url(@settlement), notice: result[:msg]
   end
-
-  def build_market
-    @settlement = Settlement.find(params[:id])
-    @settlement.build_market
-    redirect_to settlement_url(@settlement), notice: "Во владении построен рынок."
-  end
-
-
-  def build_fort
-    @settlement = Settlement.find(params[:id])
-    @settlement.build_fort
-    redirect_to settlement_url(@settlement), notice: "Во владении построен форт."
-  end
-
-  def build_garrison
-    @settlement = Settlement.find(params[:id])
-    @settlement.build_garrison
-    redirect_to settlement_url(@settlement), notice: "Во владении размещен гарнизон."
-  end
-
-  def building_upgrade
-    @building_to_up = Building.find(params[:id])
-    @building_to_up.building_upgrade
-
-      #redirect_to settlement_url(@settlement)
-   end
-
-# building1 = Settlement.find_by(id: 1).buildings.find_by(id: 33)
-
 
   private
     
