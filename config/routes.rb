@@ -9,6 +9,9 @@ Rails.application.routes.draw do
   resources :regions
   resources :countries
   resources :buildings
+
+  patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
+
   resources :building_levels
   resources :building_types
   resources :building_places
@@ -34,6 +37,7 @@ Rails.application.routes.draw do
   post '/settlements', to: 'settlements#create'
   get '/settlements/:id', to: 'settlements#show', as: :settlement
   get '/settlements/:id/edit', to: 'settlements#edit', as: :edit_settlement
+  post '/settlements/:id/build', to: 'settlements#build', as: :build
   patch '/settlements/:id', to: 'settlements#update'
   delete '/settlements/:id', to: 'settlements#destroy', as: :destroy
   
