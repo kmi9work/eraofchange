@@ -5,11 +5,7 @@ class Army < ApplicationRecord
 
   has_many :troops, dependent: :destroy
 
-  SMALL = 1    #Малая армия
-  MEDIUM = 2   #Средняя армия
-  LARGE = 3    #Большая армия
-
-  def demote_army #Если за большую армию не вносятся расходы, она превращается в среднюю
+  def demote_army #Если за большую армию не вносятся расходы, она должна либо исчезнуть, либо ухудшиться
   end
 
   def has_empty_slots?

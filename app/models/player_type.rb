@@ -3,6 +3,7 @@ class PlayerType < ApplicationRecord
 
   MERCHANT = 1  # Купец
   NOBLE = 2     # Знать
-  SAGE = 3      # Мудерц
+  SAGE = 3      # Мудрец
+  REBEL = 4     # Дух бунта
 
 end

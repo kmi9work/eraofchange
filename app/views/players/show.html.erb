@@ -62,7 +62,7 @@
    Армии:<br>
    <ul>
     <% @player.armies.each do |army| %>
-     <li><%= link_to army.army_size.name, army %></li>
+     <li><%= link_to army.army_size&.name, army %></li>
     <% end -%>
    </ul>
   <% end %>

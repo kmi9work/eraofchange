@@ -26,9 +26,9 @@ class Player < ApplicationRecord
   def player_military_outlays
     cost = {}
     self.armies.each do |army|
-      buy_cost = army.army_size&.params&.dig('buy_cost')
-      next unless buy_cost
-      buy_cost.each do |res_id, value|
+      maintenance_cost = army.army_size&.params&.dig('maintenance_cost')
+      next unless maintenance_cost
+      maintenance_cost.each do |res_id, value|
         cost[res_id] ||= 0
         cost[res_id] += value
       end

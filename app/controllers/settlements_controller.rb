@@ -16,11 +16,10 @@ class SettlementsController < ApplicationController
   def create
     @settlement = Settlement.new(settlement_params)
     respond_to do |format|
-    if @settlement.save
-        # format.html { redirect_to settlement_url(@settlement), notice: "settlement was successfully created." }
+      if @settlement.save
         format.json { render :show, status: :created, location: @settlement }
-      redirect_to settlement_url(@settlement), notice: "Населенный пункт успешно создан."
-    else
+        format.html { redirect_to settlement_url(@settlement), notice: "Населенный пункт успешно создан."}
+      else
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @settlement.errors, status: :unprocessable_entity }
       end
@@ -34,9 +33,9 @@ class SettlementsController < ApplicationController
   def update
     respond_to do |format|
       if @settlement.update(settlement_params)
-        format.html { redirect_to settlement_url(@settlement), notice: "settlement was successfully updated." }
+        format.html { redirect_to settlement_url(@settlement), notice: "Населенный пункт успешно отредактирован." }
         format.json { render :show, status: :ok, location: @settlement }
-    else
+      else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @settlement.errors, status: :unprocessable_entity }
       end
@@ -52,9 +51,10 @@ class SettlementsController < ApplicationController
     end
   end
 
-  def build(bulding_type)
+  def build
     @settlement = Settlement.find(params[:id])
-    result = @settlement.build(bulding_type)
+    bulding_type_id = params[:building_type_id]
+    result = @settlement.build(bulding_type_id)
     redirect_to settlement_url(@settlement), notice: result[:msg]
   end
 

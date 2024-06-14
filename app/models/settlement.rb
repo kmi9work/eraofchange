@@ -7,18 +7,19 @@ class Settlement < ApplicationRecord
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
   def income
+    #Исправить
+    return false
     self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
   end
 
-  def build(type_of_building)
-    already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == type_of_building}
-    which_building = BuildingLevel.find_by(level: BuildingLevel::FIRST_LEVEL, building_type_id: type_of_building)
+  def build(building_type_id)
+    already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == building_type_id}
+    building_level = BuildingLevel.find_by(level: BuildingLevel::FIRST_LEVEL, building_type_id: building_type_id)
     if already_there
-      {building: nil, msg: "Во владении уже есть #{which_building&.name}."}
+      {building: nil, msg: "Во владении уже есть #{building_level&.name}."}
     else
-      b = Building.create(settlement_id: self.id, building_level: which_building)
-      {building: b, msg: "Во владении построено #{which_building&.name}."}
+      b = Building.create(settlement_id: self.id, building_level: building_level)
+      {building: b, msg: "Во владении построено #{building_level&.name}."}
     end
   end
-
 end
