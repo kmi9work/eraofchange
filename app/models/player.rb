@@ -1,4 +1,7 @@
 class Player < ApplicationRecord
+  # params:
+  # infuence (integer) - Влияние
+
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true
   belongs_to :family, optional: true
