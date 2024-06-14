@@ -11,7 +11,7 @@
 <% end -%>
 </p>
 
-Тип владения:
+Регион владения:
 <% if @settlement.region_id.blank? %>
   не выбрана
 <% else %>
@@ -19,13 +19,17 @@
 <% end -%>
 </p>
 
+
 <p>
-Предприятия в городе:<br>
- <ul>
-  <%# @settlement.plant_places.each do |plant| %>
-  <li><%#= link_to plant.name, plant %></li>
-  <%# end -%>
- </ul>
+  Постройки во владении:<br>
+  <ul>
+    <% @settlement.buildings.each do |building| %>
+      <li>
+        <%= link_to building.building_level&.name, building_path(building) %>
+        <%= button_to 'Улучшить здание', upgrade_building_path(building), method: :patch %>
+      </li>
+    <% end -%>
+  </ul>
 </p>
 
 <hr>

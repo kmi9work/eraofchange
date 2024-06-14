@@ -1,5 +1,6 @@
 class PoliticalActionType < ApplicationRecord
-	has_many :political_actions, dependent: :destroy
+  SEDITION_PO = 5
+  has_many :political_actions, dependent: :destroy
 
   def execute(options)
     if self.respond_to?(self.action)
@@ -10,7 +11,7 @@ class PoliticalActionType < ApplicationRecord
   def sedition(options) #Подстрекательство к бунту
     region = Region.find_by_id(options[:region_id])
     if region
-      region.params["public_order"] -= 5
+      region.params["public_order"] -= SEDITION_PO
       region.save
     end
   end
@@ -22,5 +23,4 @@ class PoliticalActionType < ApplicationRecord
       region.save
     end
   end
-  
 end

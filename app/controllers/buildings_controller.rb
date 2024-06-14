@@ -57,6 +57,14 @@ class BuildingsController < ApplicationController
     end
   end
 
+
+  def upgrade
+    @building_to_upgrade = Building.find(params[:id])
+    result = @building_to_upgrade.upgrade!
+    redirect_back(fallback_location: building_path(@building_to_upgrade), notice: result[:msg])
+  end
+
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_building

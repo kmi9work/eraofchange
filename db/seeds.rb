@@ -1,16 +1,15 @@
-# Player(id: integer, name: string, merchant_id: integer, created_at: datetime, updated_at: datetime)
-# Plant(id: integer, name: string, category: string, price: integer, level: string, settlement_id: string, economic_subject_id: integer, economic_subject_type: string, settlement_id: integer, created_at: datetime, updated_at: datetime)
-# Guild(id: integer, name: string, created_at: datetime, updated_at: datetime)
-# Family(id: integer, name: string, created_at: datetime, updated_at: datetime)
-# Merchant(id: integer, name: string, plant_id: integer, family_id: integer, guild_id: integer, created_at: datetime, updated_at: datetime)
-
-
-# Player.destroy_all
-# Merchant.destroy_all
-# Family.destroy_all
-# Guild.destroy_all
-# Plant.destroy_all
-# Settlement.destroy_all
+Human.create(name: "Михаил Соколов")
+Human.create(name: "Милана Майорова")
+Human.create(name: "Александр Осипов")
+Human.create(name: "Фёдор Захаров")
+Human.create(name: "Никита Некрасов")
+Human.create(name: "Саша Никифоров")
+Human.create(name: "Марьям Ковалева")
+Human.create(name: "Илья Волков ")
+Human.create(name: "Мирослава Чернова")
+Human.create(name: "Александра Кузьмина")
+Human.create(name: "Павел Самсонов")
+Human.create(name: "Леон Захаров")
 
 
 Human.create(name: "Вася Пупкин")
@@ -24,45 +23,54 @@ PlayerType.create(title: "Купец")
 PlayerType.create(title: "Знать")
 PlayerType.create(title: "Мудрец")
 
-
-Player.create(name: "Жопкин", human_id: 1, player_type_id: 1, job_id: 1, family_id: 1 )
-Player.create(name: "Борис", human_id: 2, player_type_id: 1, job_id: 1, family_id: 2 )
-Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 2, family_id: 1  )
-Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 3, family_id: 2  )
-Player.create(name: "Хренов", human_id: 5, player_type_id: 3, job_id: 4, family_id: 3  )
-Player.create(name: "Образина", human_id: 6, player_type_id: 3, job_id: 5, family_id: 3  )
-
-
-Job.create(name: "Князь")
-Job.create(name: "Казначей")
-Job.create(name: "Посольский дьяк")
-Job.create(name: "Окольничей")
-Job.create(name: "Митрополит")
-Job.create(name: "Воевада")
-
-
 Family.create(name: "Ивановы")
 Family.create(name: "Петровы")
 Family.create(name: "Сидоровы")
 
+Job.create(name: "Великий князь")
+Job.create(name: "Наследник престола")
+Job.create(name: "Посольский дьяк")
+Job.create(name: "Казначей")
+Job.create(name: "Главный воевода")
+Job.create(name: "Митропот Московский и всея Руси")
+Job.create(name: "Первый думный боярин")
+Job.create(name: "Тайный советник")
+Job.create(name: "Дух русского бунта")
+Job.create(name: "Глава купеческого приказа")
+
+Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0} )
+Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0}  )
+Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0}   )
+Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0}   )
+Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0}   )
+Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0}   )
+Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0}   )
+Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0}   )
+Player.create(name: "Образина", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0}   )
+Player.create(name: "Образина", human_id: 10, player_type_id: 2, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
+
+
+
+
+
 Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
+
+PlantCategory.create(name: "Добывающее")
+PlantCategory.create(name: "Перерабатывающее")
 
 Country.create(title: "Русь")
 Country.create(title: "Большая орда")
 Country.create(title: "Крымское ханство")
 Country.create(title: "Казанское")
 
-Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0,
-"boards" => 200,
-"stone" => 200,
-"arms" => 10,
-"luxiry" => 5,
-"rations" => 20})
 
-SettlementType.create(name: "Город")
-SettlementType.create(name: "Деревня")
+Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0})
+Region.create(title: "Ярославское княжество", country_id: 1, params: {"public_order" => 0})
+
+SettlementType.create(name: "Город", params: {"income" => 8000})
+SettlementType.create(name: "Деревня", params: {"income" => 5000})
 
 
 Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1)
@@ -72,10 +80,9 @@ Settlement.create(name: "Хатавки", settlement_type_id: 2, region_id: 1, p
 Settlement.create(name: "Гадюкино", settlement_type_id: 2, region_id: 1, player_id: 5)
 Settlement.create(name: "Холмищи", settlement_type_id: 2, region_id: 1, player_id: 6)
 
-
-ArmySize.create(name: "Малая",   level: 1, params:  {renewal_cost: {"gold" => 7000},  buy_cost: {"gold" => 7000, "arms" => 4, "rations" => 5, "armour" => 1, "horses" => 3, "max_troop" => 4}})
-ArmySize.create(name: "Средняя", level: 2, params:  {renewal_cost: {"gold" => 12000}, buy_cost: {"gold" => 12000, "arms" => 8, "rations" => 10, "armour" => 2, "horses" => 6, "max_troop" => 8}})
-ArmySize.create(name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"gold" => 16000, "arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troop" => 12}})
+ArmySize.create(name: "Малая",   level: 1, params:  {renewal_cost: {"gold" => 7000},  buy_cost: {"arms" => 4, "rations" => 5, "armour" => 1, "horses" => 3, "max_troops" => 4}})
+ArmySize.create(name: "Средняя", level: 2, params:  {renewal_cost: {"gold" => 12000}, buy_cost: {"arms" => 8, "rations" => 10, "armour" => 2, "horses" => 6, "max_troops" => 8}})
+ArmySize.create(name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troops" => 12}})
 
 Army.create(region_id: 1, player_id: 1, army_size_id: 1)
 Army.create(region_id: 1, player_id: 2, army_size_id: 1)
@@ -130,12 +137,20 @@ Troop.create(troop_type_id: 2, is_hired: true, army_id: 1 )
 Troop.create(troop_type_id: 3, is_hired: true, army_id: 1 )
 Troop.create(troop_type_id: 4, is_hired: true, army_id: 1 )
 
-Settlement.create(name: "Москва", settlement_type_id: 1)
-Settlement.create(name: "Тверь", settlement_type_id: 1)
-Settlement.create(name: "Рязань", settlement_type_id: 1)
-Settlement.create(name: "Хатавки", settlement_type_id: 2)
-Settlement.create(name: "Гадюкино", settlement_type_id: 2)
-Settlement.create(name: "Холмищи", settlement_type_id: 2)
+# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Player", plant_category_id: 2, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 2, level: 1)
+# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Делянка", economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+
+# Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 2,plant_type_id: 2, level: 1)
 
 Resource.create(name: "Доски", indentificator: "boards")
 Resource.create(name: "Металл", indentificator: "metal")
@@ -240,3 +255,4 @@ PlantLevel.create(level: "3", deposit: "2700",  charge: "300", price: {"grain" =
                   max_product: {"grain" => 300}, plant_type_id: 10)
 
 PoliticalActionType.create(title: "Благотворительность", action: "charity")
+PoliticalActionType.create(title: "Подстрекательство к бунту", action: 'sedition')
