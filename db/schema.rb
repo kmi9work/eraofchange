@@ -156,7 +156,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "charge"
     t.json "formula"
     t.json "price"
-    t.integer "max_product"
+    t.json "max_product"
     t.integer "plant_type_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -184,6 +184,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "plant_place_id"
     t.integer "economic_subject_id"
     t.string "economic_subject_type"
+<<<<<<< HEAD
+    t.integer "credit_id"
+=======
+>>>>>>> master
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -201,7 +205,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "player_type_id"
     t.integer "family_id"
     t.integer "guild_id"
+<<<<<<< HEAD
+=======
     t.json "params"
+>>>>>>> master
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -236,7 +243,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "resources", force: :cascade do |t|
     t.string "name"
+<<<<<<< HEAD
+    t.string "indentificator"
+=======
     t.string "identificator"
+>>>>>>> master
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

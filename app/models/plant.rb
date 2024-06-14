@@ -2,6 +2,7 @@ class Plant < ApplicationRecord
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true
+  belongs_to :credit, optional: true
 
   before_destroy :check_credit, prepend: true
 
@@ -11,7 +12,7 @@ class Plant < ApplicationRecord
       throw :abort
     end
   end
-  
+
   def name_of_plant
     if economic_subject_type == "Guild"
       proprietor = "гильдии"
@@ -23,16 +24,16 @@ class Plant < ApplicationRecord
   end
 
   def upgrade!
-    # Чтобы метод можно было проверить - нужно для начала сохранить несколько PlantLevel.
-    # Метод должен увеличивать уровень предприятия. 
-    # Пример запуска (как должно быть):
-    # plant = Plant.first
-    # plant.plant_level.level
-    # => 1
-    # plant.upgrade!
-    # plant.plant_level.level
-    # => 2
-    # Метод должен сменить plant_level на новый plant_level с более высоким уровнем того же типа, если он есть (plant_type_id).
-    # Если удалось повысить уровень - вернуть в методе новый уровень. Если не удалось - метод должен вернуть nil.
+    level = self.plant_level&.level
+    if level && level < PlantLevel::MAX_LEVEL
+      pl = PlantLevel.find_by(level: level + 1, plant_type_id: self.plant_level.plant_type_id)
+      self.plant_level = pl
+      if pl && self.save
+        return {plant_level: pl, msg: "Уровень предприятия увеличен"}
+      else
+        return {plant_level: nil, msg: "Внутренняя ошибка. #{pl}, #{self.errors.inspect}"}
+      end
+    end
+    return {plant_level: nil, msg: "Невозможно улучшить. Уровень предприятия максимальный"}
   end
 end
