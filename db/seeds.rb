@@ -54,8 +54,12 @@ Country.create(title: "Большая орда")
 Country.create(title: "Крымское ханство")
 Country.create(title: "Казанское")
 
-
-Region.create(title: "Московское княжество", country_id: 1)
+Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0,
+"boards" => 200,
+"stone" => 200,
+"arms" => 10,
+"luxiry" => 5,
+"rations" => 20})
 
 SettlementType.create(name: "Город")
 SettlementType.create(name: "Деревня")
@@ -69,9 +73,9 @@ Settlement.create(name: "Гадюкино", settlement_type_id: 2, region_id: 1,
 Settlement.create(name: "Холмищи", settlement_type_id: 2, region_id: 1, player_id: 6)
 
 
-ArmySize.create(name: "Малая", level: 1)
-ArmySize.create(name: "Средняя", level: 2)
-ArmySize.create(name: "Большая", level: 3)
+ArmySize.create(name: "Малая",   level: 1, params:  {renewal_cost: {"gold" => 7000},  buy_cost: {"gold" => 7000, "arms" => 4, "rations" => 5, "armour" => 1, "horses" => 3, "max_troop" => 4}})
+ArmySize.create(name: "Средняя", level: 2, params:  {renewal_cost: {"gold" => 12000}, buy_cost: {"gold" => 12000, "arms" => 8, "rations" => 10, "armour" => 2, "horses" => 6, "max_troop" => 8}})
+ArmySize.create(name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"gold" => 16000, "arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troop" => 12}})
 
 Army.create(region_id: 1, player_id: 1, army_size_id: 1)
 Army.create(region_id: 1, player_id: 2, army_size_id: 1)
@@ -80,23 +84,47 @@ Army.create(region_id: 1, player_id: 4, army_size_id: 2)
 Army.create(region_id: 1, player_id: 5, army_size_id: 3)
 Army.create(region_id: 1, player_id: 6, army_size_id: 3)
 
-BuildingType.create(title: "Церковь")
-BuildingType.create(title: "Храм")
-BuildingType.create(title: "Рынок")
-BuildingType.create(title: "Форт")
+BuildingType.create(title: "Религиозная постройка")
+BuildingType.create(title: "Оборонительная постройка")
+BuildingType.create(title: "Торговая постройка")
+BuildingType.create(title: "Размер гарнизона")
 
-BuildingLevel.create(level: 1, building_type_id: 1)
-BuildingLevel.create(level: 2, building_type_id: 1)
-BuildingLevel.create(level: 3, building_type_id: 1)
+BuildingLevel.create(level: 1, building_type_id: 1, name: "Часовня", params: {"public_order" => 1})
+BuildingLevel.create(level: 2, building_type_id: 1, name: "Храм", params: {"public_order" => 3})
+BuildingLevel.create(level: 3, building_type_id: 1, name: "Монастырь", params: {"public_order" => 5})
+
+BuildingLevel.create(level: 1, building_type_id: 2, name: "Форт")
+BuildingLevel.create(level: 2, building_type_id: 2, name: "Крепость")
+BuildingLevel.create(level: 3, building_type_id: 2, name: "Кремль")
+
+BuildingLevel.create(level: 1, building_type_id: 3, name: "Базар", params: {"income" => 1000})
+BuildingLevel.create(level: 2, building_type_id: 3, name: "Рынок", params: {"income" => 2000})
+BuildingLevel.create(level: 3, building_type_id: 3, name: "Ярмарка", params: {"income" => 4000})
+
+BuildingLevel.create(level: 1, building_type_id: 4, name: "Караул")
+BuildingLevel.create(level: 2, building_type_id: 4, name: "Гарнизон")
+BuildingLevel.create(level: 3, building_type_id: 4, name: "Казармы")
 
 Building.create(building_level_id: 1, settlement_id: 1)
-Building.create(building_level_id: 2, settlement_id: 1)
+Building.create(building_level_id: 2, settlement_id: 2)
 Building.create(building_level_id: 3, settlement_id: 1)
+Building.create(building_level_id: 4, settlement_id: 2)
+Building.create(building_level_id: 5, settlement_id: 1)
+Building.create(building_level_id: 6, settlement_id: 2)
 
-TroopType.create(title: "Легкая пехота")
-TroopType.create(title: "Конница")
-TroopType.create(title: "Рыцари")
-TroopType.create(title: "Пушки")
+
+TroopType.create(title: "Арбалетчики") #CROSSBOWMEN = 1
+TroopType.create(title: "Легкая кавалерия") #LIGHT_CAVALRY = 2
+TroopType.create(title: "Тяжелая кавалерия")#HEAVY_CAVALRY = 3
+TroopType.create(title: "Легкая пехота")  #LIGHT_INFANTRY = 4
+TroopType.create(title: "Лучники") # ARCHERS = 5
+TroopType.create(title: "Ополчение") #MILITIA_MEN = 6
+TroopType.create(title: "Пешие рыцари") #FOOT_KIGHTS = 7
+TroopType.create(title: "Пушки") #CANONS = 8
+TroopType.create(title: "Рыцари") #KNIGHTS = 9
+TroopType.create(title: "Степные лучники") #STEPPE_ARCHERS = 10
+TroopType.create(title: "Стрельцы") #STRELTSY = 11
+TroopType.create(title: "Таран") #BATTERING_RAM = 12
 
 Troop.create(troop_type_id: 2, is_hired: true, army_id: 1 )
 Troop.create(troop_type_id: 3, is_hired: true, army_id: 1 )
@@ -211,3 +239,4 @@ PlantLevel.create(level: "2", deposit: "1500",  charge: "200", price: {"grain" =
 PlantLevel.create(level: "3", deposit: "2700",  charge: "300", price: {"grain" => 70, "tools" => 6},
                   max_product: {"grain" => 300}, plant_type_id: 10)
 
+PoliticalActionType.create(title: "Благотворительность", action: "charity")

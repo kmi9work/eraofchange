@@ -2,6 +2,16 @@ class Plant < ApplicationRecord
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true
+  belongs_to :credit, optional: true
+
+  before_destroy :check_credit, prepend: true
+
+  def check_credit
+    if self.credit.present?
+      self.errors.add(:credit, "Нельзя удалить предприятие, связанное с кредитом")
+      throw :abort
+    end
+  end
 
   def name_of_plant
     if economic_subject_type == "Guild"

@@ -13,4 +13,27 @@ class Player < ApplicationRecord
   has_many :political_actions
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
+
+  def give_credit(economic_subject_id)
+    plant = Plant.find_by_id(economic_subject_id)
+      if plant.credit_id.blank?
+        credit_new = self.credits.create
+        new_credit_id = credit_new.id
+        plant_with_credit = plant.update(credit_id: new_credit_id)
+        {msg: "Сумма кредита:"}
+      else
+        {msg: "Нельзя выдать кредит, уже выдан"}
+      end
+  end
+
+  def run_political_action(political_action_type_id, year, success, options)
+    if success
+      pat = PoliticalActionType.find_by_id(political_action_type_id)
+      result = pat.execute(options)
+      self.political_actions.create(year: year, success: success, params: result)
+    else
+      self.political_actions.create(year: year, success: success)
+    end
+  end
+
 end

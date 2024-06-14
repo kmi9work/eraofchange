@@ -32,6 +32,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "building_levels", force: :cascade do |t|
     t.integer "level"
+    t.string "name"
     t.json "price"
     t.json "params"
     t.integer "building_type_id"
@@ -183,6 +184,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
     t.integer "plant_place_id"
     t.integer "economic_subject_id"
     t.string "economic_subject_type"
+    t.integer "credit_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -206,7 +208,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_03_21_101131) do
 
   create_table "political_action_types", force: :cascade do |t|
     t.string "title"
-    t.json "action"
+    t.string "action"
     t.json "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
