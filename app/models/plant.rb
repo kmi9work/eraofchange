@@ -25,12 +25,15 @@ class Plant < ApplicationRecord
 
   def upgrade!
     level = self.plant_level&.level
-    if level && level < PlantLevel::MAX_LEVEL_PLANT
+    if level && level < PlantLevel::MAX_LEVEL
       pl = PlantLevel.find_by(level: level + 1, plant_type_id: self.plant_level.plant_type_id)
       self.plant_level = pl
-      self.save
-      return pl
+      if pl && self.save
+        return {plant_level: pl, msg: "Уровень предприятия увеличен"}
+      else
+        return {plant_level: nil, msg: "Внутренняя ошибка. #{pl}, #{self.errors.inspect}"}
+      end
     end
-    return nil
+    return {plant_level: nil, msg: "Невозможно улучшить. Уровень предприятия максимальный"}
   end
 end

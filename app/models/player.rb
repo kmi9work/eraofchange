@@ -17,16 +17,23 @@ class Player < ApplicationRecord
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
-  def give_credit(economic_subject_id)
-    plant = Plant.find_by_id(economic_subject_id)
-      if plant.credit_id.blank?
-        credit_new = self.credits.create
-        new_credit_id = credit_new.id
-        plant_with_credit = plant.update(credit_id: new_credit_id)
-        {msg: "Сумма кредита:"}
-      else
-        {msg: "Нельзя выдать кредит, уже выдан"}
-      end
+  def check_credit(plant_ids)
+    #1. Принадлежат ли эти предприятия игроку?
+    #2. Свободны ли предприятия от кредита?
+    belongs_to_player && empty_for_credit
+  end
+
+  def give_credit(plant_ids)
+    if check_credit(plant_ids)
+      # Для каждого предприятия создать кредит
+      # credit_new = self.credits.create
+      # new_credit_id = credit_new.id
+      # plant_with_credit = plant.update(credit_id: new_credit_id)
+      # Выводим сумму кредита равную сумме стоимостей всех предприятий. Срок кредита и финальную стоимость кредита
+      return {result: true, msg: ""}
+    else
+      return {result: false, msg: "Нельзя выдать кредит, уже выдан"}
+    end
   end
 
   def add_army(army_size_id, region_id)
@@ -51,13 +58,8 @@ class Player < ApplicationRecord
   end
 
   def run_political_action(political_action_type_id, year, success, options)
-    if success
-      pat = PoliticalActionType.find_by_id(political_action_type_id)
-      result = pat.execute_success(options)
-      self.political_actions.create(year: year, success: success, params: result)
-    else
-      result = pat.execute_fail(options)
-      self.political_actions.create(year: year, success: success)
-    end
+    pat = PoliticalActionType.find_by_id(political_action_type_id)
+    result = pat.execute(success, options)
+    self.political_actions.create(year: year, success: success, params: result)
   end
 end

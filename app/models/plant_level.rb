@@ -3,7 +3,7 @@ class PlantLevel < ApplicationRecord
 
     has_many :plants
 
-    MAX_LEVEL_PLANT = 3
+    MAX_LEVEL = 3
       
   # Общая структура формулы производства:
   # formula: {
