@@ -13,8 +13,8 @@ belongs_to :country, optional: true
   def cost_calculator(transaction_type, number, resource)
     relations = resource.country.params["relations"].to_s
     unless resource.country.params['embargo']
-      if transaction_type == "buy"
-        unit_cost = resource.params["buy_price"][relations]
+      if transaction_type == "sell"
+        unit_cost = resource.params["sale_price"][relations]
           if unit_cost != nil
             cost = unit_cost*number
             return cost
@@ -22,7 +22,7 @@ belongs_to :country, optional: true
             "Этот ресурс не продается на рынке"
           end
       else
-        unit_cost = resource.params["sale_price"][relations]
+        unit_cost = resource.params["buy_price"][relations]
         cost = unit_cost*number
 
         return cost
@@ -31,6 +31,8 @@ belongs_to :country, optional: true
       'Этот ресурс не продается и не покупается из-за эмбарго'
     end
   end
+
+cost_calculator("buy", 1, r)
 
 # Посмотреть цены (Увидеть изменение цены) С учётом Эмбарго - На входе ничего.
 # На выходе массив, в котором каждый элемент -
