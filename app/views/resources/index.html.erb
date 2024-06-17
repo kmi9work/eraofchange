@@ -6,7 +6,7 @@
   <thead>
     <tr>
       <th>Название ресурса</th>
-      <th>Стоимость</th>
+      <th>Идентификатор</th>
       <th>Действия</th>
     </tr>
   </thead>
@@ -14,7 +14,7 @@
     <% @resources.each do |resource|%>
      <tr>
       <td><%= link_to resource.name, resource %></td>
-      <td><%= resource.price %></td>
+      <td><%= resource.identificator %></td>
       <td class="left">
         <ul>
           <%= link_to "Редактировать", edit_resource_path(resource), class: 'btn1' %>

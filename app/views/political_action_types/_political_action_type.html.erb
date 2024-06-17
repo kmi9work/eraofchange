@@ -15,12 +15,13 @@
   </p>
 
   <p>
-    <strong>Политичеcкое действие:</strong>
-    <% if political_action_type.political_action_id.blank?%>
-     Не выбрано
+    <strong>Политичеcкие действия:</strong>
+    <% if political_action_type.political_action_ids.blank?%>
+      Не выбраны
     <% else %>
-    
-     <%= link_to political_action_type.political_action&.year, political_action_path %>
+      <% @political_action_type.political_actions.each do |political_action| %>
+        <%= link_to political_action_type.political_action&.year, political_action_path %>
+      <% end -%>  
     <% end -%>
   </p>
 

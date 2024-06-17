@@ -81,6 +81,7 @@ Rails.application.routes.draw do
   get '/plants/:id/edit', to: 'plants#edit', as: :edit_plant
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
-
+  patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
+    
   root to: 'welcome#index'
 end

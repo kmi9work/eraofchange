@@ -7,21 +7,24 @@
 <p> 
   Уровень:
   <% if @plant.plant_level.blank? %>
-   Не выбран
+    Не выбран
   <% else %>
-   <% link_to_plant_level = "/plant_levels/#{@plant.plant_level.id}" %>
-   <%= link_to @plant.plant_level&.level, link_to_plant_level %>
+    <% link_to_plant_level = "/plant_levels/#{@plant.plant_level.id}" %>
+    <%= link_to @plant.plant_level&.level, link_to_plant_level %>
   <% end -%>
 </p>
 
+<p><%= button_to "Улучшить предприятие", upgrade_plant_path(@plant), method: :patch %></p>
+
+<br>
 <p>
   Место для предприятия:
   <% if @plant.plant_place.blank? %>
-   не выбрано
+    не выбрано
   <% else %>
-   <% link_to_plant_place = "/plant_places/#{@plant.plant_place.id}" %>
-   <%= link_to @plant.plant_place&.title, link_to_plant_place %>
-<% end -%>
+    <% link_to_plant_place = "/plant_places/#{@plant.plant_place.id}" %>
+    <%= link_to @plant.plant_place&.title, link_to_plant_place %>
+  <% end -%>
 </p>
 
 <p>Гильдия/игровой персонаж: <%= link_to @plant.economic_subject&.name, @plant.economic_subject %></p>

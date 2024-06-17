@@ -7,6 +7,7 @@
       <th>Уровень</th>
       <th>Место для предприятия</th>
       <th>Владелец</th>
+      <th>Кредит</th>
       <th>Действия</th>
     </tr>
   </thead>
@@ -32,6 +33,14 @@
         <% end -%>
       </td>
       <td><%= link_to plant.economic_subject&.name, plant.economic_subject %></td>
+      <td>
+        <% if plant.credit.blank? %>
+          Нет кредита
+        <% else %>
+          <% link_to_credit = "/credits/#{plant.credit.id}" %>
+          <%= link_to plant.credit&.sum, link_to_credit %>
+        <% end -%>
+      </td>
       <td class="left">
         <ul>
           <%= link_to 'Редактировать', edit_plant_path(plant), class: 'btn1' %>
@@ -48,4 +57,3 @@
 <%= link_to "Добавить предприятие", new_plant_path, class: 'btn' %>
  
 
- 

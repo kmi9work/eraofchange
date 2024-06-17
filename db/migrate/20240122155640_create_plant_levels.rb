@@ -6,7 +6,7 @@ class CreatePlantLevels < ActiveRecord::Migration[7.0]
       t.integer :charge
       t.json :formula
       t.json :price
-      t.integer :max_product
+      t.json :max_product
       t.integer :plant_type_id
 
       t.timestamps

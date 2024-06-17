@@ -16,15 +16,12 @@
 
   <p>
     <strong>Вид политических действий:</strong>
-    <% if political_action.political_action_type_ids.blank? %>
-     Не выбран
+    <% if political_action.political_action_type_id.blank? %>
+      Не выбран
     <% else %>
-     <ul>
-      <% political_action.political_action_types.each do |political_action_type| %>
-       <li><%= link_to political_action_type.title, political_action_type %></li>
-      <% end -%>
-     </ul>
-    <% end %> 
+      <% link_to_political_action_type = "/political_action_types/#{political_action_type_id}/" %>
+      <%= link_to political_action_type&.title, link_to_political_action_type %></li>
+    <% end -%> 
   </p>
 
   <p>
