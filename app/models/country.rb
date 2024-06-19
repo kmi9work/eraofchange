@@ -17,34 +17,22 @@ class Country < ApplicationRecord
   def impose_embargo
     if self.params['embargo'] != nil
       self.params['embargo'] = true
-      self.save
+      {result: true, msg: "Эмбарго введено."}
     else
-      "Эта страна не может вводить эмбарго."
+      {result: nil, msg: "Эта страна не может вводить эмбарго."}
     end
   end
 
   def lift_embargo
     if self.params['embargo'] != nil
       self.params['embargo'] = false
-      self.save
+      {result: false, msg: "Эмбарго снято."}
     else
-      "Эта страна не может снимать эмбарго."
+      {result: nil, msg: "Эта страна не может снимать эмбарго."}
     end
   end
 
-  def embargo_switcher
-    if self.params['embargo'] != nil
-      if self.params['embargo'] == true
-        self.params['embargo'] = false
-      else
-        self.params['embargo'] = true
-      end
-    else
-    "Эта страна не может снимать или вводить эмбарго."
-    end
-  end
-
-  def relations_improver
+  def improve_relations
     if self.params['relations'] != nil
       if self.params['relations'].between?(-2,1)
         self.params['relations'] += 1
@@ -53,11 +41,11 @@ class Country < ApplicationRecord
         "Дальше отношения улучшать нельзя."
       end
     else
-      "С этой страной нельзя меня отношения."
+      "С этой страной нельзя менять отношения."
     end
   end
 
-  def relations_degrador
+  def degrade_relations
     if self.params['relations'] != nil
       if self.params['relations'].between?(-1,2)
         self.params['relations'] -= 1
@@ -66,7 +54,7 @@ class Country < ApplicationRecord
         "Дальше отношения снижать нельзя."
       end
     else
-      "С этой страной нельзя меня отношения."
+      "С этой страной нельзя менять отношения."
     end
   end
 
