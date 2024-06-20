@@ -1,32 +1,31 @@
 class Resource < ApplicationRecord
 #params
-#sale_price - цена продажи
-#buy_price - цена покупки
+#sale_price - цена продажи рынком игру
+#buy_price - цена покупки рынком у игрока
 #Если цена - nil - то он не продаётся или не покупается
 
 belongs_to :country, optional: true
 
 
-  def calculate_cost(transaction_type, number, resource)
+  def calculate_cost(transaction_type, amount, resource)
     relations = resource.country.params["relations"].to_s
-    unless resource.country.params['embargo']
       if transaction_type == "sell"
         unit_cost = resource.params["sale_price"][relations]
           if unit_cost != nil
-            cost = unit_cost*number
-            return cost
+            cost = unit_cost*amount
           else
-            "Этот ресурс не продается на рынке"
+            return {cost: nil, embargo: resource.country.params["embargo"], msg: "Этот ресурс не продается на рынке."}
           end
       else
         unit_cost = resource.params["buy_price"][relations]
-        cost = unit_cost*number
-
-        return cost
+        cost = unit_cost*amount
       end
-    else
-      'Этот ресурс не продается и не покупается из-за эмбарго'
-    end
+
+      if resource.country.params["embargo"]
+          {cost: cost, embargo: true, msg: "Этот ресурс под эмбарго. Для его покупки/продажи нужна контрабанда."}
+      else
+          {cost: cost, embargo: false, msg: "Этот ресурс продается свободно."}
+      end
   end
 
   def show_prices
@@ -46,8 +45,6 @@ belongs_to :country, optional: true
 
     return prices_array
   end
-
-
 
 end
 

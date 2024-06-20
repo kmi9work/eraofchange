@@ -17,6 +17,7 @@ class Country < ApplicationRecord
   def impose_embargo
     if self.params['embargo'] != nil
       self.params['embargo'] = true
+      self.save
       {result: true, msg: "Эмбарго введено."}
     else
       {result: nil, msg: "Эта страна не может вводить эмбарго."}
@@ -26,6 +27,7 @@ class Country < ApplicationRecord
   def lift_embargo
     if self.params['embargo'] != nil
       self.params['embargo'] = false
+      self.save
       {result: false, msg: "Эмбарго снято."}
     else
       {result: nil, msg: "Эта страна не может снимать эмбарго."}
