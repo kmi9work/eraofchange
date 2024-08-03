@@ -1,0 +1,45 @@
+<%= form_with(url: "/generator", method: "get") do %>
+  Размер: <%= text_field_tag(:x_dim, @x_dim) %> на <%= text_field_tag(:y_dim, @y_dim) %> <br>
+  Номер цикла: <%= text_field_tag(:cycle_number, @cycle_number) %>
+  <%= submit_tag("Вывести координаты") %>
+<% end %>
+
+<span style="font-size: 30px"><%= @coordinates %></span>
+
+<table>
+  <tr>
+    <td></td>
+    <% @x_dim.times do |x| %>
+      <td><%= x+1 %></td>
+    <% end -%>
+  </tr>
+  <% @y_dim.times do |y| %>
+    <tr>
+      <td><%= y+1 %></td>
+      <% @x_dim.times do |x| %>
+        <% if @coordinates.include?([x+1, y+1]) %>
+          <td class="fire">x</td>
+        <% else %>
+          <td></td>
+        <% end -%>
+      <% end -%>
+    </tr>
+  <% end -%>
+</table>
+
+<style type="text/css">
+  table * {
+    font-size: 30px;
+  }
+  table{
+    table-layout: fixed;
+    width: auto;
+  }
+  table tr td {
+    width: 60px;
+    height: 60px;
+  }
+  .fire {
+    background-color: red;
+  }
+</style>
