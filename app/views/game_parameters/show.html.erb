@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @game_parameter %>
+
+<div>
+  <%= link_to "Edit this game parameter", edit_game_parameter_path(@game_parameter) %> |
+  <%= link_to "Back to game parameters", game_parameters_path %>
+
+  <%= button_to "Destroy this game parameter", @game_parameter, method: :delete %>
+</div>
