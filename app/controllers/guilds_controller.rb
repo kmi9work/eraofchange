@@ -21,7 +21,6 @@ class GuildsController < ApplicationController
 
   def create
     @guild = Guild.new(guild_params)
-    debugger
     if @guild.save
       redirect_to guild_url(@guild), notice: "Гильдия успешно создана."
     else

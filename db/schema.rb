@@ -108,7 +108,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_03_144735) do
   create_table "game_parameters", force: :cascade do |t|
     t.string "title"
     t.string "identificator"
-    t.boolean "value"
+    t.string "value"
     t.json "params"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

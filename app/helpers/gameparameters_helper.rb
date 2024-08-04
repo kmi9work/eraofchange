@@ -1,2 +1,0 @@
-module GameparametersHelper
-end

@@ -13,7 +13,9 @@
   <div>
     <p>Название: <%= form.text_field :name %></p>
 
-    <p>Игровые персонажи:  <%= form.text_field :player_id %></p>
+    <p>Игровые персонажи:  <%= form.select :player_ids, options_for_select(@guildless_players.collect{ |p| [p.name, p.id] }, guild.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+
+
 
       <%#= form.select :player_ids, options_for_select(@guildless_players.collect{ |p| [p.name, p.id] }, guild.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 

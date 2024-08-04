@@ -48,17 +48,13 @@ Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, f
 Player.create(name: "Образина", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0}   )
 Player.create(name: "Образина", human_id: 10, player_type_id: 2, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
 
-
-state_cost = 1
-GameParameter.create(id: state_cost, title: "Оплата госрасходов", identificator: "state_expenses", value: false, params: nil)
-
-current_year = 2
-GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: nil, params:
+current_year = 1
+GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "", params:
 {"year_number" => "1", "event" => "", "state_expenses" => false})
 
 
-game_years = 3
-GameParameter.create(id: game_years, title: "Игровые годы", identificator: "game_years", value: nil, params:
+game_years = 2
+GameParameter.create(id: game_years, title: "Игровые годы", identificator: "game_years", value: "", params:
 [{"year_number" => "1", "event" => "","state_expenses" => false},
 {"year_number" => "2", "event" => "","state_expenses" => false},
 {"year_number" => "3", "event" => "boom","state_expenses" => false},
@@ -172,7 +168,6 @@ Resource.create(name: "Mука", identificator: "flour", country_id: crimea, par
 Resource.create(name: "Оружие", identificator: "weapon", country_id: crimea, params:
   {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 204},
   "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 172}})
-
 
 
 

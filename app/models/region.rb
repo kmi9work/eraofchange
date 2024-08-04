@@ -15,10 +15,10 @@ class Region < ApplicationRecord
   end
 
   def inf_state_exp_on_po #Пересчет общественного порядка с учетом госрасходов
-    if GameParameter.find_by(identificator: "state_expenses").value
+    if GameParameter.find_by(identificator: "current_year").params["state_expenses"]
       return 0
     else
-      return - 5
+      return -5
     end
   end
 
