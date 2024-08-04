@@ -1,9 +1,9 @@
 class GameParameter < ApplicationRecord
 
-  def self.change_year #Переводит в следующий год
+  def self.increase_year #Переводит в следующий год
     ny = GameParameter.find_by(identificator: "current_year")
-    if self.show_current_year <=5 # на случай резервного года
-      ny.params = GameParameter.find_by(identificator: "game_years").params[self.show_current_year]
+    if self.current_year <= 5 # на случай резервного года
+      ny.params = GameParameter.find_by(identificator: "game_years").params[self.current_year]
       ny.save
 
       po = self.find_by(identificator: "state_expenses")
@@ -16,7 +16,7 @@ class GameParameter < ApplicationRecord
     end
   end
 
-  def self.show_current_year #показывает номер года
+  def self.current_year #показывает номер года
     GameParameter.find_by(identificator: "current_year").params["year_number"].to_i
   end
 
