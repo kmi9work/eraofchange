@@ -7,8 +7,6 @@ class Settlement < ApplicationRecord
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
   def income
-    #Исправить
-    return false
     self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
   end
 

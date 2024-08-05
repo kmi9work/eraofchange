@@ -34,7 +34,9 @@ class PoliticalActionType < ApplicationRecord
     if success
       army = Army.find_by_id(options[:army_id])
       if army
-        {msg: "Размер вражеской армии: #{army.army_size&.name}. В нее входят: #{}."}         
+        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.title')
+        #Переписать msg в хэш в result'е
+        {msg: "Размер вражеской армии: #{army.army_size&.name}. В нее входят: #{troops}."}         
       end
     end
   end
@@ -43,13 +45,15 @@ class PoliticalActionType < ApplicationRecord
     if success
       army = Army.find_by_id(options[:army_id])
       if army
-        army.params["palsy"] = true
-        army.save      
+        army.params["palsy"].push(current_year+1) #У Антона узнать, как работает current_year
+        #!!! Дописать в место, где есть передвижение армии - что двигать нельзя, если паралич
+        army.save
       end
     end    
   end
 
   def contraband(success, options) #Контрабанда
+    # В params должен лежать страна контрабанды
     if success
       country = Country.find_by_id(options[:country_id])
       if country
@@ -62,7 +66,5 @@ class PoliticalActionType < ApplicationRecord
   end
 
   def new_fisheries(success, options) #Новые промыслы
-    
   end
-
 end

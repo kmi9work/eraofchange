@@ -83,12 +83,12 @@ ArmySize.create(name: "Малая",   level: 1, params:  {renewal_cost: {"gold" 
 ArmySize.create(name: "Средняя", level: 2, params:  {renewal_cost: {"gold" => 12000}, buy_cost: {"arms" => 8, "rations" => 10, "armour" => 2, "horses" => 6, "max_troops" => 8}})
 ArmySize.create(name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troops" => 12}})
 
-Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"palsy" => false})
+Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"palsy" => [2,3]}) #Паралич на второй и третий год
 
 BuildingType.create(title: "Религиозная постройка")
 BuildingType.create(title: "Оборонительная постройка")
@@ -252,6 +252,6 @@ Plant.create(comments: "Поля пшеницы", plant_level_id: 28, economic_s
 PoliticalActionType.create(title: "Благотворительность", action: "charity")
 PoliticalActionType.create(title: "Подстрекательство к бунту", action: 'sedition')
 
-GameParameter.create(name: "Ставка кредита", identificator: "credit_size", value: "20%")
-GameParameter.create(name: "Срок кредита", identificator: "credit_term", value: "3 года")
+GameParameter.create(name: "Ставка кредита (%)", identificator: "credit_size", value: "20")
+GameParameter.create(name: "Срок кредита (лет)", identificator: "credit_term", value: "3")
 GameParameter.create(name: "Оплата государственных расходов", identificator: "state_expenses")
