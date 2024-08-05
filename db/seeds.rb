@@ -49,18 +49,10 @@ Player.create(name: "Образина", human_id: 9, player_type_id: 2, job_id: 
 Player.create(name: "Образина", human_id: 10, player_type_id: 2, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
 
 current_year = 1
-GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "", params:
-{"year_number" => "1", "event" => "", "state_expenses" => false})
+GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
+{"state_expenses" => false})
 
 
-game_years = 2
-GameParameter.create(id: game_years, title: "Игровые годы", identificator: "game_years", value: "", params:
-[{"year_number" => "1", "event" => "","state_expenses" => false},
-{"year_number" => "2", "event" => "","state_expenses" => false},
-{"year_number" => "3", "event" => "boom","state_expenses" => false},
-{"year_number" => "4", "event" => "plague","state_expenses" => false},
-{"year_number" => "5", "event" => "", "state_expenses" => false},
-{"year_number" => "6", "event" => "","state_expenses" => false}])
 
 Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
