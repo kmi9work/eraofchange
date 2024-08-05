@@ -29,4 +29,40 @@ class PoliticalActionType < ApplicationRecord
       end
     end
   end
+
+  def espionage(success, options) #Шпионаж
+    if success
+      army = Army.find_by_id(options[:army_id])
+      if army
+        {msg: "Размер вражеской армии: #{army.army_size&.name}. В нее входят: #{}."}         
+      end
+    end
+  end
+
+  def sabotage(success, options) #Саботаж
+    if success
+      army = Army.find_by_id(options[:army_id])
+      if army
+        army.params["palsy"] = true
+        army.save      
+      end
+    end    
+  end
+
+  def contraband(success, options) #Контрабанда
+    if success
+      country = Country.find_by_id(options[:country_id])
+      if country
+      end
+    end
+  end
+
+  def open_gate(success, options) #Открыть ворота!
+
+  end
+
+  def new_fisheries(success, options) #Новые промыслы
+    
+  end
+
 end
