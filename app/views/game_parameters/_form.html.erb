@@ -1,0 +1,17 @@
+<%= form_with(model: game_parameter) do |form| %>
+  <% if game_parameter.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(game_parameter.errors.count, "error") %> prohibited this game_parameter from being saved:</h2>
+
+      <ul>
+        <% game_parameter.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

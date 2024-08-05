@@ -10,8 +10,6 @@ Human.create(name: "Мирослава Чернова")
 Human.create(name: "Александра Кузьмина")
 Human.create(name: "Павел Самсонов")
 Human.create(name: "Леон Захаров")
-
-
 Human.create(name: "Вася Пупкин")
 Human.create(name: "Петя Горшков")
 Human.create(name: "Вова Распутин")
@@ -22,6 +20,7 @@ Human.create(name: "Саша Никифоров")
 PlayerType.create(title: "Купец")
 PlayerType.create(title: "Знать")
 PlayerType.create(title: "Мудрец")
+PlayerType.create(title: "Дух народного бунта")
 
 Family.create(name: "Ивановы")
 Family.create(name: "Петровы")
@@ -49,7 +48,9 @@ Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, f
 Player.create(name: "Образина", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0}   )
 Player.create(name: "Образина", human_id: 10, player_type_id: 2, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
 
-
+current_year = 1
+GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
+{"state_expenses" => false})
 
 
 
@@ -57,17 +58,163 @@ Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
+
+
+
 PlantCategory.create(name: "Добывающее")
 PlantCategory.create(name: "Перерабатывающее")
 
-Country.create(title: "Русь")
-Country.create(title: "Большая орда")
-Country.create(title: "Крымское ханство")
-Country.create(title: "Казанское")
+#Русь
+rus = 1
+Country.create(title: "Русь", id: rus, params: {"relations" => nil, "embargo" => nil})
+
+
+#Большая орда
+horde = 2
+Country.create(title: "Большая орда", id: horde, params: {"relations" => 0, "embargo" => false})
+Resource.create(name: "Лошади", identificator: "horses", country_id: horde, params:
+{"sale_price" => {-2 => 127, -1 => 109, 0 => 91,  1 => 91, 2 => 91},
+"buy_price" => {-2 => 51, -1 => 58, 0 => 64, 1 => 70, 2 => 77}})
+
+Resource.create(name: "Pоскошь", identificator: "luxury", country_id: horde, params:
+{"sale_price" => {-2 => 998, -1 => 856, 0 => 713,  1 => 713, 2 => 713},
+"buy_price" => {-2 => 399, -1 => 449, 0 => 499, 1 =>549, 2 => 599}})
+
+#Ливонский орден
+livonian = 3
+Country.create(title: "Ливонский орден", id: livonian, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Каменный кирпич", identificator: "stone_brick", country_id: livonian, params:
+  {"sale_price" => {-2 => 21, -1 => 18, 0 => 15,   1 => 15, 2 => 15},
+"buy_price" => {-2 => 9, -1 => 10, 0 => 11, 1 => 12, 2 => 13}})
+
+
+Resource.create(name: "Камень", identificator: "stone", country_id: livonian, params:
+  {"sale_price" => {-2 => 28, -1 => 24, 0 => 20,   1 => 20, 2 => 20},
+"buy_price" => {-2 => 11, -1 => 13, 0 => 14, 1 => 15, 2 => 17}})
+
+Resource.create(name: "Доспехи", identificator: "armor", country_id: livonian, params:
+  {"sale_price" => {-2 => 861, -1 => 738, 0 => 615,   1 => 615, 2 => 615},
+"buy_price" => {-2 => 344, -1 => 387, 0 => 430, 1 => 473, 2 => 516}})
+
+#Швеция
+swe = 4
+Country.create(title: "Швеция", id: swe, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Драгоценный металл", identificator: "gems", country_id: swe, params:
+  {"sale_price" => {-2 => nil, -1 => nil, 0 => nil,  1 => nil, 2 => nil},
+  "buy_price" => {-2 => 77, -1 => 86, 0 => 96, 1 => 106, 2 => 115}})
+Resource.create(name: "Драгоценная руда", identificator: "gem_ore", country_id: swe, params:
+  {"sale_price" => {-2 => nil, -1 => nil, 0 => nil,  1 => nil, 2 => nil},
+  "buy_price" => {-2 => 11, -1 => 13, 0 => 14, 1 => 15, 2 => 17}})
+Resource.create(name: "Металл", identificator: "metal", country_id: swe, params:
+  {"sale_price" => {-2 => 66, -1 => 56, 0 => 47,  1 => 47, 2 => 40},
+  "buy_price" => {-2 => 26, -1 => 30, 0 => 33, 1 => 36, 2 => 40}})
+
+#Великое княжество литовское
+lithuania = 5
+Country.create(title: "Великое княжество литовское", id: lithuania, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Инструменты", identificator: "tools", country_id: lithuania, params:
+  {"sale_price" => {-2 => 186, -1 => 160, 0 => 133,  1 => 133, 2 => 133},
+  "buy_price" => {-2 => 74, -1 => 84, 0 => 93, 1 => 102, 2 => 112}})
+
+
+Resource.create(name: "Бревна", identificator: "timber", country_id: lithuania, params:
+  {"sale_price" => {-2 => 14, -1 => 12, 0 => 10,   1 => 10, 2 => 10},
+  "buy_price" => {-2 => 6, -1 => 6, 0 => 7, 1 => 8, 2 => 8}})
+
+Resource.create(name: "Доски", identificator: "boards", country_id: lithuania, params:
+  {"sale_price" => {-2 => 13, -1 => 11, 0 => 9,   1 => 9, 2 => 9},
+  "buy_price" => {-2 => 6, -1 => 11, 0 => 9, 1 => 9, 2 => 9}})
+
+#Казанское ханство
+kazan = 6
+Country.create(title: "Казанское ханство", id: kazan, params: {"relations" => 0, "embargo" => false})
+
+
+Resource.create(name: "Железная руда", identificator: "metal_ore", country_id: kazan, params:
+  {"sale_price" => {-2 => 10, -1 => 8, 0 => 7,   1 => 7, 2 => 7},
+  "buy_price" => {-2 => 4, -1 => 5, 0 => 5, 1 => 6, 2 => 6}})
+
+Resource.create(name: "Mясо", identificator: "meat", country_id: kazan, params:
+  {"sale_price" => {-2 => 27, -1 => 23, 0 => 19,   1 => 19, 2 => 19},
+ "buy_price" => {-2 => 10, -1 => 12, 0 => 13, 1 => 14, 2 => 16}})
+
+Resource.create(name: "Провизия", identificator: "food", country_id: kazan, params:
+  {"sale_price" => {-2 => 136, -1 => 116, 0 => 97,   1 => 2, 2 => 97},
+  "buy_price" => {-2 => 54, -1 => 61, 0 => 68, 1 => 75, 2 => 82}})
+
+#Крымское ханство
+crimea = 7
+Country.create(title: "Крымское ханство", id: crimea, params: {"relations" => 0, "embargo" => false})
+
+
+Resource.create(name: "Зерно", identificator: "grain", country_id: crimea, params:
+  {"sale_price" => {-2 => 4, -1 => 3, 0 => 3,  1 => 3, 2 => 3},
+   "buy_price" => {-2 => 2, -1 => 2, 0 => 2, 1 => 2, 2 => 2}})
+
+Resource.create(name: "Mука", identificator: "flour", country_id: crimea, params:
+  {"sale_price" => {-2 => 21, -1 => 18, 0 => 15,   1 => 15, 2 => 15},
+  "buy_price" => {-2 => 8, -1 => 9, 0 => 10, 1 => 11, 2 => 12}})
+Resource.create(name: "Оружие", identificator: "weapon", country_id: crimea, params:
+  {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 204},
+  "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 172}})
+
+
+
+
+
+
+
+
+
+
 
 
 Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0})
 Region.create(title: "Ярославское княжество", country_id: 1, params: {"public_order" => 0})
+
+
+
+
+
+
+
+
+
+
+#Resource.create(name: "Зерно", identificator: "grain", country_id: crimea, params: {"sale_price" => {-2 => 5, -1 => 4, 0 => 3, 1 => 2, 2 => 1}, "buy_price" => {-2 => 1, -1 => 2, 0 => 3, 1 => 4, 2 => 4}})
+
+
+
+
+
+
+
+PlantCategory.create(name: "Добывающее")
+PlantCategory.create(name: "Перерабатывающее")
+
+PlantType.create(name: "Лесопилка", plant_category_id: 2)
+PlantType.create(name: "Кузница", plant_category_id: 2)
+PlantType.create(name: "Плавильня", plant_category_id: 2)
+PlantType.create(name: "Трактир", plant_category_id: 2)
+PlantType.create(name: "Мельница", plant_category_id: 2)
+PlantType.create(name: "Делянка", plant_category_id: 1)
+PlantType.create(name: "Ферма", plant_category_id: 1)
+PlantType.create(name: "Железный рудник", plant_category_id: 1)
+PlantType.create(name: "Каменоломня", plant_category_id: 1)
+PlantType.create(name: "Поля пшеницы", plant_category_id: 1)
+
+
+
+
+
+
+
+
+
+
 
 SettlementType.create(name: "Город", params: {"income" => 8000})
 SettlementType.create(name: "Деревня", params: {"income" => 5000})
@@ -152,37 +299,12 @@ Troop.create(troop_type_id: 4, is_hired: true, army_id: 1 )
 
 # Plant.create(name: "Лесопилка", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 2,plant_type_id: 2, level: 1)
 
-Resource.create(name: "Доски", indentificator: "boards")
-Resource.create(name: "Металл", indentificator: "metal")
-Resource.create(name: "Каменный кирпич", indentificator: "stone_brick")
-Resource.create(name: "Инструменты", indentificator: "tools")
-Resource.create(name: "Бревна", indentificator: "beam")
-Resource.create(name: "Оружие", indentificator: "weapon")
-Resource.create(name: "Драгоценный металл", indentificator: "gems")
-Resource.create(name: "Драгоценная руда", indentificator: "gem_ore")
-Resource.create(name: "Провизия", indentificator: "food")
-Resource.create(name: "Камень", indentificator: "stone")
-Resource.create(name: "Mука", indentificator: "flour")
-Resource.create(name: "Доспехи", indentificator: "armor")
-Resource.create(name: "Зерно", indentificator: "grain")
-Resource.create(name: "Лошади", indentificator: "horses")
-Resource.create(name: "Mясо", indentificator: "meat")
-Resource.create(name: "Pоскошь", indentificator: "luxury")
-Resource.create(name: "Железная руда", indentificator: "metal_ore")
 
-PlantCategory.create(name: "Добывающее")
-PlantCategory.create(name: "Перерабатывающее")
 
-PlantType.create(name: "Лесопилка", plant_category_id: 2)
-PlantType.create(name: "Кузница", plant_category_id: 2)
-PlantType.create(name: "Плавильня", plant_category_id: 2)
-PlantType.create(name: "Трактир", plant_category_id: 2)
-PlantType.create(name: "Мельница", plant_category_id: 2)
-PlantType.create(name: "Делянка", plant_category_id: 1)
-PlantType.create(name: "Ферма", plant_category_id: 1)
-PlantType.create(name: "Железный рудник", plant_category_id: 1)
-PlantType.create(name: "Каменоломня", plant_category_id: 1)
-PlantType.create(name: "Поля пшеницы", plant_category_id: 1)
+
+
+
+
 
 PlantLevel.create(level: "1", deposit: "800",   charge: "100", price: {"boards" => 50, "metal" => 10},
                   max_product: {"boards" => 200}, plant_type_id: 1)
