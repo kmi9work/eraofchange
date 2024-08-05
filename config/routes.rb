@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :game_parameters
   resources :credits
   resources :troops
   resources :armies

@@ -18,21 +18,22 @@ class Player < ApplicationRecord
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
   def check_credit(plant_ids)
-    #1. Принадлежат ли эти предприятия игроку?
-    #2. Свободны ли предприятия от кредита?
-    belongs_to_player && empty_for_credit
+    plant_player = Plant.find_by_id(plant_ids)
+    if plant_player.economic_subject_id == self.id && plant_player.credit.blank?
+      {msg: "Предприятие принадлежит игроку и нет кредита"}
+    end
   end
 
   def give_credit(plant_ids)
     if check_credit(plant_ids)
-      # Для каждого предприятия создать кредит
-      # credit_new = self.credits.create
-      # new_credit_id = credit_new.id
-      # plant_with_credit = plant.update(credit_id: new_credit_id)
-      # Выводим сумму кредита равную сумме стоимостей всех предприятий. Срок кредита и финальную стоимость кредита
-      return {result: true, msg: ""}
+      plant_player = Plant.find_by_id(plant_ids)
+      credit_new = self.credits.create(sum: plant_player.plant_level&.deposit)
+      new_credit_id = credit_new.id
+      plant_with_credit = plant_player.update(credit_id: new_credit_id)
+      return {result: true, msg: "Сумма кредита: #{plant_player.plant_level&.deposit}. Срок кредита: #{GameParameter.find_by(identificator: "credit_term").value}.
+              Финальная стоимость кредита: #{plant_player.plant_level&.deposit + ((plant_player.plant_level&.deposit * 0.2) *3)}."}
     else
-      return {result: false, msg: "Нельзя выдать кредит, уже выдан"}
+      return {result: false, msg: "Нельзя выдать кредит"}
     end
   end
 
@@ -63,3 +64,4 @@ class Player < ApplicationRecord
     self.political_actions.create(year: year, success: success, params: result)
   end
 end
+

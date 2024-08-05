@@ -34,4 +34,15 @@
     <% end -%>
   </p>
 
+   <p>
+    <strong>Предприятие:</strong>
+    <% if credit.plant_ids.blank?%>
+      Не выбрано
+    <% else %>
+      <% credit.plants.each do |plant|%>
+        <%= link_to plant.comments, plant %>
+      <% end -%>
+    <% end -%>
+  </p>
+
 </div>
