@@ -20,5 +20,10 @@ class Building < ApplicationRecord
   def income
     self.building_level&.params&.dig("income").to_i
   end
-end
 
+  def pay_for_church
+    self.params["paid"].push(GameParameter.current_year)
+    self.save
+    {msg: "Расходы за церковь внесены"}
+  end
+end

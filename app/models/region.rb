@@ -6,6 +6,7 @@ class Region < ApplicationRecord
 
   has_many :settlements
   has_many :armies
+  has_many :plant_places
 
   def inf_buildings_on_po #Влияние зданий на общественной порадок
     bl_params = self.settlements.joins(buildings: :building_level).
@@ -27,5 +28,18 @@ class Region < ApplicationRecord
     po += self.inf_buildings_on_po + self.inf_state_exp_on_po
     return po
   end
+
+  def capture(who, how) #1 - войной, 0 - миром
+    self.country_id = who
+    if how == 1
+      self.params["public_order"] -= 3
+    else
+      self.params["public_order"] += 3
+    end
+
+    self.save
+    {msg: "Регион присоединен"}
+  end
+
 
 end

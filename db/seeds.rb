@@ -216,8 +216,8 @@ PlantType.create(name: "Поля пшеницы", plant_category_id: 1)
 
 
 
+SettlementType.create(name: "Столица", params: {"income" => 10000})
 SettlementType.create(name: "Город", params: {"income" => 8000})
-SettlementType.create(name: "Деревня", params: {"income" => 5000})
 
 
 Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1)
@@ -259,9 +259,12 @@ BuildingLevel.create(level: 1, building_type_id: 4, name: "Караул")
 BuildingLevel.create(level: 2, building_type_id: 4, name: "Гарнизон")
 BuildingLevel.create(level: 3, building_type_id: 4, name: "Казармы")
 
-Building.create(building_level_id: 1, settlement_id: 1)
-Building.create(building_level_id: 2, settlement_id: 2)
-Building.create(building_level_id: 3, settlement_id: 1)
+Building.create(building_level_id: 1, settlement_id: 1, params: {"paid" => []})
+Building.create(building_level_id: 2, settlement_id: 2, params: {"paid" => []})
+Building.create(building_level_id: 3, settlement_id: 1, params: {"paid" => []})
+
+
+
 Building.create(building_level_id: 4, settlement_id: 2)
 Building.create(building_level_id: 5, settlement_id: 1)
 Building.create(building_level_id: 6, settlement_id: 2)
