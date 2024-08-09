@@ -1,7 +1,7 @@
 class Army < ApplicationRecord
 
   # params:
-  # palsy (bool) - Паралич
+  # palsy ([]) - Паралич
 
   belongs_to :region, optional: true
   belongs_to :player, optional: true

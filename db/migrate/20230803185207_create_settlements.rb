@@ -5,6 +5,7 @@ class CreateSettlements < ActiveRecord::Migration[7.0]
       t.integer :settlement_type_id
       t.integer :region_id
       t.integer :player_id
+      t.json :params
       t.timestamps
     end
   end

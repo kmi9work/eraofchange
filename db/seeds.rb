@@ -36,34 +36,119 @@ Job.create(name: "Тайный советник")
 Job.create(name: "Дух русского бунта")
 Job.create(name: "Глава купеческого приказа")
 
-Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0} )
-Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0}  )
-Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0}   )
-Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0}   )
-Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0}   )
-Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Даниил", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Марфа", human_id: 10, player_type_id: 1, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Шимяка", human_id: 11, player_type_id: 1, family_id: 3)
-Player.create(name: "Шелом", human_id: 12, player_type_id: 1, family_id: 3)
-Player.create(name: "Яромила", human_id: 13, player_type_id: 1, family_id: 3)
-Player.create(name: "Булат", human_id: 14, player_type_id: 1, family_id: 3)
-Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_id: 3)
-Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3)
-Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3)
-Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3)
+Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Даниил", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Марфа", human_id: 10, player_type_id: 1, job_id: 10, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Шимяка", human_id: 11, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Шелом", human_id: 12, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Яромила", human_id: 13, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Булат", human_id: 14, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+
+current_year = 1
+GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
+{"state_expenses" => false})
+GameParameter.create(title: "Ставка кредита (%)", identificator: "credit_size", value: "20")
+GameParameter.create(title: "Срок кредита (лет)", identificator: "credit_term", value: "3")
+
+#Русь
+rus = 1
+Country.create(title: "Русь", id: rus, params: {"relations" => nil, "embargo" => nil})
+
+#Большая орда
+horde = 2
+Country.create(title: "Большая орда", id: horde, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Лошади", identificator: "horses", country_id: horde, params:
+{"sale_price" => {-2 => 127, -1 => 109, 0 => 91,  1 => 91, 2 => 91},
+"buy_price" => {-2 => 51, -1 => 58, 0 => 64, 1 => 70, 2 => 77}})
+Resource.create(name: "Pоскошь", identificator: "luxury", country_id: horde, params:
+{"sale_price" => {-2 => 998, -1 => 856, 0 => 713,  1 => 713, 2 => 713},
+"buy_price" => {-2 => 399, -1 => 449, 0 => 499, 1 =>549, 2 => 599}})
+
+#Ливонский орден
+livonian = 3
+Country.create(title: "Ливонский орден", id: livonian, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Каменный кирпич", identificator: "stone_brick", country_id: livonian, params:
+  {"sale_price" => {-2 => 21, -1 => 18, 0 => 15,   1 => 15, 2 => 15},
+"buy_price" => {-2 => 9, -1 => 10, 0 => 11, 1 => 12, 2 => 13}})
+Resource.create(name: "Камень", identificator: "stone", country_id: livonian, params:
+  {"sale_price" => {-2 => 28, -1 => 24, 0 => 20,   1 => 20, 2 => 20},
+"buy_price" => {-2 => 11, -1 => 13, 0 => 14, 1 => 15, 2 => 17}})
+Resource.create(name: "Доспехи", identificator: "armor", country_id: livonian, params:
+  {"sale_price" => {-2 => 861, -1 => 738, 0 => 615,   1 => 615, 2 => 615},
+"buy_price" => {-2 => 344, -1 => 387, 0 => 430, 1 => 473, 2 => 516}})
+
+#Швеция
+swe = 4
+Country.create(title: "Швеция", id: swe, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Драгоценный металл", identificator: "gems", country_id: swe, params:
+  {"sale_price" => {-2 => nil, -1 => nil, 0 => nil,  1 => nil, 2 => nil},
+  "buy_price" => {-2 => 77, -1 => 86, 0 => 96, 1 => 106, 2 => 115}})
+Resource.create(name: "Драгоценная руда", identificator: "gem_ore", country_id: swe, params:
+  {"sale_price" => {-2 => nil, -1 => nil, 0 => nil,  1 => nil, 2 => nil},
+  "buy_price" => {-2 => 11, -1 => 13, 0 => 14, 1 => 15, 2 => 17}})
+Resource.create(name: "Металл", identificator: "metal", country_id: swe, params:
+  {"sale_price" => {-2 => 66, -1 => 56, 0 => 47,  1 => 47, 2 => 40},
+  "buy_price" => {-2 => 26, -1 => 30, 0 => 33, 1 => 36, 2 => 40}})
+
+#Великое княжество литовское
+lithuania = 5
+Country.create(title: "Великое княжество литовское", id: lithuania, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Инструменты", identificator: "tools", country_id: lithuania, params:
+  {"sale_price" => {-2 => 186, -1 => 160, 0 => 133,  1 => 133, 2 => 133},
+  "buy_price" => {-2 => 74, -1 => 84, 0 => 93, 1 => 102, 2 => 112}})
+Resource.create(name: "Бревна", identificator: "timber", country_id: lithuania, params:
+  {"sale_price" => {-2 => 14, -1 => 12, 0 => 10,   1 => 10, 2 => 10},
+  "buy_price" => {-2 => 6, -1 => 6, 0 => 7, 1 => 8, 2 => 8}})
+Resource.create(name: "Доски", identificator: "boards", country_id: lithuania, params:
+  {"sale_price" => {-2 => 13, -1 => 11, 0 => 9,   1 => 9, 2 => 9},
+  "buy_price" => {-2 => 6, -1 => 11, 0 => 9, 1 => 9, 2 => 9}})
+
+#Казанское ханство
+kazan = 6
+Country.create(title: "Казанское ханство", id: kazan, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Железная руда", identificator: "metal_ore", country_id: kazan, params:
+  {"sale_price" => {-2 => 10, -1 => 8, 0 => 7,   1 => 7, 2 => 7},
+  "buy_price" => {-2 => 4, -1 => 5, 0 => 5, 1 => 6, 2 => 6}})
+Resource.create(name: "Mясо", identificator: "meat", country_id: kazan, params:
+  {"sale_price" => {-2 => 27, -1 => 23, 0 => 19,   1 => 19, 2 => 19},
+ "buy_price" => {-2 => 10, -1 => 12, 0 => 13, 1 => 14, 2 => 16}})
+Resource.create(name: "Провизия", identificator: "food", country_id: kazan, params:
+  {"sale_price" => {-2 => 136, -1 => 116, 0 => 97,   1 => 2, 2 => 97},
+  "buy_price" => {-2 => 54, -1 => 61, 0 => 68, 1 => 75, 2 => 82}})
+
+#Крымское ханство
+crimea = 7
+Country.create(title: "Крымское ханство", id: crimea, params: {"relations" => 0, "embargo" => false})
+
+Resource.create(name: "Зерно", identificator: "grain", country_id: crimea, params:
+  {"sale_price" => {-2 => 4, -1 => 3, 0 => 3,  1 => 3, 2 => 3},
+   "buy_price" => {-2 => 2, -1 => 2, 0 => 2, 1 => 2, 2 => 2}})
+Resource.create(name: "Mука", identificator: "flour", country_id: crimea, params:
+  {"sale_price" => {-2 => 21, -1 => 18, 0 => 15,   1 => 15, 2 => 15},
+  "buy_price" => {-2 => 8, -1 => 9, 0 => 10, 1 => 11, 2 => 12}})
+Resource.create(name: "Оружие", identificator: "weapon", country_id: crimea, params:
+  {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 204},
+  "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 172}})
 
 Guild.create(name: "Забавники")
 Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
-
-Country.create(title: "Русь")
-Country.create(title: "Большая орда")
-Country.create(title: "Крымское ханство")
-Country.create(title: "Казанское")
-
 
 Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0})
 Region.create(title: "Ярославское княжество", country_id: 1, params: {"public_order" => 0})
@@ -72,23 +157,23 @@ SettlementType.create(name: "Город", params: {"income" => 8000})
 SettlementType.create(name: "Деревня", params: {"income" => 5000})
 
 
-Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1)
-Settlement.create(name: "Тверь", settlement_type_id: 1, region_id: 1, player_id: 2)
-Settlement.create(name: "Рязань", settlement_type_id: 1, region_id: 1, player_id: 3)
-Settlement.create(name: "Хатавки", settlement_type_id: 2, region_id: 1, player_id: 4)
-Settlement.create(name: "Гадюкино", settlement_type_id: 2, region_id: 1, player_id: 5)
-Settlement.create(name: "Холмищи", settlement_type_id: 2, region_id: 1, player_id: 6)
+Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1, params: {"open_gate" => false})
+Settlement.create(name: "Тверь", settlement_type_id: 1, region_id: 1, player_id: 2, params: {"open_gate" => false})
+Settlement.create(name: "Рязань", settlement_type_id: 1, region_id: 1, player_id: 3, params: {"open_gate" => false})
+Settlement.create(name: "Хатавки", settlement_type_id: 2, region_id: 1, player_id: 4, params: {"open_gate" => false})
+Settlement.create(name: "Гадюкино", settlement_type_id: 2, region_id: 1, player_id: 5, params: {"open_gate" => false})
+Settlement.create(name: "Холмищи", settlement_type_id: 2, region_id: 1, player_id: 6, params: {"open_gate" => false})
 
 ArmySize.create(name: "Малая",   level: 1, params:  {renewal_cost: {"gold" => 7000},  buy_cost: {"arms" => 4, "rations" => 5, "armour" => 1, "horses" => 3, "max_troops" => 4}})
 ArmySize.create(name: "Средняя", level: 2, params:  {renewal_cost: {"gold" => 12000}, buy_cost: {"arms" => 8, "rations" => 10, "armour" => 2, "horses" => 6, "max_troops" => 8}})
 ArmySize.create(name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troops" => 12}})
 
-Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"palsy" => false})
-Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"palsy" => false})
+Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"palsy" => []})
+Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"palsy" => [2,3]}) #Паралич на второй и третий год
 
 BuildingType.create(title: "Религиозная постройка")
 BuildingType.create(title: "Оборонительная постройка")
@@ -135,24 +220,6 @@ TroopType.create(title: "Таран") #BATTERING_RAM = 12
 Troop.create(troop_type_id: 2, is_hired: true, army_id: 1 )
 Troop.create(troop_type_id: 3, is_hired: true, army_id: 1 )
 Troop.create(troop_type_id: 4, is_hired: true, army_id: 1 )
-
-Resource.create(name: "Доски", identificator: "boards")
-Resource.create(name: "Металл", identificator: "metal")
-Resource.create(name: "Каменный кирпич", identificator: "stone_brick")
-Resource.create(name: "Инструменты", identificator: "tools")
-Resource.create(name: "Бревна", identificator: "beam")
-Resource.create(name: "Оружие", identificator: "weapon")
-Resource.create(name: "Драгоценный металл", identificator: "gems")
-Resource.create(name: "Драгоценная руда", identificator: "gem_ore")
-Resource.create(name: "Провизия", identificator: "food")
-Resource.create(name: "Камень", identificator: "stone")
-Resource.create(name: "Mука", identificator: "flour")
-Resource.create(name: "Доспехи", identificator: "armor")
-Resource.create(name: "Зерно", identificator: "grain")
-Resource.create(name: "Лошади", identificator: "horses")
-Resource.create(name: "Mясо", identificator: "meat")
-Resource.create(name: "Pоскошь", identificator: "luxury")
-Resource.create(name: "Железная руда", identificator: "metal_ore")
 
 PlantCategory.create(name: "Добывающее")
 PlantCategory.create(name: "Перерабатывающее")
@@ -249,9 +316,10 @@ Plant.create(comments: "Железный рудник", plant_level_id: 22, econ
 Plant.create(comments: "Каменоломня", plant_level_id: 25, economic_subject_id: 9)
 Plant.create(comments: "Поля пшеницы", plant_level_id: 28, economic_subject_id: 10)
 
-PoliticalActionType.create(title: "Благотворительность", action: "charity")
 PoliticalActionType.create(title: "Подстрекательство к бунту", action: 'sedition')
-
-GameParameter.create(name: "Ставка кредита", identificator: "credit_size", value: "20%")
-GameParameter.create(name: "Срок кредита", identificator: "credit_term", value: "3 года")
-GameParameter.create(name: "Оплата государственных расходов", identificator: "state_expenses")
+PoliticalActionType.create(title: "Благотворительность", action: "charity")
+PoliticalActionType.create(title: "Шпионаж", action: 'espionage')
+PoliticalActionType.create(title: "Саботаж", action: 'sabotage')
+PoliticalActionType.create(title: "Контрабанда", action: 'contraband')
+PoliticalActionType.create(title: "Открыть ворота!", action: 'open_gate')
+PoliticalActionType.create(title: "Новые промыслы", action: 'new_fisheries')

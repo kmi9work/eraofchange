@@ -1,6 +1,7 @@
 class Player < ApplicationRecord
   # params:
   # infuence (integer) - Влияние
+  # contraband ([]) - Контрабанда
 
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true
@@ -18,20 +19,30 @@ class Player < ApplicationRecord
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
   def check_credit(plant_ids)
-    plant_player = Plant.find_by_id(plant_ids)
-    if plant_player.economic_subject_id == self.id && plant_player.credit.blank?
-      {msg: "Предприятие принадлежит игроку и нет кредита"}
+    plants = Plant.where(id: plant_ids)
+    if plants.all?{|p| p.credit_id.blank?}
+      {result: true, msg: "Нет кредитов"}
     end
   end
 
   def give_credit(plant_ids)
     if check_credit(plant_ids)
-      plant_player = Plant.find_by_id(plant_ids)
-      credit_new = self.credits.create(sum: plant_player.plant_level&.deposit)
+      plants = Plant.where(id: plant_ids)
+      credit_deposit = 0
+      credit_term = GameParameter.find_by(identificator: "credit_term").value.to_i
+      credit_size = GameParameter.find_by(identificator: "credit_size").value.to_f / 100
+      start_year = GameParameter.find_by(identificator: "current_year").value.to_i
+      plants.each { |p| credit_deposit += p.plant_level.deposit }
+      credit_sum = credit_deposit + ((credit_deposit * credit_size) * credit_term) if credit_deposit.present?
+      credit_new = self.credits.create(sum: credit_sum, deposit: credit_deposit, procent: credit_size, duration: credit_term, start_year: start_year)
       new_credit_id = credit_new.id
-      plant_with_credit = plant_player.update(credit_id: new_credit_id)
-      return {result: true, msg: "Сумма кредита: #{plant_player.plant_level&.deposit}. Срок кредита: #{GameParameter.find_by(identificator: "credit_term").value}.
-              Финальная стоимость кредита: #{plant_player.plant_level&.deposit + ((plant_player.plant_level&.deposit * 0.2) *3)}."}
+      plants_with_credit = plants.update(credit_id: new_credit_id)
+      final_hash = {
+        credit_deposit: credit_deposit, 
+        credit_term: credit_term,
+        credit_sum: credit_sum
+      }
+      return {result: final_hash, msg: "Кредит выдан"}
     else
       return {result: false, msg: "Нельзя выдать кредит"}
     end
@@ -61,7 +72,6 @@ class Player < ApplicationRecord
   def run_political_action(political_action_type_id, year, success, options)
     pat = PoliticalActionType.find_by_id(political_action_type_id)
     result = pat.execute(success, options)
-    self.political_actions.create(year: year, success: success, params: result)
+    self.political_actions.create(year: year, success: success, params: result, political_action_type_id: political_action_type_id)
   end
 end
-
