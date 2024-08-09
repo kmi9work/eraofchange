@@ -52,7 +52,7 @@ class PoliticalActionType < ApplicationRecord
         current_year = GameParameter.find_by(identificator: "current_year").value.to_i
         army.params["palsy"].push(current_year + 1)
         #!!! Дописать в место, где есть передвижение армии - что двигать нельзя, если паралич
-        army.save     
+        army.save       
       end
     end    
   end
@@ -84,5 +84,4 @@ class PoliticalActionType < ApplicationRecord
     if success
     end    
   end
-
 end
