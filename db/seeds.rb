@@ -37,16 +37,24 @@ Job.create(name: "Тайный советник")
 Job.create(name: "Дух русского бунта")
 Job.create(name: "Глава купеческого приказа")
 
-Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0} )
-Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0}  )
-Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0}   )
-Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0}   )
-Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0}   )
-Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Образина", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0}   )
-Player.create(name: "Образина", human_id: 10, player_type_id: 2, job_id: 10, family_id: 3, params: {"infuence" => 0}   )
+Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Даниил", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Марфа", human_id: 10, player_type_id: 1, job_id: 10, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Шимяка", human_id: 11, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Шелом", human_id: 12, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Яромила", human_id: 13, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Булат", human_id: 14, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
 
 current_year = 1
 GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
@@ -181,17 +189,6 @@ Region.create(title: "Ярославское княжество", country_id: 1,
 
 
 
-
-
-
-#Resource.create(name: "Зерно", identificator: "grain", country_id: crimea, params: {"sale_price" => {-2 => 5, -1 => 4, 0 => 3, 1 => 2, 2 => 1}, "buy_price" => {-2 => 1, -1 => 2, 0 => 3, 1 => 4, 2 => 4}})
-
-
-
-
-
-
-
 PlantCategory.create(name: "Добывающее")
 PlantCategory.create(name: "Перерабатывающее")
 
@@ -215,14 +212,21 @@ PlantType.create(name: "Поля пшеницы", plant_category_id: 1)
 
 
 
-
-SettlementType.create(name: "Столица", params: {"income" => 10000})
-SettlementType.create(name: "Город", params: {"income" => 8000})
+cap = 1
+SettlementType.create(id: cap, name: "Столица", params: {"income" => 10000})
+town = 2
+SettlementType.create(id: town, name: "Город", params: {"income" => 5000})
+for_cap = 3
+SettlementType.create(id: for_cap, name: "Иностранный город", params: {"income" => 0})
+for_town = 4
+SettlementType.create(id: for_town, name: "Инострнная столица", params: {"income" => 10000})
 
 
 Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1)
 Settlement.create(name: "Тверь", settlement_type_id: 1, region_id: 1, player_id: 2)
 Settlement.create(name: "Рязань", settlement_type_id: 1, region_id: 1, player_id: 3)
+
+
 Settlement.create(name: "Хатавки", settlement_type_id: 2, region_id: 1, player_id: 4)
 Settlement.create(name: "Гадюкино", settlement_type_id: 2, region_id: 1, player_id: 5)
 Settlement.create(name: "Холмищи", settlement_type_id: 2, region_id: 1, player_id: 6)
@@ -261,7 +265,7 @@ BuildingLevel.create(level: 3, building_type_id: 4, name: "Казармы")
 
 Building.create(building_level_id: 1, settlement_id: 1, params: {"paid" => []})
 Building.create(building_level_id: 2, settlement_id: 2, params: {"paid" => []})
-Building.create(building_level_id: 3, settlement_id: 1, params: {"paid" => []})
+Building.create(building_level_id: 3, settlement_id: 3, params: {"paid" => []})
 
 
 

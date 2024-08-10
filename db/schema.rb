@@ -174,7 +174,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_03_144735) do
   create_table "plant_places", force: :cascade do |t|
     t.string "title"
     t.integer "plant_category_id"
-    t.integer "settlement_id"
+    t.integer "region_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

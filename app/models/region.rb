@@ -25,11 +25,33 @@ class Region < ApplicationRecord
 
   def show_overall_po
     po = self.params["public_order"] #изначальный
-    po += self.inf_buildings_on_po + self.inf_state_exp_on_po
+    po += self.inf_buildings_on_po + self.inf_state_exp_on_po + self.check_unpaid_churches
+
     return po
   end
 
-  def capture(who, how) #1 - войной, 0 - миром
+  def check_unpaid_churches #Проверка: оплачены ли все церкви в регионе
+    bl_params = self.settlements.joins(buildings: :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        pluck('buildings.params')
+    if bl_params.empty?
+      result = 0
+    else
+      for i in 0..bl_params.length-1
+          if bl_params[i]["paid"].include?(GameParameter.current_year)
+            result = 3
+          else
+            result = -3
+            break
+          end
+        end
+    end
+    return result
+  end
+
+
+
+  def captured_by(who, how) #1 - войной, 0 - миром
     self.country_id = who
     if how == 1
       self.params["public_order"] -= 3

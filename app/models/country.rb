@@ -60,4 +60,18 @@ class Country < ApplicationRecord
     end
   end
 
+
+  def capture(region, how) #1 - войной, 0 - миром
+   region.country_id = self.id
+    if how == 1
+      region.params["public_order"] -= 3
+    else
+      region.params["public_order"] += 3
+    end
+
+    region.save
+    {result: true, msg: "Регион присоединен"}
+  end
+
+
 end
