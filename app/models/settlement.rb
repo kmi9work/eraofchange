@@ -23,15 +23,17 @@ class Settlement < ApplicationRecord
   end
 
   def pay_for_church
-    self.buildings.each do |b|
-      if b.building_level.building_type_id == BuildingType::RELIGIOUS
-        b.params["paid"].push(GameParameter.current_year)
-        b.save
+    type = self.buildings.joins(building_level: :building_type).
+                where(building_levels: {building_type_id: BuildingType::RELIGIOUS})
+    b = self.buildings.find_by(id: type.pluck("id"))
+    if b.params["paid"].include?(GameParameter.current_year)
+      {result: false, msg: "За эту церковь уже внесены расходы"}
+    else
+      b.params["paid"].push(GameParameter.current_year)
+      b.save
       {result: true, msg: "Расходы за церковь внесены"}
-      else
-      {result: false, msg: "Расходы за церковь не внесены"}
-      end
     end
   end
 
 end
+
