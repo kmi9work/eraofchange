@@ -20,20 +20,18 @@ class Player < ApplicationRecord
 
   def check_credit(plant_ids)
     plants = Plant.where(id: plant_ids)
-    if plants.all?{|p| p.credit_id.blank?}
-      {result: true, msg: "Нет кредитов"}
-    end
+    plants.all?{|p| p.credit_id.blank?}
   end
 
   def give_credit(plant_ids)
     if check_credit(plant_ids)
       plants = Plant.where(id: plant_ids)
       credit_deposit = 0
-      credit_term = GameParameter.find_by(identificator: "credit_term").value.to_i
-      credit_size = GameParameter.find_by(identificator: "credit_size").value.to_f / 100
-      start_year = GameParameter.find_by(identificator: "current_year").value.to_i
+      credit_term = GameParameter.find_by(identificator: "credit_term")&.value.to_i
+      credit_size = GameParameter.find_by(identificator: "credit_size")&.value.to_f / 100
+      start_year = GameParameter.find_by(identificator: "current_year")&.value.to_i
       plants.each { |p| credit_deposit += p.plant_level.deposit }
-      credit_sum = credit_deposit + ((credit_deposit * credit_size) * credit_term) if credit_deposit.present?
+      credit_sum = credit_deposit + ((credit_deposit * credit_size) * credit_term).round if credit_deposit.present?
       credit_new = self.credits.create(sum: credit_sum, deposit: credit_deposit, procent: credit_size, duration: credit_term, start_year: start_year)
       new_credit_id = credit_new.id
       plants_with_credit = plants.update(credit_id: new_credit_id)
@@ -44,7 +42,7 @@ class Player < ApplicationRecord
       }
       return {result: final_hash, msg: "Кредит выдан"}
     else
-      return {result: false, msg: "Нельзя выдать кредит"}
+      return {result: false, msg: "Кредит не выдан, одно или несколько предприятий уже находятся в залоге"}
     end
   end
 

@@ -49,7 +49,7 @@ class PoliticalActionType < ApplicationRecord
     if success
       army = Army.find_by_id(options[:army_id])
       if army
-        current_year = GameParameter.find_by(identificator: "current_year").value.to_i
+        current_year = GameParameter.find_by(identificator: "current_year")&.value.to_i
         army.params["palsy"].push(current_year + 1)
         #!!! Дописать в место, где есть передвижение армии - что двигать нельзя, если паралич
         army.save       
@@ -80,8 +80,7 @@ class PoliticalActionType < ApplicationRecord
   end
 
   def new_fisheries(success, options) #Новые промыслы
-    player = Player.find_by_id(options[:player_id])
-    if success
-    end    
+  
   end
+
 end
