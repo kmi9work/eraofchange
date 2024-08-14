@@ -12,29 +12,16 @@ class Region < ApplicationRecord
   has_many :plant_places
 
   def inf_buildings_on_po #Влияние зданий на общественной порадок
-    bl_params = self.settlements.joins(buildings: :building_level).
+    bbl_params = self.settlements.joins(buildings: :building_level).
          where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-         pluck('building_levels.params')
-    po = bl_params.sum{|p| p["public_order"].to_i}
-
-    ch_params = self.settlements.joins(buildings: :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        pluck('buildings.params')
-    if ch_params.empty?
-      inf = 0
-    else
-      for i in 0..ch_params.length-1
-          if ch_params[i]["paid"].include?(GameParameter.current_year)
-            inf = 3
-          else
-            inf = -3
-            break
-          end
+         pluck('buildings.params, building_levels.params')
+    bbl_params.sum do |building_params, level_params| 
+      if building_params['paid'].include?(GameParameter.current_year)
+        level_params["public_order"].to_i
+      else
+        0
       end
-      po += inf
     end
-
-
   end
 
   def inf_state_exp_on_po #Пересчет общественного порядка с учетом госрасходов
