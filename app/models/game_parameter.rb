@@ -10,7 +10,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.current_year #показывает номер года
-    GameParameter.find_by(identificator: "current_year").value.to_i
+    GameParameter.find_by(identificator: "current_year")&.value&.to_i
   end
 
   def self.pay_state_expenses

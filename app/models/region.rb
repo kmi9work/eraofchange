@@ -2,16 +2,26 @@ class Region < ApplicationRecord
   # params:
   # public_order (integer) - Общественный порядок
 
+
+  CAP_INF_ON_PO = 3 #Влияние захвата на общественный порядок
+
   belongs_to :country
 
   has_many :settlements
   has_many :armies
+  has_many :plant_places
 
   def inf_buildings_on_po #Влияние зданий на общественной порадок
-    bl_params = self.settlements.joins(buildings: :building_level).
+    bbl_params = self.settlements.joins(buildings: :building_level).
          where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-         pluck('building_levels.params')
-    bl_params.sum{|p| p["public_order"].to_i}
+         pluck('buildings.params, building_levels.params')
+    bbl_params.sum do |building_params, level_params| 
+      if building_params['paid'].include?(GameParameter.current_year)
+        level_params["public_order"].to_i
+      else
+        0
+      end
+    end
   end
 
   def inf_state_exp_on_po #Пересчет общественного порядка с учетом госрасходов
@@ -25,7 +35,20 @@ class Region < ApplicationRecord
   def show_overall_po
     po = self.params["public_order"] #изначальный
     po += self.inf_buildings_on_po + self.inf_state_exp_on_po
+
     return po
+  end
+
+  def captured_by(who, how) #1 - войной, 0 - миром
+    self.country_id = who
+    if how == 1
+      self.params["public_order"] -= CAP_INF_ON_PO
+    else
+      self.params["public_order"] += CAP_INF_ON_PO
+    end
+
+    self.save
+    {result: true, msg: "Регион присоединен"}
   end
 
 end

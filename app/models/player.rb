@@ -47,9 +47,9 @@ class Player < ApplicationRecord
   def player_military_outlays
     cost = {}
     self.armies.each do |army|
-      maintenance_cost = army.army_size&.params&.dig('maintenance_cost')
-      next unless maintenance_cost
-      maintenance_cost.each do |res_id, value|
+      renewal_cost = army.army_size&.params&.dig('renewal_cost')
+      next unless renewal_cost
+      renewal_cost.each do |res_id, value|
         cost[res_id] ||= 0
         cost[res_id] += value
       end
@@ -61,5 +61,15 @@ class Player < ApplicationRecord
     pat = PoliticalActionType.find_by_id(political_action_type_id)
     result = pat.execute(success, options)
     self.political_actions.create(year: year, success: success, params: result)
+  end
+
+  def self.all_contrabandists
+    contrabandists = []
+    Player.all.each do |pl|
+      if pl.params["contraband"]&.include?(GameParameter.current_year)
+        contrabandists.push(pl)
+      end
+    end
+    return contrabandists
   end
 end
