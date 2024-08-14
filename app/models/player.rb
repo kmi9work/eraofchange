@@ -63,15 +63,13 @@ class Player < ApplicationRecord
     self.political_actions.create(year: year, success: success, params: result)
   end
 
-  def self.show_contrabandists
+  def self.all_contrabandists
     contrabandists = []
     Player.all.each do |pl|
-      if pl.params["contraband"].include?(GameParameter.current_year)
+      if pl.params["contraband"]&.include?(GameParameter.current_year)
         contrabandists.push(pl)
       end
     end
     return contrabandists
   end
-
-
 end
