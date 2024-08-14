@@ -20,6 +20,7 @@ Human.create(name: "Саша Никифоров")
 PlayerType.create(title: "Купец")
 PlayerType.create(title: "Знать")
 PlayerType.create(title: "Мудрец")
+PlayerType.create(title: "Дух народного бунта")
 
 Family.create(name: "Ивановы")
 Family.create(name: "Петровы")
@@ -35,6 +36,7 @@ Job.create(name: "Первый думный боярин")
 Job.create(name: "Тайный советник")
 Job.create(name: "Дух русского бунта")
 Job.create(name: "Глава купеческого приказа")
+
 
 Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0, "contraband" => []})
 Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0, "contraband" => []})
@@ -54,6 +56,7 @@ Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_
 Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
 Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
 Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+
 
 current_year = 1
 GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
@@ -156,7 +159,6 @@ Region.create(title: "Ярославское княжество", country_id: 1,
 SettlementType.create(name: "Город", params: {"income" => 8000})
 SettlementType.create(name: "Деревня", params: {"income" => 5000})
 
-
 Settlement.create(name: "Москва", settlement_type_id: 1, region_id: 1, player_id: 1, params: {"open_gate" => false})
 Settlement.create(name: "Тверь", settlement_type_id: 1, region_id: 1, player_id: 2, params: {"open_gate" => false})
 Settlement.create(name: "Рязань", settlement_type_id: 1, region_id: 1, player_id: 3, params: {"open_gate" => false})
@@ -202,7 +204,6 @@ Building.create(building_level_id: 3, settlement_id: 1)
 Building.create(building_level_id: 4, settlement_id: 2)
 Building.create(building_level_id: 5, settlement_id: 1)
 Building.create(building_level_id: 6, settlement_id: 2)
-
 
 TroopType.create(title: "Арбалетчики") #CROSSBOWMEN = 1
 TroopType.create(title: "Легкая кавалерия") #LIGHT_CAVALRY = 2

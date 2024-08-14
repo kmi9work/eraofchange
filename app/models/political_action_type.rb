@@ -84,3 +84,4 @@ class PoliticalActionType < ApplicationRecord
   end
 
 end
+
