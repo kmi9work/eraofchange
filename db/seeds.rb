@@ -36,6 +36,7 @@ Job.create(name: "Первый думный боярин")
 Job.create(name: "Тайный советник")
 Job.create(name: "Дух русского бунта")
 Job.create(name: "Глава купеческого приказа")
+Job.create(name: "Глава гульдии")
 
 Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0, "contraband" => []})
 Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0, "contraband" => []})
@@ -272,6 +273,8 @@ Building.create(building_level_id: 3, settlement_id: 3, params: {"paid" => []})
 Building.create(building_level_id: 4, settlement_id: 2)
 Building.create(building_level_id: 5, settlement_id: 1)
 Building.create(building_level_id: 6, settlement_id: 2)
+
+Building.create(building_level_id: 7, settlement_id: 1)
 
 
 TroopType.create(title: "Арбалетчики") #CROSSBOWMEN = 1

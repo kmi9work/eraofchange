@@ -64,12 +64,7 @@ class Player < ApplicationRecord
   end
 
   def self.all_contrabandists
-    contrabandists = []
-    Player.all.each do |pl|
-      if pl.params["contraband"]&.include?(GameParameter.current_year)
-        contrabandists.push(pl)
-      end
-    end
-    return contrabandists
+    Player.all.select{|p| p.params["contraband"]&.include?(GameParameter.current_year)}
   end
 end
+

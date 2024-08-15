@@ -16,6 +16,9 @@ class Country < ApplicationRecord
   BY_WAR = 1
   BY_DIPLOMACY = 0
 
+  MILITARILY  = -3
+  PEACEFULLY = 3
+
   def impose_embargo
     if self.params['embargo'] != nil
       self.params['embargo'] = true
@@ -66,10 +69,9 @@ class Country < ApplicationRecord
   def capture(region, how) #1 - войной, 0 - миром
    region.country_id = self.id
     if how == BY_WAR
-      region.params["public_order"] -= Region::CAP_INF_ON_PO
-    elsif
-      how == BY_DIPLOMACY
-      region.params["public_order"] += Region::CAP_INF_ON_PO
+      region.params["public_order"] += MILITARILY
+    elsif how == BY_DIPLOMACY
+      region.params["public_order"] += PEACEFULLY
     end
 
     region.save
