@@ -58,12 +58,11 @@ class PoliticalActionType < ApplicationRecord
   end
 
   def contraband(success, options) #Контрабанда
-    # В params должен лежать страна контрабанды
+    # В options[:country_id] должна лежать страна контрабанды
     if success
       player = Player.find_by_id(options[:player_id])
       if player
-        country = Country.find_by_id(options[:country_id]).title
-        player.params["contraband"].push(country)
+        player.params["contraband"].push(options[:country_id])
         player.save
       end
     end
