@@ -41,6 +41,10 @@
   </div>
 
   <div>
+    Предприятия: <%= form.select :plant_ids, options_for_select(Plant.all.collect{ |p| [p.comments, p.id] }, credit.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
