@@ -3,9 +3,22 @@ class Army < ApplicationRecord
   belongs_to :player, optional: true
   belongs_to :army_size, optional: true
 
-  has_many :troops, dependent: :destroy
-
   def demote_army #Если за большую армию не вносятся расходы, она должна либо исчезнуть, либо ухудшиться
+   # если на конец года оплачено, то не надо, в противном случае -- распустить
+     if !self.params["paid"].include?(GameParameter.current_year)
+      if self.army_size_id == ArmySize::SMALL
+        self.destroy
+        {result: true, msg: "Армия удалена за неуплату"}
+      elsif self.army_size_id == ArmySize::MEDIUM
+        self.army_size_id = ArmySize::SMALL
+        self.save
+        {result: true, msg: "Армия сокращена за неуплату"}
+      elsif self.army_size_id == ArmySize::LARGE
+        self.army_size_id = ArmySize::MEDIUM
+        self.save
+        {result: true, msg: "Армия сокращена за неуплату"}
+      end
+     end
   end
 
   def has_empty_slots?
@@ -22,4 +35,16 @@ class Army < ApplicationRecord
       {troop: nil, msg: "В армии превышено число отрядов"}
     end
   end
+
+  def pay_for_army
+    if self.params["paid"].include?(GameParameter.current_year)
+      {result: false, msg: "Армия в этом году уже оплачена"}
+    else
+      self.params["paid"].push(GameParameter.current_year)
+      self.save
+      {result: true, msg: "Армия оплачена"}
+    end
+  end
+
+
 end

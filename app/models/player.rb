@@ -12,6 +12,7 @@ class Player < ApplicationRecord
            :inverse_of => :economic_subject
   has_many :settlements
   has_many :armies
+  has_many :troops
   has_many :credits
   has_many :political_actions
 

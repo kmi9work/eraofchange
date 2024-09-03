@@ -3,7 +3,6 @@ class Region < ApplicationRecord
   # public_order (integer) - Общественный порядок
 
 
-  CAP_INF_ON_PO = 3 #Влияние захвата на общественный порядок
 
   belongs_to :country
 
@@ -42,9 +41,9 @@ class Region < ApplicationRecord
   def captured_by(who, how) #1 - войной, 0 - миром
     self.country_id = who
     if how == 1
-      self.params["public_order"] -= CAP_INF_ON_PO
+      self.params["public_order"] -= Country::MILITARILY
     else
-      self.params["public_order"] += CAP_INF_ON_PO
+      self.params["public_order"] += Country::PEACEFULLY
     end
 
     self.save

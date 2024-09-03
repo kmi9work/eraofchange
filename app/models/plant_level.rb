@@ -1,10 +1,11 @@
 class PlantLevel < ApplicationRecord
     belongs_to :plant_type, optional: true
-
     has_many :plants
 
-    MAX_LEVEL = 3
-      
+   # serialize :formula, ActiveSupport::HashWithIndifferentAccess
+
+   # MAX_LEVEL = 3
+
   # Общая структура формулы производства:
   # formula: {
   #   from: [
@@ -17,7 +18,7 @@ class PlantLevel < ApplicationRecord
   #     {resource_id: id, count: 100}, ...
   #   ]
   # }
-  # 
+  #
   # Пример 1: из 6 досок(id 1) и 1 металла (id 2) и 300 золота (id 3) сделать один инструмент (id 10):
   # formula: {
   #   from: [
@@ -32,7 +33,7 @@ class PlantLevel < ApplicationRecord
   #     {resource_id: 10, count: 20}
   #   ]
   # }
-  # 
+  #
   # Пример 2: Добывающая делянка первого уровня (оплата 100 золота, производство 100 дерева id 4):
   # formula: {
   #   from: [
@@ -45,33 +46,267 @@ class PlantLevel < ApplicationRecord
   #     {resource_id: 4, count: 100}
   #   ]
   # }
+  # def produce(resources_from, resources_expect = nil)
+  #   # Необходимо осуществить производство ресурса в соответствии с формулой, хранящейся в классе.
+  #   # Если есть ожидаемые ресурсы (например, в Кузнице) Проверяется - возможно ли произвести ожидаемые ресурсы. То, что не получается
+  #   # по формуле или выше максимума - вернуть в сдачу.
+  #   # Если resources_expect.blank? то нужно посчитать сколько можно произвести ресурсов из resources_from (в кузнице тогда производить
+  #   # в первую очередь инструменты, потом оружие, на оставшиеся - доспехи)
+  #   # Пример работы:
+  #   # pl = PlantLevel.last
+  #   # pl.produce([
+  #   #   {resource_id: 1, count: 60},
+  #   #   {resource_id: 2, count: 10},
+  #   #   {resource_id: 3, count: 300}
+  #   # ])
+  #   # =>
+  #   # [{resource_id: 10, count: 10}]
 
-  def produce(resources_from, resources_expect = nil)
-    # Необходимо осуществить производство ресурса в соответствии с формулой, хранящейся в классе.
-    # Если есть ожидаемые ресурсы (например, в Кузнице) Проверяется - возможно ли произвести ожидаемые ресурсы. То, что не получается по формуле или выше максимума - вернуть в сдачу. 
-    # Если resources_expect.blank? то нужно посчитать сколько можно произвести ресурсов из resources_from (в кузнице тогда производить в первую очередь инструменты, потом оружие, на оставшиеся - доспехи)
-    # Пример работы:
-    # pl = PlantLevel.last
-    # pl.produce([
-    #   {resource_id: 1, count: 60},
-    #   {resource_id: 2, count: 10},
-    #   {resource_id: 3, count: 300}
-    # ])
-    # => 
-    # [{resource_id: 10, count: 10}]
+  #   # Другой пример (допустим, инструменты производятся из 6 досок и одного металла, а одни доспехи (id 11) из 5 металла)
+  #   # Запрос - 10 инструмента и один доспех. Ресурсы 60 досок, 20 металла и 300 монет
+  #   # Тогда программа должна выдать 10 инструментов, один доспех и 5 металла сдачи
+  #   # pl.produce([
+  #   #   {resource_id: 1, count: 60},
+  #   #   {resource_id: 2, count: 20},
+  #   #   {resource_id: 3, count: 300}
+  #   # ], [
+  #   # {resource_id: 10, count: 10},
+  #   # {resource_id: 11, count: 1}
+  #   # ])
+  #   # =>
+  #   # [{resource_id: 10, count: 10}, {resource_id: 11, count: 1}, {resource_id: 2, count: 5}]
+  # end
 
-    # Другой пример (допустим, инструменты производятся из 6 досок и одного металла, а одни доспехи (id 11) из 5 металла)
-    # Запрос - 10 инструмента и один доспех. Ресурсы 60 досок, 20 металла и 300 монет
-    # Тогда программа должна выдать 10 инструментов, один доспех и 5 металла сдачи
-    # pl.produce([
-    #   {resource_id: 1, count: 60},
-    #   {resource_id: 2, count: 20},
-    #   {resource_id: 3, count: 300}
-    # ], [
-    # {resource_id: 10, count: 10},
-    # {resource_id: 11, count: 1}
-    # ])
-    # => 
-    # [{resource_id: 10, count: 10}, {resource_id: 11, count: 1}, {resource_id: 2, count: 5}]
+###########решить с символами. доделать описание. протестировать все предприятия.
+
+
+  def feed_to_plant(resources_from = [], expected_resources = nil)
+    if resources_from != []
+      cl_resources_from = self.filter(resources_from)[:clean_res]
+      return self.foundry_prod(cl_resources_from) if self.type_of_production[:production_type] == 3
+      f, done = self.define_formula[:from], false
+
+      f.each do |res|
+        done = false
+        cl_resources_from.each do |res_add|
+          if res[:identificator] == res_add[:identificator]
+            res[:count] = res_add[:count]
+            done = true
+            break
+          end
+        end
+        break if done == false
+      end
+
+      if done
+        return self.produce({from: f})
+      else
+        return {result: nil, msg: "Недостаточно ресурсов для переработки"}
+      end
+    end
+
+    if expected_resources.present?
+      result = []
+      clean_expected_resources = self.filter([], expected_resources)[:cl_targ_res]
+      return {result: nil, msg: "Нет необходимых ресурсов"} if clean_expected_resources.empty?
+      clean_expected_resources.each {|cl_r| result.push(self.produce({to: [cl_r]}))}
+
+      return result
+     end
   end
+
+  def foundry_prod(cl_resources_from)
+      needed_formulas = []
+        formula = self.formula
+        result = []
+        formula["from"].each do |f|
+          re = 0
+          cl_resources_from.each do |res|
+            if f["identificator"] == res[:identificator] ### -=-
+              num_of_res = formula["from"].index(f)
+              re = formula["from"][num_of_res]
+              needed_formulas.push(re.transform_keys(&:to_sym))
+              #re = re.transform_keys(&:to_sym)
+            end
+          end
+        end
+
+        needed_formulas.each do |form|
+          cl_resources_from.each do |res_add|
+            if form[:identificator] == res_add[:identificator]
+              form[:count] = res_add[:count]
+            end
+          end
+          result.push(self.produce({from: [form]}))
+        end
+    return result
+  end
+
+  def produce(hashed_request = nil)
+    if self.plant_type.plant_category_id == PlantCategory::EXTRACTIVE
+      return self.show_ext_output
+    end
+
+    if hashed_request[:to].blank?
+      #Выдает только то, сколько можно сделать ресурса из входящего сырья
+      return self.multi_prod(hashed_request[:from])
+    elsif hashed_request[:to].present? #(если to имеется)
+       #Отправляет ресурс на разборку
+      return self.add_hash(hashed_request[:to])
+    end
+  end
+
+  def multi_prod(hashed_var, target_res = nil)
+    end_prod = [{identificator: "empty", count: 0}]
+
+    if target_res == nil
+      end_prod[0][:identificator] = self.define_formula[:to][0][:identificator]
+    else
+      end_prod[0][:identificator] = target_res
+    end
+
+    return self.special_prod(hashed_var)                            if self.type_of_production[:production_type] == 3
+    return self.forge_prod(hashed_var)                              if self.plant_type_id == PlantType::FORGE && target_res.blank?
+
+    return self.sub_hash(hashed_var, end_prod, target_res = nil)
+   end
+
+  def special_prod(hashed_var)
+    count = 0
+    froms = self.formula["from"]
+    for i in 0..froms.length-1
+      count = i if froms[i].key(hashed_var[0][:identificator]).present?
+    end
+
+    tos = self.formula["to"]
+    target_res = tos[count]["identificator"]
+
+    end_prod = [{identificator: target_res, count: 0}]
+    return self.sub_hash(hashed_var, end_prod)
+  end
+
+  def sub_hash(hashed_var, end_prod, target_res = nil)
+    if target_res != nil
+      formula = self.define_formula(target_res)[:from]
+    else
+      target_res = end_prod[0][:identificator]
+      formula = self.define_formula(target_res)[:from]
+    end
+
+    done = false
+
+    until done
+      for i in 0..hashed_var.length-1
+        if (hashed_var[i][:count] - formula[i][:count] < 0) or
+           (end_prod[0][:count] + self.define_formula[:to][0][:count] > self.define_formula(target_res)[:max_product][0][:count])
+          done = true
+          break
+        end
+      end
+      hashed_var[i][:count] -= formula[i][:count]           if hashed_var[i][:identificator] == formula[i][:identificator]
+      end_prod[0][:count] += self.define_formula[:to][0][:count]
+    end
+
+  return end_prod
+  end
+
+  def forge_prod(hashed_var, target_res = nil)
+    result = []
+    self.filter[:targ_res].each do |target_res|
+      end_prod = [{identificator: target_res, count: 0}]
+      result.push(self.sub_hash(hashed_var, end_prod, target_res))
+    end
+
+    return result
+  end
+
+  def add_hash(hashed_var)
+      target_res = hashed_var[0][:identificator]
+      formula = self.define_formula(target_res)
+
+      res_back = formula[:from][0][:identificator]
+      raw_resources = []
+      formula[:from].each {|res| raw_resources.push({identificator: res[:identificator], count: 0})}
+
+      if hashed_var[0][:count] >= self.define_formula(target_res)[:max_product][0][:count]
+        max = self.define_formula(target_res)[:max_product][0][:count]
+      else
+        max = hashed_var[0][:count]
+      end
+
+      step = self.define_formula(target_res)[:to][0][:count]
+    ############ беспонтово
+      for j in 0..(max-1)/step
+        for i in 0..raw_resources.length-1
+          a = (formula[:from][i][:count]*step)
+          raw_resources[i][:count] += a    #  if hashed_var[i][:identificator] == formula[i][:identificator]
+        end
+      end
+
+    return raw_resources
+  end
+
+
+
+
+  def filter(resources_from = [], expected_resources = nil)
+    elig_res, elig_targ_res, cl_targ_res, clean_res = [], [], [], []
+    self.formula["from"].each {|res| elig_res.push(res["identificator"])} ###-=-
+    elig_res.uniq
+    self.formula["to"].each {|res| elig_targ_res.push(res["identificator"])}
+
+    if resources_from != []
+      resources_from.each{|res| clean_res.push(res) if elig_res.include?(res[:identificator])}
+    end
+
+    if expected_resources.present?
+      expected_resources.each {|res| cl_targ_res.push(res) if elig_targ_res.include?(res[:identificator])}
+    end
+
+    return {targ_res: elig_targ_res, clean_res: clean_res, cl_targ_res: cl_targ_res}
+  end
+
+  def type_of_production
+    resource = self.formula
+    raw_res_to_prod_ratio = resource["from"].count/resource["max_product"].count
+    production_type = 1 if resource["max_product"].count == 1                       #То есть из 1 рес в 1 рес
+    production_type = 2 if resource["max_product"].count < resource["from"].count   #То есть из n рес в 1 рес
+    production_type = 3 if resource["max_product"].count == resource["from"].count   && resource["max_product"].count > 1
+    return {production_type: production_type, ratio: raw_res_to_prod_ratio}
+  end
+
+  def define_formula(target_res = nil)
+    target_res = self.formula["to"][0]["identificator"] if target_res.blank?
+    array = []
+    formula_from = self.formula["from"][self.define_prod_path_to(target_res) * self.type_of_production[:ratio], self.type_of_production[:ratio]]
+    formula_to   = (self.formula["to"][self.define_prod_path_to(target_res)]).transform_keys(&:to_sym)
+    formula_from.each{|f| array.push(f.transform_keys(&:to_sym)) } #if f["count"] != 0}
+    max = []
+    max.push((self.formula["max_product"][self.define_prod_path_to(target_res)]).transform_keys(&:to_sym))
+
+
+    return {from: array, to: [formula_to], max_product: max}
+  end
+
+
+  #Определяет по тому ресурсу, КОТОРЫЙ НАДО произвести
+  def define_prod_path_to(name_of_res)
+    num = -1
+    self.formula["to"].each do |res|
+      num +=1
+      if res["identificator"] == name_of_res
+        break
+      end
+    end
+    return num
+  end
+
+  def show_ext_output
+    output = []
+    formula = self.formula
+    formula["max_product"].each {|res| output.push(res)}
+    return output
+  end
+
+
 end
