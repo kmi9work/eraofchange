@@ -488,28 +488,32 @@ PlantLevel.create(level: "3", deposit: "1500", price: {"flour" => 400, "metal" =
 
 
 PlantLevel.create(level: "1", deposit: "1600", price: {"gold" => 2000},
-                  formula: {from:         [{identificator: "metal_ore", count: 4}, {identificator: "gem_ore", count: 5}],
-                            to:           [{identificator: "metal", count: 1}, {identificator: "gems", count: 1}],
-                            max_product:  [{identificator: "metal", count: 100}, {identificator: "gems", count: 80}]},
+                  formula: {from:         [[{identificator: "metal_ore", count: 4}], [{identificator: "gem_ore", count: 5}]],
+                            to:           [[{identificator: "metal", count: 1}, {identificator: "gems", count: 1}]],
+                            max_product:  [[{identificator: "metal", count: 100}, {identificator: "gems", count: 80}]],
+                            logic: :or},
                   plant_type_id: foundry)
 
 PlantLevel.create(level: "2", deposit: "3400", price: {"boards" => 250, "tools" => 10},
-                  formula: {from:         [{identificator: "metal_ore", count: 3}, {identificator: "gem_ore", count: 3}],
-                            to:           [{identificator: "metal", count: 1}, {identificator: "gems", count: 1}],
-                            max_product:  [{identificator: "metal", count: 200}, {identificator: "gems", count: 200}]},
+                  formula: {from:         [[{identificator: "metal_ore", count: 3}], [{identificator: "gem_ore", count: 3}]],
+                            to:           [[{identificator: "metal", count: 1}], [{identificator: "gems", count: 1}]],
+                            max_product:  [[{identificator: "metal", count: 200}], [{identificator: "gems", count: 200}]],
+                            logic: :or},
                   plant_type_id: foundry)
 
 PlantLevel.create(level: "3", deposit: "7800", price: {"boards" => 500, "tools" => 35},
-                  formula: {from:         [{identificator: "metal_ore", count: 2}, {identificator: "gem_ore", count: 2}],
-                            to:           [{identificator: "metal", count: 1}, {identificator: "gems", count: 1}],
-                            max_product:  [{identificator: "metal", count: 500}, {identificator: "gems", count: 500}]},
+                  formula: {from:         [[{identificator: "metal_ore", count: 2}], [{identificator: "gem_ore", count: 2}]],
+                            to:           [[{identificator: "metal", count: 1}], [{identificator: "gems", count: 1}]],
+                            max_product:  [[{identificator: "metal", count: 500}], [{identificator: "gems", count: 500}]],
+                            logic: :or},
                             plant_type_id: foundry)
 
 
 PlantLevel.create(level: "1", deposit: "1500", price: {"stone_brick" => 50, "metal" => 15},
-                  formula: {from:         [{identificator: "boards", count: 6}, {identificator: "metal", count: 1}],
-                            to:           [{identificator: "tools", count: 1}],
-                            max_product:  [{identificator: "tools", count: 20}]},
+                  formula: {from:         [[{identificator: "boards", count: 6}, {identificator: "metal", count: 1}]],
+                            to:           [[{identificator: "tools", count: 1}]],
+                            max_product:  [[{identificator: "tools", count: 20}]],
+                            logic: :and},
                   plant_type_id: forge)
 
 PlantLevel.create(level: "2", deposit: "4500", price: {"stone_brick" => 50, "metal" => 15, "tools" => 10},
@@ -520,23 +524,25 @@ PlantLevel.create(level: "2", deposit: "4500", price: {"stone_brick" => 50, "met
                                            {identificator: "weapon", count: 1}],    #weapons
 
                             max_product:  [{identificator: "tools", count: 50},     #tools
-                                           {identificator: "weapon", count: 20}]},    #weapons
+                                           {identificator: "weapon", count: 20}],    #weapons
+                            logic: :and},
 
                 plant_type_id: forge)
 
 PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "metal" => 60, "tools" => 20},
-                  formula: {from:         [{identificator: "boards", count: 6}, {identificator: "metal", count: 1},   #tools
-                                           {identificator: "boards", count: 3}, {identificator: "metal", count: 3},  #weapons
-                                           {identificator: "boards", count: 0}, {identificator: "metal", count: 8}], #armor                                      #armor
+                  formula: {from:         [[{identificator: "boards", count: 6}, {identificator: "metal", count: 1}],   #tools
+                                           [{identificator: "boards", count: 3}, {identificator: "metal", count: 3}],  #weapons
+                                           [{identificator: "boards", count: 0}, {identificator: "metal", count: 8}]], #armor                                      #armor
 
 
-                            to:           [{identificator: "tools", count: 1},      #tools
-                                           {identificator: "weapon", count: 1},     #weapons
-                                           {identificator: "armor", count: 1}],      #armor
+                            to:           [[{identificator: "tools", count: 1}],      #tools
+                                           [{identificator: "weapon", count: 1}],     #weapons
+                                           [{identificator: "armor", count: 1}]],      #armor
 
-                            max_product:  [{identificator: "tools", count: 120},    #tools
-                                           {identificator: "weapon", count: 50},    #weapons
-                                           {identificator: "armor", count: 20}]},   #armor
+                            max_product:  [[{identificator: "tools", count: 120}],    #tools
+                                           [{identificator: "weapon", count: 50}],    #weapons
+                                           [{identificator: "armor", count: 20}]],   #armor
+                            logic: :and},
                   plant_type_id: forge)
 
 
