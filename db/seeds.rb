@@ -517,22 +517,21 @@ PlantLevel.create(level: "1", deposit: "1500", price: {"stone_brick" => 50, "met
                   plant_type_id: forge)
 
 PlantLevel.create(level: "2", deposit: "4500", price: {"stone_brick" => 50, "metal" => 15, "tools" => 10},
-                  formula: {from:         [{identificator: "boards", count: 6}, {identificator: "metal", count: 1},   #tools
-                                           {identificator: "boards", count: 3}, {identificator: "metal", count: 3}],  #weapons
+                  formula: {from:         [[{identificator: "boards", count: 6}, {identificator: "metal", count: 1}],   #tools
+                                           [{identificator: "boards", count: 3}, {identificator: "metal", count: 3}]],  #weapons
 
-                            to:           [{identificator: "tools", count: 1},      #tools
-                                           {identificator: "weapon", count: 1}],    #weapons
+                            to:           [[{identificator: "tools", count: 1}],      #tools
+                                           [{identificator: "weapon", count: 1}]],    #weapons
 
-                            max_product:  [{identificator: "tools", count: 50},     #tools
-                                           {identificator: "weapon", count: 20}],    #weapons
+                            max_product:  [[{identificator: "tools", count: 50}],     #tools
+                                           [{identificator: "weapon", count: 20}]],    #weapons
                             logic: :and},
-
                 plant_type_id: forge)
 
 PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "metal" => 60, "tools" => 20},
                   formula: {from:         [[{identificator: "boards", count: 6}, {identificator: "metal", count: 1}],   #tools
                                            [{identificator: "boards", count: 3}, {identificator: "metal", count: 3}],  #weapons
-                                           [{identificator: "boards", count: 0}, {identificator: "metal", count: 8}]], #armor                                      #armor
+                                           [{identificator: "metal", count: 8}]], #armor                                      #armor
 
 
                             to:           [[{identificator: "tools", count: 1}],      #tools
