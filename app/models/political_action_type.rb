@@ -62,7 +62,7 @@ class PoliticalActionType < ApplicationRecord
     if success
       player = Player.find_by_id(options[:player_id])
       country = Country.find_by_id(options[:country_id])
-      if player
+      if player && country
         player.params["contraband"].push(country.title)
         player.save
       end
@@ -86,40 +86,35 @@ class PoliticalActionType < ApplicationRecord
   def send_embassy(success, options) #Отправить посольство
     if success
       player = Player.find_by_id(options[:player_id])
-      countries = Country.find(options[:country_ids])
+      countries = Country.find_by_id(options[:country_ids])
       if player && countries
-        player.params["infuence"] += 1
-        player.save
-        countries.each do |c|
-          c.params["relations"] += 1
-          c.save
-        end
+        player.modify_influence
+        countries.each {|c| c.improve_relations}
       end
     end
   end
 
   def equip_caravan(success, options) #Снарядить караван
     player = Player.find_by_id(options[:player_id])
-    if success
-      player.params["infuence"] += 2
-      player.save
-    else
-      player.params["infuence"] -= 2
-      player.save
+    if player
+      if success
+        player.modify_influence(2)
+      else
+        player.modify_influence(-2)
+      end
     end   
   end
 
   def take_bribe(success, options) #Взять мзду
     player = Player.find_by_id(options[:player_id])
     country = Country.find_by_id(rand(2..7))
-    if success
-      player.params["infuence"] += 1
-      player.save
-    else
-      player.params["infuence"] -= 3
-      player.save
-      country.params["relations"] -= 1
-      country.save
+    if player && country
+      if success
+        player.modify_influence
+      else 
+        player.modify_influence(-3)
+        country.modify_public_order(-1)
+      end
     end
   end
 
@@ -127,35 +122,31 @@ class PoliticalActionType < ApplicationRecord
     if success
       player = Player.find_by_id(options[:player_id])
       if player
-        player.params["infuence"] += 1
-        player.save
+        player.modify_influence
       end
     end
   end
 
   def peculation(success, options) #Казнокрадство
     player = Player.find_by_id(options[:player_id])
-    if success
-      player.params["infuence"] += 2
-      player.save
-    else
-      player.params["infuence"] -= 3
-      player.save
+    if player
+      if success
+        player.modify_influence(2)
+      else 
+        player.modify_influence(-3)
+      end
     end
   end
 
   def disperse_bribery(success, options) #Разогнать мздоимцев
     player = Player.find_by_id(options[:player_id])
-    regions = Country.find(Country::RUS).regions
-    if success
-      player.params["infuence"] += 3
-      player.save
-    else
-      player.params["infuence"] -= 3
-      player.save
-      regions.each do |r|
-        r.params["public_order"] -= 5
-        r.save
+    regions = Country.find_by_id(Country::RUS).regions
+    if player && regions
+      if success
+        player.modify_influence(3)
+      else
+        player.modify_influence(-3)
+        regions.each {|r| r.modify_public_order(-5)}
       end 
     end
   end
@@ -164,35 +155,31 @@ class PoliticalActionType < ApplicationRecord
     if success
       player = Player.find_by_id(options[:player_id])
       if player
-        player.params["infuence"] += 1
-        player.save
+        player.modify_influence
       end
     end
   end
 
   def name_of_grand_prince(success, options) #Именем Великого князя!
-    player_1 = Player.find_by_id(options[:player_id])
-    player_2 = Player.find_by_id(options[:job_id])
-    if success
-      player_1.params["infuence"] += 1
-      player_1.save
-    else
-      player_1.params["infuence"] -= 5
-      player_1.save
-      player_2.params["infuence"] -= 3
-      player_2.save
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence
+      else
+        player.modify_influence(-5)
+        Player.find_by_id(job_id: Job::GRAND_PRINCE).modify_influence(-3)
+      end
     end
   end
 
-  def recruiting(success, options) #Набрать рекрутов
+  def recruiting(success, options) #Набрать рекрутов (доделать)
     player = Player.find_by_id(options[:player_id])
-    if success
-      player.params["infuence"] += 1
-      player.save
-    else
-      player.params["infuence"] -= 5
-      player.save
-
+    if player
+      if success
+        player.modify_influence(3)
+      else 
+        player.modify_influence(-3)
+      end
     end
   end
 
@@ -201,10 +188,8 @@ class PoliticalActionType < ApplicationRecord
       region = Region.find_by_id(options[:region_id])
       player = Player.find_by_id(options[:player_id])
       if region && player
-        region.params["public_order"] += 5
-        region.save
-        player.params["infuence"] += 1
-        player.save
+        region.modify_public_order(5)
+        player.modify_influence
       end
     end
   end
