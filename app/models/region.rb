@@ -28,4 +28,9 @@ class Region < ApplicationRecord
     return po
   end
 
+  def modify_public_order(num) #Изменить общественный порядок
+    self.params["public_order"] += num
+    self.save
+  end
+
 end

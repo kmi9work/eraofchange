@@ -1,6 +1,6 @@
 class Player < ApplicationRecord
   # params:
-  # infuence (integer) - Влияние
+  # influence (integer) - Влияние
   # contraband ([]) - Контрабанда
 
   belongs_to :human, optional: true
@@ -71,5 +71,10 @@ class Player < ApplicationRecord
     pat = PoliticalActionType.find_by_id(political_action_type_id)
     result = pat.execute(success, options)
     self.political_actions.create(year: year, success: success, params: result, political_action_type_id: political_action_type_id)
+  end
+
+  def modify_influence(num) #Изменить влияние игрока
+    self.params["influence"] += num
+    self.save
   end
 end
