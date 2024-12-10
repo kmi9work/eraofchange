@@ -73,8 +73,7 @@ class Player < ApplicationRecord
     self.political_actions.create(year: year, success: success, params: result, political_action_type_id: political_action_type_id)
   end
 
-  def modify_influence(num = nil) #Изменить влияние игрока
-    num = 1 if num == nil
+  def modify_influence(num) #Изменить влияние игрока
     self.params["influence"] += num
     self.save
   end

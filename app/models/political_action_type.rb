@@ -88,7 +88,7 @@ class PoliticalActionType < ApplicationRecord
       player = Player.find_by_id(options[:player_id])
       countries = Country.find_by_id(options[:country_ids])
       if player && countries
-        player.modify_influence
+        player.modify_influence(1)
         countries.each {|c| c.improve_relations}
       end
     end
@@ -107,10 +107,13 @@ class PoliticalActionType < ApplicationRecord
 
   def take_bribe(success, options) #Взять мзду
     player = Player.find_by_id(options[:player_id])
-    country = Country.find_by_id(rand(2..7))
+    scope = Country.where.not(id: Country::RUS)
+    offset = rand(scope.count)
+    rand_country = scope.offset(offset).first
+
     if player && country
       if success
-        player.modify_influence
+        player.modify_influence(1)
       else 
         player.modify_influence(-3)
         country.modify_public_order(-1)
@@ -122,7 +125,7 @@ class PoliticalActionType < ApplicationRecord
     if success
       player = Player.find_by_id(options[:player_id])
       if player
-        player.modify_influence
+        player.modify_influence(1)
       end
     end
   end
@@ -155,7 +158,7 @@ class PoliticalActionType < ApplicationRecord
     if success
       player = Player.find_by_id(options[:player_id])
       if player
-        player.modify_influence
+        player.modify_influence(1)
       end
     end
   end
@@ -164,7 +167,7 @@ class PoliticalActionType < ApplicationRecord
     player = Player.find_by_id(options[:player_id])
     if player
       if success
-        player.modify_influence
+        player.modify_influence(1)
       else
         player.modify_influence(-5)
         Player.find_by_id(job_id: Job::GRAND_PRINCE).modify_influence(-3)
@@ -172,7 +175,7 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def recruiting(success, options) #Набрать рекрутов (доделать)
+  def recruiting(success, options) #Набрать рекрутов (TODO: доделать)
     player = Player.find_by_id(options[:player_id])
     if player
       if success
@@ -189,7 +192,7 @@ class PoliticalActionType < ApplicationRecord
       player = Player.find_by_id(options[:player_id])
       if region && player
         region.modify_public_order(5)
-        player.modify_influence
+        player.modify_influence(1)
       end
     end
   end
@@ -226,6 +229,4 @@ class PoliticalActionType < ApplicationRecord
 
   def patronage_gentiles(success, options) #Покровительство иноверцам
   end
-
-
 end
