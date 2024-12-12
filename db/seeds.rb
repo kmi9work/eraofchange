@@ -38,24 +38,24 @@ Job.create(name: "Дух русского бунта")
 Job.create(name: "Глава купеческого приказа")
 Job.create(name: "Глава гульдии")
 
-Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Даниил", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Марфа", human_id: 10, player_type_id: 1, job_id: 10, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Шимяка", human_id: 11, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Шелом", human_id: 12, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Яромила", human_id: 13, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Булат", human_id: 14, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
-Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3, params: {"infuence" => 0, "contraband" => []})
+Player.create(name: "Жопкин", human_id: 1, player_type_id: 2, job_id: 1, family_id: 1, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Борис", human_id: 2, player_type_id: 2, job_id: 2, family_id: 2, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Манюня", human_id: 3, player_type_id: 2, job_id: 3, family_id: 1, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 4, player_type_id: 2, job_id: 4, family_id: 2, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 5, player_type_id: 2, job_id: 5, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Образина", human_id: 6, player_type_id: 2, job_id: 6, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Распутин", human_id: 7, player_type_id: 2, job_id: 7, family_id: 2, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Хренов", human_id: 8, player_type_id: 2, job_id: 8, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Даниил", human_id: 9, player_type_id: 2, job_id: 9, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Марфа", human_id: 10, player_type_id: 1, job_id: 10, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Шимяка", human_id: 11, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Шелом", human_id: 12, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Яромила", human_id: 13, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Булат", human_id: 14, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Богатина", human_id: 15, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Алтын", human_id: 16, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Любава", human_id: 17, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
+Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id: 3, params: {"influence" => 0, "contraband" => []})
 
 current_year = 1
 GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
@@ -169,7 +169,6 @@ Resource.create(name: "Mука", identificator: "flour", country_id: crimea, par
 Resource.create(name: "Оружие", identificator: "weapon", country_id: crimea, params:
   {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 204},
   "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 172}})
-
 
 
 
