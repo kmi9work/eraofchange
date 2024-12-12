@@ -6,18 +6,43 @@ class Resource < ApplicationRecord
 
 belongs_to :country, optional: true
 
+  def self.country_filter!(country_id, resources)
+    resources.select! do |res|
+      (Resource.where(country_id: country_id)).any?{|r| r[:identificator] == res[:identificator]}
+    end
+  end
 
-  def calculate_cost(transaction_type, amount, resource)
+  def self.send_caravan(country_id, resources_to_buy = [], resource_to_sell = [])
+    result = []
+    if resources_to_buy.present? #Если мы покупаем у игрока
+      transaction_type = "buy"
+      resources = Resource.country_filter!(country_id, resources_to_buy)
+    elsif resource_to_sell.present?
+      transaction_type = "sell" #Если мы продаем игроку
+      resources = Resource.country_filter!(country_id, resource_to_sell)
+    end
+
+      all_resources = Resource.all
+      resources.each do |res|
+        result.push(Resource.calculate_cost(transaction_type, res[:count], all_resources.find_by(identificator: res[:identificator])))
+      end
+
+    return result
+  end
+
+
+  def self.calculate_cost(transaction_type, amount, resource)
     relations = resource.country.params["relations"].to_s
       if transaction_type == "sell"
-        unit_selling_cost = resource.params["sale_price"][relations]
-        unit_buying_cost = resource.params["buy_price"][relations]
+        unit_selling_cost = resource.params["sale_price"][relations.to_s]
           if unit_selling_cost != nil
             cost = unit_selling_cost*amount
           else
             return {cost: nil, embargo: resource.country.params["embargo"], msg: "Этот ресурс не продается на рынке."}
           end
-      else #то есть if transaction_type == "buy"
+      elsif transaction_type == "buy"
+          unit_buying_cost = resource.params["buy_price"][relations.to_s]
+
           if unit_buying_cost != nil
             cost = unit_buying_cost*amount
           else
@@ -32,11 +57,12 @@ belongs_to :country, optional: true
       end
   end
 
-  def show_prices
+  def self.show_prices
     resources = Resource.all
     prices_array = []
 
     resources.each do |res|
+      next if res.country_id == nil
       relations = res.country.params["relations"].to_s
 
       res_prices = {}

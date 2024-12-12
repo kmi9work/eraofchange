@@ -92,7 +92,7 @@ class PlantLevel < ApplicationRecord
 
     if resources_from_dup != []
       filter!(resources_from_dup, 'from')
-    return foundry_prod(resources_from_dup) if formula[:logic] == "or"
+      return foundry_prod(resources_from_dup) if formula[:logic] == "or"
 
       f, done = self.define_formula("from"), false
 
@@ -140,8 +140,6 @@ class PlantLevel < ApplicationRecord
     self.define_formula("to").find_index{|res| res["identificator"] == name_of_res}
   end
 
-
-
   def define_formula(way, target_res = nil)
    # target_res = formula["to"][0]["identificator"] if target_res.blank?
     if target_res.present?
@@ -155,7 +153,6 @@ class PlantLevel < ApplicationRecord
       when nil then return self.formula[way]
       when "and","or"
         return end_res.find {|f| f["identificator"] == target_res}              if target_res.present?
-o = []
         end_res, already_theres = [], []
         self.formula[way].each do |form|
           form.each do |res|
@@ -212,7 +209,6 @@ o = []
 
 
     return forge_prod(hashed_var)                              if plant_type_id == PlantType::FORGE && target_res.blank?
-#
     return sub_hash(hashed_var, end_prod, target_res = nil)
    end
 
@@ -302,7 +298,7 @@ o = []
 
       step = self.define_formula("to", target_res)[0][:count]
 
-    ############ беспонтово
+      #сделать отдельной функцией
       for j in 0..(max-1)/step
         for i in 0..raw_resources.length-1
           a = (self.define_formula("from", target_res)[i][:count])*step
@@ -314,6 +310,23 @@ o = []
     return raw_resources
   end
 
+  # formula[:from] = [{id, count}, ...]
+  # formula[:to] = [{id, count}, ...]
+
+  # request = [{id, count}, ...]
+  def met formula, request
+    n = 1
+    bucket = formula[:to]
+    while res_array_less(bucket, request)
+      res_array_sum(bucket, formula[:to])
+      n += 1
+    end
+    return n, bucket
+  end
+
+  def
+    formulas = [{from: ,to: },{from: ,to: },{from: ,to: },]
+    met(formulas[0], request)
 end
 
 

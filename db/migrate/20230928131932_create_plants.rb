@@ -7,7 +7,7 @@ class CreatePlants < ActiveRecord::Migration[7.0]
       t.integer :economic_subject_id
       t.string :economic_subject_type
       t.integer :credit_id
-      
+      t.json :params
       t.timestamps
     end
   end
