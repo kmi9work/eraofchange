@@ -36,4 +36,8 @@ class Plant < ApplicationRecord
     end
     return {plant_level: nil, msg: "Невозможно улучшить. Уровень предприятия максимальный"}
   end
+
+  def has_produced!
+    self.params["produced"].push(GameParameter.current_year)
+  end
 end
