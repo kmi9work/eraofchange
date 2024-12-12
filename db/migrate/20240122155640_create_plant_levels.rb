@@ -3,7 +3,7 @@ class CreatePlantLevels < ActiveRecord::Migration[7.0]
     create_table :plant_levels do |t|
       t.integer :level
       t.integer :deposit
-      t.json :formula
+      t.json :formulas
       t.json :price
       t.integer :plant_type_id
 

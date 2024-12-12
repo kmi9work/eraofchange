@@ -68,11 +68,6 @@ Guild.create(name: "Каменщики")
 Guild.create(name: "Пивовары")
 
 
-
-
-PlantCategory.create(name: "Добывающее")
-PlantCategory.create(name: "Перерабатывающее")
-
 #Русь
 rus = 1
 Country.create(title: "Русь", id: rus, params: {"relations" => nil, "embargo" => nil})
@@ -191,35 +186,28 @@ Region.create(title: "Ярославское княжество", country_id: 1,
 
 
 
-
-
-
-dob = 1
-PlantCategory.create(id: dob, name: "Добывающее")
-per = 2
-PlantCategory.create(id: per, name: "Перерабатывающее")
-
-
+dob = PlantCategory.create(name: "Добывающее")
+per = PlantCategory.create(name: "Перерабатывающее")
 
 delyan = 1
-PlantType.create(id: delyan, name: "Делянка", plant_category_id: dob)
+PlantType.create(id: delyan, name: "Делянка", plant_category: dob)
 
 farm = 2
-PlantType.create(id: farm, name: "Ферма", plant_category_id: dob)
+PlantType.create(id: farm, name: "Ферма", plant_category: dob)
 
 field = 3
-PlantType.create(id: field, name: "Поле пшеницы", plant_category_id: dob)
+PlantType.create(id: field, name: "Поле пшеницы", plant_category: dob)
 
 quarry = 4
-PlantType.create(id: quarry, name: "Каменоломня", plant_category_id: dob)
+PlantType.create(id: quarry, name: "Каменоломня", plant_category: dob)
 
 
 iron_mine = 5
-PlantType.create(id: iron_mine, name: "Железный рудник", plant_category_id: dob)
+PlantType.create(id: iron_mine, name: "Железный рудник", plant_category: dob)
 
 
 gold_mine = 6
-PlantType.create(id: gold_mine, name: "Драгоценный рудник", plant_category_id: dob)
+PlantType.create(id: gold_mine, name: "Драгоценный рудник", plant_category: dob)
 
 
 
@@ -350,31 +338,31 @@ PlantLevel.create(level: "3", deposit: "5500", price: {"stone" => 60, "boards" =
 
 saw_mill = 7
 #Лесопилка
-PlantType.create(id: saw_mill, name: "Лесопилка", plant_category_id: per)
+PlantType.create(id: saw_mill, name: "Лесопилка", plant_category: per)
 #Мастерская каменотеса
 stonemason = 8
-PlantType.create(id: stonemason, name: "Мастерская каменотеса", plant_category_id: per)
+PlantType.create(id: stonemason, name: "Мастерская каменотеса", plant_category: per)
 #Мельница
 mill = 9
-PlantType.create(id: mill, name: "Мельница", plant_category_id: per)
+PlantType.create(id: mill, name: "Мельница", plant_category: per)
 
 #ювелирная мастерская
 jeweller = 10
-PlantType.create(id: jeweller, name: "Ювелирная мастерская", plant_category_id: per)
+PlantType.create(id: jeweller, name: "Ювелирная мастерская", plant_category: per)
 
 
 
 tavern = 11
-PlantType.create(id: tavern, name: "Трактир", plant_category_id: 2)
+PlantType.create(id: tavern, name: "Трактир", plant_category: per)
 
 foundry = 12
-PlantType.create(id: foundry, name: "Плавильня", plant_category_id: 2)
+PlantType.create(id: foundry, name: "Плавильня", plant_category: per)
 
 
 
 
 forge = 13
-PlantType.create(id: forge, name: "Кузница", plant_category_id: 2)
+PlantType.create(id: forge, name: "Кузница", plant_category: per)
 
 
 
