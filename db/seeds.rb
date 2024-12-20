@@ -149,10 +149,7 @@ Resource.create(name: "Провизия", identificator: "food", country_id: kaz
   {"sale_price" => {-2 => 136, -1 => 116, 0 => 97,   1 => 2, 2 => 97},
   "buy_price" => {-2 => 54, -1 => 61, 0 => 68, 1 => 75, 2 => 82}})
 
-#!!! Проверить параметры для золота
-Resource.create(name: "Золото", identificator: "gold", country_id: nil, params:
-  {"sale_price" => {-2 => 0, -1 => 0, 0 => 0,   1 => 2, 2 => 0},
-  "buy_price" => {-2 => 0, -1 => 61, 0 => 0, 1 => 0, 2 => 0}})
+
 
 #Крымское ханство
 crimea = 7
@@ -177,7 +174,10 @@ Resource.create(name: "Оружие", identificator: "weapon", country_id: crime
 
 
 
-
+#!!! Проверить параметры для золота
+Resource.create(name: "Золото", identificator: "gold", country_id: nil, params:
+  {"sale_price" => {-2 => 0, -1 => 0, 0 => 0,   1 => 2, 2 => 0},
+  "buy_price" => {-2 => 0, -1 => 61, 0 => 0, 1 => 0, 2 => 0}})
 
 
 Region.create(title: "Московское княжество", country_id: 1, params: {"public_order" => 0})
@@ -545,6 +545,22 @@ PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "m
 
 
 
+<<<<<<< Updated upstream
+=======
+
+
+Plant.create(plant_level_id: 1, plant_place_id: 1, economic_subject_id: 1, economic_subject_type: "Guild", params: {"produced" => []})
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Stashed changes
 cap = 1
 SettlementType.create(id: cap, name: "Столица", params: {"income" => 10000})
 town = 2
@@ -633,22 +649,6 @@ Troop.create(troop_type_id: 4, is_hired: true, player_id: 1 )
 Troop.create(troop_type_id: 7, is_hired: true, player_id: 2 )
 Troop.create(troop_type_id: 4, is_hired: true, player_id: 2 )
 Troop.create(troop_type_id: 6, is_hired: true, player_id: 2 )
-
-# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Player", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 2, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
-# Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
-# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-# Plant.create(name: "Делянка", economic_subject_type: "Guild", plant_category_id: 1, level: 1)
-
-
-
 
 
 
