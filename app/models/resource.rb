@@ -7,8 +7,8 @@ class Resource < ApplicationRecord
   belongs_to :country, optional: true
 
   def self.country_filter(country_id, resources)
-    resources.select! do |res|
-      (Resource.where(country_id: country_id)).any?{|r| r[:identificator] == res[:identificator]}
+    resources.select do |res|
+      Resource.where(country_id: country_id).any?{|r| r[:identificator] == res[:identificator]}
     end
   end
 
@@ -18,43 +18,30 @@ class Resource < ApplicationRecord
       transaction_type = "buy"
       resources = country_filter(country_id, resources_to_buy)
     elsif resource_to_sell.present?
-      transaction_type = "sell" #Если мы продаем игроку
+      transaction_type = "sale" #Если мы продаем игроку
       resources = country_filter(country_id, resource_to_sell)
     end
 
-      all_resources = Resource.all
-      resources.each do |res|
-        result.push(Resource.calculate_cost(transaction_type, res[:count], all_resources.find_by(identificator: res[:identificator])))
-      end
+    resources.each do |res|
+      result.push(
+        calculate_cost(transaction_type, 
+                      res[:count], 
+                      Resource.find_by(identificator: res[:identificator]))
+      )
+    end
 
     return result
   end
 
-
+  # cost: nil - значит, что ресурс не продаётся на рынке
   def self.calculate_cost(transaction_type, amount, resource)
     relations = resource.country.params["relations"].to_s
-      if transaction_type == "sell"
-        unit_selling_cost = resource.params["sale_price"][relations.to_s]
-          if unit_selling_cost != nil
-            cost = unit_selling_cost*amount
-          else
-            return {cost: nil, embargo: resource.country.params["embargo"], msg: "Этот ресурс не продается на рынке."}
-          end
-      elsif transaction_type == "buy"
-          unit_buying_cost = resource.params["buy_price"][relations.to_s]
-
-          if unit_buying_cost != nil
-            cost = unit_buying_cost*amount
-          else
-            return {cost: nil, embargo: resource.country.params["embargo"], msg: "Этот ресурс не покупается на рынке."}
-          end
-      end
-
-      if resource.country.params["embargo"]
-         return {cost: cost, embargo: true, msg: "Этот ресурс под эмбарго. Для его покупки/продажи нужна контрабанда."}
-      else
-         return {cost: cost, embargo: false, msg: "Этот ресурс продается свободно."}
-      end
+    unit_cost = resource.params["#{transaction_type}_price"][relations.to_s]
+    if unit_cost
+      {resource_id: resource.id, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
+    else
+      {resource_id: resource.id, cost: nil, embargo: resource.country.params["embargo"]}
+    end
   end
 
   def self.show_prices
