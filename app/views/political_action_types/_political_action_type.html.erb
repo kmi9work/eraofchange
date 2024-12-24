@@ -20,7 +20,7 @@
       Не выбраны
     <% else %>
       <% @political_action_type.political_actions.each do |political_action| %>
-        <%= link_to political_action_type.political_action&.year, political_action_path %>
+        <%= link_to political_action&.year, political_action_path %>
       <% end -%>  
     <% end -%>
   </p>

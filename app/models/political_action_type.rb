@@ -61,8 +61,9 @@ class PoliticalActionType < ApplicationRecord
     # В options[:country_id] должна лежать страна контрабанды
     if success
       player = Player.find_by_id(options[:player_id])
-      if player
-        player.params["contraband"].push(options[:country_id])
+      country = Country.find_by_id(options[:country_id])
+      if player && country
+        player.params["contraband"].push(country.title)
         player.save
       end
     end
@@ -82,5 +83,150 @@ class PoliticalActionType < ApplicationRecord
   
   end
 
-end
+  def send_embassy(success, options) #Отправить посольство
+    if success
+      player = Player.find_by_id(options[:player_id])
+      countries = Country.find_by_id(options[:country_ids])
+      if player && countries
+        player.modify_influence(1)
+        countries.each {|c| c.improve_relations}
+      end
+    end
+  end
 
+  def equip_caravan(success, options) #Снарядить караван
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(2)
+      else
+        player.modify_influence(-2)
+      end
+    end   
+  end
+
+  def take_bribe(success, options) #Взять мзду
+    player = Player.find_by_id(options[:player_id])
+    scope = Country.where.not(id: Country::RUS)
+    offset = rand(scope.count)
+    rand_country = scope.offset(offset).first
+
+    if player && country
+      if success
+        player.modify_influence(1)
+      else 
+        player.modify_influence(-3)
+        country.modify_public_order(-1)
+      end
+    end
+  end
+
+  def сonduct_audit(success, options) #Провести ревизию
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player
+        player.modify_influence(1)
+      end
+    end
+  end
+
+  def peculation(success, options) #Казнокрадство
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(2)
+      else 
+        player.modify_influence(-3)
+      end
+    end
+  end
+
+  def disperse_bribery(success, options) #Разогнать мздоимцев
+    player = Player.find_by_id(options[:player_id])
+    regions = Country.find_by_id(Country::RUS).regions
+    if player && regions
+      if success
+        player.modify_influence(3)
+      else
+        player.modify_influence(-3)
+        regions.each {|r| r.modify_public_order(-5)}
+      end 
+    end
+  end
+
+  def implement_sabotage(success, options) #Осуществить саботаж
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player
+        player.modify_influence(1)
+      end
+    end
+  end
+
+  def name_of_grand_prince(success, options) #Именем Великого князя!
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(1)
+      else
+        player.modify_influence(-5)
+        Player.find_by_id(job_id: Job::GRAND_PRINCE).modify_influence(-3)
+      end
+    end
+  end
+
+  def recruiting(success, options) #Набрать рекрутов (TODO: доделать)
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(3)
+      else 
+        player.modify_influence(-3)
+      end
+    end
+  end
+
+  def mobile_court(success, options) #Выездной суд
+    if success
+      region = Region.find_by_id(options[:region_id])
+      player = Player.find_by_id(options[:player_id])
+      if region && player
+        region.modify_public_order(5)
+        player.modify_influence(1)
+      end
+    end
+  end
+
+  def fabricate_denunciation(success, options) #Сфабриковать донос
+  end
+
+  def legislative_reform(success, options)#Законодательная реформа
+  end
+
+  def sermon(success, options)#Проповедь    
+  end
+
+  def eradicate_heresies(success, options) #Искоренить ереси
+  end
+
+  def call_unity(success, options) #Призыв к единству
+  end
+
+  def regency(success, options) #Регентство
+  end
+
+  def use_seal(success, options) #Использовать великокняжескую печать
+  end
+
+  def favoritism(success, options) #Фаворитизм
+  end
+
+  def development_farm(success, options) #Развитие хозяйства
+  end
+
+  def confused_his_with_state(success, options) #Спутал свое с государственным
+  end
+
+  def patronage_gentiles(success, options) #Покровительство иноверцам
+  end
+end

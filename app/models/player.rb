@@ -1,6 +1,6 @@
 class Player < ApplicationRecord
   # params:
-  # infuence (integer) - Влияние
+  # influence (integer) - Влияние
   # contraband ([]) - Контрабанда
 
   belongs_to :human, optional: true
@@ -13,7 +13,6 @@ class Player < ApplicationRecord
            :inverse_of => :economic_subject
   has_many :settlements
   has_many :armies
-  has_many :troops
   has_many :credits
   has_many :political_actions
 
@@ -76,6 +75,11 @@ class Player < ApplicationRecord
 
   def self.all_contrabandists
     Player.all.select{|p| p.params["contraband"]&.include?(GameParameter.current_year)}
+  end
+
+  def modify_influence(num) #Изменить влияние игрока
+    self.params["influence"] += num
+    self.save
   end
 end
 

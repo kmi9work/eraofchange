@@ -32,20 +32,23 @@ class Region < ApplicationRecord
   def show_overall_po
     po = self.params["public_order"] #изначальный
     po += self.inf_buildings_on_po + self.inf_state_exp_on_po
-
     return po
   end
 
   def captured_by(who, how) #1 - войной, 0 - миром
     self.country_id = who
     if how == 1
-      self.params["public_order"] -= Country::MILITARILY
+      modify_public_order(-Country::MILITARILY)
     else
-      self.params["public_order"] += Country::PEACEFULLY
+      modify_public_order(Country::PEACEFULLY)
     end
 
-    self.save
     {result: true, msg: "Регион присоединен"}
+  end
+
+  def modify_public_order(num) #Изменить общественный порядок
+    self.params["public_order"] += num
+    self.save
   end
 
 end
