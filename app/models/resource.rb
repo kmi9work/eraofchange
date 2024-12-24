@@ -1,12 +1,12 @@
 class Resource < ApplicationRecord
-#params
-#sale_price - цена продажи рынком игроку
-#buy_price - цена покупки рынком у игрока
-#Если цена - nil - то он не продаётся или не покупается
+  #params
+  #sale_price - цена продажи рынком игроку
+  #buy_price - цена покупки рынком у игрока
+  #Если цена - nil - то он не продаётся или не покупается
 
-belongs_to :country, optional: true
+  belongs_to :country, optional: true
 
-  def self.country_filter!(country_id, resources)
+  def self.country_filter(country_id, resources)
     resources.select! do |res|
       (Resource.where(country_id: country_id)).any?{|r| r[:identificator] == res[:identificator]}
     end
@@ -16,10 +16,10 @@ belongs_to :country, optional: true
     result = []
     if resources_to_buy.present? #Если мы покупаем у игрока
       transaction_type = "buy"
-      resources = Resource.country_filter!(country_id, resources_to_buy)
+      resources = country_filter(country_id, resources_to_buy)
     elsif resource_to_sell.present?
       transaction_type = "sell" #Если мы продаем игроку
-      resources = Resource.country_filter!(country_id, resource_to_sell)
+      resources = country_filter(country_id, resource_to_sell)
     end
 
       all_resources = Resource.all

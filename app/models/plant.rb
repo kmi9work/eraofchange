@@ -39,5 +39,6 @@ class Plant < ApplicationRecord
 
   def has_produced!
     self.params["produced"].push(GameParameter.current_year)
+    self.save
   end
 end

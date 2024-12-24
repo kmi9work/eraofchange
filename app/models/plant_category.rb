@@ -4,7 +4,4 @@ class PlantCategory < ApplicationRecord
 
 	EXTRACTIVE = 1
 	PROCESSING = 2
-
-
-
 end

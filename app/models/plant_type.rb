@@ -4,15 +4,5 @@ class PlantType < ApplicationRecord
   
   has_many :plant_levels
 
-
-
-
   FORGE = 13
-
-
-
-
-
-
-
 end
