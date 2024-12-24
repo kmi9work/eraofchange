@@ -1,6 +1,6 @@
 class Troop < ApplicationRecord
   belongs_to :troop_type
-  belongs_to :player, dependent: :destroy
+  belongs_to :army, dependent: :destroy
 
   CROSSBOWMEN = 1     #Арбалетчики
   LIGHT_CAVALRY = 2   #Легкая кавалерия

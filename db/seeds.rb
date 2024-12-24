@@ -587,12 +587,12 @@ ArmySize.create(id: medium, name: "Средняя", level: 2, params:  {renewal_
 large = 3
 ArmySize.create(id: large, name: "Большая", level: 3, params:  {renewal_cost: {"gold" => 16000}, buy_cost: {"arms" => 12, "rations" => 15, "armour" => 4, "horses" => 10, "max_troops" => 12}})
 
-Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"paid" =>[]})
-Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"paid" =>[]})
-Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"paid" =>[]})
-Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"paid" =>[]})
-Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"paid" =>[]})
-Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"paid" =>[]})
+army1 = Army.create(region_id: 1, player_id: 1, army_size_id: 1, params: {"paid" =>[]})
+army2 = Army.create(region_id: 1, player_id: 2, army_size_id: 1, params: {"paid" =>[]})
+army3 = Army.create(region_id: 1, player_id: 3, army_size_id: 2, params: {"paid" =>[]})
+army4 = Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"paid" =>[]})
+army5 = Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"paid" =>[]})
+army6 = Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"paid" =>[]})
 
 BuildingType.create(title: "Религиозная постройка")
 BuildingType.create(title: "Оборонительная постройка")
@@ -641,19 +641,14 @@ TroopType.create(title: "Степные лучники") #STEPPE_ARCHERS = 10
 TroopType.create(title: "Стрельцы") #STRELTSY = 11
 TroopType.create(title: "Таран") #BATTERING_RAM = 12
 
-Troop.create(troop_type_id: 2, is_hired: true, player_id: 1 )
-Troop.create(troop_type_id: 3, is_hired: true, player_id: 1 )
-Troop.create(troop_type_id: 4, is_hired: true, player_id: 1 )
+Troop.create(troop_type_id: 2, is_hired: true, army: army1)
+Troop.create(troop_type_id: 3, is_hired: true, army: army1)
+Troop.create(troop_type_id: 4, is_hired: true, army: army1)
 
 
-Troop.create(troop_type_id: 7, is_hired: true, player_id: 2 )
-Troop.create(troop_type_id: 4, is_hired: true, player_id: 2 )
-Troop.create(troop_type_id: 6, is_hired: true, player_id: 2 )
-
-
-
-
-
+Troop.create(troop_type_id: 7, is_hired: true, army: army2)
+Troop.create(troop_type_id: 4, is_hired: true, army: army2)
+Troop.create(troop_type_id: 6, is_hired: true, army: army2)
 
 
 PoliticalActionType.create(title: "Благотворительность", action: "charity")
