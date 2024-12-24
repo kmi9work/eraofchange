@@ -3,10 +3,6 @@
 <%= @army.army_size.name%>
 <p>
 
-<% @army.troops.each do |troop| %>
-<p><%= troop.troop_type.title  %> </p>
-<% end %>
-
 <div>
   <%= link_to "Редактировать армию", edit_army_path(@army) %> |
   <%= link_to "Вернуться к армиям", armies_path %>

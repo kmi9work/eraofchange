@@ -5,7 +5,6 @@ class CreateArmies < ActiveRecord::Migration[7.0]
       t.references :player, null: true, foreign_key: true
       t.references :army_size, null: true, foreign_key: true
       t.json :params
-
       t.timestamps
     end
   end

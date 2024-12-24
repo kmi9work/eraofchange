@@ -20,5 +20,15 @@ class Building < ApplicationRecord
   def income
     self.building_level&.params&.dig("income").to_i
   end
-end
 
+  def pay_for_maintenance
+    if self.params["paid"].include?(GameParameter.current_year)
+      {result: false, msg: "За эту здание уже внесены расходы"}
+    else
+      self.params["paid"].push(GameParameter.current_year)
+      self.save
+      {result: true, msg: "Расходы за здание внесены"}
+    end
+  end
+
+end

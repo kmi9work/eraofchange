@@ -13,6 +13,11 @@ class Country < ApplicationRecord
   KAZAN = 6       #Казанское ханство
   CRIMEA = 7      #Крымское ханство
 
+  BY_WAR = 1
+  BY_DIPLOMACY = 0
+
+  MILITARILY  = -3
+  PEACEFULLY = 3
 
   def impose_embargo
     if self.params['embargo'] != nil
@@ -59,5 +64,19 @@ class Country < ApplicationRecord
       "С этой страной нельзя менять отношения."
     end
   end
+
+
+  def capture(region, how) #1 - войной, 0 - миром
+   region.country_id = self.id
+    if how == BY_WAR
+      region.params["public_order"] += MILITARILY
+    elsif how == BY_DIPLOMACY
+      region.params["public_order"] += PEACEFULLY
+    end
+
+    region.save
+    {result: true, msg: "Регион присоединен к #{self.title}"}
+  end
+
 
 end

@@ -1,77 +1,72 @@
 class PlantLevel < ApplicationRecord
-    belongs_to :plant_type, optional: true
+  belongs_to :plant_type, optional: true
+  has_many :plants
 
-    has_many :plants
+  def feed_to_plant!(request, way)
+    #request = make_hash_with_indiff(request) TODO
+    request.map! {|req| req.transform_keys(&:to_s)}
+    resulting_from, resulting_to = [], []
+    formulas.each do |formula|
+      from, to  = count_request(formula, request, way)
+      if way == "from"
+        res_array_sum!(request, from, -1)
+      else
+        res_array_sum!(request, to, -1)
+      end
 
-    MAX_LEVEL = 3
-      
-  # Общая структура формулы производства:
-  # formula: {
-  #   from: [
-  #     {resource_id: id, count: 1}, ...
-  #   ],
-  #   to: [
-  #     {resource_id: id, count: 2}, ...
-  #   ],
-  #   max: [
-  #     {resource_id: id, count: 100}, ...
-  #   ]
-  # }
-  # 
-  # Пример 1: из 6 досок(id 1) и 1 металла (id 2) и 300 золота (id 3) сделать один инструмент (id 10):
-  # formula: {
-  #   from: [
-  #     {resource_id: 1, count: 6},
-  #     {resource_id: 2, count: 1},
-  #     {resource_id: 3, count: 300}
-  #   ],
-  #   to: [
-  #     {resource_id: 10, count: 1}
-  #   ],
-  #   max: [
-  #     {resource_id: 10, count: 20}
-  #   ]
-  # }
-  # 
-  # Пример 2: Добывающая делянка первого уровня (оплата 100 золота, производство 100 дерева id 4):
-  # formula: {
-  #   from: [
-  #     {resource_id: 3, count: 100}
-  #   ],
-  #   to: [
-  #     {resource_id: 4, count: 100}
-  #   ],
-  #   max: [
-  #     {resource_id: 4, count: 100}
-  #   ]
-  # }
+      res_array_sum!(resulting_from, from)
+      res_array_sum!(resulting_to, to)
+    end
 
-  def produce(resources_from, resources_expect = nil)
-    # Необходимо осуществить производство ресурса в соответствии с формулой, хранящейся в классе.
-    # Если есть ожидаемые ресурсы (например, в Кузнице) Проверяется - возможно ли произвести ожидаемые ресурсы. То, что не получается по формуле или выше максимума - вернуть в сдачу. 
-    # Если resources_expect.blank? то нужно посчитать сколько можно произвести ресурсов из resources_from (в кузнице тогда производить в первую очередь инструменты, потом оружие, на оставшиеся - доспехи)
-    # Пример работы:
-    # pl = PlantLevel.last
-    # pl.produce([
-    #   {resource_id: 1, count: 60},
-    #   {resource_id: 2, count: 10},
-    #   {resource_id: 3, count: 300}
-    # ])
-    # => 
-    # [{resource_id: 10, count: 10}]
+    return {
+        from: resulting_from,
+        to: resulting_to,
+        change: request
+    }
+   end
 
-    # Другой пример (допустим, инструменты производятся из 6 досок и одного металла, а одни доспехи (id 11) из 5 металла)
-    # Запрос - 10 инструмента и один доспех. Ресурсы 60 досок, 20 металла и 300 монет
-    # Тогда программа должна выдать 10 инструментов, один доспех и 5 металла сдачи
-    # pl.produce([
-    #   {resource_id: 1, count: 60},
-    #   {resource_id: 2, count: 20},
-    #   {resource_id: 3, count: 300}
-    # ], [
-    # {resource_id: 10, count: 10},
-    # {resource_id: 11, count: 1}
-    # ])
-    # => 
-    # [{resource_id: 10, count: 10}, {resource_id: 11, count: 1}, {resource_id: 2, count: 5}]
+  def count_request(formula, request, way)
+    n = 0
+    bucket = formula[way].deep_dup
+    formula_part = formula[way]
+
+    while is_res_array_less?(bucket, request) && is_res_array_less?(res_array_mult(formula["to"], n+1), formula['max_product'])
+      res_array_sum!(bucket, formula_part.deep_dup)
+      n += 1
+    end
+
+    to = res_array_mult(formula["to"], n)
+    from = res_array_mult(formula["from"], n)
+
+    return from, to
+  end
+
+  # Проверяет, не превышает ли количество хоть одного ресурса во втором массиве количество такого же ресурса в первом.
+  # Если превышает - false. Если нет совпадений - false. 
+
+  def is_res_array_less?(res_array1, res_array2)
+    res_array1.each do |res1|
+      var = res_array2.find {|res2| res1["identificator"] == res2["identificator"]}
+      return false if var.blank?
+      return false if res1["count"] > var["count"]
+    end
+    return true
+  end
+
+  #Умножает массив ресурсов на число
+  def res_array_mult(res_array, n)
+    res_array.deep_dup.each {|res| res["count"] *= n}
+  end
+
+
+  def res_array_sum!(array_1, array_2, sign = 1)
+    arr2 = array_2.deep_dup
+    array_1.each do |res_1|
+      arr2.delete_if do |res_2|
+        res_1["identificator"] == res_2["identificator"] && res_1['count'] += res_2['count']*sign
+      end
+    end
+
+    array_1.concat(arr2)
   end
 end

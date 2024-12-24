@@ -5,7 +5,6 @@ class Settlement < ApplicationRecord
   belongs_to :settlement_type, optional: true
   belongs_to :region, optional: true
   belongs_to :player, optional: true
-  has_many :plant_places
   has_many :buildings
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
@@ -23,4 +22,18 @@ class Settlement < ApplicationRecord
       {building: b, msg: "Во владении построено #{building_level&.name}."}
     end
   end
+
+  def pay_for_church
+    rel_building = self.buildings.joins(:building_level).
+                find_by(building_levels: {building_type_id: BuildingType::RELIGIOUS})
+    if rel_building.params["paid"].include?(GameParameter.current_year)
+      {result: false, msg: "За эту церковь уже внесены расходы"}
+    else
+      rel_building.params["paid"].push(GameParameter.current_year)
+      rel_building.save
+      {result: true, msg: "Расходы за церковь внесены"}
+    end
+  end
+
 end
+
