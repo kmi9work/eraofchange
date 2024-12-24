@@ -34,5 +34,4 @@ class GameParameter < ApplicationRecord
     return {msg: "Параметры переведены в исходное состояние"}
   end
 
-
 end

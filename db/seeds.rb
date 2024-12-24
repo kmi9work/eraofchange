@@ -60,6 +60,8 @@ Player.create(name: "Матрена", human_id: 18, player_type_id: 1, family_id
 current_year = 1
 GameParameter.create(id: current_year, title: "Текущий год", identificator: "current_year", value: "1", params:
 {"state_expenses" => false})
+GameParameter.create(title: "Ставка кредита (%)", identificator: "credit_size", value: "20")
+GameParameter.create(title: "Срок кредита (лет)", identificator: "credit_term", value: "3")
 
 
 
@@ -71,7 +73,6 @@ Guild.create(name: "Пивовары")
 #Русь
 rus = 1
 Country.create(title: "Русь", id: rus, params: {"relations" => nil, "embargo" => nil})
-
 
 #Большая орда
 horde = 2
@@ -545,22 +546,11 @@ PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "m
 
 
 
-<<<<<<< Updated upstream
-=======
 
 
 Plant.create(plant_level_id: 1, plant_place_id: 1, economic_subject_id: 1, economic_subject_type: "Guild", params: {"produced" => []})
 
 
-
-
-
-
-
-
-
-
->>>>>>> Stashed changes
 cap = 1
 SettlementType.create(id: cap, name: "Столица", params: {"income" => 10000})
 town = 2
@@ -645,11 +635,28 @@ Troop.create(troop_type_id: 2, is_hired: true, army: army1)
 Troop.create(troop_type_id: 3, is_hired: true, army: army1)
 Troop.create(troop_type_id: 4, is_hired: true, army: army1)
 
+# Plant.create(name: "Мастерская каменотёса", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Трактир", economic_subject_id: 3,economic_subject_type: "Player", plant_category_id: 2, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 2, level: 1)
+# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 2, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Каменоломня", economic_subject_id: 2,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 1,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Рудник", economic_subject_id: 4,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Золотой рудник", economic_subject_id: 5,economic_subject_type: "Player", plant_category_id: 1, level: 1)
+# Plant.create(name: "Делянка", economic_subject_id: 6,economic_subject_type: "Guild", plant_category_id: 1, level: 1)
+# Plant.create(name: "Делянка", economic_subject_type: "Guild", plant_category_id: 1, level: 1)
 
 Troop.create(troop_type_id: 7, is_hired: true, army: army2)
 Troop.create(troop_type_id: 4, is_hired: true, army: army2)
 Troop.create(troop_type_id: 6, is_hired: true, army: army2)
 
 
-PoliticalActionType.create(title: "Благотворительность", action: "charity")
 PoliticalActionType.create(title: "Подстрекательство к бунту", action: 'sedition')
+PoliticalActionType.create(title: "Благотворительность", action: "charity")
+PoliticalActionType.create(title: "Шпионаж", action: 'espionage')
+PoliticalActionType.create(title: "Саботаж", action: 'sabotage')
+PoliticalActionType.create(title: "Контрабанда", action: 'contraband')
+PoliticalActionType.create(title: "Открыть ворота!", action: 'open_gate')
+PoliticalActionType.create(title: "Новые промыслы", action: 'new_fisheries')

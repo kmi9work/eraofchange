@@ -1,4 +1,7 @@
 class Settlement < ApplicationRecord
+  # params:
+  # open_gate (bool) - открыты ворота (штурм можно вести без осадных оружий)
+
   belongs_to :settlement_type, optional: true
   belongs_to :region, optional: true
   belongs_to :player, optional: true
@@ -6,8 +9,6 @@ class Settlement < ApplicationRecord
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
   def income
-    #Исправить
-    return false
     self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
   end
 
