@@ -8,8 +8,11 @@ class PlantLevel < ApplicationRecord
     resulting_from, resulting_to = [], []
     formulas.each do |formula|
       from, to  = count_request(formula, request, way)
-      res_array_sum!(request, from, -1)
-      res_array_sum!(request, to, -1)
+      if way == "from"
+        res_array_sum!(request, from, -1)
+      else
+        res_array_sum!(request, to, -1)
+      end
 
       res_array_sum!(resulting_from, from)
       res_array_sum!(resulting_to, to)
@@ -24,13 +27,14 @@ class PlantLevel < ApplicationRecord
 
   def count_request(formula, request, way)
     n = 0
-    bucket = []
+    bucket = formula[way].deep_dup
     formula_part = formula[way]
 
-    while is_res_array_less?(bucket, request) && is_res_array_less?(bucket, formula['max_product'])
-      res_array_sum!(bucket, formula_part)
+    while is_res_array_less?(bucket, request) && is_res_array_less?(res_array_mult(formula["to"], n+1), formula['max_product'])
+      res_array_sum!(bucket, formula_part.deep_dup)
       n += 1
     end
+
     to = res_array_mult(formula["to"], n)
     from = res_array_mult(formula["from"], n)
 
@@ -41,29 +45,28 @@ class PlantLevel < ApplicationRecord
   # Если превышает - false. Если нет совпадений - false. 
 
   def is_res_array_less?(res_array1, res_array2)
-    any_matches = false
     res_array1.each do |res1|
-      res_array2.each do |res2|
-        if res1["identificator"] == res2["identificator"]
-          any_matches = true
-          return false if res1["count"] > res2["count"]
-        end
-      end
+      var = res_array2.find {|res2| res1["identificator"] == res2["identificator"]}
+      return false if var.blank?
+      return false if res1["count"] > var["count"]
     end
-    return any_matches
-  end
-
-  def res_array_sum!(add_to, what_to_add, sign = 1)
-    #Вставить сюда метод суммы Даши
-    add_to.each do |add_to_res|
-      what_to_add.each do |what_to_add_res|
-        add_to_res["count"] += (what_to_add_res["count"]*sign) if add_to_res["identificator"] == what_to_add_res["identificator"]
-      end
-    end
+    return true
   end
 
   #Умножает массив ресурсов на число
   def res_array_mult(res_array, n)
     res_array.deep_dup.each {|res| res["count"] *= n}
+  end
+
+
+  def res_array_sum!(array_1, array_2, sign = 1)
+    arr2 = array_2.deep_dup
+    array_1.each do |res_1|
+      arr2.delete_if do |res_2|
+        res_1["identificator"] == res_2["identificator"] && res_1['count'] += res_2['count']*sign
+      end
+    end
+
+    array_1.concat(arr2)
   end
 end
