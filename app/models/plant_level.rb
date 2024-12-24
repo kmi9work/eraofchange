@@ -314,21 +314,75 @@ class PlantLevel < ApplicationRecord
   # formula[:to] = [{id, count}, ...]
 
   # request = [{id, count}, ...]
-  def met formula, request
-    n = 1
-    bucket = formula[:to]
-    while res_array_less(bucket, request)
-      res_array_sum(bucket, formula[:to])
-      n += 1
+
+  def produce(way, request)
+    request = {}
+    formulas = self.formulas
+    sum_from = []
+    sum_to = []
+    formulas.each do |f|
+      f,t = count_request(way, request)
+      sum_from += f
+      sum_to += t
     end
-    return n, bucket
+    if way == [:to]
+      result[:to] = request - sum_to
+    end
   end
 
-  def
-    formulas = [{from: ,to: },{from: ,to: },{from: ,to: },]
-    met(formulas[0], request)
-end
+  def count_request formula, request
+    n = 1
+    bucket = formula[:to]
+    while is_res_array_less?(bucket, request)
+      bucket = res_array_sum(bucket, formula[:to])
+      n += 1
+    end
+    from = res_array_mult(formula[:from], n)
+    to = res_array_mult(formula[:to], n)
+    return from, to
+  end
 
+  def is_res_array_less
+  end
+
+
+  def res_array_sum(res_1,res_2)
+    sum = []
+    for i in 0..res_1.length-1
+      res_2.each do |r_2|
+        if res_1[i]["identificator"] == r_2["identificator"]
+          sum.push({"identificator" => res_1[i]["identificator"], "count" => res_1[i]["count"] + r_2["count"]})
+        end
+      end
+    end
+    for i in 0..sum.length-1
+      res_1.each do |r_1|
+        if sum[i]["identificator"] != r_1["identificator"]
+          sum.push({"identificator" => r_1["identificator"], "count" => r_1["count"]})
+        end
+      end
+      res_2.each do |r_2|
+        if sum[i]["identificator"] != r_2["identificator"]
+          sum.push({"identificator" => r_2["identificator"], "count" => r_2["count"]})
+        end
+      end     
+    end
+    return sum
+  end
+
+  def res_array_mult(formula, n)
+    sum = []
+    formula.each do |f|
+      sum.push({"identificator" => f["identificator"], "count" => n * f["count"]})
+    end
+    return sum
+  end
+
+
+  #def
+   # formulas = [{from: ,to: },{from: ,to: },{from: ,to: },]
+    #met(formulas[0], request)
+end
 
 
 
