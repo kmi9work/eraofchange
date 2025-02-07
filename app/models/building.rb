@@ -32,3 +32,4 @@ class Building < ApplicationRecord
   end
 
 end
+

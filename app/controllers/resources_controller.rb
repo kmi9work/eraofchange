@@ -8,6 +8,17 @@ class ResourcesController < ApplicationController
   def show
   end
 
+  def show_prices
+    Resource.show_prices
+  end
+
+  def send_caravan
+    @where = params[:country_id]
+    @what_to_buy = params[:resources_to_buy]
+    @what_to_sell = params[:resource_to_sell]
+    Resource.send_caravan(@where, @what_to_buy, @what_to_sell)
+  end
+
   def new
     @resource = Resource.new
   end

@@ -5,6 +5,8 @@ class Country < ApplicationRecord
 	has_many :regions
 
 
+  REL_RANGE = 2
+
   RUS = 1         #Русь
   HORDE = 2       #Большая орда
   LIVONIAN = 3    #Ливонский орден
@@ -19,46 +21,23 @@ class Country < ApplicationRecord
   MILITARILY  = -3
   PEACEFULLY = 3
 
-  def impose_embargo
+  def embargo(arg)
     if self.params['embargo'] != nil
-      self.params['embargo'] = true
+      self.params['embargo'] = arg.to_i > 0
       self.save
       {result: true, msg: "Эмбарго введено."}
     else
-      {result: nil, msg: "Эта страна не может вводить эмбарго."}
+      {result: nil, msg: "Эта страна не может вводить и снимать эмбарго."}
     end
   end
 
-  def lift_embargo
-    if self.params['embargo'] != nil
-      self.params['embargo'] = false
-      self.save
-      {result: false, msg: "Эмбарго снято."}
-    else
-      {result: nil, msg: "Эта страна не может снимать эмбарго."}
-    end
-  end
-
-  def improve_relations
+  def change_relations(arg)
     if self.params['relations'] != nil
-      if self.params['relations'].between?(-2,1)
-        self.params['relations'] += 1
+      if (self.params['relations'] + arg.to_i).abs <= REL_RANGE
+        self.params['relations'] += arg.to_i
         self.save
       else
         "Дальше отношения улучшать нельзя."
-      end
-    else
-      "С этой страной нельзя менять отношения."
-    end
-  end
-
-  def degrade_relations
-    if self.params['relations'] != nil
-      if self.params['relations'].between?(-1,2)
-        self.params['relations'] -= 1
-        self.save
-      else
-        "Дальше отношения снижать нельзя."
       end
     else
       "С этой страной нельзя менять отношения."

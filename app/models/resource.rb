@@ -14,10 +14,12 @@ class Resource < ApplicationRecord
 
   def self.send_caravan(country_id, resources_to_buy = [], resource_to_sell = [])
     result = []
+    resources_to_buy.map! {|res| res.transform_keys(&:to_sym)} ########
     if resources_to_buy.present? #Если мы покупаем у игрока
       transaction_type = "buy"
       resources = country_filter(country_id, resources_to_buy)
     elsif resource_to_sell.present?
+      resource_to_sell.map! {|res| res.transform_keys(&:to_sym)} #######
       transaction_type = "sale" #Если мы продаем игроку
       resources = country_filter(country_id, resource_to_sell)
     end
@@ -38,9 +40,9 @@ class Resource < ApplicationRecord
     relations = resource.country.params["relations"].to_s
     unit_cost = resource.params["#{transaction_type}_price"][relations.to_s]
     if unit_cost
-      {resource_id: resource.id, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
     else
-      {resource_id: resource.id, cost: nil, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, cost: nil, embargo: resource.country.params["embargo"]}
     end
   end
 
@@ -53,7 +55,7 @@ class Resource < ApplicationRecord
       relations = res.country.params["relations"].to_s
 
       res_prices = {}
-      res_prices[:resource_id] = res.id
+      res_prices[:identificator] = res.identificator
       res_prices[:buy_price] = res.params["buy_price"][relations]
       res_prices[:sell_price] = res.params["sale_price"][relations]
       res_prices[:embargo] = res.country.params["embargo"]

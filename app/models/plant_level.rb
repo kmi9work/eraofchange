@@ -2,8 +2,9 @@ class PlantLevel < ApplicationRecord
   belongs_to :plant_type, optional: true
   has_many :plants
 
-  def feed_to_plant!(request, way)
+  def feed_to_plant!(request = [], way = 'from')
     #request = make_hash_with_indiff(request) TODO
+
     request.map! {|req| req.transform_keys(&:to_s)}
     resulting_from, resulting_to = [], []
     formulas.each do |formula|

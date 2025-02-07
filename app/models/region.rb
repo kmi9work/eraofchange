@@ -36,7 +36,7 @@ class Region < ApplicationRecord
   end
 
   def captured_by(who, how) #1 - войной, 0 - миром
-    self.country_id = who
+    self.country_id = who.to_i
     if how == 1
       modify_public_order(-Country::MILITARILY)
     else
@@ -47,7 +47,7 @@ class Region < ApplicationRecord
   end
 
   def modify_public_order(num) #Изменить общественный порядок
-    self.params["public_order"] += num
+    self.params["public_order"] += num.to_i
     self.save
   end
 

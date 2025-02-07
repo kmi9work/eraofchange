@@ -1,5 +1,5 @@
 class PlantLevelsController < ApplicationController
-  before_action :set_plant_level, only: %i[ show edit update destroy ]
+  before_action :set_plant_level, only: %i[ show edit update destroy feed_to_plant!]
 
   # GET /plant_levels or /plant_levels.json
   def index
@@ -8,6 +8,12 @@ class PlantLevelsController < ApplicationController
 
   # GET /plant_levels/1 or /plant_levels/1.json
   def show
+  end
+
+  def feed_to_plant!
+    @request = params[:request].deep_dup
+    @way = params[:way].deep_dup
+    @plant_level.feed_to_plant!(params[:request], params[:way])
   end
 
   # GET /plant_levels/new
@@ -21,6 +27,7 @@ class PlantLevelsController < ApplicationController
 
   # POST /plant_levels or /plant_levels.json
   def create
+
     @plant_level = PlantLevel.new(plant_level_params)
 
     respond_to do |format|
@@ -65,6 +72,8 @@ class PlantLevelsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_level_params
-      params.require(:plant_level).permit(:level, :deposit, :charge, :formula, :price, :max_product, :plant_type_id, :plant_ids => [])
+
+      params.require(:plant_level).permit(:level, :deposit, :charge, :formula, :price, :max_product,
+                                          :plant_type_id, :plant_ids => [])
     end
 end

@@ -1,22 +1,44 @@
 Rails.application.routes.draw do
+
+  patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
+  patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
   resources :game_parameters
+
   resources :credits
   resources :troops
+
   resources :armies
+  patch '/armies/:id/demote_army!', to: 'armies#demote_army!'
+  patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
+
+
   resources :army_sizes
   resources :troop_types
   resources :plant_places
   resources :fossil_types
   resources :regions
-  resources :countries
-  resources :buildings
+  patch '/regions/:id/modify_public_order', to: 'regions#modify_public_order'
+  patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
-  patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
+  resources :countries
+  patch '/countries/:id/embargo', to: 'countries#embargo'
+  patch '/countries/:id/change_relations',   to: 'countries#change_relations'
+
+
+  resources :buildings
+  patch '/buildings/:id/upgrade!', to: 'buildings#upgrade!'
+  patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
+
+
+  #patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
 
   resources :building_levels
   resources :building_types
   resources :building_places
   resources :plant_levels
+  get '/plant_levels/:id/feed_to_plant!', to: 'plant_levels#feed_to_plant!'
+
+
   resources :jobs
   resources :humen
   resources :player_types
@@ -24,6 +46,9 @@ Rails.application.routes.draw do
   resources :ideologist_technologies
   resources :political_actions
   resources :political_action_types
+
+  get '/resources/show_prices',  to: 'resources#show_prices'
+  get '/resources/send_caravan', to: 'resources#send_caravan'
   resources :resources
   resources :plant_types
   resources :plant_categories
@@ -38,8 +63,10 @@ Rails.application.routes.draw do
   post '/settlements', to: 'settlements#create'
   get '/settlements/:id', to: 'settlements#show', as: :settlement
   get '/settlements/:id/edit', to: 'settlements#edit', as: :edit_settlement
-  post '/settlements/:id/build', to: 'settlements#build', as: :build
+  post '/settlements/:id/build', to: 'settlements#build'
+  patch '/settlements/:id/pay_for_church', to: 'settlements#pay_for_church'
   patch '/settlements/:id', to: 'settlements#update'
+
   delete '/settlements/:id', to: 'settlements#destroy', as: :destroy
   
   get '/economic_subjects', to: 'economic_subjects#index'

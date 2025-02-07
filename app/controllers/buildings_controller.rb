@@ -1,9 +1,24 @@
 class BuildingsController < ApplicationController
-  before_action :set_building, only: %i[ show edit update destroy ]
+  before_action :set_building, only: %i[ show edit update destroy upgrade! pay_for_maintenance]
 
   # GET /buildings or /buildings.json
   def index
     @buildings = Building.all
+  end
+
+  def upgrade!
+    @building.upgrade!
+  end
+
+  # def upgrade
+  #   @building_to_upgrade = Building.find(params[:id])
+  #   result = @building_to_upgrade.upgrade!
+  #   redirect_back(fallback_location: building_path(@building_to_upgrade), notice: result[:msg])
+  # end
+
+
+  def pay_for_maintenance
+    @building.pay_for_maintenance
   end
 
   # GET /buildings/1 or /buildings/1.json
@@ -56,14 +71,6 @@ class BuildingsController < ApplicationController
       format.json { head :no_content }
     end
   end
-
-
-  def upgrade
-    @building_to_upgrade = Building.find(params[:id])
-    result = @building_to_upgrade.upgrade!
-    redirect_back(fallback_location: building_path(@building_to_upgrade), notice: result[:msg])
-  end
-
 
   private
     # Use callbacks to share common setup or constraints between actions.
