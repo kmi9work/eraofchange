@@ -1,13 +1,12 @@
 class SettlementsController < ApplicationController
   before_action :set_settlement, only: %i[ show edit update destroy build pay_for_church]
   
-
   def index
     @settlements = Settlement.all
   end
 
-  def  build(building_type_id)
-    @settlement.build(bulding_type_id)
+  def  build
+    @settlement.build(params[:building_type_id])
   end
 
   def pay_for_church
@@ -60,15 +59,7 @@ class SettlementsController < ApplicationController
     end
   end
 
-  # def build
-  #   @settlement = Settlement.find(params[:id])
-  #   bulding_type_id = params[:building_type_id]
-  #   result = @settlement.build(bulding_type_id)
-  #   redirect_to settlement_url(@settlement), notice: result[:msg]
-  # end
-
   private
-    
     def set_settlement
       @settlement = Settlement.find(params[:id])
     end

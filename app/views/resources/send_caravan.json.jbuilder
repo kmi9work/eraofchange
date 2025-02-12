@@ -1,1 +1,1 @@
-json.send_caravan Resource.send_caravan(@where, @what_to_buy, @what_to_sell)
+json.send_caravan @caravan

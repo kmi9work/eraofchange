@@ -1,5 +1,5 @@
 class ArmiesController < ApplicationController
-  before_action :set_army, only: %i[ show edit update destroy demote_army! pay_for_army]
+  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army]
 
   # GET /armies or /armies.json
   def index
@@ -10,7 +10,7 @@ class ArmiesController < ApplicationController
   def show
   end
 
-  def demote_army!
+  def demote_army
     @army.demote_army!
   end
 

@@ -1,1 +1,1 @@
-json.show_prices Resource.show_prices
+json.show_prices @show_of_prices

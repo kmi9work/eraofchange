@@ -18,7 +18,7 @@ class Settlement < ApplicationRecord
     if already_there
       {building: nil, msg: "Во владении уже есть #{building_level&.name}."}
     else
-      b = Building.create(settlement_id: self.id, building_level: building_level)
+      b = Building.create(settlement_id: self.id, building_level: building_level, params:  {"paid" => []})
       {building: b, msg: "Во владении построено #{building_level&.name}."}
     end
   end

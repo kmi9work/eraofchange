@@ -1,21 +1,14 @@
 class BuildingsController < ApplicationController
-  before_action :set_building, only: %i[ show edit update destroy upgrade! pay_for_maintenance]
+  before_action :set_building, only: %i[ show edit update destroy upgrade pay_for_maintenance]
 
   # GET /buildings or /buildings.json
   def index
     @buildings = Building.all
   end
 
-  def upgrade!
+  def upgrade
     @building.upgrade!
   end
-
-  # def upgrade
-  #   @building_to_upgrade = Building.find(params[:id])
-  #   result = @building_to_upgrade.upgrade!
-  #   redirect_back(fallback_location: building_path(@building_to_upgrade), notice: result[:msg])
-  # end
-
 
   def pay_for_maintenance
     @building.pay_for_maintenance

@@ -2,62 +2,26 @@ Rails.application.routes.draw do
 
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
-  resources :game_parameters
 
-  resources :credits
-  resources :troops
-
-  resources :armies
-  patch '/armies/:id/demote_army!', to: 'armies#demote_army!'
+  patch '/armies/:id/demote_army', to: 'armies#demote_army'
   patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
 
-
-  resources :army_sizes
-  resources :troop_types
-  resources :plant_places
-  resources :fossil_types
-  resources :regions
   patch '/regions/:id/modify_public_order', to: 'regions#modify_public_order'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
-  resources :countries
   patch '/countries/:id/embargo', to: 'countries#embargo'
+  patch '/countries/:id/capture', to: 'countries#capture'
   patch '/countries/:id/change_relations',   to: 'countries#change_relations'
 
-
-  resources :buildings
-  patch '/buildings/:id/upgrade!', to: 'buildings#upgrade!'
+  patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
 
-
-  #patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
-
-  resources :building_levels
-  resources :building_types
-  resources :building_places
-  resources :plant_levels
-  get '/plant_levels/:id/feed_to_plant!', to: 'plant_levels#feed_to_plant!'
-
-
-  resources :jobs
-  resources :humen
-  resources :player_types
-  resources :ideologist_types
-  resources :ideologist_technologies
-  resources :political_actions
-  resources :political_action_types
+  get '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
   get '/resources/show_prices',  to: 'resources#show_prices'
   get '/resources/send_caravan', to: 'resources#send_caravan'
-  resources :resources
-  resources :plant_types
-  resources :plant_categories
-  resources :settlement_types
-  resources :guilds
-  resources :merchants
-  resources :families
-  resources :players
 
+  #TODO Населенный пункт надо бы сделать тоже через ресурс.
   get '/settlements', to: 'settlements#index'
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'
@@ -92,7 +56,6 @@ Rails.application.routes.draw do
   get '/eco_subjects/:id/edit', to: 'eco_subjects#edit', as: :edit_eco_subject
   patch '/eco_subjects/:id', to: 'eco_subjects#update'
   delete '/eco_subjects/:id', to: 'eco_subjects#destroy', as: :destroy_eco_subject
-  
 
   get '/facilities', to: 'facilities#index'
   get '/facilities/new', to: 'facilities#new', as: :new_facility
@@ -110,6 +73,37 @@ Rails.application.routes.draw do
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
-    
+
+  resources :game_parameters
+  resources :credits
+  resources :troops
+  resources :resources
+  resources :plant_types
+  resources :plant_categories
+  resources :settlement_types
+  resources :guilds
+  resources :merchants
+  resources :families
+  resources :players
+  resources :countries
+  resources :armies
+  resources :army_sizes
+  resources :troop_types
+  resources :plant_places
+  resources :fossil_types
+  resources :regions
+  resources :buildings
+  resources :building_levels
+  resources :building_types
+  resources :building_places
+  resources :plant_levels
+  resources :jobs
+  resources :humen
+  resources :player_types
+  resources :ideologist_types
+  resources :ideologist_technologies
+  resources :political_actions
+  resources :political_action_types
+
   root to: 'welcome#index'
 end
