@@ -1,1 +1,0 @@
-json.show_prices @show_of_prices

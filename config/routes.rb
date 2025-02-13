@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
   patch '/countries/:id/embargo', to: 'countries#embargo'
-  patch '/countries/:id/capture', to: 'countries#capture'
+  patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/change_relations',   to: 'countries#change_relations'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'

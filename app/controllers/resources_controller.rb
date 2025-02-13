@@ -9,7 +9,7 @@ class ResourcesController < ApplicationController
   end
 
   def show_prices
-    @show_of_prices = Resource.show_prices
+    @prices = Resource.show_prices
   end
 
   def send_caravan

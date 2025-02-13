@@ -11,7 +11,7 @@ class PlantLevelsController < ApplicationController
   end
 
   def feed_to_plant
-    @result_of_production = @plant_level.feed_to_plant!(params[:request], params[:way])
+    @output = @plant_level.feed_to_plant!(params[:request], params[:way])
   end
 
   # GET /plant_levels/new

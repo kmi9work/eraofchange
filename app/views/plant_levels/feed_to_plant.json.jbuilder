@@ -1,1 +1,0 @@
-json.feed_to_plant @result_of_production
