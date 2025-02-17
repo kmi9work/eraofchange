@@ -12,27 +12,48 @@ class Resource < ApplicationRecord
     end
   end
 
-  def self.send_caravan(country_id, resources_to_buy = [], resource_to_sell = [])
+  def self.send_caravan(country_id, res_pl_sells = [],  res_pl_buys = [], gold = 0)
+    return {msg: "Эмбарго"} if Country.find(country_id).params["embargo"]
+    #TODO Инстурмент проверки наличия у игрока "Контрабанды"
+
+    if res_pl_sells.present? #ресурсы, которые игрок продает рынку
+      result = []
+      res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+      elig_resources = country_filter(country_id, res_pl_sells)
+
+      elig_resources.each do |res|
+        result.push(calculate_cost("sale",
+                    res[:count],
+                    Resource.find_by(identificator: res[:identificator]))
+        )
+      end
+
+      result.each {|res| gold += res[:cost]}
+    end
+
     result = []
-    resources_to_buy.map! {|res| res.transform_keys(&:to_sym)} ########
-    if resources_to_buy.present? #Если мы покупаем у игрока
-      transaction_type = "buy"
-      resources = country_filter(country_id, resources_to_buy)
-    elsif resource_to_sell.present?
-      resource_to_sell.map! {|res| res.transform_keys(&:to_sym)} #######
-      transaction_type = "sale" #Если мы продаем игроку
-      resources = country_filter(country_id, resource_to_sell)
+    if res_pl_buys.present? #ресурсы, которые игрок покупает у рынка
+      res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+      elig_resources = country_filter(country_id, res_pl_buys)
+
+      elig_resources.each do |res|
+        result.push(calculate_cost("buy",
+                    res[:count],
+                    Resource.find_by(identificator: res[:identificator]))
+        )
+      end
+    else
+      return {gold: gold}
     end
 
-    resources.each do |res|
-      result.push(
-        calculate_cost(transaction_type, 
-                      res[:count], 
-                      Resource.find_by(identificator: res[:identificator]))
-      )
+    res_to_player = []
+
+    result.each do |res|
+      gold -= res[:cost]
+      res_to_player.push({identificator: res[:identificator], count: res[:count]})
     end
 
-    return result
+    return {res_to_player: res_to_player, gold: gold}
   end
 
   # cost: nil - значит, что ресурс не продаётся на рынке
@@ -40,9 +61,9 @@ class Resource < ApplicationRecord
     relations = resource.country.params["relations"].to_s
     unit_cost = resource.params["#{transaction_type}_price"][relations.to_s]
     if unit_cost
-      {identificator: resource.identificator, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
     else
-      {identificator: resource.identificator, cost: nil, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount,  cost: nil, embargo: resource.country.params["embargo"]}
     end
   end
 
