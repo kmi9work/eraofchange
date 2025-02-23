@@ -13,7 +13,7 @@ class ResourcesController < ApplicationController
   end
 
   def send_caravan
-    @caravan = Resource.send_caravan(params[:country_id], params[:resources_to_buy], params[:resource_to_sell])
+    @caravan = Resource.send_caravan(params[:country_id], params[:res_pl_sells], params[:res_pl_buys], params[:gold])
   end
 
   def new
