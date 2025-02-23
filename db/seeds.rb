@@ -653,30 +653,30 @@ army4 = Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"paid"
 army5 = Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"paid" =>[], "palsy" => []})
 army6 = Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"paid" =>[], "palsy" => [2, 3]})
 
-BuildingType.create(title: "Религиозная постройка")
-BuildingType.create(title: "Оборонительная постройка")
-BuildingType.create(title: "Торговая постройка")
-BuildingType.create(title: "Размер гарнизона")
+rel_build = BuildingType.create(title: "Религиозная постройка")
+def_build = BuildingType.create(title: "Оборонительная постройка")
+tra_build = BuildingType.create(title: "Торговая постройка")
+har_build = BuildingType.create(title: "Размер гарнизона")
 
-BuildingLevel.create(level: 1, building_type_id: 1, name: "Часовня", params: {"public_order" => 1})
-BuildingLevel.create(level: 2, building_type_id: 1, name: "Храм", params: {"public_order" => 3})
-BuildingLevel.create(level: 3, building_type_id: 1, name: "Монастырь", params: {"public_order" => 5})
+BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"public_order" => 1})
+BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"public_order" => 3})
+BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"public_order" => 5})
 
-BuildingLevel.create(level: 1, building_type_id: 2, name: "Форт")
-BuildingLevel.create(level: 2, building_type_id: 2, name: "Крепость")
-BuildingLevel.create(level: 3, building_type_id: 2, name: "Кремль")
+BuildingLevel.create(level: 1, building_type: def_build, name: "Форт")
+BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость")
+BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль")
 
-BuildingLevel.create(level: 1, building_type_id: 3, name: "Базар", params: {"income" => 1000})
-BuildingLevel.create(level: 2, building_type_id: 3, name: "Рынок", params: {"income" => 2000})
-BuildingLevel.create(level: 3, building_type_id: 3, name: "Ярмарка", params: {"income" => 4000})
+BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000})
+BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000})
+BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
 
-BuildingLevel.create(level: 1, building_type_id: 4, name: "Караул")
-BuildingLevel.create(level: 2, building_type_id: 4, name: "Гарнизон")
-BuildingLevel.create(level: 3, building_type_id: 4, name: "Казармы")
+BuildingLevel.create(level: 1, building_type: har_build, name: "Караул")
+BuildingLevel.create(level: 2, building_type: har_build, name: "Гарнизон")
+BuildingLevel.create(level: 3, building_type: har_build, name: "Казармы")
 
-Building.create(building_level_id: 1, settlement_id: 1, params: {"paid" => []})
-Building.create(building_level_id: 2, settlement_id: 2, params: {"paid" => []})
-Building.create(building_level_id: 3, settlement_id: 3, params: {"paid" => []})
+Building.create(building_level_id: 1, settlement_id: 1)
+Building.create(building_level_id: 2, settlement_id: 2)
+Building.create(building_level_id: 3, settlement_id: 3)
 
 
 

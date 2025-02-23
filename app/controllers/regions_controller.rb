@@ -1,9 +1,17 @@
 class RegionsController < ApplicationController
-  before_action :set_region, only: %i[ show edit update destroy ]
+  before_action :set_region, only: %i[ show edit update destroy modify_public_order captured_by]
 
   # GET /regions or /regions.json
   def index
     @regions = Region.all
+  end
+
+  def captured_by
+    @region.captured_by(params[:country_id], params[:how])
+  end
+
+  def modify_public_order
+    @region.modify_public_order(params[:arg])
   end
 
   # GET /regions/1 or /regions/1.json

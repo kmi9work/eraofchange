@@ -3,7 +3,7 @@ class GameParameter < ApplicationRecord
   def self.increase_year #Переводит в следующий год
     # автоматически убирает или понижает в уровне
     # все не оплаченные на момент смены года армии
-    Army.all.each {|a| a.check_and_demote_army!}
+    #Army.all.each {|a| a.check_and_demote_army!} #метод работает
 
     current_year = GameParameter.find_by(identificator: "current_year")
     current_year.value = (self.current_year  + 1).to_s

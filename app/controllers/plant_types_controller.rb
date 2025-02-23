@@ -4,16 +4,13 @@ class PlantTypesController < ApplicationController
   def index
     @plant_types = PlantType.all
   end
-
   
   def show
   end
-
   
   def new
     @plant_type = PlantType.new
   end
-
   
   def edit
   end

@@ -1,8 +1,7 @@
 class Army < ApplicationRecord
-
   # params:
   # palsy ([]) - Паралич
-
+  has_many   :troops, dependent: :destroy
   belongs_to :region, optional: true
   belongs_to :player, optional: true
   belongs_to :army_size, optional: true
@@ -53,6 +52,4 @@ class Army < ApplicationRecord
       {result: true, msg: "Армия оплачена"}
     end
   end
-
-
 end
