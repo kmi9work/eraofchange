@@ -30,16 +30,14 @@ class Country < ApplicationRecord
     end
   end
 
-  def change_relations(arg)
+  def change_relations(count)
+    count = count.to_i
     if self.params['relations'] != nil
-      pos_or_neg_inc = arg.to_i.positive? ? 1 : -1
-      arg.to_i.abs.times do |number|
-        if (self.params['relations'] + pos_or_neg_inc).abs <= REL_RANGE
-         self.params['relations'] += pos_or_neg_inc
-        else
-          "Дальше отношения улучшать нельзя."
-          break
-        end
+      if (self.params['relations'] + count).abs <= REL_RANGE
+        self.params['relations'] += count
+      else
+        sign = count.positive? ? 1 : -1
+        self.params['relations'] = REL_RANGE*sign
       end
       self.save
     else
