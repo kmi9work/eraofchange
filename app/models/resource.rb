@@ -12,45 +12,25 @@ class Resource < ApplicationRecord
     end
   end
 
-  def self.send_caravan(country_id, res_pl_sells = [],  res_pl_buys = [], gold = 0)
+  def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [], gold = 0)
     return {msg: "Эмбарго"} if Country.find(country_id).params["embargo"]
     #TODO Инстурмент проверки наличия у игрока "Контрабанды"
 
     if res_pl_sells.present? #ресурсы, которые игрок продает рынку
-      result = []
       res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
       elig_resources = country_filter(country_id, res_pl_sells)
-
       elig_resources.each do |res|
-        result.push(calculate_cost("sale",
-                    res[:count],
-                    Resource.find_by(identificator: res[:identificator]))
-        )
+        gold += calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
       end
-
-      result.each {|res| gold += res[:cost]}
-    end
-
-    result = []
-    if res_pl_buys.present? #ресурсы, которые игрок покупает у рынка
-      res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
-      elig_resources = country_filter(country_id, res_pl_buys)
-
-      elig_resources.each do |res|
-        result.push(calculate_cost("buy",
-                    res[:count],
-                    Resource.find_by(identificator: res[:identificator]))
-        )
-      end
-    else
-      return {gold: gold}
     end
 
     res_to_player = []
-
-    result.each do |res|
-      gold -= res[:cost]
-      res_to_player.push({identificator: res[:identificator], count: res[:count]})
+    res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    elig_resources = country_filter(country_id, res_pl_buys)
+    elig_resources.each do |res|
+      resource = calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))
+      gold -= resource[:cost]
+      res_to_player.push({identificator: resource[:identificator], count: resource[:count]})
     end
 
     return {res_to_player: res_to_player, gold: gold}
