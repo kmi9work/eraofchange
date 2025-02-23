@@ -16,12 +16,11 @@ class Resource < ApplicationRecord
     return {msg: "Эмбарго"} if Country.find(country_id).params["embargo"]
     #TODO Инстурмент проверки наличия у игрока "Контрабанды"
 
-    if res_pl_sells.present? #ресурсы, которые игрок продает рынку
-      res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
-      elig_resources = country_filter(country_id, res_pl_sells)
-      elig_resources.each do |res|
-        gold += calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
-      end
+   #ресурсы, которые игрок продает рынку
+    res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    elig_resources = country_filter(country_id, res_pl_sells)
+    elig_resources.each do |res|
+      gold += calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
     end
 
     res_to_player = []
