@@ -3,6 +3,7 @@ class Region < ApplicationRecord
   # public_order (integer) - Общественный порядок
 
   belongs_to :country
+  belongs_to :player, optional: true
 
   has_many :settlements
   has_many :armies

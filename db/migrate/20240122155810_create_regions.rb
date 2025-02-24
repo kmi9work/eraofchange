@@ -3,6 +3,7 @@ class CreateRegions < ActiveRecord::Migration[7.0]
     create_table :regions do |t|
       t.string :title
       t.integer :country_id
+      t.integer :player_id
       t.json :params
 
       t.timestamps

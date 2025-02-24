@@ -2,7 +2,8 @@ class SettlementsController < ApplicationController
   before_action :set_settlement, only: %i[ show edit update destroy build pay_for_church]
   
   def index
-    @settlements = Settlement.all
+    @settlements = Settlement.joins(:region).where(regions: {country_id: Country::RUS})
+    #Нужны только города Руси. Для остальных - земли
   end
 
   def  build
