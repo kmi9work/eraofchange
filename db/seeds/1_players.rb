@@ -22,9 +22,13 @@ names.each do |name|
 end
 
 job_names = ["Великий князь", "Наследник престола", "Посольский дьяк", "Казначей", 
-  "Главный воевода", "Митропот Московский и всея Руси", "Первый думный боярин", "Тайный советник", 
+  "Главный воевода", "Митрополит", "Первый думный боярин", "Тайный советник", 
   "Окольничий", "Дух русского бунта", "Глава купеческого приказа", "Глава гульдии"]
 @jobs = []
+
+job_names.each do |name|
+  @jobs.push Job.create(name: name)
+end
 
 noble_names = ["Иван III", "Борис", "Манюня", "Распутин", "Геронтий", "Образина", "Распутин", "Хренов", "Даниил"]
 buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Булат", "Богатина", "Алтын", "Любава", "Матрена"]
@@ -39,3 +43,4 @@ end
 buyer_names.each_with_index do |name, i|
   @buyers.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, params: {"influence" => rand(5), "contraband" => []})
 end
+

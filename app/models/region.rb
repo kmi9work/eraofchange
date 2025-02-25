@@ -9,6 +9,8 @@ class Region < ApplicationRecord
   has_many :armies
   has_many :plant_places
 
+  has_one :capital, -> { where(settlement_type_id: SettlementType::CAPITAL) }, class_name: 'Settlement'
+
   def inf_buildings_on_po #Влияние зданий на общественной порадок
     bbl_params = self.settlements.joins(buildings: :building_level).
          where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).

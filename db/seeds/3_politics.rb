@@ -11,7 +11,7 @@ while str = f.gets
   region = Region.find_by_title(region_name)
   region ||= Region.create(title: region_name, country: country, params: {"public_order" => 0})
   city = Settlement.find_by_name(city_name)
-  type = cost == '10' ? cap : town
+  type = cost.to_i == 10 ? cap : town
   player = nil
   player = @nobles.shuffle.first if country.title == "Русь"
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
@@ -98,10 +98,10 @@ end
 # Settlement.create(name: "Чимги-тура", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 # Settlement.create(name: "Ярославль", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 
-rel_build = BuildingType.create(title: "Религиозная постройка")
-def_build = BuildingType.create(title: "Оборонительная постройка")
-tra_build = BuildingType.create(title: "Торговая постройка")
-har_build = BuildingType.create(title: "Размер гарнизона")
+rel_build = BuildingType.create(title: "Церковь")
+def_build = BuildingType.create(title: "Кремль")
+tra_build = BuildingType.create(title: "Рынок")
+har_build = BuildingType.create(title: "Гарнизон")
 
 BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"public_order" => 1})
 BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"public_order" => 3})
