@@ -6,6 +6,11 @@ class CountriesController < ApplicationController
     @countries = Country.all
   end
 
+  def foreign_countries
+    @countries = Country.foreign_countries
+    render 'index'
+  end
+
   def embargo
     @country.embargo(params[:arg])
   end

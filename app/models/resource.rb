@@ -59,6 +59,7 @@ class Resource < ApplicationRecord
       res_prices[:buy_price] = res.params["buy_price"][relations]
       res_prices[:sell_price] = res.params["sale_price"][relations]
       res_prices[:embargo] = res.country.params["embargo"]
+      res_prices[:country] = res.country.as_json(only: [:id, :title])
       prices_array.push(res_prices)
     end
 

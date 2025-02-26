@@ -19,6 +19,8 @@ class Country < ApplicationRecord
   MILITARILY = -3
   PEACEFULLY = 3
 
+  scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
+
   def embargo(arg) #1 - эмбарго есть, 0 - эмбарго нет
     if self.params['embargo'] != nil
       self.params['embargo'] = arg.to_i > 0

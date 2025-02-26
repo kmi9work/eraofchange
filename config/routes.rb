@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/embargo', to: 'countries#embargo'
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/change_relations',   to: 'countries#change_relations'
+  get '/countries/foreign_countries', to: 'countries#foreign_countries'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'

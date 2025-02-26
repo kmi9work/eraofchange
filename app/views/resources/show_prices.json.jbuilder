@@ -1,1 +1,1 @@
-json.show_prices @prices
+json.prices @prices
