@@ -13,6 +13,7 @@ class Settlement < ApplicationRecord
   end
 
   def build(building_type_id)
+    return if building_type_id.blank?
     already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == building_type_id}
     building_level = BuildingLevel.find_by(level: BuildingLevel::FIRST_LEVEL, building_type_id: building_type_id)
     if already_there

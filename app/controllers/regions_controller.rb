@@ -4,6 +4,7 @@ class RegionsController < ApplicationController
   # GET /regions or /regions.json
   def index
     @regions = Region.all
+    @regions = @regions.where.not(country_id: Country::RUS) if params[:foreign].to_i == 1
   end
 
   def captured_by

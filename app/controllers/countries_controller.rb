@@ -4,6 +4,8 @@ class CountriesController < ApplicationController
   # GET /countries or /countries.json
   def index
     @countries = Country.all
+    @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
+    @countries = @countries.order(:title)
   end
 
   def foreign_countries

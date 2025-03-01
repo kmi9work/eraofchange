@@ -98,10 +98,9 @@ end
 # Settlement.create(name: "Чимги-тура", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 # Settlement.create(name: "Ярославль", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 
-rel_build = BuildingType.create(title: "Церковь")
-def_build = BuildingType.create(title: "Кремль")
-tra_build = BuildingType.create(title: "Рынок")
-har_build = BuildingType.create(title: "Гарнизон")
+rel_build = BuildingType.create(title: "Церковь", icon: 'ri-cross-line')
+def_build = BuildingType.create(title: "Кремль", icon: 'ri-shield-line')
+tra_build = BuildingType.create(title: "Рынок", icon: 'ri-exchange-line')
 
 BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"public_order" => 1})
 BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"public_order" => 3})
@@ -114,10 +113,6 @@ BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль")
 BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000})
 BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000})
 BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
-
-BuildingLevel.create(level: 1, building_type: har_build, name: "Караул")
-BuildingLevel.create(level: 2, building_type: har_build, name: "Гарнизон")
-BuildingLevel.create(level: 3, building_type: har_build, name: "Казармы")
 
 Building.create(building_level_id: 1, settlement_id: 1)
 Building.create(building_level_id: 2, settlement_id: 2)
