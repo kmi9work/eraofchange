@@ -2,6 +2,7 @@ class Player < ApplicationRecord
   # params:
   # influence (integer) - Влияние
   # contraband ([]) - Контрабанда
+  audited
 
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true

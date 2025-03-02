@@ -1,6 +1,7 @@
 class Region < ApplicationRecord
   # params:
   # public_order (integer) - Общественный порядок
+  audited
 
   belongs_to :country
   belongs_to :player, optional: true

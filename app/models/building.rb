@@ -1,4 +1,6 @@
 class Building < ApplicationRecord
+  audited
+
   belongs_to :building_level
   belongs_to :settlement
 

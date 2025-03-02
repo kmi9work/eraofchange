@@ -1,6 +1,8 @@
 class Army < ApplicationRecord
   # params:
   # palsy ([]) - Паралич
+  audited
+  
   has_many   :troops, dependent: :destroy
   belongs_to :region, optional: true
   belongs_to :player, optional: true

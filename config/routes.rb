@@ -75,7 +75,14 @@ Rails.application.routes.draw do
   delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
 
+  get '/login/:id', to: 'users#login'
+  get '/current_user', to: 'users#current_user'
+
+  get '/audits', to: 'audits#index'
+
+
   resources :game_parameters
+  resources :users
   resources :credits
   resources :troops
   resources :resources

@@ -1,6 +1,7 @@
 class Settlement < ApplicationRecord
   # params:
   # open_gate (bool) - открыты ворота (штурм можно вести без осадных оружий)
+  audited
 
   belongs_to :settlement_type, optional: true
   belongs_to :region, optional: true

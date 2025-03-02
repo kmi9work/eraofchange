@@ -1,4 +1,6 @@
 class Plant < ApplicationRecord
+  audited
+
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true

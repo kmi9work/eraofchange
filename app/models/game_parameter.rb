@@ -1,4 +1,5 @@
 class GameParameter < ApplicationRecord
+  audited
 
   def self.increase_year #Переводит в следующий год
     # автоматически убирает или понижает в уровне
