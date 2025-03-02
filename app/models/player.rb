@@ -52,7 +52,15 @@ class Player < ApplicationRecord
   end
 
   def income
-    self.settlements.sum{|s| s.income}
+    sum = 0
+    if job_id == Job::METROPOLITAN
+      church_params = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        select('building_levels.params')
+      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
+    end
+    sum + self.settlements.sum{|s| s.income}
   end
 
   def player_military_outlays

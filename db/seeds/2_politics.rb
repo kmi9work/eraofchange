@@ -102,9 +102,9 @@ rel_build = BuildingType.create(title: "Церковь", icon: 'ri-cross-line')
 def_build = BuildingType.create(title: "Кремль", icon: 'ri-shield-line')
 tra_build = BuildingType.create(title: "Рынок", icon: 'ri-exchange-line')
 
-BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"public_order" => 1})
-BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"public_order" => 3})
-BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"public_order" => 5})
+BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1})
+BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3})
+BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"metropolitan_income" => 6000, "public_order" => 5})
 
 BuildingLevel.create(level: 1, building_type: def_build, name: "Форт")
 BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость")
