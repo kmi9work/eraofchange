@@ -5,6 +5,7 @@ class RegionsController < ApplicationController
   def index
     @regions = Region.all
     @regions = @regions.where.not(country_id: Country::RUS) if params[:foreign].to_i == 1
+    @regions = @regions.where(country_id: Country::RUS) if params[:foreign].to_i == 0
   end
 
   def captured_by
