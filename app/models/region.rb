@@ -32,9 +32,9 @@ class Region < ApplicationRecord
     return po
   end
 
-  def captured_by(who, how) #1 - войной, 0 - миром
-    self.country_id = who.to_i
-    if who.id == Country::RUS
+  def captured_by(who_id, how) #1 - войной, 0 - миром
+    self.country_id = who_id.to_i
+    if who_id == Country::RUS
       if how == 1
         self.public_order_items << PublicOrderItem.add(Country::MILITARILY, "Регион присоединен войной", self)
       else
