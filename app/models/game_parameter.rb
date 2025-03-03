@@ -1,12 +1,17 @@
 class GameParameter < ApplicationRecord
   audited
 
+  NO_STATE_EXPENSES = -5
+
   def self.increase_year #Переводит в следующий год
     # автоматически убирает или понижает в уровне
     # все не оплаченные на момент смены года армии
     #Army.all.each {|a| a.check_and_demote_army!} #метод работает
 
     current_year = GameParameter.find_by(identificator: "current_year")
+    if current_year.params["state_expenses"] == false
+      PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil)
+    end
     current_year.value = (self.current_year  + 1).to_s
     current_year.params["state_expenses"] = false
     current_year.save
