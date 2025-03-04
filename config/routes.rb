@@ -20,7 +20,7 @@ Rails.application.routes.draw do
   get '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
   get '/resources/show_prices',  to: 'resources#show_prices'
-  get '/resources/send_caravan', to: 'resources#send_caravan'
+  post '/resources/send_caravan', to: 'resources#send_caravan'
 
   #TODO Населенный пункт надо бы сделать тоже через ресурс.
   get '/settlements', to: 'settlements#index'

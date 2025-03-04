@@ -14,6 +14,7 @@ class ResourcesController < ApplicationController
 
   def send_caravan
     @caravan = Resource.send_caravan(params[:country_id], params[:res_pl_sells], params[:res_pl_buys], params[:gold])
+    render json: @caravan
   end
 
   def new
