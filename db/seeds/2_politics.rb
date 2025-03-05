@@ -122,20 +122,24 @@ Building.create(building_level_id: 5, settlement_id: 1)
 Building.create(building_level_id: 6, settlement_id: 2)
 Building.create(building_level_id: 7, settlement_id: 1)
 
+guild_boss = Job.find_by_name("Глава гульдии")
+f = File.open('./db/seeds/pat_merchants.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  title, action, icon, desc, cost, prob, success = str.split(";").map{|i| i.strip}
+  PoliticalActionType.create(
+    icon: icon, title: title, action: action, job: guild_boss,
+    description: desc, cost: cost, probability: prob, success: success)
+end
 
-PoliticalActionType.create(icon: 'mdi-fencing', title: "Подстрекательство к бунту", action: 'sedition')
-PoliticalActionType.create(icon: 'mdi-charity', title: "Благотворительность", action: "charity")
-PoliticalActionType.create(icon: 'mdi-domino-mask', title: "Шпионаж", action: 'espionage')
-PoliticalActionType.create(icon: 'mdi-stop-circle', title: "Саботаж", action: 'sabotage')
-PoliticalActionType.create(icon: 'mdi-crosshairs-off', title: "Контрабанда", action: 'contraband')
-PoliticalActionType.create(icon: 'mdi-gate-open', title: "Открыть ворота!", action: 'open_gate')
-PoliticalActionType.create(icon: 'mdi-teddy-bear', title: "Новые промыслы", action: 'new_fisheries')
-PoliticalActionType.create(title: "Отправить посольство", action: 'send_embassy')
-PoliticalActionType.create(title: "Снарядить караван", action: 'equip_caravan')
-PoliticalActionType.create(title: "Взять мзду", action: 'take_bribe')
-PoliticalActionType.create(title: "Провести ревизию", action: 'сonduct_audit')
-PoliticalActionType.create(title: "Казнокрадство", action: 'peculation')
-PoliticalActionType.create(title: "Разогнать мздоимцев", action: 'disperse_bribery')
-PoliticalActionType.create(title: "Осуществить саботаж", action: 'implement_sabotage')
-PoliticalActionType.create(title: "Именем Великого князя", action: 'name_of_grand_prince')
-PoliticalActionType.create(title: "Набрать рекрутов", action: 'recruiting')
+f = File.open('./db/seeds/pat_nobles.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  job_name, title, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}
+  job = Job.find_by_name(job_name)
+  PoliticalActionType.create(
+    icon: icon, title: title, action: action, job: job,
+    description: desc, cost: cost, probability: prob, 
+    success: success, failure: failure)
+end
+

@@ -34,13 +34,16 @@ class Region < ApplicationRecord
 
   def captured_by(who_id, how) #1 - войной, 0 - миром
     self.country_id = who_id.to_i
-    if who_id == Country::RUS
-      if how == 1
+    if who_id.to_i == Country::RUS
+      if how.to_i == 1
         self.public_order_items << PublicOrderItem.add(Country::MILITARILY, "Регион присоединен войной", self)
       else
         self.public_order_items << PublicOrderItem.add(Country::PEACEFULLY, "Регион присоединен миром", self)
       end
+    else
+      self.settlements.update_all(player_id: nil)
     end
+    self.save
 
     {result: true, msg: "Регион присоединен"}
   end

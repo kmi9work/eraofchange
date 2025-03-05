@@ -4,8 +4,13 @@ class CreatePoliticalActionTypes < ActiveRecord::Migration[7.0]
       t.string :icon
       t.string :title
       t.string :action
+      t.integer :job_id
       t.json :params
-
+      t.text :description
+      t.string :cost
+      t.string :probability
+      t.text :success
+      t.text :failure
       t.timestamps
     end
   end
