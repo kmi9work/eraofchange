@@ -11,8 +11,8 @@ end
 
 pt_types = ["Купец","Знать","Мудрец","Дух народного бунта"]
 @player_types = []
-pt_types.each do |title|
-  @player_types.push(PlayerType.create(title: title))
+pt_types.each do |name|
+  @player_types.push(PlayerType.create(name: name))
 end
 
 names = ["Рюриковичи", "Аксаковы", "Патрикеевы", "Волоцкие", "Большие", "Молодые", "Голицыны"]

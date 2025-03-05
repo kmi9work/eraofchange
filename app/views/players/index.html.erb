@@ -25,7 +25,7 @@
           Не выбран
         <% else %>
           <% link_to_player_type = "/player_types/#{player.player_type.id}" %>
-          <%= link_to player.player_type&.title, link_to_player_type %>
+          <%= link_to player.player_type&.name, link_to_player_type %>
         <% end -%>
       </td>
       <td>

@@ -15,7 +15,7 @@ class RegionsTest < ApplicationSystemTestCase
     click_on "New region"
 
     fill_in "Params", with: @region.params
-    fill_in "Title", with: @region.title
+    fill_in "name", with: @region.name
     click_on "Create Region"
 
     assert_text "Region was successfully created"
@@ -27,7 +27,7 @@ class RegionsTest < ApplicationSystemTestCase
     click_on "Edit this region", match: :first
 
     fill_in "Params", with: @region.params
-    fill_in "Title", with: @region.title
+    fill_in "name", with: @region.name
     click_on "Update Region"
 
     assert_text "Region was successfully updated"

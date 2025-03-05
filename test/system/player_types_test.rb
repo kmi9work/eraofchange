@@ -15,7 +15,7 @@ class PlayerTypesTest < ApplicationSystemTestCase
     click_on "New player type"
 
     fill_in "Ideologist type", with: @player_type.ideologist_type_id
-    fill_in "Title", with: @player_type.title
+    fill_in "name", with: @player_type.name
     click_on "Create Player type"
 
     assert_text "Player type was successfully created"
@@ -27,7 +27,7 @@ class PlayerTypesTest < ApplicationSystemTestCase
     click_on "Edit this player type", match: :first
 
     fill_in "Ideologist type", with: @player_type.ideologist_type_id
-    fill_in "Title", with: @player_type.title
+    fill_in "name", with: @player_type.name
     click_on "Update Player type"
 
     assert_text "Player type was successfully updated"

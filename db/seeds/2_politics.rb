@@ -6,14 +6,14 @@ for_town = SettlementType.create(name: "Иностранная столица", 
 f = File.open('./db/seeds/countries.csv', 'r+')
 while str = f.gets
   country_name, region_name, city_name, cost = str.split(';')
-  country = Country.find_by_title(country_name)
-  country ||= Country.create(title: country_name, params: {"relations" => 0, "embargo" => false})
-  region = Region.find_by_title(region_name)
-  region ||= Region.create(title: region_name, country: country, params: {"public_order" => 0})
+  country = Country.find_by_name(country_name)
+  country ||= Country.create(name: country_name, params: {"relations" => 0, "embargo" => false})
+  region = Region.find_by_name(region_name)
+  region ||= Region.create(name: region_name, country: country, params: {"public_order" => 0})
   city = Settlement.find_by_name(city_name)
   type = cost.to_i == 10 ? cap : town
   player = nil
-  player = @nobles.shuffle.first if country.title == "Русь"
+  player = @nobles.shuffle.first if country.name == "Русь"
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
 end
 
@@ -98,9 +98,9 @@ end
 # Settlement.create(name: "Чимги-тура", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 # Settlement.create(name: "Ярославль", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 
-rel_build = BuildingType.create(title: "Церковь", icon: 'ri-cross-line')
-def_build = BuildingType.create(title: "Кремль", icon: 'ri-shield-line')
-tra_build = BuildingType.create(title: "Рынок", icon: 'ri-exchange-line')
+rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
+def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
+tra_build = BuildingType.create(name: "Рынок", icon: 'ri-exchange-line')
 
 BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1})
 BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3})
@@ -126,19 +126,19 @@ guild_boss = Job.find_by_name("Глава гульдии")
 f = File.open('./db/seeds/pat_merchants.csv', 'r+')
 f.gets #headers
 while str = f.gets
-  title, action, icon, desc, cost, prob, success = str.split(";").map{|i| i.strip}
+  name, action, icon, desc, cost, prob, success = str.split(";").map{|i| i.strip}
   PoliticalActionType.create(
-    icon: icon, title: title, action: action, job: guild_boss,
+    icon: icon, name: name, action: action, job: guild_boss,
     description: desc, cost: cost, probability: prob, success: success)
 end
 
 f = File.open('./db/seeds/pat_nobles.csv', 'r+')
 f.gets #headers
 while str = f.gets
-  job_name, title, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}
+  job_name, name, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}
   job = Job.find_by_name(job_name)
   PoliticalActionType.create(
-    icon: icon, title: title, action: action, job: job,
+    icon: icon, name: name, action: action, job: job,
     description: desc, cost: cost, probability: prob, 
     success: success, failure: failure)
 end

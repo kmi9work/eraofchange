@@ -11,18 +11,18 @@ army4 = Army.create(region_id: 1, player_id: 4, army_size_id: 2, params: {"paid"
 army5 = Army.create(region_id: 1, player_id: 5, army_size_id: 3, params: {"paid" =>[], "palsy" => []})
 army6 = Army.create(region_id: 1, player_id: 6, army_size_id: 3, params: {"paid" =>[], "palsy" => [2, 3]})
 
-TroopType.create(title: "Арбалетчики") #CROSSBOWMEN = 1
-TroopType.create(title: "Легкая кавалерия") #LIGHT_CAVALRY = 2
-TroopType.create(title: "Тяжелая кавалерия")#HEAVY_CAVALRY = 3
-TroopType.create(title: "Легкая пехота")  #LIGHT_INFANTRY = 4
-TroopType.create(title: "Лучники") # ARCHERS = 5
-TroopType.create(title: "Ополчение") #MILITIA_MEN = 6
-TroopType.create(title: "Пешие рыцари") #FOOT_KIGHTS = 7
-TroopType.create(title: "Пушки") #CANONS = 8
-TroopType.create(title: "Рыцари") #KNIGHTS = 9
-TroopType.create(title: "Степные лучники") #STEPPE_ARCHERS = 10
-TroopType.create(title: "Стрельцы") #STRELTSY = 11
-TroopType.create(title: "Таран") #BATTERING_RAM = 12
+TroopType.create(name: "Арбалетчики") #CROSSBOWMEN = 1
+TroopType.create(name: "Легкая кавалерия") #LIGHT_CAVALRY = 2
+TroopType.create(name: "Тяжелая кавалерия")#HEAVY_CAVALRY = 3
+TroopType.create(name: "Легкая пехота")  #LIGHT_INFANTRY = 4
+TroopType.create(name: "Лучники") # ARCHERS = 5
+TroopType.create(name: "Ополчение") #MILITIA_MEN = 6
+TroopType.create(name: "Пешие рыцари") #FOOT_KIGHTS = 7
+TroopType.create(name: "Пушки") #CANONS = 8
+TroopType.create(name: "Рыцари") #KNIGHTS = 9
+TroopType.create(name: "Степные лучники") #STEPPE_ARCHERS = 10
+TroopType.create(name: "Стрельцы") #STRELTSY = 11
+TroopType.create(name: "Таран") #BATTERING_RAM = 12
 
 Troop.create(troop_type_id: 2, is_hired: true, army: army1)
 Troop.create(troop_type_id: 3, is_hired: true, army: army1)

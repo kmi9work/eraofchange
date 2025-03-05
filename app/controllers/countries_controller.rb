@@ -5,7 +5,7 @@ class CountriesController < ApplicationController
   def index
     @countries = Country.all
     @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
-    @countries = @countries.order(:title)
+    @countries = @countries.order(:name)
   end
 
   def foreign_countries
@@ -86,6 +86,6 @@ class CountriesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def country_params
-      params.require(:country).permit(:title, :params)
+      params.require(:country).permit(:name, :params)
     end
 end

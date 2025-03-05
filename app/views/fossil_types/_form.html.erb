@@ -12,8 +12,8 @@
   <% end %>
 
   <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
   </div>
 
   <div>
@@ -21,7 +21,7 @@
   </div>
 
   <div>
-    Места для предприятияй: <%= form.select :plant_place_ids, options_for_select(PlantPlace.all.collect{ |pp| [pp.title, pp.id] }, fossil_type.plant_place_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
+    Места для предприятияй: <%= form.select :plant_place_ids, options_for_select(PlantPlace.all.collect{ |pp| [pp.name, pp.id] }, fossil_type.plant_place_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %>
   </div>
 
   <div>

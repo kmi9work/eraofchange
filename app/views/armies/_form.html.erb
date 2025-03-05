@@ -16,7 +16,7 @@
 
     <p>Принадлежит игроку: <%= form.select :player_id, options_for_select(Player.all.collect{ |p| [p.name, p.id]}, army.player_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-   <p>Регион: <%= form.select :region_id, options_for_select(Region.all.collect{ |r| [r.title, r.id]}, army.region_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+   <p>Регион: <%= form.select :region_id, options_for_select(Region.all.collect{ |r| [r.name, r.id]}, army.region_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
     <%= form.submit 'Отправить'%>
     <% end -%>

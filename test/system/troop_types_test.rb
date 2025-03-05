@@ -15,7 +15,7 @@ class TroopTypesTest < ApplicationSystemTestCase
     click_on "New troop type"
 
     fill_in "Params", with: @troop_type.params
-    fill_in "Title", with: @troop_type.title
+    fill_in "name", with: @troop_type.name
     click_on "Create Troop type"
 
     assert_text "Troop type was successfully created"
@@ -27,7 +27,7 @@ class TroopTypesTest < ApplicationSystemTestCase
     click_on "Edit this troop type", match: :first
 
     fill_in "Params", with: @troop_type.params
-    fill_in "Title", with: @troop_type.title
+    fill_in "name", with: @troop_type.name
     click_on "Update Troop type"
 
     assert_text "Troop type was successfully updated"

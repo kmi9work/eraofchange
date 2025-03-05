@@ -15,7 +15,7 @@
     <% @buildings.each do |building| %>
       <tr>
         <td><%= building.id%></td>
-        <td><%= link_to building&.building_level&.building_type&.title, building_path(building) %></td>
+        <td><%= link_to building&.building_level&.building_type&.name, building_path(building) %></td>
         <td><%= building&.building_level&.id %></td>
         <td><%= link_to "Редактировать постройку", edit_building_path(building), class: 'btn1' %>
             <%= button_to "Удалить постройку", building_path(building), method: :delete, class:'btn2', id: "delete-#{building.id}"%>

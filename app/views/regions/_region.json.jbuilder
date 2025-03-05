@@ -1,4 +1,4 @@
-json.extract! region, :id, :title, :params, :country, :player, :inf_buildings_on_po, :show_overall_po, :created_at, :updated_at
+json.extract! region, :id, :name, :params, :country, :player, :inf_buildings_on_po, :show_overall_po, :created_at, :updated_at
 json.capital do
   if region.capital.present?
     json.partial! "settlements/settlement", settlement: region.capital

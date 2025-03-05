@@ -17,7 +17,7 @@ class PoliticalActionTypesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create political_action_type" do
     assert_difference("PoliticalActionType.count") do
-      post political_action_types_url, params: { political_action_type: { action: @political_action_type.action, params: @political_action_type.params, title: @political_action_type.title } }
+      post political_action_types_url, params: { political_action_type: { action: @political_action_type.action, params: @political_action_type.params, name: @political_action_type.name } }
     end
 
     assert_redirected_to political_action_type_url(PoliticalActionType.last)
@@ -34,7 +34,7 @@ class PoliticalActionTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update political_action_type" do
-    patch political_action_type_url(@political_action_type), params: { political_action_type: { action: @political_action_type.action, params: @political_action_type.params, title: @political_action_type.title } }
+    patch political_action_type_url(@political_action_type), params: { political_action_type: { action: @political_action_type.action, params: @political_action_type.params, name: @political_action_type.name } }
     assert_redirected_to political_action_type_url(@political_action_type)
   end
 

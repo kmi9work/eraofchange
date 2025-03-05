@@ -17,7 +17,7 @@ class IdeologistTechnologiesTest < ApplicationSystemTestCase
     fill_in "Ideologist type", with: @ideologist_technology.ideologist_type_id
     fill_in "Params", with: @ideologist_technology.params
     fill_in "Requirements", with: @ideologist_technology.requirements
-    fill_in "Title", with: @ideologist_technology.title
+    fill_in "name", with: @ideologist_technology.name
     click_on "Create Ideologist technology"
 
     assert_text "Ideologist technology was successfully created"
@@ -31,7 +31,7 @@ class IdeologistTechnologiesTest < ApplicationSystemTestCase
     fill_in "Ideologist type", with: @ideologist_technology.ideologist_type_id
     fill_in "Params", with: @ideologist_technology.params
     fill_in "Requirements", with: @ideologist_technology.requirements
-    fill_in "Title", with: @ideologist_technology.title
+    fill_in "name", with: @ideologist_technology.name
     click_on "Update Ideologist technology"
 
     assert_text "Ideologist technology was successfully updated"

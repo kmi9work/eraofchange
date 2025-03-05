@@ -15,7 +15,7 @@ class PlantPlacesTest < ApplicationSystemTestCase
     click_on "New plant place"
 
     fill_in "Plant place type", with: @plant_place.plant_place_type
-    fill_in "Title", with: @plant_place.title
+    fill_in "name", with: @plant_place.name
     click_on "Create Plant place"
 
     assert_text "Plant place was successfully created"
@@ -27,7 +27,7 @@ class PlantPlacesTest < ApplicationSystemTestCase
     click_on "Edit this plant place", match: :first
 
     fill_in "Plant place type", with: @plant_place.plant_place_type
-    fill_in "Title", with: @plant_place.title
+    fill_in "name", with: @plant_place.name
     click_on "Update Plant place"
 
     assert_text "Plant place was successfully updated"

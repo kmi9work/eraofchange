@@ -17,7 +17,7 @@ class IdeologistTechnologiesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create ideologist_technology" do
     assert_difference("IdeologistTechnology.count") do
-      post ideologist_technologies_url, params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, title: @ideologist_technology.title } }
+      post ideologist_technologies_url, params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, name: @ideologist_technology.name } }
     end
 
     assert_redirected_to ideologist_technology_url(IdeologistTechnology.last)
@@ -34,7 +34,7 @@ class IdeologistTechnologiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update ideologist_technology" do
-    patch ideologist_technology_url(@ideologist_technology), params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, title: @ideologist_technology.title } }
+    patch ideologist_technology_url(@ideologist_technology), params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, name: @ideologist_technology.name } }
     assert_redirected_to ideologist_technology_url(@ideologist_technology)
   end
 

@@ -19,7 +19,7 @@
       <td>
           <%= link_to army.army_size.name, army_path(army) %></td>
       <td><%= army.player.name %></td>
-      <td><%= army.region.title%></td>
+      <td><%= army.region.name%></td>
       <td><%= link_to "Редактировать армию", edit_army_path(army), class: 'btn1' %>
           <%= button_to "Удалить армию", army_path(army), method: :delete, class: 'btn2', id: "delete-#{army.id}"%></td>
         </ul>

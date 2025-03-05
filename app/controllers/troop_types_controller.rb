@@ -65,6 +65,6 @@ class TroopTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def troop_type_params
-      params.require(:troop_type).permit(:title, :params)
+      params.require(:troop_type).permit(:name, :params)
     end
 end

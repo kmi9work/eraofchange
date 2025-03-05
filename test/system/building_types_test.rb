@@ -15,7 +15,7 @@ class BuildingTypesTest < ApplicationSystemTestCase
     click_on "New building type"
 
     fill_in "Params", with: @building_type.params
-    fill_in "Title", with: @building_type.title
+    fill_in "name", with: @building_type.name
     click_on "Create Building type"
 
     assert_text "Building type was successfully created"
@@ -27,7 +27,7 @@ class BuildingTypesTest < ApplicationSystemTestCase
     click_on "Edit this building type", match: :first
 
     fill_in "Params", with: @building_type.params
-    fill_in "Title", with: @building_type.title
+    fill_in "name", with: @building_type.name
     click_on "Update Building type"
 
     assert_text "Building type was successfully updated"

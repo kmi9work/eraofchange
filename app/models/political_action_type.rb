@@ -36,7 +36,7 @@ class PoliticalActionType < ApplicationRecord
       army = Army.find_by_id(options[:army_id])
       if army
         army_size = army.army_size&.name
-        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.title')
+        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.name')
         final_hash = {
           army_size: army_size,
           troops: troops
@@ -64,7 +64,7 @@ class PoliticalActionType < ApplicationRecord
       player = Player.find_by_id(options[:player_id])
       country = Country.find_by_id(options[:country_id])
       if player && country
-        player.params["contraband"].push(country.title)
+        player.params["contraband"].push(country.name)
         player.save
       end
     end

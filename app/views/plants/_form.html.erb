@@ -21,7 +21,7 @@
 
       <p>Уровень предприятия: <%= form.select :plant_level_id, options_for_select(PlantLevel.all.collect{ |pl| [pl.level, pl.id] }, plant.plant_level_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
-      <p>Место для предприятия: <%= form.select :plant_place_id, options_for_select(PlantPlace.all.collect{ |pp| [pp.title, pp.id] }, plant.plant_place_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
+      <p>Место для предприятия: <%= form.select :plant_place_id, options_for_select(PlantPlace.all.collect{ |pp| [pp.name, pp.id] }, plant.plant_place_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
 
       <p>Кредит: <%= form.select :credit_id, options_for_select(Credit.all.collect{ |c| [c.sum, c.id] }, plant.credit_id), {:include_blank => true}, class: 'form-select', style: "width: 200px" %></p>
       

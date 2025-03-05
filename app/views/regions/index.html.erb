@@ -15,7 +15,7 @@
     <% @regions.each do |region| %>
       <tr>
         <td scope="row"><%= region.id %></td>
-        <td><%= link_to region.title, region_path(region) %></td>
+        <td><%= link_to region.name, region_path(region) %></td>
         <td>Параметры</td>
         <td>
           <%= link_to "Редактировать регион", edit_region_path(region), class: 'btn1' %>

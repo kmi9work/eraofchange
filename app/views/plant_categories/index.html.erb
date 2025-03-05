@@ -29,7 +29,7 @@
             Не выбраны места для предприятий
           <% else %>
             <% plant_category.plant_places.each do |plant_place|%>
-              <%= link_to plant_place.title, plant_place %>
+              <%= link_to plant_place.name, plant_place %>
             <% end -%>
           <% end -%>
         </td>

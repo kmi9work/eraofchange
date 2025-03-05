@@ -17,7 +17,7 @@ class PlantPlacesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create plant_place" do
     assert_difference("PlantPlace.count") do
-      post plant_places_url, params: { plant_place: { plant_place_type: @plant_place.plant_place_type, title: @plant_place.title } }
+      post plant_places_url, params: { plant_place: { plant_place_type: @plant_place.plant_place_type, name: @plant_place.name } }
     end
 
     assert_redirected_to plant_place_url(PlantPlace.last)
@@ -34,7 +34,7 @@ class PlantPlacesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update plant_place" do
-    patch plant_place_url(@plant_place), params: { plant_place: { plant_place_type: @plant_place.plant_place_type, title: @plant_place.title } }
+    patch plant_place_url(@plant_place), params: { plant_place: { plant_place_type: @plant_place.plant_place_type, name: @plant_place.name } }
     assert_redirected_to plant_place_url(@plant_place)
   end
 

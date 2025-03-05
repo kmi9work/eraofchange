@@ -17,7 +17,7 @@ class BuildingTypesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create building_type" do
     assert_difference("BuildingType.count") do
-      post building_types_url, params: { building_type: { params: @building_type.params, title: @building_type.title } }
+      post building_types_url, params: { building_type: { params: @building_type.params, name: @building_type.name } }
     end
 
     assert_redirected_to building_type_url(BuildingType.last)
@@ -34,7 +34,7 @@ class BuildingTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update building_type" do
-    patch building_type_url(@building_type), params: { building_type: { params: @building_type.params, title: @building_type.title } }
+    patch building_type_url(@building_type), params: { building_type: { params: @building_type.params, name: @building_type.name } }
     assert_redirected_to building_type_url(@building_type)
   end
 

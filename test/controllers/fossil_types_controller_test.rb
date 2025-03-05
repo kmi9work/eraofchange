@@ -17,7 +17,7 @@ class FossilTypesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create fossil_type" do
     assert_difference("FossilType.count") do
-      post fossil_types_url, params: { fossil_type: { title: @fossil_type.title } }
+      post fossil_types_url, params: { fossil_type: { name: @fossil_type.name } }
     end
 
     assert_redirected_to fossil_type_url(FossilType.last)
@@ -34,7 +34,7 @@ class FossilTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update fossil_type" do
-    patch fossil_type_url(@fossil_type), params: { fossil_type: { title: @fossil_type.title } }
+    patch fossil_type_url(@fossil_type), params: { fossil_type: { name: @fossil_type.name } }
     assert_redirected_to fossil_type_url(@fossil_type)
   end
 

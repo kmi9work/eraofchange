@@ -56,6 +56,6 @@ class Country < ApplicationRecord
     end
 
     region.save
-    {result: true, msg: "Регион присоединен к #{self.title}"}
+    {result: true, msg: "Регион присоединен к #{self.name}"}
   end
 end
