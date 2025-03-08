@@ -17,7 +17,9 @@ Rails.application.routes.draw do
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
 
-  get '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
+  get '/plant_levels/prod_info', to: 'plant_levels#prod_info'
+  post '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
+
 
   get '/resources/show_prices',  to: 'resources#show_prices'
   post '/resources/send_caravan', to: 'resources#send_caravan'

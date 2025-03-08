@@ -2,11 +2,38 @@ class PlantLevel < ApplicationRecord
   belongs_to :plant_type, optional: true
   has_many :plants
 
+  include Dictionary
+
+  def self.show_pl_levels
+    pl_levels = []
+    formula_from = []
+    formula_to = []
+    d = 0
+    PlantLevel.all.each do |p_l|
+      next if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
+      pl_levels.push({id: d + 1,
+                      formula_from: p_l.formula_conversion[:from],
+                      formula_to:   p_l.formula_conversion[:to],
+                      plant_type_name: "#{p_l.plant_type.name} #{p_l.level}"})
+    end
+    return pl_levels
+  end
+
+  def formula_conversion
+    to, from = [], []
+    self.formulas.each do |res|
+      res["from"].each{|uu| from.push({name: look_up_res(uu["identificator"]), identificator: uu["identificator"], count: nil})}
+      res["to"].each{|ii|   to.push({name: look_up_res(ii["identificator"]), identificator:   ii["identificator"], count: nil})}
+    end
+    return {from: from.uniq, to: to.uniq}
+  end
+
   def feed_to_plant!(request = [], way = 'from')
     #request = make_hash_with_indiff(request) TODO
-
     request.map! {|req| req.transform_keys(&:to_s)}
+    request.map {|req| req[:count] = req[:count].to_i} ####################
     resulting_from, resulting_to = [], []
+
     formulas.each do |formula|
       from, to  = count_request(formula, request, way)
       if way == "from"
@@ -43,8 +70,7 @@ class PlantLevel < ApplicationRecord
   end
 
   # Проверяет, не превышает ли количество хоть одного ресурса во втором массиве количество такого же ресурса в первом.
-  # Если превышает - false. Если нет совпадений - false. 
-
+  # Если превышает - false. Если нет совпадений - false.
   def is_res_array_less?(res_array1, res_array2)
     res_array1.each do |res1|
       var = res_array2.find {|res2| res1["identificator"] == res2["identificator"]}
@@ -54,17 +80,19 @@ class PlantLevel < ApplicationRecord
     return true
   end
 
-  #Умножает массив ресурсов на число
+  #Умножает массив ресурсов на число и добавляет русское название ресурса
   def res_array_mult(res_array, n)
-    res_array.deep_dup.each {|res| res["count"] *= n}
+    res_array.deep_dup.each do |res|
+     res["count"] *= n
+     res.merge!({name: look_up_res(res["identificator"])})
+    end
   end
-
 
   def res_array_sum!(array_1, array_2, sign = 1)
     arr2 = array_2.deep_dup
     array_1.each do |res_1|
       arr2.delete_if do |res_2|
-        res_1["identificator"] == res_2["identificator"] && res_1['count'] += res_2['count']*sign
+        res_1["identificator"] == res_2["identificator"] && res_1["count"] += res_2["count"]*sign
       end
     end
 
