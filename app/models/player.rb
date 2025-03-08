@@ -91,8 +91,25 @@ class Player < ApplicationRecord
     InfluenceItem.add(value, comment, self, entity)
   end
 
+  def influence_buildings
+    sum = 0
+    if self.job_id == Job::METROPOLITAN
+      church_params = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        select('building_levels.params')
+      sum += church_params.map{|p| p.params['metropolitan_influence'].to_i}.sum
+    end
+    def_params = Building.joins({settlement: :region}, :building_level).
+      where(building_levels: {building_type_id: BuildingType::DEFENCE}).
+      where(regions: {country_id: Country::RUS}).
+      where(settlements: {player_id: self.id}).
+      select('building_levels.params')
+    sum + def_params.map{|p| p.params['influence'].to_i}.sum
+  end
+
   def influence
-    self.influence_items.sum(&:value)
+    self.influence_buildings + self.influence_items.sum(&:value)
   end
 end
 

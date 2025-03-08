@@ -16,6 +16,13 @@ class GameParameter < ApplicationRecord
     current_year.params["state_expenses"] = false
     current_year.save
 
+    Player.all.each do |player|
+      if player.params['income_taken']
+        player.params['income_taken'] = false
+        player.save
+      end
+    end
+
     return {msg: "Наступил следующий год"}
   end
 

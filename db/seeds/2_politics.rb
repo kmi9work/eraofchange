@@ -3,9 +3,34 @@ town = SettlementType.create(name: "Город", params: {"income" => 5000})
 for_cap = SettlementType.create(name: "Иностранный город", params: {"income" => 0})
 for_town = SettlementType.create(name: "Иностранная столица", params: {"income" => 10000})
 
+rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
+def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
+tra_build = BuildingType.create(name: "Рынок", icon: 'ri-exchange-line')
+
+rels = [
+  BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1, "metropolitan_influence" => 1}),
+  BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3, "metropolitan_influence" => 3}),
+  BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"metropolitan_income" => 6000, "public_order" => 6, "metropolitan_influence" => 6})
+]
+
+defs = [
+  BuildingLevel.create(level: 1, building_type: def_build, name: "Форт", params: {"influence" => 1}),
+  BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость", params: {"influence" => 4}),
+  BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль", params: {"influence" => 7})
+]
+
+tras = [
+  BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000}),
+  BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000}),
+  BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
+]
+
 f = File.open('./db/seeds/countries.csv', 'r+')
+f.gets #Заголовки
+
+po_values = [1, 0, -1, -1] #Общественный порядок в начале
 while str = f.gets
-  id, country_name, region_name, city_name, cost = str.split(';')
+  id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level = str.split(';')
   country = Country.find_by_name(country_name)
   if country.blank?
     country = Country.create(id: id, name: country_name, params: {"relations" => 0, "embargo" => false})
@@ -14,38 +39,22 @@ while str = f.gets
   region = Region.find_by_name(region_name)
   if region.blank?
     region = Region.create(name: region_name, country: country)
-    PublicOrderItem.add(0, "Ручная правка", region)
+    PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
   end
   city = Settlement.find_by_name(city_name)
   type = cost.to_i == 10 ? cap : town
-  player = nil
-  player = @nobles.shuffle.first if country.name == "Русь"
+  player = Player.find_by_name(player_name)
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
+  if def_level.strip.present?
+    Building.create(building_level: defs[def_level.to_i - 1], settlement: city)
+  end
+  if tra_level.strip.present?
+    Building.create(building_level: tras[tra_level.to_i - 1], settlement: city)
+  end
+  if rel_level.strip.present?
+    Building.create(building_level: rels[rel_level.to_i - 1], settlement: city)
+  end
 end
-
-rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
-def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
-tra_build = BuildingType.create(name: "Рынок", icon: 'ri-exchange-line')
-
-BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1})
-BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3})
-BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"metropolitan_income" => 6000, "public_order" => 5})
-
-BuildingLevel.create(level: 1, building_type: def_build, name: "Форт")
-BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость")
-BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль")
-
-BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000})
-BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000})
-BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
-
-Building.create(building_level_id: 1, settlement_id: 1)
-Building.create(building_level_id: 2, settlement_id: 2)
-Building.create(building_level_id: 3, settlement_id: 3)
-Building.create(building_level_id: 4, settlement_id: 2)
-Building.create(building_level_id: 5, settlement_id: 1)
-Building.create(building_level_id: 6, settlement_id: 2)
-Building.create(building_level_id: 7, settlement_id: 1)
 
 guild_boss = Job.find_by_name("Глава гульдии")
 f = File.open('./db/seeds/pat_merchants.csv', 'r+')

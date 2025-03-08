@@ -23,14 +23,14 @@ end
 
 job_names = ["Великий князь", "Митрополит", "Посольский дьяк", "Казначей", 
   "Воевода", "Тайный советник", "Княжеский зодчий", 
-  "Окольничий", "Дух русского бунта", "Глава гульдии"]
+  "Окольничий", "Дух русского бунта", "Глава гульдии"] #Порядок не трогать!
 @jobs = []
 
 job_names.each do |name|
   @jobs.push Job.create(name: name)
 end
 
-noble_names = ["Иван III", "Борис", "Манюня", "Распутин", "Геронтий", "Образина", "Распутин", "Хренов", "Даниил"]
+noble_names = ["Рюрикович", "Геронтий", "Аксаков", "Патрикеев", "Большой", "Молодой", "Волоцкий", "Голицын"] #Порядок не трогать!
 buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Булат", "Богатина", "Алтын", "Любава", "Матрена"]
 
 @nobles = []
@@ -40,7 +40,7 @@ buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Б
 Player.create(id: 1, name: "КУПЕЦ", human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, job: @jobs.last, params: {"contraband" => []})
 
 noble_names.each_with_index do |name, i|
-  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first)
+  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first, params: {"income_taken" => false})
   @nobles.push 
   InfluenceItem.add(0, "Ручная правка", p)
 end

@@ -33,10 +33,14 @@ class PlayersController < ApplicationController
   end
 
   def update
-    if @player.update(player_params)
-      redirect_to player_url(@player)
-    else
-      render :edit, status: :unprocessable_entity
+    respond_to do |format|
+      if @player.update(player_params)
+        format.html { redirect_to political_action_type_url(@political_action_type), notice: "Political action type was successfully updated." }
+        format.json { render :show, status: :ok, location: @political_action_type }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @political_action_type.errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -59,6 +63,6 @@ class PlayersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def player_params
-      params.require(:player).permit(:name, :family_id, :guild_id, :player_type_id, :job_id, :credit_ids => [], :political_action_ids => [], :plant_ids => [])
+      params.require(:player).permit(:name, :family_id, :guild_id, :player_type_id, :job_id, :credit_ids => [], :political_action_ids => [], :plant_ids => [], :params => {})
     end
 end
