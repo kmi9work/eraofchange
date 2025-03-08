@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @influence_item %>
+
+<div>
+  <%= link_to "Edit this influence item", edit_influence_item_path(@influence_item) %> |
+  <%= link_to "Back to influence items", influence_items_path %>
+
+  <%= button_to "Destroy this influence item", @influence_item, method: :delete %>
+</div>

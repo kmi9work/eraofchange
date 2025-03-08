@@ -1,9 +1,19 @@
 class RegionsController < ApplicationController
-  before_action :set_region, only: %i[ show edit update destroy ]
+  before_action :set_region, only: %i[ show edit update destroy modify_public_order captured_by]
 
   # GET /regions or /regions.json
   def index
     @regions = Region.all
+    @regions = @regions.where.not(country_id: Country::RUS) if params[:foreign].to_i == 1
+    @regions = @regions.where(country_id: Country::RUS) if params[:foreign].to_i == 0
+  end
+
+  def captured_by
+    @region.captured_by(params[:country_id], params[:how])
+  end
+
+  def modify_public_order
+    @region.modify_public_order(params[:arg])
   end
 
   # GET /regions/1 or /regions/1.json
@@ -65,6 +75,6 @@ class RegionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def region_params
-      params.require(:region).permit(:title, :params)
+      params.require(:region).permit(:name, :params)
     end
 end

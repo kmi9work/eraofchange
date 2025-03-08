@@ -65,6 +65,6 @@ class PlantPlacesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def plant_place_params
-      params.require(:plant_place).permit(:title, :plant_category_id, :plant_ids => [], :fossil_type_ids => [])
+      params.require(:plant_place).permit(:name, :plant_category_id, :plant_ids => [], :fossil_type_ids => [])
     end
 end

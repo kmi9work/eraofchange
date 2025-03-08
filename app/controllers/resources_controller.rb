@@ -8,6 +8,15 @@ class ResourcesController < ApplicationController
   def show
   end
 
+  def show_prices
+    @prices = Resource.show_prices
+  end
+
+  def send_caravan
+    @caravan = Resource.send_caravan(params[:country_id], params[:res_pl_sells], params[:res_pl_buys], params[:gold])
+    render json: @caravan
+  end
+
   def new
     @resource = Resource.new
   end

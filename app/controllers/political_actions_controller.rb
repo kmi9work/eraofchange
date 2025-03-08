@@ -22,6 +22,7 @@ class PoliticalActionsController < ApplicationController
   # POST /political_actions or /political_actions.json
   def create
     @political_action = PoliticalAction.new(political_action_params)
+    @political_action.year = GameParameter.current_year
 
     respond_to do |format|
       if @political_action.save
@@ -65,6 +66,6 @@ class PoliticalActionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def political_action_params
-      params.require(:political_action).permit(:year, :success, :params, :player_id, :political_action_type_id)
+      params.require(:political_action).permit(:year, :success, :player_id, :political_action_type_id, params: {})
     end
 end

@@ -2,6 +2,7 @@ class PoliticalActionType < ApplicationRecord
   SEDITION_PO = 5
   CHARITY_PO = 5
 
+  belongs_to :job
   has_many :political_actions, dependent: :destroy
 
   def execute(success, options)
@@ -35,7 +36,7 @@ class PoliticalActionType < ApplicationRecord
       army = Army.find_by_id(options[:army_id])
       if army
         army_size = army.army_size&.name
-        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.title')
+        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.name')
         final_hash = {
           army_size: army_size,
           troops: troops
@@ -63,7 +64,7 @@ class PoliticalActionType < ApplicationRecord
       player = Player.find_by_id(options[:player_id])
       country = Country.find_by_id(options[:country_id])
       if player && country
-        player.params["contraband"].push(country.title)
+        player.params["contraband"].push(country.name)
         player.save
       end
     end
@@ -88,6 +89,7 @@ class PoliticalActionType < ApplicationRecord
       player = Player.find_by_id(options[:player_id])
       if player
         player.modify_influence(1)
+        countries.each {|c| c.improve_relations}
       end
     end
   end
@@ -118,12 +120,12 @@ class PoliticalActionType < ApplicationRecord
     end
   end 
 
-  def send_embassy(success, options) #Отправить посольство
+  def send_embassy(success, options, political_action) #Отправить посольство
     if success
       player = Player.find_by_id(options[:player_id])
-      countries = Country.find_by_id(options[:country_ids])
+      countries = Country.where(id: options[:country_ids])
       if player && countries
-        player.modify_influence(1)
+        player.modify_influence(1, "Отправить посольство", player, political_action)
         countries.each {|c| c.improve_relations}
       end
     end
@@ -148,9 +150,9 @@ class PoliticalActionType < ApplicationRecord
     player = Player.find_by_id(options[:player_id])
     if player
       if success
-        player.modify_influence(1)
+        player.modify_influence(2)
       else
-        player.modify_influence(-3)
+        player.modify_influence(-2)
       end
     end   
   end
@@ -265,7 +267,7 @@ class PoliticalActionType < ApplicationRecord
     end  
   end
 
-  def eradicate_heresies(success, options) #Искоренить ереси
+  def root_out_heresies(success, options) #Искоренить ереси
     player = Player.find_by_id(options[:player_id])
     scope = Region.all
     offset = rand(scope.count)
@@ -280,7 +282,7 @@ class PoliticalActionType < ApplicationRecord
     end
   end
     
-  def call_unity(success, options) #Призыв к единству
+  def call_for_unity(success, options) #Призыв к единству
     player = Player.find_by_id(options[:player_id])
     if player
       if success
@@ -302,7 +304,7 @@ class PoliticalActionType < ApplicationRecord
     end 
   end
 
-  def fabricate_denunciation(success, options) #Сфабриковать донос
+  def fabricate_a_denunciation(success, options) #Сфабриковать донос
     player_1 = Player.find_by_id(options[:player_id])
     player_2 = Player.find_by_id(options[:player_id])
     if player_1 && player_2
@@ -328,7 +330,7 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def development_farm(success, options) #Развитие хозяйства
+  def dev_the_economy(success, options) #Развитие хозяйства
     if success
       player = Player.find_by_id(options[:player_id])
       if player 
@@ -337,7 +339,7 @@ class PoliticalActionType < ApplicationRecord
     end 
   end
 
-  def confused_his_with_state(success, options) #Спутал свое с государственным
+  def confused_mine(success, options) #Спутал свое с государственным
     player = Player.find_by_id(options[:player_id])
     if player
       if success
@@ -348,7 +350,7 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def patronage_gentiles(success, options) #Покровительство иноверцам
+  def patronage_of_infidel(success, options) #Покровительство иноверцам
     player = Player.find_by_id(options[:player_id])
     regions = Country.find_by_id(Country::RUS).regions
     if player

@@ -12,25 +12,27 @@ class Resource < ApplicationRecord
     end
   end
 
-  def self.send_caravan(country_id, resources_to_buy = [], resource_to_sell = [])
-    result = []
-    if resources_to_buy.present? #Если мы покупаем у игрока
-      transaction_type = "buy"
-      resources = country_filter(country_id, resources_to_buy)
-    elsif resource_to_sell.present?
-      transaction_type = "sale" #Если мы продаем игроку
-      resources = country_filter(country_id, resource_to_sell)
+  def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [], gold = 0)
+    return {msg: "Эмбарго"} if Country.find(country_id).params["embargo"]
+    gold = gold.to_i
+    #TODO Инстурмент проверки наличия у игрока "Контрабанды"
+   #ресурсы, которые игрок продает рынку
+    res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    elig_resources = country_filter(country_id, res_pl_sells)
+    elig_resources.each do |res|
+      gold += calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
     end
 
-    resources.each do |res|
-      result.push(
-        calculate_cost(transaction_type, 
-                      res[:count], 
-                      Resource.find_by(identificator: res[:identificator]))
-      )
+    res_to_player = []
+    res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    elig_resources = country_filter(country_id, res_pl_buys)
+    elig_resources.each do |res|
+      resource = calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))
+      gold -= resource[:cost]
+      res_to_player.push({identificator: resource[:identificator], count: resource[:count].to_i})
     end
 
-    return result
+    return {res_to_player: res_to_player, gold: gold}
   end
 
   # cost: nil - значит, что ресурс не продаётся на рынке
@@ -38,9 +40,9 @@ class Resource < ApplicationRecord
     relations = resource.country.params["relations"].to_s
     unit_cost = resource.params["#{transaction_type}_price"][relations.to_s]
     if unit_cost
-      {resource_id: resource.id, cost: unit_cost*amount, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount, cost: unit_cost*amount.to_i, embargo: resource.country.params["embargo"]}
     else
-      {resource_id: resource.id, cost: nil, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount,  cost: nil, embargo: resource.country.params["embargo"]}
     end
   end
 
@@ -53,10 +55,12 @@ class Resource < ApplicationRecord
       relations = res.country.params["relations"].to_s
 
       res_prices = {}
-      res_prices[:resource_id] = res.id
+      res_prices[:name] = res.name
+      res_prices[:identificator] = res.identificator
       res_prices[:buy_price] = res.params["buy_price"][relations]
       res_prices[:sell_price] = res.params["sale_price"][relations]
       res_prices[:embargo] = res.country.params["embargo"]
+      res_prices[:country] = res.country.as_json(only: [:id, :name])
       prices_array.push(res_prices)
     end
 

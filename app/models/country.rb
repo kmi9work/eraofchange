@@ -1,9 +1,9 @@
 class Country < ApplicationRecord
   # params:
   # embargo (bool)- Введено ли эмбарго в стране?
-  # relations (interger) - уровень отношений с Русью от -2 до 2
 	has_many :regions
 
+  REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
 
   RUS = 1         #Русь
   HORDE = 2       #Большая орда
@@ -22,67 +22,46 @@ class Country < ApplicationRecord
   BY_WAR = 1
   BY_DIPLOMACY = 0
 
-  MILITARILY  = -3
+  MILITARILY = -3
   PEACEFULLY = 3
 
-  def impose_embargo
+  scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
+
+  def embargo(arg) #1 - эмбарго есть, 0 - эмбарго нет
     if self.params['embargo'] != nil
-      self.params['embargo'] = true
+      self.params['embargo'] = arg.to_i > 0
       self.save
-      {result: true, msg: "Эмбарго введено."}
+      self.params['embargo'] ? emb = "введено" : emb = "снято"
+      {result: true, msg: "Эмбарго #{emb}."}
     else
-      {result: nil, msg: "Эта страна не может вводить эмбарго."}
+      {result: nil, msg: "Эта страна не может вводить и снимать эмбарго."}
     end
   end
 
-  def lift_embargo
-    if self.params['embargo'] != nil
-      self.params['embargo'] = false
-      self.save
-      {result: false, msg: "Эмбарго снято."}
-    else
-      {result: nil, msg: "Эта страна не может снимать эмбарго."}
-    end
-  end
-
-  def improve_relations
+  def change_relations(count)
+    count = count.to_i
     if self.params['relations'] != nil
-      if self.params['relations'].between?(-2,1)
-        self.params['relations'] += 1
-        self.save
+      if (self.params['relations'] + count).abs <= REL_RANGE
+        self.params['relations'] += count
       else
-        "Дальше отношения улучшать нельзя."
+        sign = count.positive? ? 1 : -1
+        self.params['relations'] = REL_RANGE*sign
       end
+      self.save
     else
       "С этой страной нельзя менять отношения."
     end
   end
-
-  def degrade_relations
-    if self.params['relations'] != nil
-      if self.params['relations'].between?(-1,2)
-        self.params['relations'] -= 1
-        self.save
-      else
-        "Дальше отношения снижать нельзя."
-      end
-    else
-      "С этой страной нельзя менять отношения."
-    end
-  end
-
 
   def capture(region, how) #1 - войной, 0 - миром
    region.country_id = self.id
-    if how == BY_WAR
+    if how.to_i == BY_WAR
       region.params["public_order"] += MILITARILY
-    elsif how == BY_DIPLOMACY
+    elsif how.to_i == BY_DIPLOMACY
       region.params["public_order"] += PEACEFULLY
     end
 
     region.save
-    {result: true, msg: "Регион присоединен к #{self.title}"}
+    {result: true, msg: "Регион присоединен к #{self.name}"}
   end
-
-
 end

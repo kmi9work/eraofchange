@@ -1,7 +1,7 @@
 <div id="<%= dom_id fossil_type %>">
   <p>
-    <strong>Title:</strong>
-    <%= fossil_type.title %>
+    <strong>name:</strong>
+    <%= fossil_type.name %>
   </p>
 
   <p>
@@ -21,7 +21,7 @@
       Не выбраны
     <% else %>
       <% fossil_type.plant_places.each do |plant_place|%>
-        <%= link_to plant_place.title, plant_place %>
+        <%= link_to plant_place.name, plant_place %>
       <% end -%>
     <% end -%>
   </p>

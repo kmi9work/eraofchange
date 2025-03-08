@@ -16,7 +16,7 @@ class PoliticalActionTypesTest < ApplicationSystemTestCase
 
     fill_in "Action", with: @political_action_type.action
     fill_in "Params", with: @political_action_type.params
-    fill_in "Title", with: @political_action_type.title
+    fill_in "name", with: @political_action_type.name
     click_on "Create Political action type"
 
     assert_text "Political action type was successfully created"
@@ -29,7 +29,7 @@ class PoliticalActionTypesTest < ApplicationSystemTestCase
 
     fill_in "Action", with: @political_action_type.action
     fill_in "Params", with: @political_action_type.params
-    fill_in "Title", with: @political_action_type.title
+    fill_in "name", with: @political_action_type.name
     click_on "Update Political action type"
 
     assert_text "Political action type was successfully updated"

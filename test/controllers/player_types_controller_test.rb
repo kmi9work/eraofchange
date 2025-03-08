@@ -17,7 +17,7 @@ class PlayerTypesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create player_type" do
     assert_difference("PlayerType.count") do
-      post player_types_url, params: { player_type: { ideologist_type_id: @player_type.ideologist_type_id, title: @player_type.title } }
+      post player_types_url, params: { player_type: { ideologist_type_id: @player_type.ideologist_type_id, name: @player_type.name } }
     end
 
     assert_redirected_to player_type_url(PlayerType.last)
@@ -34,7 +34,7 @@ class PlayerTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update player_type" do
-    patch player_type_url(@player_type), params: { player_type: { ideologist_type_id: @player_type.ideologist_type_id, title: @player_type.title } }
+    patch player_type_url(@player_type), params: { player_type: { ideologist_type_id: @player_type.ideologist_type_id, name: @player_type.name } }
     assert_redirected_to player_type_url(@player_type)
   end
 

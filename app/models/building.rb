@@ -1,6 +1,8 @@
 class Building < ApplicationRecord
-  belongs_to :building_level, optional: true
-  belongs_to :settlement, optional: true
+  audited
+
+  belongs_to :building_level
+  belongs_to :settlement
 
   def upgrade!
     level = self.building_level&.level

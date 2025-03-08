@@ -2,6 +2,7 @@ class Player < ApplicationRecord
   # params:
   # influence (integer) - Влияние
   # contraband ([]) - Контрабанда
+  audited
 
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true
@@ -15,6 +16,7 @@ class Player < ApplicationRecord
   has_many :armies
   has_many :credits
   has_many :political_actions
+  has_many :influence_items
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
@@ -51,7 +53,15 @@ class Player < ApplicationRecord
   end
 
   def income
-    self.settlements.sum{|s| s.income}
+    sum = 0
+    if job_id == Job::METROPOLITAN
+      church_params = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        select('building_levels.params')
+      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
+    end
+    sum + self.settlements.sum{|s| s.income}
   end
 
   def player_military_outlays
@@ -77,9 +87,8 @@ class Player < ApplicationRecord
     Player.all.select{|p| p.params["contraband"]&.include?(GameParameter.current_year)}
   end
 
-  def modify_influence(num) #Изменить влияние игрока
-    self.params["influence"] += num
-    self.save
+  def modify_influence(value, comment, player, entity) #Изменить влияние игрока
+    InfluenceItem.add(value, comment, self, entity)
   end
 end
 

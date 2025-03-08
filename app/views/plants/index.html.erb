@@ -29,7 +29,7 @@
           Не выбрано
         <% else %>
           <% link_to_plant_place = "/plant_places/#{plant.plant_place.id}" %>
-          <%= link_to plant.plant_place&.title, link_to_plant_place %>
+          <%= link_to plant.plant_place&.name, link_to_plant_place %>
         <% end -%>
       </td>
       <td><%= link_to plant.economic_subject&.name, plant.economic_subject %></td>

@@ -1,8 +1,17 @@
 class SettlementsController < ApplicationController
-  before_action :set_settlement, only: %i[ show edit update destroy ]
+  before_action :set_settlement, only: %i[ show edit update destroy build pay_for_church]
   
   def index
-    @settlements = Settlement.all
+    @settlements = Settlement.joins(:region).where(regions: {country_id: Country::RUS}).order(:name)
+    #Нужны только города Руси. Для остальных - земли
+  end
+
+  def build
+    @settlement.build(params[:building_type_id])
+  end
+
+  def pay_for_church
+     @settlement.pay_for_church
   end
 
   def show
@@ -51,21 +60,13 @@ class SettlementsController < ApplicationController
     end
   end
 
-  def build
-    @settlement = Settlement.find(params[:id])
-    bulding_type_id = params[:building_type_id]
-    result = @settlement.build(bulding_type_id)
-    redirect_to settlement_url(@settlement), notice: result[:msg]
-  end
-
   private
-    
     def set_settlement
       @settlement = Settlement.find(params[:id])
     end
 
     def settlement_params
-      params.require(:settlement).permit(:name, :settlement_type_id,  :region_id, :plant_place_ids => [] )
+      params.require(:settlement).permit(:name, :settlement_type_id,  :region_id, :player_id, :plant_place_ids => [] )
     end
 
 end

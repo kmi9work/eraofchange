@@ -17,7 +17,7 @@ class RegionsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create region" do
     assert_difference("Region.count") do
-      post regions_url, params: { region: { params: @region.params, title: @region.title } }
+      post regions_url, params: { region: { params: @region.params, name: @region.name } }
     end
 
     assert_redirected_to region_url(Region.last)
@@ -34,7 +34,7 @@ class RegionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update region" do
-    patch region_url(@region), params: { region: { params: @region.params, title: @region.title } }
+    patch region_url(@region), params: { region: { params: @region.params, name: @region.name } }
     assert_redirected_to region_url(@region)
   end
 

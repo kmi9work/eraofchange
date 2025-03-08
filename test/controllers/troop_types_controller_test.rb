@@ -17,7 +17,7 @@ class TroopTypesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create troop_type" do
     assert_difference("TroopType.count") do
-      post troop_types_url, params: { troop_type: { params: @troop_type.params, title: @troop_type.title } }
+      post troop_types_url, params: { troop_type: { params: @troop_type.params, name: @troop_type.name } }
     end
 
     assert_redirected_to troop_type_url(TroopType.last)
@@ -34,7 +34,7 @@ class TroopTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update troop_type" do
-    patch troop_type_url(@troop_type), params: { troop_type: { params: @troop_type.params, title: @troop_type.title } }
+    patch troop_type_url(@troop_type), params: { troop_type: { params: @troop_type.params, name: @troop_type.name } }
     assert_redirected_to troop_type_url(@troop_type)
   end
 

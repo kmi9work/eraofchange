@@ -3,6 +3,7 @@ class Plant < ApplicationRecord
   # params:
   # produced ([]) - Произведено
 
+  audited
   belongs_to :plant_level, optional: true
   belongs_to :plant_place, optional: true
   belongs_to :economic_subject, polymorphic: true, optional: true

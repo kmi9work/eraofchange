@@ -14,7 +14,7 @@ class FossilTypesTest < ApplicationSystemTestCase
     visit fossil_types_url
     click_on "New fossil type"
 
-    fill_in "Title", with: @fossil_type.title
+    fill_in "name", with: @fossil_type.name
     click_on "Create Fossil type"
 
     assert_text "Fossil type was successfully created"
@@ -25,7 +25,7 @@ class FossilTypesTest < ApplicationSystemTestCase
     visit fossil_type_url(@fossil_type)
     click_on "Edit this fossil type", match: :first
 
-    fill_in "Title", with: @fossil_type.title
+    fill_in "name", with: @fossil_type.name
     click_on "Update Fossil type"
 
     assert_text "Fossil type was successfully updated"

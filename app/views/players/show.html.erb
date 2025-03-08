@@ -13,7 +13,7 @@
  <p>Тип игрока не выбран</p>
 <% else %>
  <% link_to_player_type = "/player_types/#{@player.player_type.id}/" %>
- <p>Тип игрока: <%= link_to @player.player_type.title, link_to_player_type %></p>
+ <p>Тип игрока: <%= link_to @player.player_type.name, link_to_player_type %></p>
 <% end %>
 
 <% if @player.job.blank?%>

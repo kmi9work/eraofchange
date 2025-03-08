@@ -1,9 +1,17 @@
 class GameParametersController < ApplicationController
-  before_action :set_game_parameter, only: %i[ show edit update destroy ]
+  before_action :set_game_parameter, only: %i[ show edit update destroy]
 
   # GET /game_parameters or /game_parameters.json
   def index
     @game_parameters = GameParameter.all
+  end
+
+  def pay_state_expenses
+    GameParameter.pay_state_expenses
+  end
+
+  def increase_year
+    GameParameter.increase_year
   end
 
   # GET /game_parameters/1 or /game_parameters/1.json

@@ -29,7 +29,7 @@
     Не выбран
   <% else %>
     <% link_to_fossil_type = "/fossil_types/#{@plant_type.fossil_type.id}" %>
-    <%= link_to @plant_type.fossil_type&.title, link_to_fossil_type %>
+    <%= link_to @plant_type.fossil_type&.name, link_to_fossil_type %>
   <% end -%>
 </p>
 

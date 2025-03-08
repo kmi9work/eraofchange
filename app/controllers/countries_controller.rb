@@ -1,9 +1,29 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy ]
+  before_action :set_country, only: %i[ show edit update destroy embargo change_relations capture]
 
   # GET /countries or /countries.json
   def index
     @countries = Country.all
+    @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
+    @countries = @countries.order(:name)
+  end
+
+  def foreign_countries
+    @countries = Country.foreign_countries
+    render 'index'
+  end
+
+  def embargo
+    @country.embargo(params[:arg])
+  end
+
+  def capture
+    region = Region.find(params[:region_id])
+    @country.capture(region, params[:how])
+  end
+
+  def change_relations
+    @country.change_relations(params[:arg])
   end
 
   # GET /countries/1 or /countries/1.json
@@ -24,6 +44,7 @@ class CountriesController < ApplicationController
     @country = Country.new(country_params)
 
     respond_to do |format|
+
       if @country.save
         format.html { redirect_to country_url(@country), notice: "Country was successfully created." }
         format.json { render :show, status: :created, location: @country }
@@ -65,6 +86,6 @@ class CountriesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def country_params
-      params.require(:country).permit(:title, :params)
+      params.require(:country).permit(:name, :params)
     end
 end

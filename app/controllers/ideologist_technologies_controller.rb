@@ -65,6 +65,6 @@ class IdeologistTechnologiesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def ideologist_technology_params
-      params.require(:ideologist_technology).permit(:title, :requirements, :params, :ideologist_type_id)
+      params.require(:ideologist_technology).permit(:name, :requirements, :params, :ideologist_type_id)
     end
 end

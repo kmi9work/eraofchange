@@ -65,6 +65,6 @@ class BuildingTypesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def building_type_params
-      params.require(:building_type).permit(:title, :params)
+      params.require(:building_type).permit(:name, :params)
     end
 end

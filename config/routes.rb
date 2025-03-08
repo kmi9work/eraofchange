@@ -1,51 +1,42 @@
 Rails.application.routes.draw do
-  
+  resources :influence_items
+
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
+  patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
+  patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
 
-  resources :game_parameters
-  resources :credits
-  resources :troops
-  resources :armies
-  resources :army_sizes
-  resources :troop_types
-  resources :plant_places
-  resources :fossil_types
-  resources :regions
-  resources :countries
-  resources :buildings
+  patch '/armies/:id/demote_army', to: 'armies#demote_army'
+  patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
 
-  patch '/buildings/:id/upgrade', to: 'buildings#upgrade', as: :upgrade_building
+  patch '/regions/:id/modify_public_order', to: 'regions#modify_public_order'
+  patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
-  resources :building_levels
-  resources :building_types
-  resources :building_places
-  resources :plant_levels
-  resources :jobs
-  resources :humen
-  resources :player_types
-  resources :ideologist_types
-  resources :ideologist_technologies
-  resources :political_actions
-  resources :political_action_types
-  resources :resources
-  resources :plant_types
-  resources :plant_categories
-  resources :settlement_types
-  resources :guilds
-  resources :merchants
-  resources :families
-  resources :players
+  patch '/countries/:id/embargo', to: 'countries#embargo'
+  patch '/countries/:id/capture/:region_id', to: 'countries#capture'
+  patch '/countries/:id/change_relations',   to: 'countries#change_relations'
+  get '/countries/foreign_countries', to: 'countries#foreign_countries'
 
+  patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
+  patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
+
+  get '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
+
+  get '/resources/show_prices',  to: 'resources#show_prices'
+  post '/resources/send_caravan', to: 'resources#send_caravan'
+
+  #TODO Населенный пункт надо бы сделать тоже через ресурс.
   get '/settlements', to: 'settlements#index'
   get '/settlements/new', to: 'settlements#new', as: :new_settlement
   post '/settlements', to: 'settlements#create'
   get '/settlements/:id', to: 'settlements#show', as: :settlement
   get '/settlements/:id/edit', to: 'settlements#edit', as: :edit_settlement
-  post '/settlements/:id/build', to: 'settlements#build', as: :build
+  post '/settlements/:id/build', to: 'settlements#build'
+  patch '/settlements/:id/pay_for_church', to: 'settlements#pay_for_church'
   patch '/settlements/:id', to: 'settlements#update'
+
   delete '/settlements/:id', to: 'settlements#destroy', as: :destroy
   
   get '/economic_subjects', to: 'economic_subjects#index'
@@ -89,6 +80,44 @@ Rails.application.routes.draw do
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
-    
+
+  get '/login/:id', to: 'users#login'
+  get '/current_user', to: 'users#current_user'
+
+  get '/audits', to: 'audits#index'
+
+
+  resources :game_parameters
+  resources :users
+  resources :credits
+  resources :troops
+  resources :resources
+  resources :plant_types
+  resources :plant_categories
+  resources :settlement_types
+  resources :guilds
+  resources :merchants
+  resources :families
+  resources :players
+  resources :countries
+  resources :armies
+  resources :army_sizes
+  resources :troop_types
+  resources :plant_places
+  resources :fossil_types
+  resources :regions
+  resources :buildings
+  resources :building_levels
+  resources :building_types
+  resources :building_places
+  resources :plant_levels
+  resources :jobs
+  resources :humen
+  resources :player_types
+  resources :ideologist_types
+  resources :ideologist_technologies
+  resources :political_actions
+  resources :political_action_types
+
   root to: 'welcome#index'
 end

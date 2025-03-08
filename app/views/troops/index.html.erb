@@ -16,7 +16,7 @@
     <% @troops.each do |troop| %>
       <tr>
         <td><%= troop.troop_type.id %></td>
-        <td><%= link_to troop.troop_type.title, troop_path(troop) %></td>
+        <td><%= link_to troop.troop_type.name, troop_path(troop) %></td>
         <td> Параметры </td>
         <td> 
           <%= link_to "Редактировать отряд", edit_troop_path(troop), class: 'btn1' %>
