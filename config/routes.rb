@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  
+  get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
+  patch '/plants/:id/upgrade', to: 'plants#upgrade'
+  get '/plants/:id/has_produced', to: 'plants#has_produced'
+
+
   resources :game_parameters
   resources :credits
   resources :troops

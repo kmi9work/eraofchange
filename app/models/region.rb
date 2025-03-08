@@ -38,7 +38,7 @@ class Region < ApplicationRecord
   def captured_by(who, how) #1 - войной, 0 - миром
     self.country_id = who
     if how == 1
-      modify_public_order(-Country::MILITARILY)
+      modify_public_order(Country::MILITARILY)
     else
       modify_public_order(Country::PEACEFULLY)
     end

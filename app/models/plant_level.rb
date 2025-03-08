@@ -2,6 +2,8 @@ class PlantLevel < ApplicationRecord
   belongs_to :plant_type, optional: true
   has_many :plants
 
+  MAX_LEVEL = 3
+
   def feed_to_plant!(request, way)
     #request = make_hash_with_indiff(request) TODO
     request.map! {|req| req.transform_keys(&:to_s)}

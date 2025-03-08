@@ -83,6 +83,41 @@ class PoliticalActionType < ApplicationRecord
   
   end
 
+  def go_to_people(success, options) #Торжественный выход к народу
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player
+        player.modify_influence(1)
+      end
+    end
+  end
+
+  def inferior_coins(success, options) #Чеканка неполноценной монеты
+    player = Player.find_by_id(options[:player_id])
+    regions = Country.find_by_id(Country::RUS).regions
+    if player && regions
+      if success
+        player.modify_influence(2)
+      else 
+        player.modify_influence(-2)
+        regions.each {|r| r.modify_public_order(-1)}
+      end
+    end
+  end
+
+  def convene_meeting(success, options) #Созвать вече
+    player = Player.find_by_id(options[:player_id])
+    regions = Country.find_by_id(Country::RUS).regions
+    if player && regions
+      if success
+        player.modify_influence(3)
+        regions.each {|r| r.modify_public_order(5)}
+      else 
+        player.modify_influence(-3)
+      end
+    end
+  end 
+
   def send_embassy(success, options) #Отправить посольство
     if success
       player = Player.find_by_id(options[:player_id])
@@ -94,31 +129,30 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def equip_caravan(success, options) #Снарядить караван
-    player = Player.find_by_id(options[:player_id])
-    if player
-      if success
-        player.modify_influence(2)
-      else
-        player.modify_influence(-2)
-      end
-    end   
-  end
-
   def take_bribe(success, options) #Взять мзду
     player = Player.find_by_id(options[:player_id])
     scope = Country.where.not(id: Country::RUS)
     offset = rand(scope.count)
     rand_country = scope.offset(offset).first
-
-    if player && country
+    if player && rand_country
       if success
-        player.modify_influence(1)
+        player.modify_influence(2)
       else 
         player.modify_influence(-3)
-        country.modify_public_order(-1)
+        rand_country.params["relations"] -= 1        
       end
     end
+  end
+
+  def equip_caravan(success, options) #Снарядить караван
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(1)
+      else
+        player.modify_influence(-3)
+      end
+    end   
   end
 
   def сonduct_audit(success, options) #Провести ревизию
@@ -136,7 +170,7 @@ class PoliticalActionType < ApplicationRecord
       if success
         player.modify_influence(2)
       else 
-        player.modify_influence(-3)
+        player.modify_influence(-2)
       end
     end
   end
@@ -169,13 +203,47 @@ class PoliticalActionType < ApplicationRecord
       if success
         player.modify_influence(1)
       else
-        player.modify_influence(-5)
-        Player.find_by_id(job_id: Job::GRAND_PRINCE).modify_influence(-3)
+        player.modify_influence(-2)
+        Player.find_by(job_id: Job::GRAND_PRINCE).modify_influence(-2)
       end
     end
   end
 
-  def recruiting(success, options) #Набрать рекрутов (TODO: доделать)
+  def recruiting(success, options) #Набрать рекрутов
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(3)
+      else 
+        player.modify_influence(-3)
+        settlements = Player.find_by(job_id: Job::GRAND_PRINCE).settlements
+        regions = Region.joins(:settlements).where(settlements: settlements).distinct
+        regions.each{|r| r.modify_public_order(-5)}
+      end
+    end
+  end
+
+  def swamp_drainage(success, options) #Осушение болот
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player
+        player.modify_influence(1)
+      end
+    end
+  end
+
+  def contracts_brother(success, options) #Подряды свояку
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(2)
+      else 
+        player.modify_influence(-2)
+      end
+    end
+  end
+
+  def city_improvement(success, options) #Улучшение города
     player = Player.find_by_id(options[:player_id])
     if player
       if success
@@ -186,47 +254,110 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def mobile_court(success, options) #Выездной суд
+  def sermon(success, options)#Проповедь
     if success
-      region = Region.find_by_id(options[:region_id])
       player = Player.find_by_id(options[:player_id])
-      if region && player
-        region.modify_public_order(5)
+      region = Region.find_by_id(options[:region_id])
+      if player && region
         player.modify_influence(1)
+        region.modify_public_order(5)
+      end
+    end  
+  end
+
+  def eradicate_heresies(success, options) #Искоренить ереси
+    player = Player.find_by_id(options[:player_id])
+    scope = Region.all
+    offset = rand(scope.count)
+    rand_region = scope.offset(offset).first
+    if player && rand_region
+      if success
+        player.modify_influence(2)
+      else 
+        player.modify_influence(-2)
+        rand_region.modify_public_order(-5)
+      end
+    end
+  end
+    
+  def call_unity(success, options) #Призыв к единству
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(3)
+        countries = Country.where(id: [Country::PERMIAN, Country::VYATKA,Country::RYAZAN, Country::TVER, Country::NOVGOROD])
+        countries.each {|c| c.improve_relations}
+      else 
+        player.modify_influence(-3)
       end
     end
   end
 
-  def fabricate_denunciation(success, options) #Сфабриковать донос
-  end
-
-  def legislative_reform(success, options)#Законодательная реформа
-  end
-
-  def sermon(success, options)#Проповедь    
-  end
-
-  def eradicate_heresies(success, options) #Искоренить ереси
-  end
-
-  def call_unity(success, options) #Призыв к единству
-  end
-
   def regency(success, options) #Регентство
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player 
+        player.modify_influence(1)
+      end
+    end 
   end
 
-  def use_seal(success, options) #Использовать великокняжескую печать
+  def fabricate_denunciation(success, options) #Сфабриковать донос
+    player_1 = Player.find_by_id(options[:player_id])
+    player_2 = Player.find_by_id(options[:player_id])
+    if player_1 && player_2
+      if success
+        player_1.modify_influence(2)
+        player_2.modify_influence(-2)
+      else 
+        player_1.modify_influence(-2)
+      end
+    end
   end
 
   def favoritism(success, options) #Фаворитизм
+    player_1 = Player.find_by_id(options[:player_id])
+    player_2 = Player.find_by_id(options[:player_id])
+    if player_1 && player_2
+      if success
+        player_1.modify_influence(3)
+        player_2.modify_influence(3)
+      else 
+        player_1.modify_influence(-3)
+      end
+    end
   end
 
   def development_farm(success, options) #Развитие хозяйства
+    if success
+      player = Player.find_by_id(options[:player_id])
+      if player 
+        player.modify_influence(1)
+      end
+    end 
   end
 
   def confused_his_with_state(success, options) #Спутал свое с государственным
+    player = Player.find_by_id(options[:player_id])
+    if player
+      if success
+        player.modify_influence(2)
+      else 
+        player_1.modify_influence(-3)
+      end
+    end
   end
 
   def patronage_gentiles(success, options) #Покровительство иноверцам
+    player = Player.find_by_id(options[:player_id])
+    regions = Country.find_by_id(Country::RUS).regions
+    if player
+      if success
+        player.modify_influence(3)
+      else 
+        player_1.modify_influence(-3)
+        regions.each {|r| r.modify_public_order(-3)}
+      end
+    end
   end
 end
