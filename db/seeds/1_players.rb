@@ -22,7 +22,7 @@ names.each do |name|
 end
 
 job_names = ["Великий князь", "Митрополит", "Посольский дьяк", "Казначей", 
-  "Воевода", "Тайный советник", "Зодчий", 
+  "Воевода", "Тайный советник", "Княжеский зодчий", 
   "Окольничий", "Дух русского бунта", "Глава гульдии"]
 @jobs = []
 
@@ -37,10 +37,10 @@ buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Б
 @buyers = []
 
 noble_names.each_with_index do |name, i|
-  @nobles.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first, params: {"influence" => rand(5), "contraband" => []})
+  @nobles.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first, params: {"influence" => rand(5)})
 end
 
 buyer_names.each_with_index do |name, i|
-  @buyers.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, params: {"influence" => rand(5), "contraband" => []})
+  @buyers.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, params: {"contraband" => []})
 end
 

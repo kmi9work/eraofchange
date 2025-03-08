@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Influence items</h1>
+
+<div id="influence_items">
+  <% @influence_items.each do |influence_item| %>
+    <%= render influence_item %>
+    <p>
+      <%= link_to "Show this influence item", influence_item %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New influence item", new_influence_item_path %>

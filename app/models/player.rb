@@ -16,6 +16,7 @@ class Player < ApplicationRecord
   has_many :armies
   has_many :credits
   has_many :political_actions
+  has_many :influence_items
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
@@ -86,9 +87,8 @@ class Player < ApplicationRecord
     Player.all.select{|p| p.params["contraband"]&.include?(GameParameter.current_year)}
   end
 
-  def modify_influence(num) #Изменить влияние игрока
-    self.params["influence"] += num
-    self.save
+  def modify_influence(value, comment, player, entity) #Изменить влияние игрока
+    InfluenceItem.add(value, comment, self, entity)
   end
 end
 

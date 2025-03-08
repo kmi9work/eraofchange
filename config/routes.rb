@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :influence_items
 
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'

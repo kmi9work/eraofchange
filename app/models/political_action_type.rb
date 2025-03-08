@@ -84,12 +84,12 @@ class PoliticalActionType < ApplicationRecord
   
   end
 
-  def send_embassy(success, options) #Отправить посольство
+  def send_embassy(success, options, political_action) #Отправить посольство
     if success
       player = Player.find_by_id(options[:player_id])
-      countries = Country.find_by_id(options[:country_ids])
+      countries = Country.where(id: options[:country_ids])
       if player && countries
-        player.modify_influence(1)
+        player.modify_influence(1, "Отправить посольство", player, political_action)
         countries.each {|c| c.improve_relations}
       end
     end
@@ -187,47 +187,27 @@ class PoliticalActionType < ApplicationRecord
     end
   end
 
-  def mobile_court(success, options) #Выездной суд
-    if success
-      region = Region.find_by_id(options[:region_id])
-      player = Player.find_by_id(options[:player_id])
-      if region && player
-        region.modify_public_order(5)
-        player.modify_influence(1)
-      end
-    end
-  end
-
-  def fabricate_denunciation(success, options) #Сфабриковать донос
-  end
-
-  def legislative_reform(success, options)#Законодательная реформа
+  def fabricate_a_denunciation(success, options) #Сфабриковать донос
   end
 
   def sermon(success, options)#Проповедь    
   end
 
-  def eradicate_heresies(success, options) #Искоренить ереси
+  def root_out_heresies(success, options) #Искоренить ереси
   end
 
-  def call_unity(success, options) #Призыв к единству
-  end
-
-  def regency(success, options) #Регентство
-  end
-
-  def use_seal(success, options) #Использовать великокняжескую печать
+  def call_for_unity(success, options) #Призыв к единству
   end
 
   def favoritism(success, options) #Фаворитизм
   end
 
-  def development_farm(success, options) #Развитие хозяйства
+  def dev_the_economy(success, options) #Развитие хозяйства
   end
 
-  def confused_his_with_state(success, options) #Спутал свое с государственным
+  def confused_mine(success, options) #Спутал свое с государственным
   end
 
-  def patronage_gentiles(success, options) #Покровительство иноверцам
+  def patronage_of_infidel(success, options) #Покровительство иноверцам
   end
 end
