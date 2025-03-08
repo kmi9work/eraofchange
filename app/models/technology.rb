@@ -27,15 +27,10 @@ class Technology < ApplicationRecord
   end
 
   def close_it
-    self.params['opened'] = 0
-    self.save
-  end
-
-  def self.opened
-    Technology.all.map{|it| it.params['opened'] == 1}
-  end
-
-  def self.closed
-    Technology.all.map{|it| it.params['closed'] == 1}
+    ti = technology_items.first
+    if ti
+      ti.value = 0
+      ti.save
+    end
   end
 end
