@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :public_order_items
   resources :technology_items
   resources :relation_items
   resources :influence_items

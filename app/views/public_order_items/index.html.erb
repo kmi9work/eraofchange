@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Public order items</h1>
+
+<div id="public_order_items">
+  <% @public_order_items.each do |public_order_item| %>
+    <%= render public_order_item %>
+    <p>
+      <%= link_to "Show this public order item", public_order_item %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New public order item", new_public_order_item_path %>
