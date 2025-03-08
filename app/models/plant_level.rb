@@ -3,6 +3,8 @@ class PlantLevel < ApplicationRecord
   has_many :plants
   MAX_LEVEL = 3
 
+  #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ 
+
   include Dictionary
 
   def self.show_pl_levels
@@ -28,6 +30,8 @@ class PlantLevel < ApplicationRecord
     end
     return {from: from.uniq, to: to.uniq}
   end
+  #/ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
+
 
   def feed_to_plant!(request = [], way = 'from')
     #request = make_hash_with_indiff(request) TODO
@@ -83,7 +87,7 @@ class PlantLevel < ApplicationRecord
   def res_array_mult(res_array, n)
     res_array.deep_dup.each do |res|
      res["count"] *= n
-     res.merge!({name: look_up_res(res["identificator"])})
+     res.merge!({name: look_up_res(res["identificator"])}) #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
     end
   end
 

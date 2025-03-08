@@ -20,6 +20,7 @@ class Resource < ApplicationRecord
     res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
     elig_resources = country_filter(country_id, res_pl_sells)
     elig_resources.each do |res|
+      #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
       gold += calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
     end
 
@@ -37,6 +38,7 @@ class Resource < ApplicationRecord
     res_to_player.push({name: gold_as_res.name, identificator: gold_as_res.identificator, count: gold})
 
 
+    #/ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
     return {res_to_player: res_to_player}
   end
 
