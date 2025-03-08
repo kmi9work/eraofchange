@@ -25,7 +25,7 @@ class PoliticalActionsController < ApplicationController
     @political_action.year = GameParameter.current_year
 
     respond_to do |format|
-      if @political_action.save
+      if @political_action.execute
         format.html { redirect_to political_action_url(@political_action), notice: "Political action was successfully created." }
         format.json { render :show, status: :created, location: @political_action }
       else

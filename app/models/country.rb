@@ -2,6 +2,7 @@ class Country < ApplicationRecord
   # params:
   # embargo (bool)- Введено ли эмбарго в стране?
 	has_many :regions
+  has_many :relation_items
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
 
@@ -39,19 +40,21 @@ class Country < ApplicationRecord
     end
   end
 
-  def change_relations(count)
+  def change_relations(count, entity)
     count = count.to_i
-    if self.params['relations'] != nil
-      if (self.params['relations'] + count).abs <= REL_RANGE
-        self.params['relations'] += count
-      else
-        sign = count.positive? ? 1 : -1
-        self.params['relations'] = REL_RANGE*sign
-      end
-      self.save
-    else
-      "С этой страной нельзя менять отношения."
-    end
+    rel = relations
+    r = rel + count
+    comment = entity.is_a?(PoliticalAction) ? entity.political_action_type.name : entity.name
+    RelationItem.add(
+      (r / r.abs) * (count.abs - (r.abs - REL_RANGE)),
+      comment,
+      self,
+      entity
+    )
+  end
+
+  def relations
+    self.params['relations'].to_i + relation_items.sum(&:value)
   end
 
   def capture(region, how) #1 - войной, 0 - миром

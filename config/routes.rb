@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :relation_items
   resources :influence_items
 
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
