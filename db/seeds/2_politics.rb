@@ -23,6 +23,70 @@ while str = f.gets
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
 end
 
+rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
+def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
+tra_build = BuildingType.create(name: "Рынок", icon: 'ri-exchange-line')
+
+BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1})
+BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3})
+BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"metropolitan_income" => 6000, "public_order" => 5})
+
+BuildingLevel.create(level: 1, building_type: def_build, name: "Форт")
+BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость")
+BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль")
+
+BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000})
+BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000})
+BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
+
+Building.create(building_level_id: 1, settlement_id: 1)
+Building.create(building_level_id: 2, settlement_id: 2)
+Building.create(building_level_id: 3, settlement_id: 3)
+Building.create(building_level_id: 4, settlement_id: 2)
+Building.create(building_level_id: 5, settlement_id: 1)
+Building.create(building_level_id: 6, settlement_id: 2)
+Building.create(building_level_id: 7, settlement_id: 1)
+
+guild_boss = Job.find_by_name("Глава гульдии")
+f = File.open('./db/seeds/pat_merchants.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  name, action, icon, desc, cost, prob, success = str.split(";").map{|i| i.strip}
+  PoliticalActionType.create(
+    icon: icon, name: name, action: action, job: guild_boss,
+    description: desc, cost: cost, probability: prob, success: success)
+end
+
+f = File.open('./db/seeds/pat_nobles.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  job_name, name, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}
+  job = Job.find_by_name(job_name)
+  PoliticalActionType.create(
+    icon: icon, name: name, action: action, job: job,
+    description: desc, cost: cost, probability: prob, 
+    success: success, failure: failure)
+end
+
+f = File.open('./db/seeds/technologies.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  name, description = str.split(";").map{|i| i.strip}
+  t = Technology.create(name: name, description: description, params: {'opened' => 0})
+  TechnologyItem.add(0, "Изменить значение", t)
+end
+
+
+
+
+
+
+
+
+
+
+
+
 # Settlement.create(name: "Азак", settlement_type_id: cap.id, region_id: 1, player_id: 2, params: {"open_gate" => false})
 # Settlement.create(name: "Алексин", settlement_type_id: cap.id, region_id: 1, player_id: 3, params: {"open_gate" => false})
 # Settlement.create(name: "Арзамас", settlement_type_id: cap.id, region_id: 1, player_id: 4, params: {"open_gate" => false})
@@ -103,57 +167,3 @@ end
 # Settlement.create(name: "Чернигов", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 # Settlement.create(name: "Чимги-тура", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
 # Settlement.create(name: "Ярославль", settlement_type_id: cap.id, region_id: 1, player_id: 6, params: {"open_gate" => false})
-
-rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
-def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
-tra_build = BuildingType.create(name: "Рынок", icon: 'ri-exchange-line')
-
-BuildingLevel.create(level: 1, building_type: rel_build, name: "Часовня", params: {"metropolitan_income" => 1500, "public_order" => 1})
-BuildingLevel.create(level: 2, building_type: rel_build, name: "Храм", params: {"metropolitan_income" => 3000, "public_order" => 3})
-BuildingLevel.create(level: 3, building_type: rel_build, name: "Монастырь", params: {"metropolitan_income" => 6000, "public_order" => 5})
-
-BuildingLevel.create(level: 1, building_type: def_build, name: "Форт")
-BuildingLevel.create(level: 2, building_type: def_build, name: "Крепость")
-BuildingLevel.create(level: 3, building_type: def_build, name: "Кремль")
-
-BuildingLevel.create(level: 1, building_type: tra_build, name: "Базар", params: {"income" => 1000})
-BuildingLevel.create(level: 2, building_type: tra_build, name: "Рынок", params: {"income" => 2000})
-BuildingLevel.create(level: 3, building_type: tra_build, name: "Ярмарка", params: {"income" => 4000})
-
-Building.create(building_level_id: 1, settlement_id: 1)
-Building.create(building_level_id: 2, settlement_id: 2)
-Building.create(building_level_id: 3, settlement_id: 3)
-Building.create(building_level_id: 4, settlement_id: 2)
-Building.create(building_level_id: 5, settlement_id: 1)
-Building.create(building_level_id: 6, settlement_id: 2)
-Building.create(building_level_id: 7, settlement_id: 1)
-
-guild_boss = Job.find_by_name("Глава гульдии")
-f = File.open('./db/seeds/pat_merchants.csv', 'r+')
-f.gets #headers
-while str = f.gets
-  name, action, icon, desc, cost, prob, success = str.split(";").map{|i| i.strip}
-  PoliticalActionType.create(
-    icon: icon, name: name, action: action, job: guild_boss,
-    description: desc, cost: cost, probability: prob, success: success)
-end
-
-f = File.open('./db/seeds/pat_nobles.csv', 'r+')
-f.gets #headers
-while str = f.gets
-  job_name, name, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}
-  job = Job.find_by_name(job_name)
-  PoliticalActionType.create(
-    icon: icon, name: name, action: action, job: job,
-    description: desc, cost: cost, probability: prob, 
-    success: success, failure: failure)
-end
-
-f = File.open('./db/seeds/technologies.csv', 'r+')
-f.gets #headers
-while str = f.gets
-  name, description = str.split(";").map{|i| i.strip}
-  t = Technology.create(name: name, description: description, params: {'opened' => 0})
-  TechnologyItem.add(0, "Изменить значение", t)
-end
-

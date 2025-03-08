@@ -1,4 +1,6 @@
 class TechnologyItem < ApplicationRecord
+  audited
+
   belongs_to :technology
   belongs_to :entity, polymorphic: true, optional: true
 

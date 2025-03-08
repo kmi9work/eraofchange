@@ -12,6 +12,12 @@ public_order_items = [
     comment: 'Влияние зданий',
     region: region
   ),
+  PublicOrderItem.new(
+    id: 0,
+    value: (Technology.find(Technology::GODS_ANOITED).is_open == 1 ? 5 : 0),
+    comment: 'Технология помазанник божий',
+    region: region
+  ),
   *region.public_order_items
 ]
 

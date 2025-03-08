@@ -16,75 +16,35 @@ class PoliticalAction < ApplicationRecord
 
   def sedition #Подстрекательство к бунту
     if success.to_i == 1
-      region = Region.find_by_id(options[:region_id])
+      region = Region.find_by_id(params['region_id'])
       if region
-        region.params["public_order"] -= SEDITION_PO
-        region.save
+        PublicOrderItem.add(-5, self.political_action_type.name, region, self)
       end
     end
   end
 
   def charity #Благотворительность
     if success.to_i == 1
-      region = Region.find_by_id(options[:region_id])
+      region = Region.find_by_id(params['region_id'])
       if region
-        region.params["public_order"] += CHARITY_PO
-        region.save
-      end
-    end
-  end
-
-  def espionage #Шпионаж
-    if success.to_i == 1
-      army = Army.find_by_id(options[:army_id])
-      if army
-        army_size = army.army_size&.name
-        troops = army.troops.joins(:troop_type).pluck('troops.troop_type_id, troop_types.name')
-        final_hash = {
-          army_size: army_size,
-          troops: troops
-        }
-        return {result: final_hash}     
+        PublicOrderItem.add(5, self.political_action_type.name, region, self)
       end
     end
   end
 
   def sabotage #Саботаж
-    if success.to_i == 1
-      army = Army.find_by_id(options[:army_id])
-      if army
-        current_year = GameParameter.find_by(identificator: "current_year")&.value.to_i
-        army.params["palsy"].push(current_year + 1)
-        #!!! Дописать в место, где есть передвижение армии - что двигать нельзя, если паралич
-        army.save       
-      end
-    end    
   end
 
   def contraband #Контрабанда
-    # В options[:country_id] должна лежать страна контрабанды
-    if success.to_i == 1
-      player = Player.find_by_id(options[:player_id])
-      country = Country.find_by_id(options[:country_id])
-      if player && country
-        player.params["contraband"].push(country.name)
-        player.save
-      end
-    end
   end
 
   def open_gate #Открыть ворота!
-    if success.to_i == 1
-      settlement = Settlement.find_by_id(options[:settlement_id])
-      if settlement
-        settlement.params["open_gate"] = true
-        settlement.save
-      end
-    end
   end
 
   def new_fisheries #Новые промыслы
-  
+  end
+
+  def people_support #Народная поддержка
   end
 
   # =========== /Купцы ===========
@@ -286,7 +246,7 @@ class PoliticalAction < ApplicationRecord
   def patronage_of_infidel #Покровительство иноверцам
     if success.to_i == 1
       modify_influence(3)
-      it = Technology.find_by_id(technology_id)
+      it = Technology.find_by_id(params['technology_id'])
       it.open_it
     else 
       regions = Country.find_by_id(Country::RUS).regions

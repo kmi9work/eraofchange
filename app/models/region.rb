@@ -27,7 +27,7 @@ class Region < ApplicationRecord
   end
 
   def show_overall_po
-    self.inf_buildings_on_po + self.count_items
+    self.inf_buildings_on_po + self.count_items + (Technology.find(Technology::GODS_ANOITED).is_open == 1 ? 5 : 0)
   end
 
   def captured_by(who_id, how) #1 - войной, 0 - миром

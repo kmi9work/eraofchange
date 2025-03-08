@@ -31,6 +31,14 @@ class GameParameter < ApplicationRecord
     return {msg: "Расходы за государство оплачены"}
   end
 
+  def self.unpay_state_expenses
+    st_exp = self.find_by(identificator: "current_year")
+    st_exp.params["state_expenses"] = false #Делает отметку о том, что в текущем году расходы НЕ оплачены
+    st_exp.save
+
+    return {msg: "Расходы за государство оплачены"}
+  end
+
   def self.set_default
     cy = GameParameter.find_by(identificator: "current_year")
     cy.params = false

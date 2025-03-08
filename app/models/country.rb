@@ -46,7 +46,7 @@ class Country < ApplicationRecord
     r = rel + count
     comment = entity.is_a?(PoliticalAction) ? entity.political_action_type.name : entity.name
     RelationItem.add(
-      (r / r.abs) * (count.abs - (r.abs - REL_RANGE)),
+      r.abs > REL_RANGE ? ((r / r.abs) * (count.abs - (r.abs - REL_RANGE))) : count,
       comment,
       self,
       entity
@@ -54,7 +54,9 @@ class Country < ApplicationRecord
   end
 
   def relations
-    self.params['relations'].to_i + relation_items.sum(&:value)
+    sum = 0
+    sum += 2 if (Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1) && [PERMIAN, VYATKA, RYAZAN, TVER, NOVGOROD].include?(self.id)
+    sum + self.params['relations'].to_i + relation_items.sum(&:value)
   end
 
   def capture(region, how) #1 - войной, 0 - миром

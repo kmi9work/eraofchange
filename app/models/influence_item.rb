@@ -1,4 +1,6 @@
 class InfluenceItem < ApplicationRecord
+  audited
+
   belongs_to :player
   belongs_to :entity, polymorphic: true, optional: true
 

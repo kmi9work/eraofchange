@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
+  patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
 
   patch '/armies/:id/demote_army', to: 'armies#demote_army'

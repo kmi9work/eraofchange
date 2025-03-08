@@ -1,4 +1,6 @@
 class PublicOrderItem < ApplicationRecord
+  audited
+
   belongs_to :region
   belongs_to :entity, polymorphic: true, optional: true
 

@@ -10,6 +10,10 @@ class GameParametersController < ApplicationController
     GameParameter.pay_state_expenses
   end
 
+  def unpay_state_expenses
+    GameParameter.unpay_state_expenses
+  end
+
   def increase_year
     GameParameter.increase_year
   end

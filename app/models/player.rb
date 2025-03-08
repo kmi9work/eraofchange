@@ -61,7 +61,7 @@ class Player < ApplicationRecord
         select('building_levels.params')
       sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
     end
-    sum + self.settlements.sum{|s| s.income}
+    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
   end
 
   def player_military_outlays
