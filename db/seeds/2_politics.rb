@@ -3,7 +3,7 @@ town = SettlementType.create(name: "Город", params: {"income" => 5000})
 for_cap = SettlementType.create(name: "Иностранный город", params: {"income" => 0})
 for_town = SettlementType.create(name: "Иностранная столица", params: {"income" => 10000})
 
-f = File.open('./db/seeds/countries_сopy.csv', 'r+')
+f = File.open('./db/seeds/countries.csv', 'r+')
 while str = f.gets
   id, country_name, region_name, city_name, cost = str.split(';')
   country = Country.find_by_name(country_name)
