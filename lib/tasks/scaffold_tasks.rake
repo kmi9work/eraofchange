@@ -23,9 +23,3 @@
 # rails generate scaffold Credit sum:integer deposit:integer procent:float start_year:integer duration:integer
 # rails generate scaffold InfluenceItem value:integer player_id:integer entity_id:integer entity_type:string comment:string year:integer
 # rails generate scaffold RelationItem value:integer country_id:integer entity_id:integer entity_type:string comment:string year:integer
-
-
-
-
-
-

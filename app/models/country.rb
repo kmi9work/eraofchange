@@ -13,6 +13,7 @@ class Country < ApplicationRecord
   LITHUANIA = 5   #Великое княжество литовское
   KAZAN = 6       #Казанское ханство
   CRIMEA = 7      #Крымское ханство
+
   PERMIAN = 8     #Пермь
   VYATKA = 9      #Вятка
   RYAZAN = 10     #Рязань

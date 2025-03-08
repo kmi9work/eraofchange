@@ -5,9 +5,9 @@ for_town = SettlementType.create(name: "Иностранная столица", 
 
 f = File.open('./db/seeds/countries.csv', 'r+')
 while str = f.gets
-  country_name, region_name, city_name, cost = str.split(';')
+  id, country_name, region_name, city_name, cost = str.split(';')
   country = Country.find_by_name(country_name)
-  country ||= Country.create(name: country_name, params: {"relations" => 0, "embargo" => false})
+  country ||= Country.create(id: id, name: country_name, params: {"relations" => 0, "embargo" => false})
   region = Region.find_by_name(region_name)
   region ||= Region.create(name: region_name, country: country, params: {"public_order" => 0})
   city = Settlement.find_by_name(city_name)

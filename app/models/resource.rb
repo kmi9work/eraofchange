@@ -20,19 +20,26 @@ class Resource < ApplicationRecord
     res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
     elig_resources = country_filter(country_id, res_pl_sells)
     elig_resources.each do |res|
-      gold += calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
+      #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
+      gold += calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
     end
 
     res_to_player = []
     res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
     elig_resources = country_filter(country_id, res_pl_buys)
     elig_resources.each do |res|
-      resource = calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))
+      resource = calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))
       gold -= resource[:cost]
-      res_to_player.push({identificator: resource[:identificator], count: resource[:count].to_i})
+      res_to_player.push({name: Resource.find_by(identificator: resource[:identificator]).name,
+                          identificator: resource[:identificator],
+                          count: resource[:count].to_i})
     end
+    gold_as_res = Resource.find_by(identificator: "gold")
+    res_to_player.push({name: gold_as_res.name, identificator: gold_as_res.identificator, count: gold})
 
-    return {res_to_player: res_to_player, gold: gold}
+
+    #/ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
+    return {res_to_player: res_to_player}
   end
 
   # cost: nil - значит, что ресурс не продаётся на рынке
