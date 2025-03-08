@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   resources :influence_items
 
+  get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
+  patch '/plants/:id/upgrade', to: 'plants#upgrade'
+  get '/plants/:id/has_produced', to: 'plants#has_produced'
+
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
 
@@ -58,6 +62,7 @@ Rails.application.routes.draw do
   get '/eco_subjects/:id/edit', to: 'eco_subjects#edit', as: :edit_eco_subject
   patch '/eco_subjects/:id', to: 'eco_subjects#update'
   delete '/eco_subjects/:id', to: 'eco_subjects#destroy', as: :destroy_eco_subject
+  
 
   get '/facilities', to: 'facilities#index'
   get '/facilities/new', to: 'facilities#new', as: :new_facility
