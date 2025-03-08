@@ -1,0 +1,2 @@
+module TechnologyItemsHelper
+end

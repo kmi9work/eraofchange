@@ -27,9 +27,7 @@ class Region < ApplicationRecord
   end
 
   def show_overall_po
-    po = self.params["public_order"] #Ручная правка
-    po += self.inf_buildings_on_po + self.count_items
-    return po
+    self.inf_buildings_on_po + self.count_items
   end
 
   def captured_by(who_id, how) #1 - войной, 0 - миром

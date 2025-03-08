@@ -37,7 +37,9 @@ buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Б
 @buyers = []
 
 noble_names.each_with_index do |name, i|
-  @nobles.push Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first, params: {"influence" => rand(5)})
+  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first)
+  @nobles.push 
+  InfluenceItem.add(0, "Ручная правка", p)
 end
 
 buyer_names.each_with_index do |name, i|

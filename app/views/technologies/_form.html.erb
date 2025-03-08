@@ -1,10 +1,10 @@
-<%= form_with(model: ideologist_technology) do |form| %>
-  <% if ideologist_technology.errors.any? %>
+<%= form_with(model: technology) do |form| %>
+  <% if technology.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(ideologist_technology.errors.count, "error") %> prohibited this ideologist_technology from being saved:</h2>
+      <h2><%= pluralize(technology.errors.count, "error") %> prohibited this technology from being saved:</h2>
 
       <ul>
-        <% ideologist_technology.errors.each do |error| %>
+        <% technology.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
       </ul>

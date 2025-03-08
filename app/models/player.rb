@@ -92,7 +92,7 @@ class Player < ApplicationRecord
   end
 
   def influence
-    self.params["influence"].to_i + self.influence_items.sum(&:value)
+    self.influence_items.sum(&:value)
   end
 end
 

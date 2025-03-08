@@ -2,47 +2,47 @@ require "test_helper"
 
 class IdeologistTechnologiesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @ideologist_technology = ideologist_technologies(:one)
+    @technology = technologies(:one)
   end
 
   test "should get index" do
-    get ideologist_technologies_url
+    get technologies_url
     assert_response :success
   end
 
   test "should get new" do
-    get new_ideologist_technology_url
+    get new_technology_url
     assert_response :success
   end
 
-  test "should create ideologist_technology" do
-    assert_difference("IdeologistTechnology.count") do
-      post ideologist_technologies_url, params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, name: @ideologist_technology.name } }
+  test "should create technology" do
+    assert_difference("Technology.count") do
+      post technologies_url, params: { technology: { ideologist_type_id: @technology.ideologist_type_id, params: @technology.params, requirements: @technology.requirements, name: @technology.name } }
     end
 
-    assert_redirected_to ideologist_technology_url(IdeologistTechnology.last)
+    assert_redirected_to technology_url(Technology.last)
   end
 
-  test "should show ideologist_technology" do
-    get ideologist_technology_url(@ideologist_technology)
+  test "should show technology" do
+    get technology_url(@technology)
     assert_response :success
   end
 
   test "should get edit" do
-    get edit_ideologist_technology_url(@ideologist_technology)
+    get edit_technology_url(@technology)
     assert_response :success
   end
 
-  test "should update ideologist_technology" do
-    patch ideologist_technology_url(@ideologist_technology), params: { ideologist_technology: { ideologist_type_id: @ideologist_technology.ideologist_type_id, params: @ideologist_technology.params, requirements: @ideologist_technology.requirements, name: @ideologist_technology.name } }
-    assert_redirected_to ideologist_technology_url(@ideologist_technology)
+  test "should update technology" do
+    patch technology_url(@technology), params: { technology: { ideologist_type_id: @technology.ideologist_type_id, params: @technology.params, requirements: @technology.requirements, name: @technology.name } }
+    assert_redirected_to technology_url(@technology)
   end
 
-  test "should destroy ideologist_technology" do
-    assert_difference("IdeologistTechnology.count", -1) do
-      delete ideologist_technology_url(@ideologist_technology)
+  test "should destroy technology" do
+    assert_difference("Technology.count", -1) do
+      delete technology_url(@technology)
     end
 
-    assert_redirected_to ideologist_technologies_url
+    assert_redirected_to technologies_url
   end
 end

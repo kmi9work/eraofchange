@@ -286,7 +286,7 @@ class PoliticalAction < ApplicationRecord
   def patronage_of_infidel #Покровительство иноверцам
     if success.to_i == 1
       modify_influence(3)
-      it = IdeologistTechnology.find_by_id(technology_id)
+      it = Technology.find_by_id(technology_id)
       it.open_it
     else 
       regions = Country.find_by_id(Country::RUS).regions

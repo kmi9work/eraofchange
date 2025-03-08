@@ -1,0 +1,47 @@
+<%= form_with(model: technology_item) do |form| %>
+  <% if technology_item.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(technology_item.errors.count, "error") %> prohibited this technology_item from being saved:</h2>
+
+      <ul>
+        <% technology_item.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :value, style: "display: block" %>
+    <%= form.number_field :value %>
+  </div>
+
+  <div>
+    <%= form.label :technology_id, style: "display: block" %>
+    <%= form.number_field :technology_id %>
+  </div>
+
+  <div>
+    <%= form.label :entity_id, style: "display: block" %>
+    <%= form.number_field :entity_id %>
+  </div>
+
+  <div>
+    <%= form.label :entity_type, style: "display: block" %>
+    <%= form.text_field :entity_type %>
+  </div>
+
+  <div>
+    <%= form.label :comment, style: "display: block" %>
+    <%= form.text_field :comment %>
+  </div>
+
+  <div>
+    <%= form.label :year, style: "display: block" %>
+    <%= form.number_field :year %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

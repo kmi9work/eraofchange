@@ -7,9 +7,15 @@ f = File.open('./db/seeds/countries.csv', 'r+')
 while str = f.gets
   id, country_name, region_name, city_name, cost = str.split(';')
   country = Country.find_by_name(country_name)
-  country ||= Country.create(id: id, name: country_name, params: {"relations" => 0, "embargo" => false})
+  if country.blank?
+    country = Country.create(id: id, name: country_name, params: {"relations" => 0, "embargo" => false})
+    RelationItem.add(0, "Ручная правка", country)
+  end
   region = Region.find_by_name(region_name)
-  region ||= Region.create(name: region_name, country: country, params: {"public_order" => 0})
+  if region.blank?
+    region = Region.create(name: region_name, country: country)
+    PublicOrderItem.add(0, "Ручная правка", region)
+  end
   city = Settlement.find_by_name(city_name)
   type = cost.to_i == 10 ? cap : town
   player = nil
@@ -141,5 +147,13 @@ while str = f.gets
     icon: icon, name: name, action: action, job: job,
     description: desc, cost: cost, probability: prob, 
     success: success, failure: failure)
+end
+
+f = File.open('./db/seeds/technologies.csv', 'r+')
+f.gets #headers
+while str = f.gets
+  name, description = str.split(";").map{|i| i.strip}
+  t = Technology.create(name: name, description: description, params: {'opened' => 0})
+  TechnologyItem.add(0, "Изменить значение", t)
 end
 

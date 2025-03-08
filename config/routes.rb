@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :technology_items
   resources :relation_items
   resources :influence_items
 
@@ -118,7 +119,7 @@ Rails.application.routes.draw do
   resources :humen
   resources :player_types
   resources :ideologist_types
-  resources :ideologist_technologies
+  resources :technologies
   resources :political_actions
   resources :political_action_types
 

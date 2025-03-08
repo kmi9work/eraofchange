@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Technology items</h1>
+
+<div id="technology_items">
+  <% @technology_items.each do |technology_item| %>
+    <%= render technology_item %>
+    <p>
+      <%= link_to "Show this technology item", technology_item %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New technology item", new_technology_item_path %>

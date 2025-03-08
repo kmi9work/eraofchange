@@ -7,11 +7,7 @@ end
 
 public_order_items = [
   PublicOrderItem.new(
-    value: region.params['public_order'],
-    comment: 'Ручная правка',
-    region: region
-  ),
-  PublicOrderItem.new(
+    id: 0,
     value: region.inf_buildings_on_po,
     comment: 'Влияние зданий',
     region: region
@@ -20,6 +16,7 @@ public_order_items = [
 ]
 
 json.public_order_items public_order_items.reverse do |poi|
+  json.id poi.id
   json.value poi.value
   json.comment poi.comment
   json.year poi.year

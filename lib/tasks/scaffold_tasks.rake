@@ -1,7 +1,7 @@
 
 # rails generate scaffold PoliticalActionType title:string action:json params:json
 # rails generate scaffold PoliticalAction year:integer success:integer params:json political_action_type:references player:references
-# rails generate scaffold IdeologistTechnology title:string requirements:json params:json ideologist_type:references
+# rails generate scaffold Technology title:string requirements:json params:json ideologist_type:references
 # rails generate scaffold IdeologistType name:string
 # rails generate scaffold PlayerType title:string ideologist_type:references
 # rails generate scaffold Human name:string
@@ -23,3 +23,5 @@
 # rails generate scaffold Credit sum:integer deposit:integer procent:float start_year:integer duration:integer
 # rails generate scaffold InfluenceItem value:integer player_id:integer entity_id:integer entity_type:string comment:string year:integer
 # rails generate scaffold RelationItem value:integer country_id:integer entity_id:integer entity_type:string comment:string year:integer
+# rails generate scaffold TechnologyItem value:integer technology_id:integer entity_id:integer entity_type:string comment:string year:integer
+# rails generate scaffold PublicOrderItem value:integer region_id:integer entity_id:integer entity_type:string comment:string year:integer
