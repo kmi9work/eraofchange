@@ -7,18 +7,17 @@ class Country < ApplicationRecord
 
   RUS = 1         #Русь
   HORDE = 2       #Большая орда
-  LIVONIAN = 9    #Ливонский орден
-  SWEDEN = 8      #Швеция
-  LITHUANIA = 4   #Великое княжество литовское
+  LIVONIAN = 3    #Ливонский орден
+  SWEDEN = 4      #Швеция
+  LITHUANIA = 5   #Великое княжество литовское
   KAZAN = 6       #Казанское ханство
-  CRIMEA = 12      #Крымское ханство
+  CRIMEA = 7      #Крымское ханство
 
-
-  #PERMIAN = 8     #Пермь
-  #VYATKA = 9      #Вятка
-  #RYAZAN = 10     #Рязань
-  #TVER = 11       #Тверь
-  #NOVGOROD = 12   #Великий Новгород
+  PERMIAN = 8     #Пермь
+  VYATKA = 9      #Вятка
+  RYAZAN = 10     #Рязань
+  TVER = 11       #Тверь
+  NOVGOROD = 12   #Великий Новгород
 
 
   BY_WAR = 1
