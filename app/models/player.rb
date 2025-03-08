@@ -90,5 +90,9 @@ class Player < ApplicationRecord
   def modify_influence(value, comment, player, entity) #Изменить влияние игрока
     InfluenceItem.add(value, comment, self, entity)
   end
+
+  def influence
+    self.params["influence"].to_i + self.influence_items.sum(&:value)
+  end
 end
 
