@@ -104,7 +104,7 @@ class PoliticalAction < ApplicationRecord
     end
   end
 
-  def сonduct_audit #Провести ревизию
+  def conduct_audit #Провести ревизию
     if success.to_i == 1
       modify_influence(1)
     end
