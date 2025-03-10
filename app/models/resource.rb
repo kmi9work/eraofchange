@@ -53,19 +53,25 @@ class Resource < ApplicationRecord
     end
   end
 
+
+  #ПЕРЕПИСАТЬ ВСЁ ТАК, ЧТОБЫ БЫЛО ПОНЯТНО, КТО КОМУ ПРОДАЕТ, СЕЙЧАС НЕ ПОНЯТНО
+  #когда игрок продает to_market, когда покупает -- off_market вместо buy_price и sale_price
+
   def self.show_prices
     resources = Resource.all
     prices_array = []
 
     resources.each do |res|
       next if res.country_id == nil
-      relations = res.country.params["relations"].to_s
+      relations = res.country.relations.to_s
 
       res_prices = {}
       res_prices[:name] = res.name
+      res_prices[:name_and_s_pr] = "#{res.name} по #{res.params["buy_price"][relations]} за штуку"
+      res_prices[:name_and_b_pr] = "#{res.name} по #{res.params["sale_price"][relations]} за штуку"
       res_prices[:identificator] = res.identificator
       res_prices[:buy_price] = res.params["buy_price"][relations]
-      res_prices[:sell_price] = res.params["sale_price"][relations]
+      res_prices[:sell_price] = res.params["sale_price"][relations] if res.params["sale_price"]
       res_prices[:embargo] = res.country.params["embargo"]
       res_prices[:country] = res.country.as_json(only: [:id, :name])
       prices_array.push(res_prices)
