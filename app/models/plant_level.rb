@@ -3,7 +3,8 @@ class PlantLevel < ApplicationRecord
   has_many :plants
   MAX_LEVEL = 3
 
-  #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ 
+
+########ПРОВЕРИТЬ ВНИМАТЕЛЬНЕЕ
 
   include Dictionary
 
@@ -11,10 +12,9 @@ class PlantLevel < ApplicationRecord
     pl_levels = []
     formula_from = []
     formula_to = []
-    d = 0
     PlantLevel.all.each do |p_l|
       next if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
-      pl_levels.push({id: d + 1,
+      pl_levels.push({id: p_l.id,
                       formula_from: p_l.formula_conversion[:from],
                       formula_to:   p_l.formula_conversion[:to],
                       plant_type_name: "#{p_l.plant_type.name} #{p_l.level}"})
@@ -30,12 +30,20 @@ class PlantLevel < ApplicationRecord
     end
     return {from: from.uniq, to: to.uniq}
   end
-  #/ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
 
+  ########ПРОВЕРИТЬ ВНИМАТЕЛЬНЕЕ
 
   def feed_to_plant!(request = [], way = 'from')
+    Technology.find(Technology::TECH_SCHOOLS).is_open == 1 ? coof = 1.5 : coof = 1
+
     #request = make_hash_with_indiff(request) TODO
     request.map! {|req| req.transform_keys(&:to_s)}
+    request.map do |req|
+      req["count"] = req["count"].to_i
+      (req["count"] /= coof).ceil if way == "to"
+      req[:name] = look_up_res(req["identificator"])
+    end
+
     resulting_from, resulting_to = [], []
     formulas.each do |formula|
       from, to  = count_request(formula, request, way)
@@ -48,6 +56,8 @@ class PlantLevel < ApplicationRecord
       res_array_sum!(resulting_from, from)
       res_array_sum!(resulting_to, to)
     end
+
+    resulting_to.each{|res| res["count"] *= coof}
 
     return {
         from: resulting_from,
@@ -73,7 +83,7 @@ class PlantLevel < ApplicationRecord
   end
 
   # Проверяет, не превышает ли количество хоть одного ресурса во втором массиве количество такого же ресурса в первом.
-  # Если превышает - false. Если нет совпадений - false. 
+  # Если превышает - false. Если нет совпадений - false.
   def is_res_array_less?(res_array1, res_array2)
     res_array1.each do |res1|
       var = res_array2.find {|res2| res1["identificator"] == res2["identificator"]}
@@ -87,7 +97,7 @@ class PlantLevel < ApplicationRecord
   def res_array_mult(res_array, n)
     res_array.deep_dup.each do |res|
      res["count"] *= n
-     res.merge!({name: look_up_res(res["identificator"])}) #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
+     res.merge!({name: look_up_res(res["identificator"])})
     end
   end
 
