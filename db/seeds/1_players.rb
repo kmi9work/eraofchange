@@ -37,10 +37,10 @@ buyer_names = ["Марфа", "Шимяка", "Шелом", "Яромила", "Б
 @buyers = []
 
 # ОБЯЗАТЕЛЬНЫЙ КУПЕЦ-ГЛАВА ГИЛЬДИИ
-Player.create(id: 1, name: "КУПЕЦ", human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, job: @jobs.last, params: {"contraband" => []})
+Player.create(id: 1, name: "КУПЕЦ", human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, jobs: [@jobs.last], params: {"contraband" => []})
 
 noble_names.each_with_index do |name, i|
-  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], job: @jobs[i], family: @families.shuffle.first, params: {"income_taken" => false})
+  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], jobs: [@jobs[i]], family: @families.shuffle.first, params: {"income_taken" => false})
   @nobles.push 
   InfluenceItem.add(0, "Ручная правка", p)
 end

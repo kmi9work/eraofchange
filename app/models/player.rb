@@ -7,7 +7,7 @@ class Player < ApplicationRecord
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true
   belongs_to :family, optional: true
-  belongs_to :job, optional: true
+  has_and_belongs_to_many :jobs
   belongs_to :guild, optional: true
 
   has_many :plants, :as => :economic_subject,
@@ -54,7 +54,7 @@ class Player < ApplicationRecord
 
   def income
     sum = 0
-    if job_id == Job::METROPOLITAN
+    if job_ids.include?(Job::METROPOLITAN)
       church_params = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
         where(regions: {country_id: Country::RUS}).
@@ -93,7 +93,7 @@ class Player < ApplicationRecord
 
   def influence_buildings
     sum = 0
-    if self.job_id == Job::METROPOLITAN
+    if job_ids.include?(Job::METROPOLITAN)
       church_params = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
         where(regions: {country_id: Country::RUS}).

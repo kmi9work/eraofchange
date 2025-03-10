@@ -23,6 +23,7 @@ class PoliticalActionsController < ApplicationController
   def create
     @political_action = PoliticalAction.new(political_action_params)
     @political_action.year = GameParameter.current_year
+    @political_action.player_id = Job.find_by_id(political_action_params[:job_id])&.players&.first&.id
 
     respond_to do |format|
       if @political_action.execute
@@ -66,6 +67,6 @@ class PoliticalActionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def political_action_params
-      params.require(:political_action).permit(:year, :success, :player_id, :political_action_type_id, params: {})
+      params.require(:political_action).permit(:year, :success, :player_id, :job_id, :political_action_type_id, params: {})
     end
 end

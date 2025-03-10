@@ -1,5 +1,10 @@
-json.extract! player, :id, :name, :human, :job, :player_type, :family, :guild, :params, :income, :influence, :player_military_outlays
-json.job player.job, partial: "jobs/job", as: :job
+json.extract! player, :id, :name, :human, :player_type, :family, :guild, :params, :income, :influence, :player_military_outlays
+
+json.jobs player.jobs do |job|
+  json.id job.id
+  json.name job.name
+  json.player_ids job.player_ids
+end 
 
 influence_items = [
   InfluenceItem.new(

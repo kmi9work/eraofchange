@@ -6,6 +6,6 @@ class AuditsController < ApplicationController
     #   @current_user.save
     # else
     # end
-    @audits = Audited::Audit.last(20).reverse
+    @audits = Audited::Audit.last(50).reverse
   end
 end

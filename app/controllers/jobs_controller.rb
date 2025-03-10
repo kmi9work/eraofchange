@@ -4,6 +4,7 @@ class JobsController < ApplicationController
   # GET /jobs or /jobs.json
   def index
     @jobs = Job.all
+    @jobs = @jobs.where(id: 1..8) if params[:nobles].to_i == 1 #TODO: CONSTANTS
   end
 
   # GET /jobs/1 or /jobs/1.json
@@ -65,6 +66,6 @@ class JobsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def job_params
-      params.require(:job).permit(:name, :params)
+      params.require(:job).permit(:name, :params, player_ids: [])
     end
 end

@@ -4,6 +4,4 @@ class PoliticalActionType < ApplicationRecord
 
   belongs_to :job
   has_many :political_actions, dependent: :destroy
-
-  
 end

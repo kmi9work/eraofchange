@@ -2,6 +2,7 @@ class PoliticalAction < ApplicationRecord
   audited
 
   belongs_to :player
+  belongs_to :job
   belongs_to :political_action_type
 
   def execute
@@ -138,8 +139,8 @@ class PoliticalAction < ApplicationRecord
       modify_influence(1)
     else
       modify_influence(-2)
-      prince = Player.find_by(job_id: Job::GRAND_PRINCE)
-      InfluenceItem.add(-2, self.political_action_type.name, prince, self)
+      princes = Job.find_by_id(Job::GRAND_PRINCE).players
+      princes.each{|p| InfluenceItem.add(-2, self.political_action_type.name, p, self)}
     end
   end
 
@@ -148,7 +149,8 @@ class PoliticalAction < ApplicationRecord
       modify_influence(3)
     else 
       modify_influence(-3)
-      regions = Region.joins(settlements: :player).where(players: {job_id: Job::GRAND_PRINCE}).distinct
+      prince_ids = Job.find_by_id(Job::GRAND_PRINCE).player_ids
+      regions = Region.joins(settlements: :player).where(player_id: prince_ids).distinct
       regions.each{|r| PublicOrderItem.add(-5, self.political_action_type.name, r, self)}
     end
   end
@@ -161,17 +163,17 @@ class PoliticalAction < ApplicationRecord
 
   def contract_to_cousin #Подряды свояку
     if success.to_i == 1
-      player.modify_influence(2)
+      modify_influence(2)
     else 
-      player.modify_influence(-2)
+      modify_influence(-2)
     end
   end
 
   def improving_the_city #Улучшение города
     if success.to_i == 1
-      player.modify_influence(3)
+      modify_influence(3)
     else 
-      player.modify_influence(-3)
+      modify_influence(-3)
     end
   end
 
