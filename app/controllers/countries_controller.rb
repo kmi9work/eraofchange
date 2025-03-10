@@ -23,7 +23,7 @@ class CountriesController < ApplicationController
   end
 
   def change_relations
-    @country.change_relations(params[:arg], GameParameter.first) #TODO 2nd arg
+    @country.change_relations(params[:value], GameParameter.first) #TODO 2nd arg
   end
 
   # GET /countries/1 or /countries/1.json

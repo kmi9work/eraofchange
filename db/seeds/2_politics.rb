@@ -28,7 +28,7 @@ tras = [
 f = File.open('./db/seeds/countries.csv', 'r+')
 f.gets #Заголовки
 
-po_values = [1, 0, -1, -1] #Общественный порядок в начале
+po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets
   id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level = str.split(';')
   country = Country.find_by_name(country_name)
