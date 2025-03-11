@@ -150,7 +150,7 @@ class PoliticalAction < ApplicationRecord
     else 
       modify_influence(-3)
       prince_ids = Job.find_by_id(Job::GRAND_PRINCE).player_ids
-      regions = Region.joins(settlements: :player).where(player_id: prince_ids).distinct
+      regions = Region.joins(settlements: :player).where(settlements: {player_id: prince_ids}).distinct
       regions.each{|r| PublicOrderItem.add(-5, self.political_action_type.name, r, self)}
     end
   end
@@ -181,7 +181,7 @@ class PoliticalAction < ApplicationRecord
     if success.to_i == 1
       modify_influence(1)
       region = Region.find_by_id(params['region_id'])
-      PublicOrderItem.add(-5, self.political_action_type.name, region, self) if region
+      PublicOrderItem.add(5, self.political_action_type.name, region, self) if region
     end  
   end
 
