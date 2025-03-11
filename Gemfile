@@ -7,6 +7,11 @@ gem 'rack-cors'
 gem "audited"
 gem 'activerecord-session_store'
 
+gem 'capistrano'
+gem 'capistrano-rails'
+gem 'capistrano-rbenv'
+gem 'capistrano-passenger'
+
 
 gem 'byebug'
 
