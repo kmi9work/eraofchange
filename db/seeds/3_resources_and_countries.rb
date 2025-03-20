@@ -6,8 +6,8 @@ rus = Country.find_by_name("Русь").id
 horde = Country.find_by_name("Большая Орда").id
 
 Resource.create(name: "Лошади", identificator: "horses", country_id: horde, params:
-{"sale_price" => {-2 => 127, -1 => 109, 0 => 91,  1 => 91, 2 => 91},
-"buy_price" => {-2 => 51, -1 => 58, 0 => 64, 1 => 70, 2 => 77}})
+{"sale_price" => {-2 => 127, -1 => 109, 0 => 91,  1 => 91, 2 => 90},
+"buy_price" => {-2 => 51, -1 => 58, 0 => 64, 1 => 70, 2 => 75}})
 
 Resource.create(name: "Pоскошь", identificator: "luxury", country_id: horde, params:
 {"sale_price" => {-2 => 1000, -1 => 860, 0 => 700,  1 => 700, 2 => 700},
@@ -37,15 +37,15 @@ Resource.create(name: "Драгоценная руда", identificator: "gem_ore
   "buy_price" => {-2 => 11, -1 => 13, 0 => 14, 1 => 15, 2 => 17}})
 
 Resource.create(name: "Металл", identificator: "metal", country_id: swe, params:
-  {"sale_price" => {-2 => 66, -1 => 56, 0 => 47,  1 => 47, 2 => 47},
+  {"sale_price" => {-2 => 66, -1 => 56, 0 => 47,  1 => 47, 2 => 50},
   "buy_price" => {-2 => 26, -1 => 30, 0 => 33, 1 => 36, 2 => 40}})
 
 #Великое княжество Литовское
 lithuania = Country.find_by_name("Великое княжество Литовское").id
 
 Resource.create(name: "Инструменты", identificator: "tools", country_id: lithuania, params:
-  {"sale_price" => {-2 => 186, -1 => 160, 0 => 133,  1 => 133, 2 => 133},
-  "buy_price" => {-2 => 74, -1 => 84, 0 => 93, 1 => 102, 2 => 112}})
+  {"sale_price" => {-2 => 186, -1 => 160, 0 => 133,  1 => 133, 2 => 130},
+  "buy_price" => {-2 => 74, -1 => 84, 0 => 93, 1 => 102, 2 => 110}})
 Resource.create(name: "Бревна", identificator: "timber", country_id: lithuania, params:
   {"sale_price" => {-2 => 14, -1 => 12, 0 => 10,   1 => 10, 2 => 10},
   "buy_price" => {-2 => 6, -1 => 6, 0 => 7, 1 => 8, 2 => 8}})
@@ -60,11 +60,11 @@ Resource.create(name: "Железная руда", identificator: "metal_ore", c
   {"sale_price" => {-2 => 10, -1 => 8, 0 => 7,   1 => 7, 2 => 7},
   "buy_price" => {-2 => 4, -1 => 5, 0 => 5, 1 => 6, 2 => 6}})
 Resource.create(name: "Mясо", identificator: "meat", country_id: kazan, params:
-  {"sale_price" => {-2 => 27, -1 => 23, 0 => 19,   1 => 19, 2 => 19},
- "buy_price" => {-2 => 10, -1 => 12, 0 => 13, 1 => 14, 2 => 16}})
+  {"sale_price" => {-2 => 27, -1 => 23, 0 => 19,   1 => 19, 2 => 20},
+ "buy_price" => {-2 => 10, -1 => 12, 0 => 13, 1 => 14, 2 => 15}})
 Resource.create(name: "Провизия", identificator: "food", country_id: kazan, params:
-  {"sale_price" => {-2 => 136, -1 => 116, 0 => 97,   1 => 97, 2 => 97},
-  "buy_price" => {-2 => 54, -1 => 61, 0 => 68, 1 => 75, 2 => 82}})
+  {"sale_price" => {-2 => 136, -1 => 116, 0 => 97,   1 => 97, 2 => 100},
+  "buy_price" => {-2 => 54, -1 => 61, 0 => 68, 1 => 75, 2 => 80}})
 
 #Крымское ханство
 crimea = Country.find_by_name("Крымское ханство").id
@@ -76,8 +76,8 @@ Resource.create(name: "Mука", identificator: "flour", country_id: crimea, par
   {"sale_price" => {-2 => 21, -1 => 18, 0 => 15,   1 => 15, 2 => 15},
   "buy_price" => {-2 => 8, -1 => 9, 0 => 10, 1 => 11, 2 => 12}})
 Resource.create(name: "Оружие", identificator: "weapon", country_id: crimea, params:
-  {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 204},
-  "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 172}})
+  {"sale_price" => {-2 => 286, -1 => 245, 0 => 204,  1 => 204, 2 => 200},
+  "buy_price" => {-2 => 114, -1 => 129, 0 => 143, 1 => 157, 2 => 170}})
 
 
 
