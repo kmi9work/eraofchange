@@ -40,11 +40,15 @@ class Country < ApplicationRecord
     end
   end
 
-  def change_relations(count, entity)
+  def change_relations(count, entity, comment = nil)
     count = count.to_i
     rel = relations
     r = rel + count
-    comment = entity.is_a?(PoliticalAction) ? entity.political_action_type.name : entity.name
+    if entity.is_a?(PoliticalAction)
+      comment = entity.political_action_type&.name
+    elsif comment.blank?
+      comment = entity.try(:name)
+    end
     RelationItem.add(
       r.abs > REL_RANGE ? ((r / r.abs) * (count.abs - (r.abs - REL_RANGE))) : count,
       comment,
@@ -56,10 +60,12 @@ class Country < ApplicationRecord
   def relations
     sum = 0
     sum += 2 if (Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1) && [PERMIAN, VYATKA, RYAZAN, TVER, NOVGOROD].include?(self.id)
-    sum + self.params['relations'].to_i + relation_items.sum(&:value)
+    sum += relation_items.sum(&:value)
+    sum.abs > REL_RANGE ? (sum / sum.abs)*[sum.abs, REL_RANGE].min : sum
   end
 
   def capture(region, how) #1 - войной, 0 - миром
+    #ПЕРЕПИСАТЬ ЧЕРЕЗ items!
    region.country_id = self.id
     if how.to_i == BY_WAR
       region.params["public_order"] += MILITARILY

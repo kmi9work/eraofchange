@@ -1,5 +1,5 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: %i[ show edit update destroy ]
+  before_action :set_player, only: %i[ show edit update destroy add_influence ]
 
   # GET /players or /players.json
   def index
@@ -53,6 +53,11 @@ class PlayersController < ApplicationController
     army_size_id = params[:army_size_id]
     region_id = params[:region_id]
     @player.add_army(army_size_id, region_id)
+  end
+
+  def add_influence
+    value = params[:value].to_i
+    @player.modify_influence(value, "Ручная правка", nil)
   end
 
   private

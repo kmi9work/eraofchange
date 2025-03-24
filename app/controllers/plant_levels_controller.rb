@@ -18,7 +18,6 @@ class PlantLevelsController < ApplicationController
   def feed_to_plant
     @output = @plant_level.feed_to_plant!(params[:request], params[:way])
     render json: @output
-
   end
 
   # GET /plant_levels/new

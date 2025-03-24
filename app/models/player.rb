@@ -87,7 +87,7 @@ class Player < ApplicationRecord
     Player.all.select{|p| p.params["contraband"]&.include?(GameParameter.current_year)}
   end
 
-  def modify_influence(value, comment, player, entity) #Изменить влияние игрока
+  def modify_influence(value, comment, entity) #Изменить влияние игрока
     InfluenceItem.add(value, comment, self, entity)
   end
 
@@ -109,7 +109,7 @@ class Player < ApplicationRecord
   end
 
   def influence
-    self.influence_buildings + self.influence_items.sum(&:value)
+    self.influence_buildings + self.influence_items.sum{|ii| ii.value.to_i}
   end
 end
 

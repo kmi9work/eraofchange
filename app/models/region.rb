@@ -13,7 +13,7 @@ class Region < ApplicationRecord
 
   has_one :capital, -> { where(settlement_type_id: SettlementType::CAPITAL) }, class_name: 'Settlement'
 
-  def inf_buildings_on_po #Влияние зданий на общественной порадок
+  def inf_buildings_on_po #Влияние зданий на общественной порядок
     bbl_params = self.settlements.joins(buildings: :building_level).
          where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
          pluck('buildings.params, building_levels.params')
@@ -44,5 +44,9 @@ class Region < ApplicationRecord
     self.save
 
     {result: true, msg: "Регион присоединен"}
+  end
+
+  def add_po_item(value, comment, entity) #Изменить общественный порядок
+    PublicOrderItem.add(value, comment, self, entity)
   end
 end

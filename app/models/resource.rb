@@ -44,8 +44,8 @@ class Resource < ApplicationRecord
 
   # cost: nil - значит, что ресурс не продаётся на рынке
   def self.calculate_cost(transaction_type, amount, resource)
-    relations = resource.country.params["relations"].to_s
-    unit_cost = resource.params["#{transaction_type}_price"][relations.to_s]
+    relations = resource.country&.relations.to_s
+    unit_cost = resource.params["#{transaction_type}_price"][relations]
     if unit_cost
       {identificator: resource.identificator, count: amount, cost: unit_cost*amount.to_i, embargo: resource.country.params["embargo"]}
     else

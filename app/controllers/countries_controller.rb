@@ -1,5 +1,5 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy embargo change_relations capture]
+  before_action :set_country, only: %i[ show edit update destroy embargo change_relations capture add_relation_item]
 
   # GET /countries or /countries.json
   def index
@@ -20,10 +20,6 @@ class CountriesController < ApplicationController
   def capture
     region = Region.find(params[:region_id])
     @country.capture(region, params[:how])
-  end
-
-  def change_relations
-    @country.change_relations(params[:value], GameParameter.first) #TODO 2nd arg
   end
 
   # GET /countries/1 or /countries/1.json
@@ -76,6 +72,11 @@ class CountriesController < ApplicationController
       format.html { redirect_to countries_url, notice: "Country was successfully destroyed." }
       format.json { head :no_content }
     end
+  end
+
+  def add_relation_item
+    value = params[:value].to_i
+    @country.change_relations(value, @country, "Ручная правка")
   end
 
   private

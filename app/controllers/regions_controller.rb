@@ -1,5 +1,5 @@
 class RegionsController < ApplicationController
-  before_action :set_region, only: %i[ show edit update destroy modify_public_order captured_by]
+  before_action :set_region, only: %i[ show edit update destroy modify_public_order captured_by add_po_item]
 
   # GET /regions or /regions.json
   def index
@@ -65,6 +65,11 @@ class RegionsController < ApplicationController
       format.html { redirect_to regions_url, notice: "Region was successfully destroyed." }
       format.json { head :no_content }
     end
+  end
+
+  def add_po_item
+    value = params[:value].to_i
+    @region.add_po_item(value, "Ручная правка", nil)
   end
 
   private

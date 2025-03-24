@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   resources :relation_items
   resources :influence_items
 
+  patch '/players/:id/add_influence', to: 'players#add_influence'
+
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
@@ -15,12 +17,12 @@ Rails.application.routes.draw do
   patch '/armies/:id/demote_army', to: 'armies#demote_army'
   patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
 
-  patch '/regions/:id/modify_public_order', to: 'regions#modify_public_order'
+  patch '/regions/:id/add_po_item', to: 'regions#add_po_item'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
   patch '/countries/:id/embargo', to: 'countries#embargo'
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
-  patch '/countries/:id/change_relations',   to: 'countries#change_relations'
+  patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
