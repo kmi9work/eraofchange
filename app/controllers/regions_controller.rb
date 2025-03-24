@@ -69,7 +69,8 @@ class RegionsController < ApplicationController
 
   def add_po_item
     value = params[:value].to_i
-    @region.add_po_item(value, "Ручная правка", nil)
+    comment = params[:comment].presence || "Ручная правка"
+    @region.add_po_item(value, comment, nil)
   end
 
   private

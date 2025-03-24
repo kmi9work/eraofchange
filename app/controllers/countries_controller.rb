@@ -76,7 +76,8 @@ class CountriesController < ApplicationController
 
   def add_relation_item
     value = params[:value].to_i
-    @country.change_relations(value, @country, "Ручная правка")
+    comment = params[:comment].presence || "Ручная правка"
+    @country.change_relations(value, @country, comment)
   end
 
   private

@@ -57,7 +57,8 @@ class PlayersController < ApplicationController
 
   def add_influence
     value = params[:value].to_i
-    @player.modify_influence(value, "Ручная правка", nil)
+    comment = params[:comment].presence || "Ручная правка"
+    @player.modify_influence(value, comment, nil)
   end
 
   private
