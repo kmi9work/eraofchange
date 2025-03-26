@@ -1,5 +1,9 @@
 class TroopsController < ApplicationController
-  before_action :set_troop, only: %i[ show edit update destroy ]
+  before_action :set_troop, only: %i[ show edit update destroy pay_for ]
+
+  def pay_for
+    @troop.pay_for
+  end
 
   # GET /troops or /troops.json
   def index

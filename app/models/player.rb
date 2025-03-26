@@ -13,7 +13,8 @@ class Player < ApplicationRecord
   has_many :plants, :as => :economic_subject,
            :inverse_of => :economic_subject
   has_many :settlements
-  has_many :armies
+  has_many :armies, :as => :owner,
+           :inverse_of => :owner
   has_many :credits
   has_many :political_actions
   has_many :influence_items
@@ -65,14 +66,9 @@ class Player < ApplicationRecord
   end
 
   def player_military_outlays
-    cost = {}
+    cost = 0
     self.armies.each do |army|
-      renewal_cost = army.army_size&.params&.dig('renewal_cost')
-      next unless renewal_cost
-      renewal_cost.each do |res_id, value|
-        cost[res_id] ||= 0
-        cost[res_id] += value
-      end
+      cost += army.troops.count * Troop::RENEWAL_COST
     end
     cost
   end

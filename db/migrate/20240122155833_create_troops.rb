@@ -4,6 +4,7 @@ class CreateTroops < ActiveRecord::Migration[7.0]
       t.boolean :is_hired
       t.references :troop_type, null: true, foreign_key: true
       t.references :army, null: true, foreign_key: true
+      t.json :params
 
       t.timestamps
     end

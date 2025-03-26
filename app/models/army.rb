@@ -4,9 +4,8 @@ class Army < ApplicationRecord
   audited
   
   has_many   :troops, dependent: :destroy
-  belongs_to :region, optional: true
-  belongs_to :player, optional: true
-  belongs_to :army_size, optional: true
+  belongs_to :settlement, optional: true
+  belongs_to :owner, polymorphic: true, optional: true
 
   def demote_army! #Если за большую армию не вносятся расходы, она должна либо исчезнуть, либо ухудшиться
     if self.army_size_id == ArmySize::SMALL
@@ -45,13 +44,33 @@ class Army < ApplicationRecord
     end
   end
 
-  def pay_for_army
-    if self.params["paid"].include?(GameParameter.current_year)
-      {result: false, msg: "Армия в этом году уже оплачена"}
-    else
-      self.params["paid"].push(GameParameter.current_year)
+  def goto settlement_id
+    settlement = Settlement.find_by_id(settlement_id)
+    if settlement
+      self.settlement_id = settlement.id
       self.save
-      {result: true, msg: "Армия оплачена"}
+    end
+  end
+
+  def power
+    troops.sum{|t| t.troop_type.params['power'].to_i}
+  end
+
+  def attack enemy_id
+    enemy = Army.find_by_id(enemy_id)
+    if enemy
+      winner, looser = self.power > enemy.power ? [self, enemy] : [enemy, self]
+      damage = looser.power
+      winner.troops.shuffle.each do |troop|
+        h = troop.health
+        troop.injure(damage)
+        damage -= h
+        break if damage <= 0
+      end
+      looser.destroy
+      winner
+    else
+      false
     end
   end
 end

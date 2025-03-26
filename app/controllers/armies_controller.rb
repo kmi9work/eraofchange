@@ -1,12 +1,23 @@
 class ArmiesController < ApplicationController
-  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army]
+  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack]
 
-  # GET /armies or /armies.json
+  def goto
+    @army.goto(params[:settlement_id])
+  end
+
+  def attack
+    @army = @army.attack(params[:enemy_id])
+    if @army
+      render :show
+    else
+      render json: false
+    end
+  end
+
   def index
     @armies = Army.all
   end
 
-  # GET /armies/1 or /armies/1.json
   def show
   end
 
@@ -18,16 +29,13 @@ class ArmiesController < ApplicationController
     @army.pay_for_army
   end
 
-  # GET /armies/new
   def new
     @army = Army.new
   end
 
-  # GET /armies/1/edit
   def edit
   end
 
-  # POST /armies or /armies.json
   def create
     @army = Army.new(army_params)
 
@@ -42,7 +50,6 @@ class ArmiesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /armies/1 or /armies/1.json
   def update
     respond_to do |format|
       if @army.update(army_params)
@@ -55,7 +62,6 @@ class ArmiesController < ApplicationController
     end
   end
 
-  # DELETE /armies/1 or /armies/1.json
   def destroy
     @army.destroy
 

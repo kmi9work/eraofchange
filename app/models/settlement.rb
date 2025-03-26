@@ -7,6 +7,7 @@ class Settlement < ApplicationRecord
   belongs_to :region, optional: true
   belongs_to :player, optional: true
   has_many :buildings
+  has_many :armies
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
   def income

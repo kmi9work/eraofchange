@@ -1,4 +1,5 @@
 json.extract! country, :id, :name, :params, :relations, :created_at, :updated_at
+json.owner_type 'Country'
 
 relation_items = []
 if Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1 && 

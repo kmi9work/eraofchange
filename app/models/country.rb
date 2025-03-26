@@ -3,6 +3,7 @@ class Country < ApplicationRecord
   # embargo (bool)- Введено ли эмбарго в стране?
 	has_many :regions
   has_many :relation_items
+  has_many :armies
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
 
