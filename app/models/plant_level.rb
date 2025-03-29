@@ -4,8 +4,6 @@ class PlantLevel < ApplicationRecord
   MAX_LEVEL = 3
 
 
-########ПРОВЕРИТЬ ВНИМАТЕЛЬНЕЕ
-
   include Dictionary
 
   def self.show_pl_levels
@@ -17,7 +15,9 @@ class PlantLevel < ApplicationRecord
       pl_levels.push({id: p_l.id,
                       formula_from: p_l.formula_conversion[:from],
                       formula_to:   p_l.formula_conversion[:to],
-                      plant_type_name: "#{p_l.plant_type.name} #{p_l.level}"})
+                      name: p_l.plant_type.name,
+                      level: p_l.level
+                    })
     end
     return pl_levels
   end
@@ -30,8 +30,6 @@ class PlantLevel < ApplicationRecord
     end
     return {from: from.uniq, to: to.uniq}
   end
-
-  ########ПРОВЕРИТЬ ВНИМАТЕЛЬНЕЕ
 
   def feed_to_plant!(request = [], way = 'from')
     Technology.find(Technology::TECH_SCHOOLS).is_open == 1 ? coof = 1.5 : coof = 1
