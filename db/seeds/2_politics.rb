@@ -33,8 +33,8 @@ while str = f.gets
   id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level, relations = str.split(';')
   country = Country.find_by_name(country_name)
   if country.blank?
-    country = Country.create(id: id, name: country_name, params: {"relations" => relations.to_i, "embargo" => false})
-    RelationItem.add(0, "Ручная правка", country)
+    country = Country.create(id: id, name: country_name, params: {"embargo" => false})
+    RelationItem.add(relations.to_i, "Ручная правка", country)
   end
   region = Region.find_by_name(region_name)
   if region.blank?
