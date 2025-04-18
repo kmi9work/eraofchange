@@ -13,6 +13,10 @@ class CountriesController < ApplicationController
     render 'index'
   end
 
+  def embargo_status
+
+  end
+
   def embargo
     @country.embargo(params[:arg])
   end
