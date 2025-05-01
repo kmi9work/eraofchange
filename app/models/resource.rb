@@ -13,10 +13,8 @@ class Resource < ApplicationRecord
   end
 
   def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [], gold = 0)
-    gold = gold.to_i
-    #TODO Инстурмент проверки наличия у игрока "Контрабанды"
    #ресурсы, которые игрок продает рынку
-    res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    gold = res_pl_sells.select {|d|  d[:identificator] == "gold"}[0][:count] || 0
     elig_resources = country_filter(country_id, res_pl_sells)
     elig_resources.each do |res|
       #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
@@ -24,7 +22,6 @@ class Resource < ApplicationRecord
     end
 
     res_to_player = []
-    res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
     elig_resources = country_filter(country_id, res_pl_buys)
     elig_resources.each do |res|
       resource = calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))
@@ -52,10 +49,6 @@ class Resource < ApplicationRecord
     end
   end
 
-
-  #ПЕРЕПИСАТЬ ВСЁ ТАК, ЧТОБЫ БЫЛО ПОНЯТНО, КТО КОМУ ПРОДАЕТ, СЕЙЧАС НЕ ПОНЯТНО
-  #когда игрок продает to_market, когда покупает -- off_market вместо buy_price и sale_price
-
   def self.show_prices
     resources = Resource.all
 
@@ -81,8 +74,8 @@ class Resource < ApplicationRecord
       to_prices[:identificator]  = res.identificator
       off_prices[:identificator] = res.identificator
 
-      to_prices[:name_and_s_pr]  = "По #{res.params["buy_price"][relations]} за штуку" #что продается рынку
-      off_prices[:name_and_b_pr] = "По #{res.params["sale_price"][relations]} за штуку"#что продается на рынок
+      to_prices[:name_and_s_pr]  = "По #{res.params["buy_price"][relations]}" #что продается рынку
+      off_prices[:name_and_b_pr] = "По #{res.params["sale_price"][relations]}"#что продается на рынок
 
       to_prices[:sell_price] = res.params["buy_price"][relations] #игрок продает на рынок
       off_prices[:buy_price] = res.params["sale_price"][relations]  #игрок покупает на рынке

@@ -58,24 +58,6 @@ class Country < ApplicationRecord
     )
   end
 
-  def self.c_embargo
-    for_ids = Country.foreign_countries
-    query = <<~SQL
-      SELECT id, name, params->>'embargo' AS embargo
-      FROM countries
-      WHERE id IN (#{[HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA].join(',')})
-    SQL
-    
-    results = ActiveRecord::Base.connection.execute(query)
-    results.map do |row|
-      {
-        id: row['id'],
-        name: row['name'],
-        embargo: row['embargo'] == 'true'
-      }
-  end
-  end
-
   def relations
     sum = 0
     sum += 2 if (Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1) && [PERMIAN, VYATKA, RYAZAN, TVER, NOVGOROD].include?(self.id)
