@@ -6,3 +6,9 @@
 Rails.application.config.filter_parameters += [
   :passw, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn
 ]
+
+ActiveSupport.on_load(:action_controller) do
+  wrap_parameters format: [:json] do
+    # Автоматически оборачивает JSON-параметры в хэш с indifferent access
+  end
+end
