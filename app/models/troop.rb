@@ -23,7 +23,7 @@ class Troop < ApplicationRecord
   end
 
   def power
-    troop_type.params['power'].to_i
+    health
   end
 
   def health

@@ -15,7 +15,7 @@ class GameParametersController < ApplicationController
   end
 
   def increase_year
-    GameParameter.increase_year
+    GameParameter.increase_year(params[:kaznachei_bonus])
   end
 
   # GET /game_parameters/1 or /game_parameters/1.json

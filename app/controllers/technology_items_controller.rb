@@ -38,6 +38,11 @@ class TechnologyItemsController < ApplicationController
   def update
     respond_to do |format|
       if @technology_item.update(technology_item_params)
+        if params[:okolnichy_bonus] && technology_item_params[:value].to_i == 1
+          Job.find_by_id(Job::OKOLNICHY).players.each do |player|
+            player.modify_influence(Job::OKOLNICHY_BONUS, "Бонус за открытие технологии", @region) 
+          end
+        end
         format.html { redirect_to technology_item_url(@technology_item), notice: "Technology item was successfully updated." }
         format.json { render :show, status: :ok, location: @technology_item }
       else

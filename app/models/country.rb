@@ -66,15 +66,21 @@ class Country < ApplicationRecord
   end
 
   def capture(region, how) #1 - войной, 0 - миром
-    #ПЕРЕПИСАТЬ ЧЕРЕЗ items!
    region.country_id = self.id
     if how.to_i == BY_WAR
-      region.params["public_order"] += MILITARILY
+      PublicOrderItem.add(MILITARILY, "Присоединение войной", region, nil)
     elsif how.to_i == BY_DIPLOMACY
-      region.params["public_order"] += PEACEFULLY
+      PublicOrderItem.add(MILITARILY, "Присоединение миром", region, nil)
     end
 
     region.save
-    {result: true, msg: "Регион присоединен к #{self.name}"}
+  end
+
+  def join_peace
+    rus = Country.find_by_id(RUS)
+    regions.each{|r| rus.capture(r, BY_DIPLOMACY)}
+    Job.find_by_id(Job::POSOL).players.each do |player|
+      player.modify_influence(Job::POSOL_BONUS, "Бонус за присоединение миром", self) 
+    end
   end
 end

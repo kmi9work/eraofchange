@@ -30,7 +30,7 @@ f.gets #Заголовки
 
 po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets
-  id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level, relations = str.split(';')
+  id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level, relations, way = str.split(';').map(&:strip)
   country = Country.find_by_name(country_name)
   if country.blank?
     country = Country.create(id: id, name: country_name, params: {"embargo" => false})
@@ -38,7 +38,7 @@ while str = f.gets
   end
   region = Region.find_by_name(region_name)
   if region.blank?
-    region = Region.create(name: region_name, country: country)
+    region = Region.create(name: region_name, country: country, way: way)
     PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
   end
   city = Settlement.find_by_name(city_name)

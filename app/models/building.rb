@@ -24,13 +24,28 @@ class Building < ApplicationRecord
   end
 
   def pay_for_maintenance
-    if self.params["paid"].include?(GameParameter.current_year)
-      {result: false, msg: "За эту здание уже внесены расходы"}
+    if is_paid
+      self.params["paid"].delete(GameParameter.current_year)
+      self.save
     else
       self.params["paid"].push(GameParameter.current_year)
       self.save
-      {result: true, msg: "Расходы за здание внесены"}
     end
   end
 
+  def is_paid
+    self.params["paid"].include?(GameParameter.current_year)
+  end
+
+  def fined
+    self.params['fined']
+  end
+
+  def fine
+    Job.find_by_id(Job::METROPOLITAN).players.each do |player|
+      player.modify_influence(Job::METROPOLITAN_PINE, "Штраф за неоплаченную церковь", self) 
+    end
+    self.params['fined'] = true
+    self.save
+  end
 end

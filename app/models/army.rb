@@ -7,37 +7,17 @@ class Army < ApplicationRecord
   belongs_to :settlement, optional: true
   belongs_to :owner, polymorphic: true, optional: true
 
-  def demote_army! #Если за большую армию не вносятся расходы, она должна либо исчезнуть, либо ухудшиться
-    if self.army_size_id == ArmySize::SMALL
-      self.destroy
-      {result: true, msg: "Армия удалена за неуплату"}
-    elsif self.army_size_id == ArmySize::MEDIUM
-      self.army_size_id = ArmySize::SMALL
-      self.save
-      {result: true, msg: "Армия сокращена за неуплату"}
-    elsif self.army_size_id == ArmySize::LARGE
-      self.army_size_id = ArmySize::MEDIUM
-      self.save
-      {result: true, msg: "Армия сокращена за неуплату"}
-    end
-  end
-
-  def check_and_demote_army!
-    # если на конец года оплачено, то не надо, в противном случае -- распустить
-    if !self.params["paid"].include?(GameParameter.current_year)
-      demote_army!
-    end
-  end
+  NUMBER_OF_SLOTS = 3
 
   def has_empty_slots?
-    number_of_slots = self.army_size&.params.dig("max_troop").to_i
+    number_of_slots = NUMBER_OF_SLOTS
     hired_troops = self.troops.count
     hired_troops < number_of_slots
   end
 
   def add_troop(troop_type_id)
     if has_empty_slots?
-      troop = self.troops.create(troop_type_id: troop_type_id)
+      troop = self.troops.create(troop_type_id: troop_type_id, params: {'paid' => []})
       {troop: troop, msg: "Отряд успешно добавлен в армию"}
     else
       {troop: nil, msg: "В армии превышено число отрядов"}
@@ -53,14 +33,14 @@ class Army < ApplicationRecord
   end
 
   def power
-    troops.sum{|t| t.troop_type.params['power'].to_i}
+    troops.sum{|t| t.power}
   end
 
-  def attack enemy_id
+  def attack enemy_id, voevoda_bonus
     enemy = Army.find_by_id(enemy_id)
     if enemy
       winner, looser = self.power > enemy.power ? [self, enemy] : [enemy, self]
-      damage = looser.power
+      damage = (looser.power / 2.0).ceil
       winner.troops.shuffle.each do |troop|
         h = troop.health
         troop.injure(damage)
@@ -68,6 +48,11 @@ class Army < ApplicationRecord
         break if damage <= 0
       end
       looser.destroy
+      if winner.owner.job_ids&.include?(Job::VOEVODA) or winner.owner.job_ids&.include?(Job::GRAND_PRINCE)
+        Job.find_by_id(Job::VOEVODA).players.each do |player|
+          player.modify_influence(Job::VOEVODA_BONUS, "Бонус за победу", winner) 
+        end
+      end
       winner
     else
       false

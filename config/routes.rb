@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   resources :influence_items
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'
+  patch '/troops/:id/upgrade', to: 'troops#upgrade'
+  get '/troop_types/upgrade_paths', to: 'troop_types#upgrade_paths'
 
   patch '/players/:id/add_influence', to: 'players#add_influence'
 
@@ -20,6 +22,7 @@ Rails.application.routes.draw do
   patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
   patch '/armies/:id/goto/:settlement_id', to: 'armies#goto'
   patch '/armies/:id/attack/:enemy_id', to: 'armies#attack'
+  post '/armies/:id/troops', to: 'armies#add_troop'
 
   patch '/regions/:id/add_po_item', to: 'regions#add_po_item'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
@@ -27,6 +30,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/embargo', to: 'countries#embargo'
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
+  patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
