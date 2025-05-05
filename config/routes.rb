@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   patch '/regions/:id/add_po_item', to: 'regions#add_po_item'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
-  patch '/countries/:id/embargo', to: 'countries#embargo'
+  patch '/countries/:id/set_embargo', to: 'countries#set_embargo'
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
