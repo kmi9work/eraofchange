@@ -74,9 +74,6 @@ class Resource < ApplicationRecord
       to_prices[:identificator]  = res.identificator
       off_prices[:identificator] = res.identificator
 
-      to_prices[:name_and_s_pr]  = "По #{res.params["buy_price"][relations]}" #что продается рынку
-      off_prices[:name_and_b_pr] = "По #{res.params["sale_price"][relations]}"#что продается на рынок
-
       to_prices[:sell_price] = res.params["buy_price"][relations] #игрок продает на рынок
       off_prices[:buy_price] = res.params["sale_price"][relations]  #игрок покупает на рынке
 

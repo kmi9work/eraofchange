@@ -16,6 +16,10 @@ class CountriesController < ApplicationController
   def set_embargo
     @country.set_embargo
   end
+  
+  def embargo
+    @country.embargo(params[:arg])
+  end
 
   def capture
     region = Region.find(params[:region_id])

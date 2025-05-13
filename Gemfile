@@ -60,16 +60,19 @@ group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
 end
 
-group :development do
-  # Use console on exceptions pages [https://github.com/rails/web-console]
-  gem "web-console"
 
-  # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
-  # gem "rack-mini-profiler"
 
-  # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
-  # gem "spring"
-end
+# group :development do
+#   # Use console on exceptions pages [https://github.com/rails/web-console]
+#   gem "web-console"
+#   gem 'capistrano', '~> 3.17'
+#   gem 'capistrano-rails', '~> 1.6'
+#   gem 'capistrano-bundler', '~> 2.0'
+#   gem 'capistrano-rvm' # если используете RVM
+#   # или gem 'capistrano-rbenv' # если используете rbenv
+#   gem 'capistrano3-puma' # если используете Puma
+
+# end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
