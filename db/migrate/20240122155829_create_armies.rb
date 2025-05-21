@@ -4,6 +4,8 @@ class CreateArmies < ActiveRecord::Migration[7.0]
       t.references :settlement, null: true, foreign_key: true
       t.integer :owner_id
       t.string :owner_type
+      t.string :name
+      t.boolean :hidden
       t.json :params
       t.timestamps
     end

@@ -10,6 +10,10 @@ class TroopTypesController < ApplicationController
   def show
   end
 
+  def upgrade_paths
+    render json: TroopType.upgrade_paths
+  end
+
   # GET /troop_types/new
   def new
     @troop_type = TroopType.new

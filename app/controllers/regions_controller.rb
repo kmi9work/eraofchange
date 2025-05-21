@@ -10,6 +10,13 @@ class RegionsController < ApplicationController
 
   def captured_by
     @region.captured_by(params[:country_id], params[:how])
+    if params[:grand_prince_bonus] && 
+          params[:country_id].to_i == Country::RUS && 
+          @region.way == 'rus'
+      Job.find_by_id(Job::GRAND_PRINCE)&.players&.each do |player|
+        player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение земли", @region) 
+      end
+    end
   end
 
   def modify_public_order

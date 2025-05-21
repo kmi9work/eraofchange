@@ -1,12 +1,12 @@
 class ArmiesController < ApplicationController
-  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack]
+  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop]
 
   def goto
     @army.goto(params[:settlement_id])
   end
 
   def attack
-    @army = @army.attack(params[:enemy_id])
+    @army = @army.attack(params[:enemy_id], params[:voevoda_bonus])
     if @army
       render :show
     else
@@ -21,10 +21,6 @@ class ArmiesController < ApplicationController
   def show
   end
 
-  def demote_army
-    @army.demote_army!
-  end
-
   def pay_for_army
     @army.pay_for_army
   end
@@ -34,6 +30,11 @@ class ArmiesController < ApplicationController
   end
 
   def edit
+  end
+
+  def add_troop
+    @army.add_troop(params[:troop_type_id])
+    render :show, status: :created, location: @army
   end
 
   def create
@@ -53,6 +54,11 @@ class ArmiesController < ApplicationController
   def update
     respond_to do |format|
       if @army.update(army_params)
+        if params[:tainiy_bonus]
+          Job.find_by_id(Job::TAINIY).players.each do |player|
+            player.modify_influence(Job::TAINIY_BONUS, "Бонус за разведку", @building) 
+          end
+        end
         format.html { redirect_to army_url(@army), notice: "Army was successfully updated." }
         format.json { render :show, status: :ok, location: @army }
       else
@@ -79,6 +85,6 @@ class ArmiesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def army_params
-      params.require(:army).permit(:region_id, :player_id, :army_size_id)
+      params.require(:army).permit(:name, :hidden, :settlement_id, :owner_id, :owner_type)
     end
 end

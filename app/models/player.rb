@@ -105,7 +105,7 @@ class Player < ApplicationRecord
   end
 
   def influence
-    self.influence_buildings + self.influence_items.sum{|ii| ii.value.to_i}
+    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
   end
 end
 

@@ -1,5 +1,5 @@
 class TroopsController < ApplicationController
-  before_action :set_troop, only: %i[ show edit update destroy pay_for ]
+  before_action :set_troop, only: %i[ show edit update destroy pay_for upgrade ]
 
   def pay_for
     @troop.pay_for
@@ -21,6 +21,12 @@ class TroopsController < ApplicationController
 
   # GET /troops/1/edit
   def edit
+  end
+
+  def upgrade
+    @troop.troop_type_id = params[:target_type_id]
+    @troop.save
+    render :show, status: :created, location: @troop
   end
 
   # POST /troops or /troops.json

@@ -1,4 +1,4 @@
-json.extract! army, :id, :settlement, :owner_id, :owner_type, :power, :created_at, :updated_at
+json.extract! army, :id, :name, :hidden, :settlement, :owner_id, :owner_type, :power, :created_at, :updated_at
 if army.owner_type == 'Player'
   json.owner army.owner, partial: "players/player", as: :player
 elsif army.owner_type == 'Country'

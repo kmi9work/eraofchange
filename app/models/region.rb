@@ -13,7 +13,7 @@ class Region < ApplicationRecord
 
   has_one :capital, -> { where(settlement_type_id: SettlementType::CAPITAL) }, class_name: 'Settlement'
 
-  def inf_buildings_on_po #Влияние зданий на общественной порядок
+  def inf_buildings_on_po #Влияние зданий на общественный порядок
     bbl_params = self.settlements.joins(buildings: :building_level).
          where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
          pluck('buildings.params, building_levels.params')
