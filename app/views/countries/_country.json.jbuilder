@@ -1,4 +1,4 @@
-json.extract! country, :id, :name, :params, :relations, :created_at, :updated_at
+json.extract! country, :id, :name, :embargo, :params, :relations, :created_at, :updated_at
 json.owner_type 'Country'
 
 relation_items = []

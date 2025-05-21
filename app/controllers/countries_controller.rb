@@ -1,5 +1,5 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy embargo change_relations capture add_relation_item join_peace]
+  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture add_relation_item join_peace]
 
   # GET /countries or /countries.json
   def index
@@ -11,6 +11,10 @@ class CountriesController < ApplicationController
   def foreign_countries
     @countries = Country.foreign_countries
     render 'index'
+  end
+
+  def set_embargo
+    @country.set_embargo
   end
 
   def join_peace

@@ -13,11 +13,8 @@ class Resource < ApplicationRecord
   end
 
   def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [], gold = 0)
-    return {msg: "Эмбарго"} if Country.find(country_id).params["embargo"]
-    gold = gold.to_i
-    #TODO Инстурмент проверки наличия у игрока "Контрабанды"
    #ресурсы, которые игрок продает рынку
-    res_pl_sells.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
+    gold = res_pl_sells.select {|d|  d[:identificator] == "gold"}[0][:count] || 0
     elig_resources = country_filter(country_id, res_pl_sells)
     elig_resources.each do |res|
       #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
@@ -25,7 +22,6 @@ class Resource < ApplicationRecord
     end
 
     res_to_player = []
-    res_pl_buys.map! {|res| res.transform_keys(&:to_sym)} ####### Костыль сериализации
     elig_resources = country_filter(country_id, res_pl_buys)
     elig_resources.each do |res|
       resource = calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))
@@ -53,31 +49,47 @@ class Resource < ApplicationRecord
     end
   end
 
-
-  #ПЕРЕПИСАТЬ ВСЁ ТАК, ЧТОБЫ БЫЛО ПОНЯТНО, КТО КОМУ ПРОДАЕТ, СЕЙЧАС НЕ ПОНЯТНО
-  #когда игрок продает to_market, когда покупает -- off_market вместо buy_price и sale_price
-
   def self.show_prices
     resources = Resource.all
+
+    off_market = [] # То, что продается с рынка
+    to_market =  [] # То, что продается на рынок
+
+    off_and_to_market_prices = {off_market: off_market, to_market: to_market} # хэш с данным для покупки и продажи
+
     prices_array = []
 
     resources.each do |res|
       next if res.country_id == nil
       relations = res.country.relations.to_s
 
-      res_prices = {}
-      res_prices[:name] = res.name
-      res_prices[:name_and_s_pr] = "#{res.name} по #{res.params["buy_price"][relations]} за штуку"
-      res_prices[:name_and_b_pr] = "#{res.name} по #{res.params["sale_price"][relations]} за штуку"
-      res_prices[:identificator] = res.identificator
-      res_prices[:buy_price] = res.params["buy_price"][relations]
-      res_prices[:sell_price] = res.params["sale_price"][relations] if res.params["sale_price"]
-      res_prices[:embargo] = res.country.params["embargo"]
-      res_prices[:country] = res.country.as_json(only: [:id, :name])
-      prices_array.push(res_prices)
+      not_for_sale = true if res.params["sale_price"][relations] == nil
+
+      to_prices =  {}
+      off_prices = {}
+
+      to_prices[:name]  = res.name
+      off_prices[:name] = res.name
+
+      to_prices[:identificator]  = res.identificator
+      off_prices[:identificator] = res.identificator
+
+      to_prices[:sell_price] = res.params["buy_price"][relations] #игрок продает на рынок
+      off_prices[:buy_price] = res.params["sale_price"][relations]  #игрок покупает на рынке
+
+      to_prices[:embargo]  = res.country.params["embargo"]
+      off_prices[:embargo] = res.country.params["embargo"]
+
+
+      to_prices[:country]  = res.country.as_json(only: [:id, :name])
+      off_prices[:country] = res.country.as_json(only: [:id, :name])
+
+      to_market.push(to_prices)
+      off_market.push(off_prices) if !not_for_sale
+
     end
 
-    return prices_array
+    return off_and_to_market_prices
   end
 
 end

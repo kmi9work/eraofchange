@@ -30,15 +30,14 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
-  def embargo(arg) #1 - эмбарго есть, 0 - эмбарго нет
-    if self.params['embargo'] != nil
-      self.params['embargo'] = arg.to_i > 0
-      self.save
-      self.params['embargo'] ? emb = "введено" : emb = "снято"
-      {result: true, msg: "Эмбарго #{emb}."}
-    else
-      {result: nil, msg: "Эта страна не может вводить и снимать эмбарго."}
-    end
+  def embargo #1 - эмбарго есть, 0 - эмбарго нет
+    params['embargo']
+  end
+
+  def set_embargo
+    return false if params['embargo'].nil?
+    self.params['embargo'] = params['embargo'] == 0 ? 1 : 0
+    self.save
   end
 
   def change_relations(count, entity, comment = nil)
