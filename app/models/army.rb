@@ -48,7 +48,7 @@ class Army < ApplicationRecord
         break if damage <= 0
       end
       looser.destroy
-      if winner.owner.job_ids&.include?(Job::VOEVODA) or winner.owner.job_ids&.include?(Job::GRAND_PRINCE)
+      if winner.owner.try(:job_ids)&.include?(Job::VOEVODA) or winner.owner.try(:job_ids)&.include?(Job::GRAND_PRINCE)
         Job.find_by_id(Job::VOEVODA).players.each do |player|
           player.modify_influence(Job::VOEVODA_BONUS, "Бонус за победу", winner) 
         end

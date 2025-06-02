@@ -2,12 +2,18 @@ class Troop < ApplicationRecord
   belongs_to :troop_type
   belongs_to :army
 
+  before_create :set_first_year
+
   RENEWAL_COST = 7000
   CANON_COST = [
     {identificator: "tools", count: 20}, 
     {identificator: "metal", count: 20}, 
     {identificator: "money", count: 1000}
   ]
+
+  def set_first_year
+    self.params['first_year'] = GameParameter.current_year
+  end
 
   def pay_for
     if is_paid
@@ -45,5 +51,9 @@ class Troop < ApplicationRecord
       self.params['damage'] = damage
       self.save
     end
+  end
+
+  def to_destroy
+    !self.params["paid"]&.include?(GameParameter.current_year - 1) && self.params['first_year'].to_i < GameParameter.current_year
   end
 end
