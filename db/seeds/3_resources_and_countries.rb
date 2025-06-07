@@ -10,7 +10,7 @@ Resource.create(name: "Лошади", identificator: "horses", country_id: horde
 "buy_price" => {-2 => 51, -1 => 58, 0 => 64, 1 => 70, 2 => 77}})
 
 Resource.create(name: "Pоскошь", identificator: "luxury", country_id: horde, params:
- {"sale_price" => {-2 => 66, -1 => 56, 0 => 47,  1 => 47, 2 => 47},
+{"sale_price" => {-2 => 1000, -1 => 860, 0 => 700,  1 => 700, 2 => 700},
 "buy_price" => {-2 => 400, -1 => 450, 0 => 500, 1 =>550, 2 => 600}})
 
 #Ливонский орден

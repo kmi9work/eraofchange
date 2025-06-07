@@ -3,7 +3,7 @@ class PlayersController < ApplicationController
 
   # GET /players or /players.json
   def index
-    scope = Player.all
+    scope = Player.order(:id)
     if params[:player_type_id].present?
       scope = scope.where(player_type_id: params[:player_type_id])
     end
