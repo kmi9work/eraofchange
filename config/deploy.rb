@@ -3,9 +3,17 @@ lock "~> 3.19.2"
 
 set :application, "eraofchange"
 set :repo_url, "git@github.com:kmi9work/eraofchange.git"
+set :branch, 'depl'
 
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/deploy/eraofchange"
+
+set :passenger_restart_command, 'passenger-config restart-app'
+
+
+set :rbenv_type, :user  # или :system, если Ruby установлен системно
+set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
+set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
 
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
