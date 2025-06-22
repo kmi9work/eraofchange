@@ -36,3 +36,5 @@
 /config/master.key
 
 .byebug_history
+
+/config/credentials/production.key

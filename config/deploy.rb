@@ -15,6 +15,7 @@ set :rbenv_type, :user  # или :system, если Ruby установлен с�
 set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
 set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
 
+
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
 
@@ -26,10 +27,16 @@ set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rben
 # set :pty, true
 
 # Default value for :linked_files is []
-# append :linked_files, "config/database.yml", 'config/master.key'
+append :linked_files, "config/database.yml", 'config/master.key'
 
 # Default value for linked_dirs is []
-# append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
+append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
+#append :linked_files, 'config/credentials/production.key'
+
+set :keep_releases, 3
+
+
+#Rake::Task['deploy:assets:precompile'].clear_actions
 
 # Default value for default_env is {}
 # set :default_env, { path: "/opt/ruby/bin:$PATH" }
