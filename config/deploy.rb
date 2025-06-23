@@ -29,8 +29,8 @@ namespace :deploy do
       # Копируем файлы с локальной машины на сервер (если они существуют)
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
-      upload!('config/config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production.key')
-      upload!('config/config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production..yml.enc')
+      upload!('config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production.key')
+      upload!('config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production..yml.enc')
       upload!('.env', "#{shared_path}/.env") if File.exist?('.env')
 
       # Даем правильные права
