@@ -38,3 +38,4 @@
 .byebug_history
 
 /config/credentials/production.key
+/config/credentials.yml.enc
