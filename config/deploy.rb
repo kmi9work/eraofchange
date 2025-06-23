@@ -28,13 +28,13 @@ namespace :deploy do
 
       # Копируем файлы с локальной машины на сервер (если они существуют)
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
-     # upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
+      upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
       upload!('config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.key')
       upload!('config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.yml.enc')
 
       # Даем правильные права
-      execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
-      execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
+      # execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
+      # execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
     end
   end
 
@@ -54,7 +54,7 @@ end
 # set :pty, true
 
 # Default value for :linked_files is []
-append :linked_files, "config/database.yml"#, 'config/master.key'
+append :linked_files, "config/database.yml", 'config/master.key'
 
 # Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
