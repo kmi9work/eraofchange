@@ -22,16 +22,15 @@ namespace :deploy do
       # Создаем папки, если их нет
       execute :mkdir, "-p #{shared_path}/config"
       execute :mkdir, "-p #{shared_path}/config/credentials"
-      # execute :mkdir, "-p #{shared_path}/tmp/sockets"
-      # execute :mkdir, "-p #{shared_path}/tmp/pids"
-      # execute :mkdir, "-p #{shared_path}/public/uploads"
+      execute :mkdir, "-p #{shared_path}/tmp/sockets"
+      execute :mkdir, "-p #{shared_path}/tmp/pids"
+      execute :mkdir, "-p #{shared_path}/public/uploads"
 
       # Копируем файлы с локальной машины на сервер (если они существуют)
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
-      upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
+     # upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
       upload!('config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.key')
       upload!('config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.yml.enc')
-      upload!('.env', "#{shared_path}/.env") if File.exist?('.env')
 
       # Даем правильные права
       execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
@@ -42,13 +41,6 @@ namespace :deploy do
   # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
   before 'deploy:check:linked_files', :setup_config
 end
-
-
-
-
-
-
-
 
 
 # Default value for :format is :airbrussh.
@@ -62,11 +54,12 @@ end
 # set :pty, true
 
 # Default value for :linked_files is []
-append :linked_files, "config/database.yml", 'config/master.key'
+append :linked_files, "config/database.yml"#, 'config/master.key'
 
 # Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
 append :linked_files, 'config/credentials/production.key'
+append :linked_files, 'config/credentials/production.yml.enc'
 
 set :keep_releases, 3
 
