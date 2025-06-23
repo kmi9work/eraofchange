@@ -38,13 +38,9 @@ namespace :deploy do
     end
   end
 
-
-
   # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
   before 'deploy:check:linked_files', :setup_config
 end
-
-
 
 
 # Default value for :format is :airbrussh.
