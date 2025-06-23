@@ -38,15 +38,7 @@ namespace :deploy do
     end
   end
 
-   after :migrate, :seed do
-    on primary :db do
-      within release_path do
-        with rails_env: fetch(:stage) do
-          execute :rake, 'db:seed:all'
-        end
-      end
-    end
-  end
+
 
   # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
   before 'deploy:check:linked_files', :setup_config
