@@ -42,7 +42,7 @@ namespace :deploy do
     on primary :db do
       within release_path do
         with rails_env: fetch(:stage) do
-          execute :rake, 'db:seed'
+          execute :rake, 'db:seed:all'
         end
       end
     end
