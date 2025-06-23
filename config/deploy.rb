@@ -8,12 +8,47 @@ set :branch, 'depl'
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/deploy/eraofchange"
 
-set :passenger_restart_command, 'passenger-config restart-app'
+#set :passenger_restart_command, 'passenger-config restart-app'
 
 
 set :rbenv_type, :user  # или :system, если Ruby установлен системно
 set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
 set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
+
+namespace :deploy do
+  # Задача для создания папок и файлов при первом деплое
+  task :setup_config do
+    on roles(:app) do
+      # Создаем папки, если их нет
+      execute :mkdir, "-p #{shared_path}/config"
+      execute :mkdir, "-p #{shared_path}/config/credentials"
+      # execute :mkdir, "-p #{shared_path}/tmp/sockets"
+      # execute :mkdir, "-p #{shared_path}/tmp/pids"
+      # execute :mkdir, "-p #{shared_path}/public/uploads"
+
+      # Копируем файлы с локальной машины на сервер (если они существуют)
+      upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
+      upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
+      upload!('config/config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production.key')
+      upload!('config/config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/config/credentials/production..yml.enc')
+      upload!('.env', "#{shared_path}/.env") if File.exist?('.env')
+
+      # Даем правильные права
+      execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
+      execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
+    end
+  end
+
+  # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
+  before 'deploy:check:linked_files', :setup_config
+end
+
+
+
+
+
+
+
 
 
 # Default value for :format is :airbrussh.
