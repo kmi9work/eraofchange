@@ -64,7 +64,8 @@ append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/syst
 set :keep_releases, 3
 
 set :default_env, { 
-  'RAILS_MASTER_KEY' => File.read('config/master.key').strip
+  'RAILS_MASTER_KEY' => File.read('config/master.key').strip,
+  'ERAOFCHANGE_DATABASE_PASSWORD' => 'b1cf3cdaf6066b' #для теста
 }
 
 
