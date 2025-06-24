@@ -8,6 +8,10 @@ set :branch, 'depl'
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/deploy/eraofchange"
 
+# Passenger
+set :passenger_restart_with_touch, true
+set :passenger_ruby, '/home/deploy/.rbenv/shims/ruby'
+
 #set :passenger_restart_command, 'passenger-config restart-app'
 
 
@@ -38,15 +42,15 @@ namespace :deploy do
     end
   end
 
-   after :migrate, :seed do
-    on primary :db do
-      within release_path do
-        with rails_env: fetch(:stage) do
-          execute :rake, 'db:seed:all'
-        end
-      end
-    end
-  end
+  #  after :migrate, :seed do
+  #   on primary :db do
+  #     within release_path do
+  #       with rails_env: fetch(:stage) do
+  #         execute :rake, 'db:seed:all'
+  #       end
+  #     end
+  #   end
+  # end
 
   # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
   before 'deploy:check:linked_files', :setup_config

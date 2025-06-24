@@ -3,10 +3,7 @@
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
 
-server "62.173.148.168", user: "deploy", roles: %w{app db web} #, my_property: :my_value
-# server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
-# server "db.example.com", user: "deploy", roles: %w{db}
-
+server "62.173.148.168", user: "deploy", roles: %w{app db web}, passenger_ruby: '/home/deploy/.rbenv/shims/ruby' # Путь к ruby
 
 
 # role-based syntax
