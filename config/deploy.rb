@@ -5,15 +5,12 @@ set :application, "eraofchange"
 set :repo_url, "git@github.com:kmi9work/eraofchange.git"
 set :branch, 'depl'
 
-# Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/deploy/eraofchange"
-
 # Passenger
 set :passenger_restart_with_touch, true
 set :passenger_ruby, '/home/deploy/.rbenv/shims/ruby'
 
 #set :passenger_restart_command, 'passenger-config restart-app'
-
 
 set :rbenv_type, :user  # или :system, если Ruby установлен системно
 set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
@@ -25,7 +22,6 @@ namespace :deploy do
     on roles(:app) do
       # Создаем папки, если их нет
       execute :mkdir, "-p #{shared_path}/config"
-      #execute :mkdir, "-p #{shared_path}/config/credentials"
       execute :mkdir, "-p #{shared_path}/tmp/sockets"
       execute :mkdir, "-p #{shared_path}/tmp/pids"
       execute :mkdir, "-p #{shared_path}/public/uploads"
@@ -33,14 +29,24 @@ namespace :deploy do
       # Копируем файлы с локальной машины на сервер (если они существуют)
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
-      #upload!('config/credentials/production.key', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.key')
-      #upload!('config/credentials/production.yml.enc', "#{shared_path}/config/credentials") if File.exist?('config/credentials/production.yml.enc')
 
       # Даем правильные права
       # execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
       # execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
     end
+
+
+    desc 'Restart Passenger'
+    task :restart do
+      on roles(:app) do
+        execute :touch, "#{current_path}/tmp/restart.txt"
+      end
+    end
+  after 'deploy:published', 'deploy:restart'
   end
+
+
+
 
   #  after :migrate, :seed do
   #   on primary :db do
@@ -57,23 +63,9 @@ namespace :deploy do
 end
 
 
-# Default value for :format is :airbrussh.
-# set :format, :airbrussh
-
-# You can configure the Airbrussh format using :format_options.
-# These are the defaults.
-# set :format_options, command_output: true, log_file: "log/capistrano.log", color: :auto, truncate: :auto
-
-# Default value for :pty is false
-# set :pty, true
-
-# Default value for :linked_files is []
 append :linked_files, "config/database.yml", 'config/master.key'
-
-# Default value for linked_dirs is []
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
-#append :linked_files, 'config/credentials/production.key'
-#append :linked_files, 'config/credentials/production.yml.enc'
+
 
 set :keep_releases, 3
 
@@ -81,19 +73,3 @@ set :default_env, {
   'RAILS_MASTER_KEY' => File.read('config/master.key').strip,
   'ERAOFCHANGE_DATABASE_PASSWORD' => 'b1cf3cdaf6066b' #для теста
 }
-
-
-
-#Rake::Task['deploy:assets:precompile'].clear_actions
-
-# Default value for default_env is {}
-# set :default_env, { path: "/opt/ruby/bin:$PATH" }
-
-# Default value for local_user is ENV['USER']
-# set :local_user, -> { `git config user.name`.chomp }
-
-# Default value for keep_releases is 5
-# set :keep_releases, 5
-
-# Uncomment the following to require manually verifying the host key before first deploy.
-# set :ssh_options, verify_host_key: :secure
