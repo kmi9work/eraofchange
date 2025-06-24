@@ -16,6 +16,7 @@ set :rbenv_type, :user  # или :system, если Ruby установлен с�
 set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
 set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
 
+
 namespace :deploy do
   # Задача для создания папок и файлов при первом деплое
   task :setup_config do
@@ -26,27 +27,26 @@ namespace :deploy do
       execute :mkdir, "-p #{shared_path}/tmp/pids"
       execute :mkdir, "-p #{shared_path}/public/uploads"
 
-      # Копируем файлы с локальной машины на сервер (если они существуют)
+      # Копируем файлы с локальной машины на сервер
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
-
+    
       # Даем правильные права
       # execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
       # execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
-    end
-
-
-    desc 'Restart Passenger'
-    task :restart do
-      on roles(:app) do
-        execute :touch, "#{current_path}/tmp/restart.txt"
-      end
-    end
-  after 'deploy:published', 'deploy:restart'
+   end
   end
 
+  desc 'Restart Passenger'
+  task :restart do
+    on roles(:app) do
+      execute :touch, "#{current_path}/tmp/restart.txt"
+    end
+  end
 
-
+  # Хук для выполнения после деплоя
+  after 'deploy:published', 'deploy:restart'
+end
 
   #  after :migrate, :seed do
   #   on primary :db do
