@@ -3,7 +3,7 @@ lock "~> 3.19.2"
 
 set :application, "eraofchange"
 set :repo_url, "git@github.com:kmi9work/eraofchange.git"
-set :branch, 'depl'
+set :branch, 'stop_gap'
 
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, "/home/deploy/eraofchange"
