@@ -20,48 +20,38 @@ namespace :deploy do
   # Задача для создания папок и файлов при первом деплое
   task :setup_config do
     on roles(:app) do
-      # Создаем папки, если их нет
+      # Создаем необходимые папки в shared
       execute :mkdir, "-p #{shared_path}/config"
       execute :mkdir, "-p #{shared_path}/tmp/sockets"
       execute :mkdir, "-p #{shared_path}/tmp/pids"
       execute :mkdir, "-p #{shared_path}/public/uploads"
+      execute :mkdir, "-p #{shared_path}/log"
 
-      # Копируем файлы с локальной машины на сервер
+      # Копируем конфигурационные файлы
       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
-   
-     # Даем правильные права
-      # execute :chmod, "644 #{shared_path}/config/database.yml" if test("[ -f #{shared_path}/config/database.yml ]")
-      # execute :chmod, "600 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
+      
+      # Устанавливаем правильные права (раскомментируйте если нужно)
+      #execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
     end
   end
 
   desc 'Restart Passenger'
   task :restart do
     on roles(:app) do
-      execute :touch, "#{current_path}/tmp/restart.txt"
+      # Проверяем, существует ли systemd unit
+      if test(:sudo, :systemctl, :status, :passenger)
+        execute :sudo, :systemctl, :restart, :passenger
+      else
+        warn "Passenger systemd service not found, falling back to touch restart.txt"
+        execute :touch, "#{current_path}/tmp/restart.txt"
+      end
     end
   end
 
-  # Хук для выполнения после деплоя
-  after 'deploy:published', 'deploy:restart'
-end
-
-
-
-
-  #  after :migrate, :seed do
-  #   on primary :db do
-  #     within release_path do
-  #       with rails_env: fetch(:stage) do
-  #         execute :rake, 'db:seed:all'
-  #       end
-  #     end
-  #   end
-  # end
-
-  # Вызываем задачу перед деплоем (только если папка `release_path` не существует)
+  # Хуки для выполнения задач
   before 'deploy:check:linked_files', :setup_config
+  after 'deploy:publishing', :restart
 end
 
 
@@ -75,3 +65,14 @@ set :default_env, {
   'RAILS_MASTER_KEY' => File.read('config/master.key').strip,
   'ERAOFCHANGE_DATABASE_PASSWORD' => 'b1cf3cdaf6066b' #для теста
 }
+
+
+  #  after :migrate, :seed do
+  #   on primary :db do
+  #     within release_path do
+  #       with rails_env: fetch(:stage) do
+  #         execute :rake, 'db:seed:all'
+  #       end
+  #     end
+  #   end
+  # end
