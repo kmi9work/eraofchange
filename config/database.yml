@@ -14,5 +14,5 @@ test:
 production:
   <<: *default
   database: eraofchange_production
-  username: eraofchange
+  username: deploy
   password: <%= ENV["ERAOFCHANGE_DATABASE_PASSWORD"] %>

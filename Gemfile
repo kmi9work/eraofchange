@@ -60,19 +60,19 @@ group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
 end
 
+group :development do
+  # Use console on exceptions pages [https://github.com/rails/web-console]
+  gem "web-console"
+  gem 'capistrano', '~> 3.17'
+  gem 'capistrano-rails', '~> 1.6'
+  gem 'capistrano-passenger', '~> 0.2.1' 
+  gem 'capistrano-bundler', '~> 2.0'
+  gem 'capistrano-rbenv'
+  gem 'ed25519', '~> 1.2'
+  gem 'bcrypt_pbkdf', '~> 1.0'
+  gem 'net-ssh', '~> 7.0'
+end
 
-
-# group :development do
-#   # Use console on exceptions pages [https://github.com/rails/web-console]
-#   gem "web-console"
-#   gem 'capistrano', '~> 3.17'
-#   gem 'capistrano-rails', '~> 1.6'
-#   gem 'capistrano-bundler', '~> 2.0'
-#   gem 'capistrano-rvm' # если используете RVM
-#   # или gem 'capistrano-rbenv' # если используете rbenv
-#   gem 'capistrano3-puma' # если используете Puma
-
-# end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
