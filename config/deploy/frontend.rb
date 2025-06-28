@@ -10,10 +10,6 @@ namespace :custom do
       set :shared_path, ->  { Pathname.new("#{deploy_to}/shared") }
       set :release_path, -> { Pathname.new("#{deploy_to}/releases/#{release_timestamp}") }
       set :keep_releases, 3
-      # set :default_env, { 
-      #   'RAILS_MASTER_KEY' => File.read('config/master.key').strip,
-      #   'ERAOFCHANGE_DATABASE_PASSWORD' => File.read('config/database.key').strip
-      # }
     end
 
   task :front_deploy do
@@ -32,7 +28,7 @@ namespace :custom do
          # Сборка проекта 
           execute :bash, '-lc', '"source ~/.nvm/nvm.sh && /home/deploy/.local/share/pnpm/pnpm build"' 
           execute :mkdir, "-p #{current_path}"    
-          execute :ln, '-s', "#{release_path}/dist", "#{current_path}" 
+          execute :ln, '-sfn',  "#{release_path}/dist", "#{current_path}" 
         end
 
 
