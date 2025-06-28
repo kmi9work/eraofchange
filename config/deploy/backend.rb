@@ -2,7 +2,11 @@
 namespace :custom do
   require 'pathname'
 
-  task :setup do
+  task :setup do  
+    set :rbenv_type, :user  # или :system, если Ruby установлен системно
+    set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
+    set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
+
     set :application, "eraofchange"
     set :repo_url, "git@github.com:kmi9work/eraofchange.git"
     set :branch, 'depl'
@@ -66,12 +70,22 @@ namespace :custom do
     end
   end
 
+  task :r do
+    on roles(:app) do
+      execute :sudo, :systemctl, :stop, :passenger
+    end
+  end
+
+
+
+
+
 
 end
 
 # Хуки должны быть вне namespace
 before 'deploy:check:linked_files', 'custom:setup_config'
-after 'deploy:publishing', 'deploy:restart'
+#after 'deploy:publishing', 'deploy:restart'
 
 append :linked_files, "config/database.yml", 'config/master.key'
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
