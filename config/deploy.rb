@@ -1,67 +1,87 @@
 # config valid for current version and patch releases of Capistrano
 lock "~> 3.19.2"
 
-set :application, "eraofchange"
-set :repo_url, "git@github.com:kmi9work/eraofchange.git"
-set :branch, 'depl'
-
-set :deploy_to, "/opt/era/eraofchange"
-
-# Passenger
-#set :passenger_restart_with_touch, true
-set :passenger_ruby, '/home/deploy/.rbenv/shims/ruby'
-#set :passenger_restart_command, 'passenger-config restart-app'
-
 set :rbenv_type, :user  # или :system, если Ruby установлен системно
 set :rbenv_ruby, '3.2.2'  # Замените на вашу версию Ruby
 set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
 
-set :keep_releases, 3
+namespace :deploy do 
+  task :backend do
+    require_relative 'deploy/backend.rb'
+    invoke 'custom:deploy'
+  end
 
-set :default_env, { 
-  'RAILS_MASTER_KEY' =>               File.read('config/master.key').strip,
-  'ERAOFCHANGE_DATABASE_PASSWORD' =>  File.read('config/database.key').strip
-}
+  task :reinit do
+    require_relative 'deploy/backend.rb'
+    invoke 'custom:db_reinit'
+  end
 
-#бэкенд  + фронтенд
-namespace :deploy do
-  desc "Полный деплой (бэкенд  + фронтенд)"
-  task :full do
-    invoke 'deploy'      # Стандартный деплой Capistrano
+end
+
+
+# set :application, "eraofchange"
+# set :repo_url, "git@github.com:kmi9work/eraofchange.git"
+# set :branch, 'depl'
+
+# set :deploy_to, "/opt/era/eraofchange"
+
+# # Passenger
+# #set :passenger_restart_with_touch, true
+# set :passenger_ruby, '/home/deploy/.rbenv/shims/ruby'
+# #set :passenger_restart_command, 'passenger-config restart-app'
+
+
+# set :keep_releases, 3
+
+# set :default_env, { 
+#   'RAILS_MASTER_KEY' =>               File.read('config/master.key').strip,
+#   'ERAOFCHANGE_DATABASE_PASSWORD' =>  File.read('config/database.key').strip
+# }
+
+
+
+# #Разворачивание бека с нуля
+# #Команада cap production deploy
+# namespace :deploy do
+#   task :setup_config do
+#     on roles(:app) do
+#       # Создаем необходимые папки в shared
+#       execute :mkdir, "-p #{shared_path}/config"
+#       execute :mkdir, "-p #{shared_path}/tmp/sockets"
+#       execute :mkdir, "-p #{shared_path}/tmp/pids"
+#       execute :mkdir, "-p #{shared_path}/public/uploads"
+#       execute :mkdir, "-p #{shared_path}/log"
+
+#       # Копируем конфигурационные файлы
+#       upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
+#       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
+      
+#       # Устанавливаем правильные права
+#       execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
+#      # execute :touch, "#{current_path}/tmp/restart.txt"
+#     end
+#   end  
+
+#   # Хуки для выполнения задач
+#   before 'deploy:check:linked_files', 'deploy:setup_config'
+#   after 'deploy:publishing', 'deploy:restart'
+# end
+
+
+desc "Показать пути деплоя"
+task :show_paths do
+  on roles(:app) do
+    puts "Deploy to: #{fetch(:deploy_to)}"
+    puts "Release path: #{release_path}"
+    puts "Current path: #{current_path}"
+    puts "Shared path: #{shared_path}"
     
-    invoke 'frontend:deploy' # Сборка фронтенда
+    execute :ls, "-la #{deploy_to}"
   end
 end
 
-#Разворачивание бека с нуля
-#Команада cap production deploy
-namespace :deploy do
-  task :setup_config do
-    on roles(:app) do
-      # Создаем необходимые папки в shared
-      execute :mkdir, "-p #{shared_path}/config"
-      execute :mkdir, "-p #{shared_path}/tmp/sockets"
-      execute :mkdir, "-p #{shared_path}/tmp/pids"
-      execute :mkdir, "-p #{shared_path}/public/uploads"
-      execute :mkdir, "-p #{shared_path}/log"
-
-      # Копируем конфигурационные файлы
-      upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
-      upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
-      
-      # Устанавливаем правильные права
-      execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
-     # execute :touch, "#{current_path}/tmp/restart.txt"
-    end
-  end  
-
-  # Хуки для выполнения задач
-  before 'deploy:check:linked_files', 'deploy:setup_config'
-  after 'deploy:publishing', 'deploy:restart'
-end
-
-#Перезалив базы
-#Команада cap production db:reinit
+# #Перезалив базы
+# #Команада cap production db:reinit
 namespace :db do
   desc 'Полный сброс и инициализация БД (drop, create, migrate, seed)'
   task :reinit do
@@ -89,32 +109,32 @@ namespace :db do
   end
 end
 
-append :linked_files, "config/database.yml", 'config/master.key'
-append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
+# append :linked_files, "config/database.yml", 'config/master.key'
+# append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
 
 
-#Установка фронта
-#Команда cap production frontend:deploy
-#TO DO: Сделать структуру папок как у бека (с номерами релизов и текущей версией)
-namespace :frontend do
-  task :deploy do
-    on roles(:app) do
-      frontend_dir = "/opt/era/era_front"
-      execute :git, :clone, "--depth 1", "git@github.com:kmi9work/era_front.git", frontend_dir unless test("[ -d #{frontend_dir} ]")
-      within frontend_dir do
-        #execute :git, :pull
-        execute :bash, '-lc', '"source ~/.nvm/nvm.sh && nvm install v22"'
-        execute :bash, "-c", '"curl -fsSL https://get.pnpm.io/install.sh | sh -"'
+# #Установка фронта
+# #Команда cap production frontend:deploy
+# #TO DO: Сделать структуру папок как у бека (с номерами релизов и текущей версией)
+# namespace :frontend do
+#   task :deploy do
+#     on roles(:app) do
+#       frontend_dir = "/opt/era/era_front"
+#       execute :git, :clone, "--depth 1", "git@github.com:kmi9work/era_front.git", frontend_dir unless test("[ -d #{frontend_dir} ]")
+#       within frontend_dir do
+#         #execute :git, :pull
+#         execute :bash, '-lc', '"source ~/.nvm/nvm.sh && nvm install v22"'
+#         execute :bash, "-c", '"curl -fsSL https://get.pnpm.io/install.sh | sh -"'
 
-        # Установка зависимостей через pnpm
-        execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
+#         # Установка зависимостей через pnpm
+#         execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
         
-        # Замена адреса
-        execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", "#{frontend_dir}/.env"
+#         # Замена адреса
+#         execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", "#{frontend_dir}/.env"
 
-        # Сборка проекта 
-        execute :bash, '-lc', '"source ~/.nvm/nvm.sh && /home/deploy/.local/share/pnpm/pnpm build"'
-      end
-    end
-  end
-end
+#         # Сборка проекта 
+#         execute :bash, '-lc', '"source ~/.nvm/nvm.sh && /home/deploy/.local/share/pnpm/pnpm build"'
+#       end
+#     end
+#   end
+# end
