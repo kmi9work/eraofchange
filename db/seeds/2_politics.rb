@@ -1,7 +1,8 @@
-cap = SettlementType.create(name: "Столица", params: {"income" => 10000})
 town = SettlementType.create(name: "Город", params: {"income" => 5000})
-for_cap = SettlementType.create(name: "Иностранный город", params: {"income" => 0})
-for_town = SettlementType.create(name: "Иностранная столица", params: {"income" => 10000})
+cap = SettlementType.create(name: "Столица", params: {"income" => 10000})
+type_region = SettlementType.create(name: "Земля", params: {"income" => 10000})
+cap_region = SettlementType.create(name: "Столичная земля", params: {"income" => 15000})
+xz = SettlementType.create(name: "ХЗ", params: {"income" => 0})
 
 rel_build = BuildingType.create(name: "Церковь", icon: 'ri-cross-line')
 def_build = BuildingType.create(name: "Кремль", icon: 'ri-shield-line')
@@ -30,7 +31,7 @@ f.gets #Заголовки
 
 po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets
-  id, country_name, region_name, city_name, cost, player_name, def_level, tra_level, rel_level, relations, embargo, way = str.split(';').map(&:strip)
+  id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = str.split(';').map(&:strip)
   country = Country.find_by_name(country_name)
   if country.blank?
     country = Country.create(id: id, name: country_name, params: {"embargo" => embargo.presence&.to_i})
@@ -42,7 +43,18 @@ while str = f.gets
     PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
   end
   city = Settlement.find_by_name(city_name)
-  type = cost.to_i == 10 ? cap : town
+  type = case cost_type.to_i
+  when 1
+    town
+  when 2
+    cap
+  when 3
+    type_region
+  when 4
+    cap_region
+  else
+    xz
+  end
   player = Player.find_by_name(player_name)
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
   if def_level.strip.present?
