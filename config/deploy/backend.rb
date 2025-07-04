@@ -37,7 +37,7 @@ namespace :custom do
       execute :mkdir, "-p #{shared_path}/public/uploads"
       execute :mkdir, "-p #{shared_path}/log"
 
-      upload!('config/database.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database.yml')
+      upload!('config/database_prod.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database_prod.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
       
       execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
