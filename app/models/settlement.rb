@@ -37,6 +37,5 @@ class Settlement < ApplicationRecord
       {result: true, msg: "Расходы за церковь внесены"}
     end
   end
-
 end
 

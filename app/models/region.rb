@@ -11,7 +11,7 @@ class Region < ApplicationRecord
   has_many :plant_places
   has_many :public_order_items
 
-  has_one :capital, -> { where(settlement_type_id: SettlementType::CAPITAL) }, class_name: 'Settlement'
+  has_one :capital, -> { where(settlement_type_id: [SettlementType::CAPITAL, SettlementType::TYPE_REGION, SettlementType::CAP_REGION]) }, class_name: 'Settlement'
 
   def inf_buildings_on_po #Влияние зданий на общественный порядок
     bbl_params = self.settlements.joins(buildings: :building_level).
