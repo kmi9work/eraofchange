@@ -1,9 +1,77 @@
 class GameParameter < ApplicationRecord
-  audited
 
+  ADDITIONAL_TIME = 1800 #Дополнительное время для цикла, когда длительность больше, чем в обычном цикле
+  SPECIAL_YEARS = [1]
+  TIMER = 4
   NO_STATE_EXPENSES = -5
 
-  def self.increase_year(kaznachei_bonus) #Переводит в следующий год
+  def self.show_time   
+    timer = GameParameter.find(TIMER)
+
+    #Когда таймер еще ни разу не запускался   
+    if GameParameter.new_start?
+      return GameParameter.set_cycle_len
+    
+    #Таймер уже запускался, и его нужно обновить, потому что была перезагрузка фронта.
+    else
+      return  GameParameter.ticking? ? GameParameter.count_down  : timer.params.last["remaining"]
+    end
+  end
+
+  def self.show 
+    return Time.at(GameParameter.show_time).utc.strftime("%H:%M:%S")
+  end
+
+  def self.switch_timer #switch
+    timer = GameParameter.find(TIMER)
+    if GameParameter.new_start?
+      timer.params.push({"year"=>"#{GameParameter.current_year}", 
+                        "ticking" => "1",
+                        "start"=>"#{Time.now.to_i}", 
+                        "remaining"=>"#{GameParameter.set_cycle_len}", 
+                        "finish"=>"#{Time.now.to_i + GameParameter.set_cycle_len}"})
+    elsif !GameParameter.ticking?
+      timer.params.last["ticking"] = "1"
+      timer.params.last["finish"]  = Time.now.to_i + timer.params.last["remaining"]
+    elsif GameParameter.ticking?
+      timer.params.last["remaining"] = GameParameter.count_down
+      timer.params.last["ticking"]   = "0"
+    end  
+
+    timer.save
+  end
+
+  #Проверяет, относится ли текущий год к числу тех годов, которые идут дольше. Сейчас это только первый год. 
+  def self.set_cycle_len
+    SPECIAL_YEARS.include?(GameParameter.current_year) ? c_l = GameParameter.find(TIMER).value.to_i + ADDITIONAL_TIME : c_l = GameParameter.find(TIMER).value.to_i 
+    return  c_l
+  end
+
+  #Проверяет, не запущен ли таймер на данный момент. 
+  def self.ticking?
+    return false if GameParameter.find(TIMER).params.empty?
+    return  GameParameter.find(TIMER).params.last["ticking"].to_i > 0
+  end
+
+  #Проверяет, не создан ли параметр таймера вообще или на текущий год. 
+  def self.new_start?
+    timer = GameParameter.find(TIMER)
+    if timer.params.empty? or timer.params.last["year"].to_i != GameParameter.current_year 
+      return true 
+    else
+      return false
+    end
+  end
+
+  #Отслеживает, сколько секунд осталось до устанновленного конечного времени. 
+  #Если конечное время достигнуто, возвращает 0.
+  def self.count_down
+    timer = GameParameter.find(TIMER)
+    timer.params.last["finish"].to_i - Time.now.to_i > 0 ? t_r = timer.params.last["finish"].to_i - Time.now.to_i : t_r = 0
+    return t_r
+  end
+
+  def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
     current_year = GameParameter.find_by(identificator: "current_year")
     if current_year.params["state_expenses"] == false
       PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil)
@@ -73,5 +141,4 @@ class GameParameter < ApplicationRecord
 
     return {msg: "Параметры переведены в исходное состояние"}
   end
-
 end
