@@ -10,16 +10,16 @@ class GameParameter < ApplicationRecord
 
     #Когда таймер еще ни разу не запускался   
     if GameParameter.new_start?
-      return GameParameter.set_cycle_len
+      return {time: GameParameter.set_cycle_len, ticking: 0}
     
     #Таймер уже запускался, и его нужно обновить, потому что была перезагрузка фронта.
     else
-      return  GameParameter.ticking? ? GameParameter.count_down  : timer.params.last["remaining"]
+      return  GameParameter.ticking? ? {time: GameParameter.count_down, ticking: 1}  : {time: timer.params.last["remaining"], ticking: 0}
     end
   end
 
   def self.show 
-    return Time.at(GameParameter.show_time).utc.strftime("%H:%M:%S")
+    return Time.at(GameParameter.show_time[:time]).utc.strftime("%H:%M:%S")
   end
 
   def self.switch_timer #switch
