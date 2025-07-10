@@ -23,7 +23,7 @@ class GameParametersController < ApplicationController
   end
 
   def show_time
-    GameParameter.show_time
+    @time = GameParameter.show_time
   end
 
   def switch_timer
