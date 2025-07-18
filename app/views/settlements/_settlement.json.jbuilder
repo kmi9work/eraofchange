@@ -1,4 +1,4 @@
-json.extract! settlement, :id, :name, :settlement_type_id, :region_id, :income, :buildings, :created_at, :updated_at
+json.extract! settlement, :id, :name, :settlement_type_id, :settlement_type, :region_id, :income, :buildings, :created_at, :updated_at
 json.player do 
   if settlement.player
     json.partial! "players/player", player: settlement.player
