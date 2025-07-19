@@ -4,7 +4,6 @@ class GameParameter < ApplicationRecord
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
-
   SCHEDULE = [
               {identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
               {identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
@@ -34,7 +33,6 @@ class GameParameter < ApplicationRecord
 
     GameParameter.create_schedule(dummy_schedule)
   end
-
 
   def self.toggle_timer
     timer = GameParameter.find(TIMER)
@@ -70,8 +68,6 @@ class GameParameter < ApplicationRecord
     timer.params = schedule || SCHEDULE
     timer.save
   end
-
-
 
   def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
     current_year = GameParameter.find_by(identificator: "current_year")
