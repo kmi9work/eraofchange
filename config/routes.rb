@@ -14,8 +14,8 @@ Rails.application.routes.draw do
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
-  get   '/game_parameters/show_time', to: 'game_parameters#show_time'
-  patch '/game_parameters/switch_timer', to: 'game_parameters#switch_timer'
+  get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
+  patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'

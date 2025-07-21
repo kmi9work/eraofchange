@@ -22,12 +22,12 @@ class GameParametersController < ApplicationController
   def show
   end
 
-  def show_time
-    @time = GameParameter.show_time
+  def show_schedule
+    @time = GameParameter.show_schedule
   end
 
-  def switch_timer
-    GameParameter.switch_timer
+  def toggle_timer
+    GameParameter.toggle_timer
   end
 
   # GET /game_parameters/new
