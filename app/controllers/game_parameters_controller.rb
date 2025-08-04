@@ -22,6 +22,14 @@ class GameParametersController < ApplicationController
   def show
   end
 
+  def show_schedule
+    @time = GameParameter.show_schedule
+  end
+
+  def toggle_timer
+    GameParameter.toggle_timer
+  end
+
   # GET /game_parameters/new
   def new
     @game_parameter = GameParameter.new
