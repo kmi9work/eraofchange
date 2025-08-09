@@ -30,6 +30,16 @@ class GameParametersController < ApplicationController
     GameParameter.toggle_timer
   end
 
+  def save_sorted_results
+    GameParameter.save_sorted_results(params[:arrayed_results])
+  end
+
+  def show_sorted_results
+   @game_resuls = GameParameter.show_sorted_results
+  end
+
+  
+
   # GET /game_parameters/new
   def new
     @game_parameter = GameParameter.new

@@ -15,10 +15,14 @@ Rails.application.routes.draw do
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
+  get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
+
+  patch '/game_parameters/clear_results', to: 'game_parameters#clear_results'
   patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
+  patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
 
 
 

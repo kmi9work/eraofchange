@@ -12,3 +12,8 @@ ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 GameParameter.create(id: GameParameter::TIMER, name: "Расписание", identificator: "schedule", 	 value: "1", params: [])
 
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
+
+GameParameter.create(id: GameParameter::RESULTS, name: "Результаты", identificator: "results", 	 value: "1", params: [])
+
+ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
+

@@ -1,8 +1,42 @@
 class GameParameter < ApplicationRecord
 
   TIMER = 4
+  RESULTS = 5
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
+
+  
+  def self.save_sorted_results(arrayed_result_hashes)
+    game_results = GameParameter.find(RESULTS)
+
+    results = game_results.params + arrayed_result_hashes
+
+    ## включить чтобы не было повторений
+    sorted_results = results.sort_by do |result|
+      -result[:capital].to_i / result[:number_of_players].to_i
+    end
+
+    sorted_results.each_with_index do |result, index|
+      result[:place] = index + 1
+    end
+
+    game_results.params = sorted_results
+    game_results.save
+  end
+
+  def self.clear_results
+    GameParameter.find(RESULTS).params = []
+    GameParameter.find(RESULTS).save
+  end
+
+  def self.show_sorted_results
+    return GameParameter.find(RESULTS).params
+  end
+
+
+
+#########
+
 
   SCHEDULE = [
               {identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
@@ -58,6 +92,7 @@ class GameParameter < ApplicationRecord
           unix_finish: GameParameter.modify_date(item["finish"])
         }
     end
+    
     return {schedule: schedule, ticking: timer.value}
   end
 
