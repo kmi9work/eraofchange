@@ -19,6 +19,9 @@ Rails.application.routes.draw do
 
   patch '/game_parameters/clear_results', to: 'game_parameters#clear_results'
   patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+
+  patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
+
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'

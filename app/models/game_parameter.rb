@@ -5,6 +5,8 @@ class GameParameter < ApplicationRecord
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
+  ### def delete_result
+
   
   def self.save_sorted_results(arrayed_result_hashes)
     game_results = GameParameter.find(RESULTS)
