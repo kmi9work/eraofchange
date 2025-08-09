@@ -19,7 +19,7 @@ Rails.application.routes.draw do
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
-
+  patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
 
 
   patch '/armies/:id/demote_army', to: 'armies#demote_army'
