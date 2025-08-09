@@ -18,6 +18,10 @@ class GameParametersController < ApplicationController
     GameParameter.increase_year(params[:kaznachei_bonus])
   end
 
+  def create_schedule
+    GameParameter.create_schedule 
+  end
+
   # GET /game_parameters/1 or /game_parameters/1.json
   def show
   end

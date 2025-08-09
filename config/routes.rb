@@ -28,7 +28,6 @@ Rails.application.routes.draw do
   patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
 
 
-
   patch '/armies/:id/demote_army', to: 'armies#demote_army'
   patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
   patch '/armies/:id/goto/:settlement_id', to: 'armies#goto'

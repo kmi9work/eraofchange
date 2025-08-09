@@ -69,7 +69,7 @@ class Country < ApplicationRecord
     if how.to_i == BY_WAR
       PublicOrderItem.add(MILITARILY, "Присоединение войной", region, nil)
     elsif how.to_i == BY_DIPLOMACY
-      PublicOrderItem.add(MILITARILY, "Присоединение миром", region, nil)
+      PublicOrderItem.add(PEACEFULLY, "Присоединение миром", region, nil)
     end
 
     region.save
