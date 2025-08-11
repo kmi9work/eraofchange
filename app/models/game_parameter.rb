@@ -16,9 +16,7 @@ class GameParameter < ApplicationRecord
             {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
-  def self.update_results(arrayed_result_hashes)
-    
-    
+  def self.update_results(arrayed_result_hashes)    
     arrayed_result_hashes.transform_keys!(&:to_sym) 
     results_game_parameter = GameParameter.find(RESULTS)
     results_game_parameter.params.map! {|par| par.transform_keys(&:to_sym)}
@@ -38,9 +36,17 @@ class GameParameter < ApplicationRecord
   def self.sort_and_rank_results(results)
     per_pl_cap = GameParameter.find_cap_per_pl(results)
     sorted_results = per_pl_cap.sort_by { |hash| -hash[:cap_per_pl].to_i }
-    ranked_results = sorted_results.each_with_index {|result, index| result[:place] = index + 1}
+    place = 0
+    previous_value = nil
     
-    return ranked_results
+    sorted_results.each do |result|
+      current_value = result[:cap_per_pl]
+      place += 1 if current_value != previous_value    
+      result[:place] = place
+      previous_value = current_value
+    end
+
+    sorted_results
   end
 
   def self.delete_result(player_id)
@@ -55,6 +61,7 @@ class GameParameter < ApplicationRecord
 
   def self.find_cap_per_pl(results)    
     per_pl_cap = []
+    results.map! {|par| par.transform_keys(&:to_sym)}
     results.each do |result|
       num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1
       capital = result[:capital].to_i
@@ -66,14 +73,13 @@ class GameParameter < ApplicationRecord
     return per_pl_cap
   end
 
-  
   def self.save_sorted_results(arrayed_result_hashes = nil)    
     game_results = GameParameter.find(RESULTS)
     if game_results.params.empty? 
       max_id = 0
     else
       game_results.params.map! {|res| res.transform_keys(&:to_sym)}
-      max_id = game_results.params.max_by { |h| h[:id] }[:player_id]
+      max_id = game_results.params.max_by { |h| h[:player_id]}[:player_id]
     end
 
     if arrayed_result_hashes != nil
@@ -82,7 +88,7 @@ class GameParameter < ApplicationRecord
     else
       results = game_results.params
     end
-    
+
     results.map! {|res| res.transform_keys(&:to_sym)}
     game_results.params = GameParameter.sort_and_rank_results(results)  
     game_results.save
@@ -95,10 +101,11 @@ class GameParameter < ApplicationRecord
   end
 
   def self.show_sorted_results
-    return GameParameter.find(RESULTS).params
+    results_game_parameter = GameParameter.find(RESULTS)
+    results_game_parameter.params = GameParameter.sort_and_rank_results(results_game_parameter.params)
+    results_game_parameter.save
+    return results_game_parameter.params
   end
-
-
 
 #########
 
