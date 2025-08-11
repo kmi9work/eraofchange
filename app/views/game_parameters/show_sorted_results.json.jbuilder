@@ -1,1 +1,1 @@
-json.results  @game_resuls
+json.results  @game_results

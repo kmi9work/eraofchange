@@ -15,9 +15,9 @@ Rails.application.routes.draw do
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
-  get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
 
-  patch '/game_parameters/clear_results', to: 'game_parameters#clear_results'
+
+
   patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
   patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
@@ -25,7 +25,14 @@ Rails.application.routes.draw do
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
-  patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
+
+  #Результаты
+  get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
+  patch  '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
+  patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
+  patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
+  patch '/game_parameters/delete_result',      to: 'game_parameters#delete_result'
+ 
 
 
   patch '/armies/:id/demote_army', to: 'armies#demote_army'

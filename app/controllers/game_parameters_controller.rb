@@ -18,16 +18,12 @@ class GameParametersController < ApplicationController
     GameParameter.increase_year(params[:kaznachei_bonus])
   end
 
-  def create_schedule
-    GameParameter.create_schedule 
-  end
-
   # GET /game_parameters/1 or /game_parameters/1.json
   def show
   end
 
   def create_schedule
-    GameParameter.create_schedule
+    GameParameter.create_temp_schedule
   end
 
   def show_schedule
@@ -39,14 +35,21 @@ class GameParametersController < ApplicationController
   end
 
   def save_sorted_results
-    GameParameter.save_sorted_results(params[:arrayed_results])
+    GameParameter.save_sorted_results(params[:request].to_unsafe_h)
+  end
+
+  def update_results
+    GameParameter.update_results(params[:request].to_unsafe_h)
+  end
+
+  def delete_result
+    GameParameter.delete_result(params[:request].to_unsafe_h)
   end
 
   def show_sorted_results
-   @game_resuls = GameParameter.show_sorted_results
-  end
-
-  
+   @game_results = GameParameter.show_sorted_results
+   render json: @game_results
+  end  
 
   # GET /game_parameters/new
   def new
