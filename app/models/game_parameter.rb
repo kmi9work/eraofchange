@@ -19,6 +19,7 @@ class GameParameter < ApplicationRecord
 
 
   def self.toggle_screen(screen_value)
+    
     screen = GameParameter.find(SCREEN)
     screen.value = screen_value
     screen.save 

@@ -31,7 +31,7 @@ class GameParametersController < ApplicationController
   end
 
   def toggle_screen
-    GameParameter.toggle_timer
+    GameParameter.toggle_screen(params[:request])
   end
 
   def get_screen
@@ -40,7 +40,7 @@ class GameParametersController < ApplicationController
   end
 
   def toggle_timer
-    GameParameter.toggle_screen(params[:request].to_unsafe_h)
+    GameParameter.toggle_timer
   end
 
   def save_sorted_results

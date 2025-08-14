@@ -18,7 +18,7 @@ Rails.application.routes.draw do
 
 
 
-  patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+  patch '/game_parameters/toggle_screen', to: 'game_parameters#toggle_screen'
 
   patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
 
