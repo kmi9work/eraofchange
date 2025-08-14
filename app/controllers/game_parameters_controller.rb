@@ -30,8 +30,17 @@ class GameParametersController < ApplicationController
     @time = GameParameter.show_schedule
   end
 
-  def toggle_timer
+  def toggle_screen
     GameParameter.toggle_timer
+  end
+
+  def get_screen
+    @screen = GameParameter.get_screen
+    render json: @screen
+  end
+
+  def toggle_timer
+    GameParameter.toggle_screen(params[:request].to_unsafe_h)
   end
 
   def save_sorted_results

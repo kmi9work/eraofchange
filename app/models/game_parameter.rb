@@ -2,6 +2,7 @@ class GameParameter < ApplicationRecord
 
   TIMER = 4
   RESULTS = 5
+  SCREEN = 6
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
@@ -15,6 +16,17 @@ class GameParameter < ApplicationRecord
             {identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
             {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
+
+
+  def self.toggle_screen(screen_value)
+    screen = GameParameter.find(SCREEN)
+    screen.value = screen_value
+    screen.save 
+  end
+
+  def self.get_screen
+    return GameParameter.find(SCREEN).value
+  end
 
   def self.update_results(arrayed_result_hashes)    
     arrayed_result_hashes.transform_keys!(&:to_sym) 
@@ -32,6 +44,8 @@ class GameParameter < ApplicationRecord
     results_game_parameter.params = GameParameter.sort_and_rank_results(updated_params)
     results_game_parameter.save
   end
+
+
 
   def self.sort_and_rank_results(results)
     per_pl_cap = GameParameter.find_cap_per_pl(results)

@@ -17,3 +17,7 @@ GameParameter.create(id: GameParameter::RESULTS, name: "Результаты", i
 
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
+GameParameter.create(id: GameParameter::SCREEN, name: "Экран", identificator: "screen", 	 value: "0", params: [])
+
+
+

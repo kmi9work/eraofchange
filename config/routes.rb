@@ -27,7 +27,12 @@ Rails.application.routes.draw do
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
 
   #Результаты
+  get   '/game_parameters/get_screen', to: 'game_parameters#get_screen'
   get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
+
+
+  patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+  
   patch  '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
   patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
