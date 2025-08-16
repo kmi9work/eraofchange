@@ -1,8 +1,8 @@
 class GameParameter < ApplicationRecord
 
   TIMER = 4
-  RESULTS = 5
-  SCREEN = 6
+  SCREEN = 5
+  
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
@@ -17,9 +17,8 @@ class GameParameter < ApplicationRecord
             {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
-
+###Управление экраном
   def self.toggle_screen(screen_value)
-    
     screen = GameParameter.find(SCREEN)
     screen.value = screen_value
     screen.save 
@@ -29,107 +28,10 @@ class GameParameter < ApplicationRecord
     return GameParameter.find(SCREEN).value
   end
 
-  def self.update_results(arrayed_result_hashes)    
-    arrayed_result_hashes.transform_keys!(&:to_sym) 
-    results_game_parameter = GameParameter.find(RESULTS)
-    results_game_parameter.params.map! {|par| par.transform_keys(&:to_sym)}
-    
-    updated_params = results_game_parameter.params.map do |result|
-      if arrayed_result_hashes[:player_id] == result[:player_id]
-        arrayed_result_hashes 
-      else
-        result 
-      end
-    end
-
-    results_game_parameter.params = GameParameter.sort_and_rank_results(updated_params)
-    results_game_parameter.save
-  end
-
-
-
-  def self.sort_and_rank_results(results)
-    per_pl_cap = GameParameter.find_cap_per_pl(results)
-    sorted_results = per_pl_cap.sort_by { |hash| -hash[:cap_per_pl].to_i }
-    place = 0
-    previous_value = nil
-    
-    sorted_results.each do |result|
-      current_value = result[:cap_per_pl]
-      place += 1 if current_value != previous_value    
-      result[:place] = place
-      previous_value = current_value
-    end
-
-    sorted_results
-  end
-
-  def self.delete_result(player_id)
-    results_game_parameter = GameParameter.find(RESULTS)
-    player_id.transform_keys(&:to_sym)
-    results_game_parameter.params.map! {|par| par.transform_keys(&:to_sym)}
-    results_game_parameter.params.delete_if{|h| h[:player_id] == player_id[:player_id] }
-    results_game_parameter.params = GameParameter.sort_and_rank_results(results_game_parameter.params)
-
-    results_game_parameter.save
-  end
-
-  def self.find_cap_per_pl(results)    
-    per_pl_cap = []
-    results.map! {|par| par.transform_keys(&:to_sym)}
-    results.each do |result|
-      num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1
-      capital = result[:capital].to_i
-      result[:cap_per_pl] = capital/num_of_players
-
-      per_pl_cap << result
-    end
-
-    return per_pl_cap
-  end
-
-  def self.save_sorted_results(arrayed_result_hashes = nil)    
-    game_results = GameParameter.find(RESULTS)
-    if game_results.params.empty? 
-      max_id = 0
-    else
-      game_results.params.map! {|res| res.transform_keys(&:to_sym)}
-      max_id = game_results.params.max_by { |h| h[:player_id]}[:player_id]
-    end
-
-    if arrayed_result_hashes != nil
-      arrayed_result_hashes[:player_id] = max_id + 1
-      results = game_results.params.push(arrayed_result_hashes)
-    else
-      results = game_results.params
-    end
-
-    results.map! {|res| res.transform_keys(&:to_sym)}
-    game_results.params = GameParameter.sort_and_rank_results(results)  
-    game_results.save
-  end
-
-  def self.clear_results
-    game_results = GameParameter.find(RESULTS)
-    game_results.params = []
-    game_results.save
-  end
-
-  def self.show_sorted_results
-    results_game_parameter = GameParameter.find(RESULTS)
-    results_game_parameter.params = GameParameter.sort_and_rank_results(results_game_parameter.params)
-    results_game_parameter.save
-    return results_game_parameter.params
-  end
-
-#########
-
-
-
-
+###Таймер
   def self.create_temp_schedule
     dummy_schedule = []
-    minutes_to_add = 2
+    minutes_to_add = 1
 
     current_time = Time.now + (minutes_to_add * 60)
     item_name = 1 
@@ -146,10 +48,10 @@ class GameParameter < ApplicationRecord
     GameParameter.create_schedule(dummy_schedule)
   end
 
-  def self.toggle_timer
-    
+  def self.toggle_timer(value = nil)    
     timer = GameParameter.find(TIMER)
-    timer.value = 1-timer.value.to_i
+    timer.value = value.to_i              unless value.nil?
+    timer.value = 1-timer.value.to_i      if     value.nil?
     timer.save
   end
 

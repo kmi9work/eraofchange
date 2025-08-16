@@ -40,7 +40,7 @@ class GameParametersController < ApplicationController
   end
 
   def toggle_timer
-    GameParameter.toggle_timer
+    GameParameter.toggle_timer(params[:request])
   end
 
   def save_sorted_results
