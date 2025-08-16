@@ -2,7 +2,8 @@ class GameParameter < ApplicationRecord
 
   TIMER = 4
   SCREEN = 5
-  
+  DEFAULT_SCREEN = "placeholder"
+
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
