@@ -147,6 +147,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.toggle_timer
+    
     timer = GameParameter.find(TIMER)
     timer.value = 1-timer.value.to_i
     timer.save
