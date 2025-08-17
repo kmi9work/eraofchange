@@ -1,23 +1,38 @@
 class GameParameter < ApplicationRecord
 
   TIMER = 4
+  SCREEN = 5
+  DEFAULT_SCREEN = "placeholder"
+
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
 
   SCHEDULE = [
-              {identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
-              {identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
-              {identificator: "Первый цикл", start: "11:30",  finish: "13:00"},
-              {identificator: "Второй цикл", start: "13:00",  finish: "14:00"},
-              {identificator: "Обед", start:"14:00",    finish: "14:30"},
-              {identificator: "Третий цикл", start: "14:30",  finish: "15:30"},              
-              {identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
-              {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
-            ]
+            {identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
+            {identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
+            {identificator: "Первый цикл", start: "11:30",  finish: "13:00"},
+            {identificator: "Второй цикл", start: "13:00",  finish: "14:00"},
+            {identificator: "Обед", start:"14:00",    finish: "14:30"},
+            {identificator: "Третий цикл", start: "14:30",  finish: "15:30"},              
+            {identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
+            {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
+          ]
 
+###Управление экраном
+  def self.toggle_screen(screen_value)
+    screen = GameParameter.find(SCREEN)
+    screen.value = screen_value
+    screen.save 
+  end
+
+  def self.get_screen
+    return GameParameter.find(SCREEN).value
+  end
+
+###Таймер
   def self.create_temp_schedule
     dummy_schedule = []
-    minutes_to_add = 2
+    minutes_to_add = 1
 
     current_time = Time.now + (minutes_to_add * 60)
     item_name = 1 
@@ -34,9 +49,10 @@ class GameParameter < ApplicationRecord
     GameParameter.create_schedule(dummy_schedule)
   end
 
-  def self.toggle_timer
+  def self.toggle_timer(value = nil)    
     timer = GameParameter.find(TIMER)
-    timer.value = 1-timer.value.to_i
+    timer.value = value.to_i              unless value.nil?
+    timer.value = 1-timer.value.to_i      if     value.nil?
     timer.save
   end
 
@@ -58,6 +74,7 @@ class GameParameter < ApplicationRecord
           unix_finish: GameParameter.modify_date(item["finish"])
         }
     end
+    
     return {schedule: schedule, ticking: timer.value}
   end
 

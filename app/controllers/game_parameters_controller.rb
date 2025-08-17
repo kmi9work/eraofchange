@@ -22,13 +22,28 @@ class GameParametersController < ApplicationController
   def show
   end
 
+  def create_schedule
+    GameParameter.create_temp_schedule
+  end
+
   def show_schedule
     @time = GameParameter.show_schedule
   end
 
-  def toggle_timer
-    GameParameter.toggle_timer
+  def toggle_screen
+    GameParameter.toggle_screen(params[:request])
   end
+
+  def get_screen
+    @screen = GameParameter.get_screen
+    render json: @screen
+  end
+
+  def toggle_timer
+    GameParameter.toggle_timer(params[:request])
+  end
+
+
 
   # GET /game_parameters/new
   def new

@@ -14,8 +14,17 @@ Rails.application.routes.draw do
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
+
+  ###Таймер
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
-  patch '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+  patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
+  patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+
+  ###Экран
+  get   '/game_parameters/get_screen', to: 'game_parameters#get_screen'
+  patch '/game_parameters/toggle_screen', to: 'game_parameters#toggle_screen'
+
+  
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
@@ -27,7 +36,7 @@ Rails.application.routes.draw do
   patch '/armies/:id/goto/:settlement_id', to: 'armies#goto'
   patch '/armies/:id/attack/:enemy_id', to: 'armies#attack'
   post '/armies/:id/troops', to: 'armies#add_troop'
-
+  
   patch '/regions/:id/add_po_item', to: 'regions#add_po_item'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 
