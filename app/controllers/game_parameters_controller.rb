@@ -56,7 +56,22 @@ class GameParametersController < ApplicationController
     GameParameter.toggle_timer(params[:request])
   end
 
+ def save_sorted_results
+    GameParameter.save_sorted_results(params[:request].to_unsafe_h)
+  end
 
+  def update_results
+    GameParameter.update_results(params[:request].to_unsafe_h)
+  end
+
+  def delete_result
+    GameParameter.delete_result(params[:request].to_unsafe_h)
+  end
+
+  def show_sorted_results
+   @game_results = GameParameter.show_sorted_results
+   render json: @game_results
+  end  
 
 
 
