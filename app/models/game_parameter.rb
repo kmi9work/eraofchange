@@ -8,14 +8,14 @@ class GameParameter < ApplicationRecord
   NOT_TICKING = 0
 
   SCHEDULE = [
-            {identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
-            {identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
-            {identificator: "Первый цикл", start: "11:30",  finish: "13:00"},
-            {identificator: "Второй цикл", start: "13:00",  finish: "14:00"},
-            {identificator: "Обед", start:"14:00",    finish: "14:30"},
-            {identificator: "Третий цикл", start: "14:30",  finish: "15:30"},              
-            {identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
-            {identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
+            {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
+            {id: 2, identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
+            {id: 3, identificator: "Первый цикл", start: "11:30",  finish: "13:00"},
+            {id: 4, identificator: "Второй цикл", start: "13:00",  finish: "14:00"},
+            {id: 5, identificator: "Обед", start:"14:00",    finish: "14:30"},
+            {id: 6, identificator: "Третий цикл", start: "14:30",  finish: "15:30"},              
+            {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
+            {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
 ###Управление экраном
@@ -29,7 +29,54 @@ class GameParameter < ApplicationRecord
     return GameParameter.find(SCREEN).value
   end
 
-###Таймер
+###Таймер и расписание
+
+  def self.show_schedule
+    timer = GameParameter.find(TIMER)
+    schedule_item = {}
+    id = 0
+    schedule = timer.params.map do |item|
+        id += 1
+        { id: id,
+          identificator: item["identificator"].to_s,
+          start: item["start"],
+          unix_start: GameParameter.modify_date(item["start"]),
+          finish: item["finish"],
+          unix_finish: GameParameter.modify_date(item["finish"])
+        }
+    end
+    
+    return {schedule: schedule, ticking: timer.value}
+  end
+
+  def self.add_schedule_item(schedule_item)
+    #{"identificator"=>"Пятый цикл", "finish"=>"18:30"}
+    timer = GameParameter.find(TIMER)
+    params = timer.params
+    new_start = params.last["finish"]
+    last_id = params.last["id"]
+    new_item   = {id: last_id + 1,
+                  identificator: schedule_item["identificator"], 
+                  start: new_start,
+                  finish: schedule_item["finish"]
+                }
+    timer.params << new_item
+    timer.save
+  end
+
+  def self.update_schedule_item(schedule_item)
+    timer = GameParameter.find(TIMER)
+    new_schedule = timer.params.map{|item| item["id"] == schedule_item["id"] ? schedule_item : item}
+    timer.params = new_schedule
+    timer.save
+  end
+
+  def self.delete_schedule_item(schedule_item_id)
+    timer = GameParameter.find(TIMER)
+    timer.params.delete_if {|item| item["id"] == schedule_item_id["id"]}
+    timer.save
+  end
+
   def self.create_temp_schedule
     dummy_schedule = []
     minutes_to_add = 1
@@ -64,20 +111,6 @@ class GameParameter < ApplicationRecord
     return unix_time
   end
 
-  def self.show_schedule
-    timer = GameParameter.find(TIMER)
-    schedule_item = {}
-    schedule = timer.params.map do |item|
-        {
-          identificator: item["identificator"].to_s,
-          unix_start: GameParameter.modify_date(item["start"]),
-          unix_finish: GameParameter.modify_date(item["finish"])
-        }
-    end
-    
-    return {schedule: schedule, ticking: timer.value}
-  end
-
   def self.create_schedule(schedule = nil)
     timer = GameParameter.find(TIMER)
     timer.value = NOT_TICKING 
@@ -85,6 +118,8 @@ class GameParameter < ApplicationRecord
     timer.params = schedule || SCHEDULE
     timer.save
   end
+
+  ############
 
   def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
     current_year = GameParameter.find_by(identificator: "current_year")

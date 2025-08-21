@@ -15,9 +15,13 @@ Rails.application.routes.draw do
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
 
-  ###Таймер
+  ###Таймер и расписание
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
   patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
+  patch '/game_parameters/add_schedule_item', to: 'game_parameters#add_schedule_item'
+  patch '/game_parameters/update_schedule_item', to: 'game_parameters#update_schedule_item'
+  patch '/game_parameters/delete_schedule_item', to: 'game_parameters#delete_schedule_item'
+
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
   ###Экран
