@@ -21,5 +21,7 @@ GameParameter.create(id: GameParameter::RESULTS, name: "Результаты к�
 
 
 
+ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
+GameParameter.create(id: GameParameter::RESULTS + 1, name: "тест", identificator: "test", 	 value: "0", params: [])
 

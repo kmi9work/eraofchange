@@ -21,6 +21,10 @@ Rails.application.routes.draw do
   patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
   patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
+
+  get   '/game_parameters/get_current_result',  to: 'game_parameters#get_current_result'
+  patch '/game_parameters/choose_current_result',       to: 'game_parameters#choose_current_result'
+  
  
 
   ###Таймер и расписание

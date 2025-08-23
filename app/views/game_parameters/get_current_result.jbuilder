@@ -1,0 +1,1 @@
+json.current_result_screen @current_result_screen

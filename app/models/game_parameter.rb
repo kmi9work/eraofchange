@@ -19,6 +19,11 @@ class GameParameter < ApplicationRecord
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
+  def self.choose_current_result(num)
+    rank = GameParameter.find(RESULTS + 1)
+    rank.value = num
+    rank.save
+  end
 
   ###Результаты
   def self.update_results(arrayed_result_hashes)    
@@ -38,6 +43,10 @@ class GameParameter < ApplicationRecord
     results_game_parameter.save
   end
 
+
+  def self.get_current_result
+    GameParameter.find(RESULTS + 1).value
+  end
 
 
   def self.sort_and_rank_results(results)

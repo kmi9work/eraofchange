@@ -30,6 +30,16 @@ class GameParametersController < ApplicationController
     @time = GameParameter.show_schedule
   end
 
+##########
+  def get_current_result
+    @current_result_screen = GameParameter.get_current_result
+  end
+
+  def choose_current_result
+    GameParameter.choose_current_result(params[:request])
+  end
+  ######
+
   def add_schedule_item
     GameParameter.add_schedule_item(params[:request])
   end
