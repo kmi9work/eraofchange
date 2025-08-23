@@ -50,15 +50,14 @@ class GameParameter < ApplicationRecord
   end
 
   def self.add_schedule_item(schedule_item)
-    #{"identificator"=>"Пятый цикл", "finish"=>"18:30"}
+    schedule_item.transform_keys(&:to_sym)
     timer = GameParameter.find(TIMER)
     params = timer.params
-    new_start = params.last["finish"]
-    last_id = params.last["id"]
+    last_id = params.present? ? params.last["id"]  : 0
     new_item   = {id: last_id + 1,
-                  identificator: schedule_item["identificator"], 
-                  start: new_start,
-                  finish: schedule_item["finish"]
+                  identificator: schedule_item[:identificator],
+                  start: schedule_item[:start],
+                  finish: schedule_item[:finish]
                 }
     timer.params << new_item
     timer.save
