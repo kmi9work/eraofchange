@@ -19,6 +19,8 @@ class GameParameter < ApplicationRecord
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
+
+
   def self.choose_current_result(num)
     rank = GameParameter.find(RESULTS + 1)
     rank.value = num
