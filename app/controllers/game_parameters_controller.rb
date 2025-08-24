@@ -30,6 +30,19 @@ class GameParametersController < ApplicationController
     @time = GameParameter.show_schedule
   end
 
+  def add_schedule_item
+    GameParameter.add_schedule_item(params[:request])
+  end
+
+  def delete_schedule_item
+    GameParameter.delete_schedule_item(params[:request])
+  end
+
+
+  def update_schedule_item
+    GameParameter.update_schedule_item(params[:request])
+  end
+
   def toggle_screen
     GameParameter.toggle_screen(params[:request])
   end
@@ -42,6 +55,8 @@ class GameParametersController < ApplicationController
   def toggle_timer
     GameParameter.toggle_timer(params[:request])
   end
+
+
 
 
 
