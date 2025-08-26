@@ -14,7 +14,6 @@ Rails.application.routes.draw do
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
-
   ### Результаты
   get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
   patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
@@ -22,9 +21,7 @@ Rails.application.routes.draw do
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
   patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
 
-  get   '/game_parameters/get_current_result',  to: 'game_parameters#get_current_result'
-  patch '/game_parameters/choose_current_result',       to: 'game_parameters#choose_current_result'
-  
+ 
  
 
   ###Таймер и расписание

@@ -18,30 +18,6 @@ class GameParameter < ApplicationRecord
             {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
- 
- DISPLAYED_RESULTS = [0,1,2,3,4] #0 - пустой, 1 - третье место, 2 - второе 3 - первое, 4 - все списком
- 
-  
-  ### Выдача результатов 
-   def self.show_current_merchant_result_display
-    game_results = GameParameter.find(RESULTS)
-    game_results.params.transform_keys!(&:to_sym)
-
-    if game_results.params.empty? || !game_results.params.has_key?(:display)
-      game_results.params[:display] = DISPLAYED_RESULTS[0]
-      game_results.save
-      game_results.params.transform_keys!(&:to_sym)
-    end
-
-    return game_results.params[:display]
-   end
-
-  def self.change_current_merchant_result_display(num) #merch
-    game_results = GameParameter.find(RESULTS)
-    game_results.params.transform_keys!(&:to_sym)
-    game_results.params[:display] = num
-    game_results.save
-  end
 
   ###Результаты
 def self.sort_and_save_results(result_hash = nil)
