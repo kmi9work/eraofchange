@@ -31,12 +31,12 @@ class GameParametersController < ApplicationController
   end
 
 ##########
-  def get_current_result
-    @current_result_screen = GameParameter.get_current_result
+  def get_current_result ##########
+    @current_result_screen = GameParameter.show_current_merchant_result_display
   end
 
   def choose_current_result
-    GameParameter.choose_current_result(params[:request])
+    GameParameter.change_current_merchant_result_display(params[:request])
   end
   ######
 
@@ -47,7 +47,6 @@ class GameParametersController < ApplicationController
   def delete_schedule_item
     GameParameter.delete_schedule_item(params[:request])
   end
-
 
   def update_schedule_item
     GameParameter.update_schedule_item(params[:request])
@@ -67,7 +66,7 @@ class GameParametersController < ApplicationController
   end
 
  def save_sorted_results
-    GameParameter.save_sorted_results(params[:request].to_unsafe_h)
+    GameParameter.sort_and_save_results(params[:request].to_unsafe_h)
   end
 
   def update_results
@@ -82,8 +81,6 @@ class GameParametersController < ApplicationController
    @game_results = GameParameter.show_sorted_results
    render json: @game_results
   end  
-
-
 
   # GET /game_parameters/new
   def new

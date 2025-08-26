@@ -18,38 +18,55 @@ class GameParameter < ApplicationRecord
             {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
+ 
+ DISPLAYED_RESULTS = [0,1,2,3,4] #0 - пустой, 1 - третье место, 2 - второе 3 - первое, 4 - все списком
+ 
+  
+  ### Выдача результатов 
+   def self.show_current_merchant_result_display
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
 
+    if game_results.params.empty? || !game_results.params.has_key?(:display)
+      game_results.params[:display] = DISPLAYED_RESULTS[0]
+      game_results.save
+      game_results.params.transform_keys!(&:to_sym)
+    end
 
+    return game_results.params[:display]
+   end
 
-  def self.choose_current_result(num)
-    rank = GameParameter.find(RESULTS + 1)
-    rank.value = num
-    rank.save
+  def self.change_current_merchant_result_display(num) #merch
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
+    game_results.params[:display] = num
+    game_results.save
   end
 
   ###Результаты
-  def self.update_results(arrayed_result_hashes)    
-    arrayed_result_hashes.transform_keys!(&:to_sym) 
-    results_game_parameter = GameParameter.find(RESULTS)
-    results_game_parameter.params.map! {|par| par.transform_keys(&:to_sym)}
-    
-    updated_params = results_game_parameter.params.map do |result|
-      if arrayed_result_hashes[:player_id] == result[:player_id]
-        arrayed_result_hashes 
-      else
-        result 
-      end
+def self.sort_and_save_results(result_hash = nil)
+
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym) ### ключи в символы
+    if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
+      game_results.params[:merchant_results] = []
+      max_id = 0
+    else
+      game_results.params[:merchant_results].map! {|res| res.transform_keys(&:to_sym)}
+      max_id = game_results.params[:merchant_results].max_by { |h| h[:player_id]}[:player_id]
     end
 
-    results_game_parameter.params = GameParameter.sort_and_rank_results(updated_params)
-    results_game_parameter.save
+    if result_hash != nil
+      result_hash[:player_id] = max_id + 1  ##заменить на merchant_id
+      results = game_results.params[:merchant_results].push(result_hash)
+    else
+      results = game_results.params[:merchant_results]
+    end
+
+    results.map! {|res| res.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(results)  
+    game_results.save
   end
-
-
-  def self.get_current_result
-    GameParameter.find(RESULTS + 1).value
-  end
-
 
   def self.sort_and_rank_results(results)
     per_pl_cap = GameParameter.find_cap_per_pl(results)
@@ -67,16 +84,6 @@ class GameParameter < ApplicationRecord
     sorted_results
   end
 
-  def self.delete_result(player_id)
-    results_game_parameter = GameParameter.find(RESULTS)
-    player_id.transform_keys(&:to_sym)
-    results_game_parameter.params.map! {|par| par.transform_keys(&:to_sym)}
-    results_game_parameter.params.delete_if{|h| h[:player_id] == player_id[:player_id] }
-    results_game_parameter.params = GameParameter.sort_and_rank_results(results_game_parameter.params)
-
-    results_game_parameter.save
-  end
-
   def self.find_cap_per_pl(results)    
     per_pl_cap = []
     results.map! {|par| par.transform_keys(&:to_sym)}
@@ -91,40 +98,52 @@ class GameParameter < ApplicationRecord
     return per_pl_cap
   end
 
-  def self.save_sorted_results(arrayed_result_hashes = nil)    
+  def self.update_results(result_hash)   
+    result_hash.transform_keys!(&:to_sym) 
     game_results = GameParameter.find(RESULTS)
-    if game_results.params.empty? 
-      max_id = 0
-    else
-      game_results.params.map! {|res| res.transform_keys(&:to_sym)}
-      max_id = game_results.params.max_by { |h| h[:player_id]}[:player_id]
+    game_results.params.transform_keys!(&:to_sym) ### ключи хэша
+    game_results.params[:merchant_results].map! {|par| par.transform_keys!(&:to_sym)}
+    
+    updated_params = game_results.params[:merchant_results].map do |result|
+      if result_hash[:player_id] == result[:player_id]
+        result_hash 
+      else
+        result 
+      end
     end
 
-    if arrayed_result_hashes != nil
-      arrayed_result_hashes[:player_id] = max_id + 1
-      results = game_results.params.push(arrayed_result_hashes)
-    else
-      results = game_results.params
-    end
-
-    results.map! {|res| res.transform_keys(&:to_sym)}
-    game_results.params = GameParameter.sort_and_rank_results(results)  
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(updated_params)
     game_results.save
   end
+
+  def self.delete_result(player_id_hash)
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
+    player_id_hash.transform_keys!(&:to_sym)
+    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results].delete_if{|h| h[:player_id] == player_id_hash[:player_id] }
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
+
+    game_results.save
+  end
+
+  def self.show_sorted_results
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
+    return []  if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) 
+
+    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
+    game_results.save
+    game_results.params.transform_keys!(&:to_sym)
+    return game_results.params[:merchant_results]
+  end  
 
   def self.clear_results
     game_results = GameParameter.find(RESULTS)
     game_results.params = []
     game_results.save
   end
-
-  def self.show_sorted_results
-    results_game_parameter = GameParameter.find(RESULTS)
-    results_game_parameter.params = GameParameter.sort_and_rank_results(results_game_parameter.params)
-    results_game_parameter.save
-    return results_game_parameter.params
-  end
-
 
 
 
