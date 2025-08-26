@@ -21,9 +21,6 @@ Rails.application.routes.draw do
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
   patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
 
- 
- 
-
   ###Таймер и расписание
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
   patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
