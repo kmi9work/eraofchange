@@ -14,16 +14,39 @@ Rails.application.routes.draw do
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
 
+  ### Результаты
+  get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
+  patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
+  patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
+  patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
+  patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
+
+  ###Таймер и расписание
+  get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
+  patch '/game_parameters/create_schedule', to: 'game_parameters#create_schedule'
+  patch '/game_parameters/add_schedule_item', to: 'game_parameters#add_schedule_item'
+  patch '/game_parameters/update_schedule_item', to: 'game_parameters#update_schedule_item'
+  patch '/game_parameters/delete_schedule_item', to: 'game_parameters#delete_schedule_item'
+
+  patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
+
+  ###Экран
+  get   '/game_parameters/get_screen', to: 'game_parameters#get_screen'
+  patch '/game_parameters/toggle_screen', to: 'game_parameters#toggle_screen'
+
+  
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
+
+
 
   patch '/armies/:id/demote_army', to: 'armies#demote_army'
   patch '/armies/:id/pay_for_army', to: 'armies#pay_for_army'
   patch '/armies/:id/goto/:settlement_id', to: 'armies#goto'
   patch '/armies/:id/attack/:enemy_id', to: 'armies#attack'
   post '/armies/:id/troops', to: 'armies#add_troop'
-
+  
   patch '/regions/:id/add_po_item', to: 'regions#add_po_item'
   patch '/regions/:id/captured_by', to: 'regions#captured_by'
 

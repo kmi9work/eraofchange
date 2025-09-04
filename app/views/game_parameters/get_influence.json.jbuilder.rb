@@ -1,0 +1,1 @@
+json.get_influence  @influence
