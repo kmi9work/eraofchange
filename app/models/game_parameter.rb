@@ -3,6 +3,7 @@ class GameParameter < ApplicationRecord
   TIMER = 4
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
+  RESULTS = 6
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
@@ -17,6 +18,113 @@ class GameParameter < ApplicationRecord
             {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
+
+  ###Результаты
+def self.sort_and_save_results(result_hash = nil)
+
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym) ### ключи в символы
+    if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
+      game_results.params[:merchant_results] = []
+      max_id = 0
+    else
+      game_results.params[:merchant_results].map! {|res| res.transform_keys(&:to_sym)}
+      max_id = game_results.params[:merchant_results].max_by { |h| h[:player_id]}[:player_id]
+    end
+
+    if result_hash != nil
+      result_hash[:player_id] = max_id + 1  ##заменить на merchant_id
+      results = game_results.params[:merchant_results].push(result_hash)
+    else
+      results = game_results.params[:merchant_results]
+    end
+
+    results.map! {|res| res.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(results)  
+    game_results.save
+  end
+
+  def self.sort_and_rank_results(results)
+    per_pl_cap = GameParameter.find_cap_per_pl(results)
+    sorted_results = per_pl_cap.sort_by { |hash| -hash[:cap_per_pl].to_i }
+    place = 0
+    previous_value = nil
+    
+    sorted_results.each do |result|
+      current_value = result[:cap_per_pl]
+      place += 1 if current_value != previous_value    
+      result[:place] = place
+      previous_value = current_value
+    end
+
+    sorted_results
+  end
+
+  def self.find_cap_per_pl(results)    
+    per_pl_cap = []
+    results.map! {|par| par.transform_keys(&:to_sym)}
+    results.each do |result|
+      num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1
+      capital = result[:capital].to_i
+      result[:cap_per_pl] = capital/num_of_players
+
+      per_pl_cap << result
+    end
+
+    return per_pl_cap
+  end
+
+  def self.update_results(result_hash)   
+    result_hash.transform_keys!(&:to_sym) 
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym) ### ключи хэша
+    game_results.params[:merchant_results].map! {|par| par.transform_keys!(&:to_sym)}
+    
+    updated_params = game_results.params[:merchant_results].map do |result|
+      if result_hash[:player_id] == result[:player_id]
+        result_hash 
+      else
+        result 
+      end
+    end
+
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(updated_params)
+    game_results.save
+  end
+
+  def self.delete_result(player_id_hash)
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
+    player_id_hash.transform_keys!(&:to_sym)
+    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results].delete_if{|h| h[:player_id] == player_id_hash[:player_id] }
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
+
+    game_results.save
+  end
+
+  def self.show_sorted_results
+    game_results = GameParameter.find(RESULTS)
+    game_results.params.transform_keys!(&:to_sym)
+    return []  if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) 
+
+    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
+    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
+    game_results.save
+    game_results.params.transform_keys!(&:to_sym)
+    return game_results.params[:merchant_results]
+  end  
+
+  def self.clear_results
+    game_results = GameParameter.find(RESULTS)
+    game_results.params = []
+    game_results.save
+  end
+
+
+
+
+
 
 ###Управление экраном
   def self.toggle_screen(screen_value)

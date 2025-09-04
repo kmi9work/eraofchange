@@ -38,7 +38,6 @@ class GameParametersController < ApplicationController
     GameParameter.delete_schedule_item(params[:request])
   end
 
-
   def update_schedule_item
     GameParameter.update_schedule_item(params[:request])
   end
@@ -56,9 +55,22 @@ class GameParametersController < ApplicationController
     GameParameter.toggle_timer(params[:request])
   end
 
+ def save_sorted_results
+    GameParameter.sort_and_save_results(params[:request].to_unsafe_h)
+  end
 
+  def update_results
+    GameParameter.update_results(params[:request].to_unsafe_h)
+  end
 
+  def delete_result
+    GameParameter.delete_result(params[:request].to_unsafe_h)
+  end
 
+  def show_sorted_results
+   @game_results = GameParameter.show_sorted_results
+   render json: @game_results
+  end  
 
   # GET /game_parameters/new
   def new
