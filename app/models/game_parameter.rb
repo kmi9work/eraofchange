@@ -20,8 +20,7 @@ class GameParameter < ApplicationRecord
           ]
 
   ###Результаты
-def self.sort_and_save_results(result_hash = nil)
-
+  def self.sort_and_save_results(result_hash = nil)
     game_results = GameParameter.find(RESULTS)
     game_results.params.transform_keys!(&:to_sym) ### ключи в символы
     if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
@@ -121,12 +120,7 @@ def self.sort_and_save_results(result_hash = nil)
     game_results.save
   end
 
-
-
-
-
-
-###Управление экраном
+  ###Управление экраном
   def self.toggle_screen(screen_value)
     screen = GameParameter.find(SCREEN)
     screen.value = screen_value
@@ -137,8 +131,7 @@ def self.sort_and_save_results(result_hash = nil)
     return GameParameter.find(SCREEN).value
   end
 
-###Таймер и расписание
-
+  ###Таймер и расписание
   def self.show_schedule
     timer = GameParameter.find(TIMER)
     schedule_item = {}
@@ -158,7 +151,6 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.add_schedule_item(schedule_item)
-    #{"identificator"=>"Пятый цикл", "finish"=>"18:30"}
     timer = GameParameter.find(TIMER)
     params = timer.params
     new_start = params.last["finish"]
