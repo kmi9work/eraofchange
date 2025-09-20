@@ -65,27 +65,31 @@ class Country < ApplicationRecord
   end
 
   def capture(region, how) #1 - войной, 0 - миром
-   region.country_id = self.id
-    if how.to_i == BY_WAR
-      PublicOrderItem.add(MILITARILY, "Присоединение войной #{region.name}", region, nil)
-    elsif how.to_i == BY_DIPLOMACY
-      PublicOrderItem.add(PEACEFULLY, "Присоединение миром #{region.name}", region, nil)
-    end
-
-    if self.id == RUS
-      Job.find_by_id(Job::GRAND_PRINCE).players.each do |player|
-        player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение миром #{region.name}", self) 
+    if region.country_id != self.id
+     region.country_id = self.id
+      if how.to_i == BY_WAR
+        PublicOrderItem.add(MILITARILY, "Присоединение войной #{region.name}", region, nil)
+      elsif how.to_i == BY_DIPLOMACY
+        PublicOrderItem.add(PEACEFULLY, "Присоединение миром #{region.name}", region, nil)
       end
-    end
 
-    region.save
+      if self.id == RUS
+        Job.find_by_id(Job::GRAND_PRINCE).players.each do |player|
+          player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение миром #{region.name}", self) 
+        end
+      end
+
+      region.save
+    end
   end
 
   def join_peace
     rus = Country.find_by_id(RUS)
-    regions.each{|r| rus.capture(r, BY_DIPLOMACY)}
-    Job.find_by_id(Job::POSOL).players.each do |player|
-      player.modify_influence(Job::POSOL_BONUS, "Бонус за присоединение миром #{self.name}", self) 
+    if self.country_id != RUS
+      regions.each{|r| rus.capture(r, BY_DIPLOMACY)}
+      Job.find_by_id(Job::POSOL).players.each do |player|
+        player.modify_influence(Job::POSOL_BONUS, "Бонус за присоединение миром #{self.name}", self) 
+      end
     end
   end
 end
