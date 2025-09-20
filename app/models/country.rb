@@ -85,7 +85,7 @@ class Country < ApplicationRecord
 
   def join_peace
     rus = Country.find_by_id(RUS)
-    if self.country_id != RUS
+    if regions.any?{|r| r.country_id != RUS}
       regions.each{|r| rus.capture(r, BY_DIPLOMACY)}
       Job.find_by_id(Job::POSOL).players.each do |player|
         player.modify_influence(Job::POSOL_BONUS, "Бонус за присоединение миром #{self.name}", self) 
