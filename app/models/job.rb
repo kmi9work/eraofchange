@@ -15,7 +15,7 @@ class Job < ApplicationRecord
   SPIRIT = 9
   GUILD_BOSS = 10
 
-  ZODCHIY_BONUS = 2
+  ZODCHIY_BONUS = 3
   GRAND_PRINCE_BONUS = 2
   OKOLNICHY_BONUS = 2
   TAINIY_BONUS = 3

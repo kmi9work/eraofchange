@@ -4,13 +4,18 @@ class Building < ApplicationRecord
   belongs_to :building_level
   belongs_to :settlement
 
-  def upgrade!
+  def upgrade! zodchiy_bonus
     level = self.building_level&.level
     if level < BuildingLevel::MAX_LEVEL
       next_level = level + 1
       required_building_type = self.building_level.building_type
       self.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
       if self.building_level && self.save
+        if zodchiy_bonus && next_level == 3
+          Job.find_by_id(Job::ZODCHIY).players.each do |player|
+            player.modify_influence(Job::ZODCHIY_BONUS, "Бонус за постройки", @building) 
+          end
+        end
         return {building_level: self.building_level, msg: "Новый уровень постройки: #{self.building_level&.name}"}
       else
         return {building_level: nil, msg: "Внутренняя ошибка. #{self.building_level}, #{self.errors.inspect}"}

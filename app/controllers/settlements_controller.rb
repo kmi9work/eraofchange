@@ -11,11 +11,6 @@ class SettlementsController < ApplicationController
 
   def build
     @settlement.build(params[:building_type_id])
-    if params[:zodchiy_bonus]
-      Job.find_by_id(Job::ZODCHIY).players.each do |player|
-        player.modify_influence(Job::ZODCHIY_BONUS, "Бонус за постройки", @building) 
-      end
-    end
   end
 
   def pay_for_church
