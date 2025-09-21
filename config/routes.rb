@@ -16,6 +16,10 @@ Rails.application.routes.draw do
 
   ### Результаты
   get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
+  get   '/game_parameters/show_curr_merch_res_screen', to: 'game_parameters#show_curr_merch_res_screen'
+  patch '/game_parameters/change_curr_merch_res_screen', to: 'game_parameters#change_curr_merch_res_screen'
+
+
   patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
   patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'

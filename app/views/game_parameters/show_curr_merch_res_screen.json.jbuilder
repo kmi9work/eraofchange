@@ -1,0 +1,1 @@
+json.merch_screen @merch_screen

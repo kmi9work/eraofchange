@@ -72,6 +72,16 @@ class GameParametersController < ApplicationController
    render json: @game_results
   end  
 
+
+  def show_curr_merch_res_screen
+    @merch_screen = GameParameter.show_curr_merch_res_screen
+    render json: @merch_screen
+  end
+
+  def change_curr_merch_res_screen
+    GameParameter.change_curr_merch_res_screen(params[:request])
+  end
+
   # GET /game_parameters/new
   def new
     @game_parameter = GameParameter.new
