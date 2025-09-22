@@ -22,12 +22,12 @@ class GameParameter < ApplicationRecord
   ###Результаты
 
   def self.show_curr_merch_res_screen
-   return GameParameter.find(RESULTS).params["display"] ###rename!!!
+   return GameParameter.find(RESULTS).params["merch_display"]
   end
 
   def self.change_curr_merch_res_screen(number)
     game_results = GameParameter.find(RESULTS)
-    game_results.params["display"] = number 
+    game_results.params["merch_display"] = number 
     game_results.save
   end
 
