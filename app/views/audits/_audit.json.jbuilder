@@ -10,6 +10,9 @@ else
   json.user nil
 end
 
+# Добавляем информацию о том, просмотрено ли событие
+json.is_viewed @viewed_audit_ids.include?(audit.id)
+
 # Обрабатываем audited_changes для зданий
 if audit.auditable_type == 'Building' && audit.audited_changes['building_level_id']
   audited_changes = audit.audited_changes.dup
