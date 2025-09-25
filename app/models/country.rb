@@ -1,4 +1,6 @@
 class Country < ApplicationRecord
+  audited
+  
   # params:
   # embargo (bool)- Введено ли эмбарго в стране?
 	has_many :regions

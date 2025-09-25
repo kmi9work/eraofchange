@@ -2,20 +2,25 @@ class ArmiesController < ApplicationController
   before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop]
 
   def goto
-    @army.goto(params[:settlement_id])
+    @army.goto(params[:settlement_id], current_user)
   end
 
   def attack
-    @army = @army.attack(params[:enemy_id], params[:voevoda_bonus])
-    if @army
-      render :show
+    enemy = Army.active.find_by(id: params[:enemy_id])
+    if enemy
+      @army = @army.attack(params[:enemy_id], params[:voevoda_bonus], current_user)
+      if @army
+        render :show
+      else
+        render json: false
+      end
     else
       render json: false
     end
   end
 
   def index
-    @armies = Army.all
+    @armies = Army.active.order(:name)
   end
 
   def show
@@ -33,7 +38,7 @@ class ArmiesController < ApplicationController
   end
 
   def add_troop
-    @army.add_troop(params[:troop_type_id])
+    @army.add_troop(params[:troop_type_id], current_user)
     render :show, status: :created, location: @army
   end
 
@@ -63,7 +68,25 @@ class ArmiesController < ApplicationController
         format.json { render :show, status: :ok, location: @army }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @army.errors, status: :unprocessable_entity }
+        format.json { 
+          error_messages = @army.errors.full_messages
+          # Переводим стандартные сообщения об ошибках на русский
+          error_messages = error_messages.map do |message|
+            case message
+            when "Name has already been taken"
+              "Армия с таким названием уже существует"
+            when "Name can't be blank"
+              "Название армии не может быть пустым"
+            when "Owner must exist"
+              "Владелец армии должен быть указан"
+            when "Settlement must exist"
+              "Поселение должно быть указано"
+            else
+              message
+            end
+          end
+          render json: { errors: error_messages }, status: :unprocessable_entity 
+        }
       end
     end
   end
@@ -80,7 +103,7 @@ class ArmiesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_army
-      @army = Army.find(params[:id])
+      @army = Army.active.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

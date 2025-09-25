@@ -37,8 +37,34 @@ class JobsController < ApplicationController
 
   # PATCH/PUT /jobs/1 or /jobs/1.json
   def update
+    old_player_ids = @job.player_ids.dup
+    
     respond_to do |format|
       if @job.update(job_params)
+        # Создаем аудит для смены должности
+        if old_player_ids != @job.player_ids
+          old_players = Player.where(id: old_player_ids).pluck(:name)
+          new_players = Player.where(id: @job.player_ids).pluck(:name)
+          
+          comment = if old_players.empty? && !new_players.empty?
+            "#{@job.name} назначен #{new_players.join(', ')}"
+          elsif !old_players.empty? && new_players.empty?
+            "#{@job.name} освобожден от #{old_players.join(', ')}"
+          elsif !old_players.empty? && !new_players.empty?
+            "#{@job.name} передан от #{old_players.join(', ')} к #{new_players.join(', ')}"
+          else
+            "#{@job.name} изменен"
+          end
+          
+          @job.audits.create!(
+            action: 'update',
+            auditable: @job,
+            user: current_user,
+            audited_changes: { 'player_ids' => [old_player_ids, @job.player_ids] },
+            comment: comment
+          )
+        end
+        
         format.html { redirect_to job_url(@job), notice: "Job was successfully updated." }
         format.json { render :show, status: :ok, location: @job }
       else

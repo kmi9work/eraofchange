@@ -1,4 +1,23 @@
 class GameParameter < ApplicationRecord
+  audited
+
+  def audit_comment
+    case identificator
+    when "current_year"
+      if params_changed? && params_change[1]
+        new_params = params_change[1]
+        old_params = params_change[0] || {}
+        
+        if new_params["state_expenses"] == true && old_params["state_expenses"] == false
+          "Оплачены госрасходы за #{value} год"
+        elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
+          "Отменена оплата госрасходов за #{value} год"
+        end
+      elsif value_changed?
+        "Год изменен с #{value_change[0]} на #{value_change[1]}"
+      end
+    end
+  end
 
   TIMER = 4
   SCREEN = 5
@@ -22,7 +41,7 @@ class GameParameter < ApplicationRecord
   ###Результаты
 def self.sort_and_save_results(result_hash = nil)
 
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym) ### ключи в символы
     if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
       game_results.params[:merchant_results] = []
@@ -76,7 +95,7 @@ def self.sort_and_save_results(result_hash = nil)
 
   def self.update_results(result_hash)   
     result_hash.transform_keys!(&:to_sym) 
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym) ### ключи хэша
     game_results.params[:merchant_results].map! {|par| par.transform_keys!(&:to_sym)}
     
@@ -93,7 +112,7 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.delete_result(player_id_hash)
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym)
     player_id_hash.transform_keys!(&:to_sym)
     game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
@@ -104,7 +123,7 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.show_sorted_results
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym)
     return []  if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) 
 
@@ -116,7 +135,7 @@ def self.sort_and_save_results(result_hash = nil)
   end  
 
   def self.clear_results
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params = []
     game_results.save
   end
@@ -128,19 +147,19 @@ def self.sort_and_save_results(result_hash = nil)
 
 ###Управление экраном
   def self.toggle_screen(screen_value)
-    screen = GameParameter.find(SCREEN)
+    screen = GameParameter.find_by(identificator: "screen")
     screen.value = screen_value
     screen.save 
   end
 
   def self.get_screen
-    return GameParameter.find(SCREEN).value
+    return GameParameter.find_by(identificator: "screen").value
   end
 
 ###Таймер и расписание
 
   def self.show_schedule
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     schedule_item = {}
     id = 0
     schedule = timer.params.map do |item|
@@ -159,7 +178,7 @@ def self.sort_and_save_results(result_hash = nil)
 
   def self.add_schedule_item(schedule_item)
     schedule_item.transform_keys(&:to_sym)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     params = timer.params
     last_id = params.present? ? params.last["id"]  : 0
     new_item   = {id: last_id + 1,
@@ -172,14 +191,14 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.update_schedule_item(schedule_item)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     new_schedule = timer.params.map{|item| item["id"] == schedule_item["id"] ? schedule_item : item}
     timer.params = new_schedule
     timer.save
   end
 
   def self.delete_schedule_item(schedule_item_id)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.params.delete_if {|item| item["id"] == schedule_item_id["id"]}
     timer.save
   end
@@ -204,7 +223,7 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.toggle_timer(value = nil)    
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.value = value.to_i              unless value.nil?
     timer.value = 1-timer.value.to_i      if     value.nil?
     timer.save
@@ -219,7 +238,7 @@ def self.sort_and_save_results(result_hash = nil)
   end
 
   def self.create_schedule(schedule = nil)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.value = NOT_TICKING 
     timer.params = []
     timer.params = schedule || SCHEDULE
@@ -272,6 +291,10 @@ def self.sort_and_save_results(result_hash = nil)
 
   def self.current_year #показывает номер года
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
+  end
+
+  def self.initial_audit_id #показывает последний ID аудитов из сидов
+    GameParameter.find_by(identificator: "current_year")&.params&.dig("initial_audit_id")&.to_i || 0
   end
 
   def self.pay_state_expenses

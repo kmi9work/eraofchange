@@ -109,11 +109,16 @@ class Player < ApplicationRecord
   def influence_buildings
     sum = 0
     if job_ids.include?(Job::METROPOLITAN)
-      church_params = Building.joins({settlement: :region}, :building_level).
+      # Получаем церкви, которые были оплачены в предыдущем году
+      previous_year = GameParameter.current_year - 1
+      church_buildings = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
         where(regions: {country_id: Country::RUS}).
-        select('building_levels.params')
-      sum += church_params.map{|p| p.params['metropolitan_influence'].to_i}.sum
+        where("buildings.params::jsonb->'paid' @> ?::jsonb", [previous_year].to_json)
+      
+      sum += church_buildings.joins(:building_level).sum do |building|
+        building.building_level.params['metropolitan_influence'].to_i
+      end
     end
     def_params = Building.joins({settlement: :region}, :building_level).
       where(building_levels: {building_type_id: BuildingType::DEFENCE}).
