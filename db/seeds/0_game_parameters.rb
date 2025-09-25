@@ -17,10 +17,8 @@ GameParameter.create(id: GameParameter::SCREEN, name: "Экран", identificato
 
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
-GameParameter.create(id: GameParameter::RESULTS, name: "Результаты купцов", identificator: "results", 	 value: "0", params: {"merch_display"=>0, 
-																																																															"noble_display"=>0,
-																																																															"merchant_results" => []})
-
+GameParameter.create(id: GameParameter::RESULTS, name: "Результаты купцов", identificator: "results", 	 
+												 value: "0", params: {display: "merchPlaceholder", merchant_results: []})
 
 
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')

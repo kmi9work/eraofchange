@@ -78,24 +78,16 @@ class GameParametersController < ApplicationController
 
   end
 
-  def show_curr_noble_res_screen
-   @noble_screen = GameParameter.show_curr_merch_res_screen
-   render json: @noble_screen
+  def display_results
+   @current_display = GameParameter.display_results
+   render json: @current_display
   end
 
 
-  def show_curr_merch_res_screen
-    @merch_screen = GameParameter.show_curr_merch_res_screen
-    render json: @merch_screen
+  def change_results_display
+    GameParameter.change_results_display(params[:request])
   end
 
-  def change_curr_merch_res_screen
-    GameParameter.change_curr_merch_res_screen(params[:request])
-  end
-
-  def change_curr_noble_res_screen
-    GameParameter.change_curr_noble_res_screen(params[:request])
-  end
 
   # GET /game_parameters/new
   def new

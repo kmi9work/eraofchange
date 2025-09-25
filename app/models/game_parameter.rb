@@ -46,27 +46,15 @@ class GameParameter < ApplicationRecord
     return sorted_nobles
   end
 
-  def self.show_curr_merch_res_screen
-   return GameParameter.find(RESULTS).params["merch_display"]
+  def self.display_results
+   return GameParameter.find(RESULTS).params["display"]
   end
 
-  def self.show_curr_noble_res_screen
-   return GameParameter.find(RESULTS).params["noble_display"]
-  end
-
-  def self.change_curr_merch_res_screen(number)
+  def self.change_results_display(string)
     game_results = GameParameter.find(RESULTS)
-    game_results.params["merch_display"] = number 
+    game_results.params["display"] = string 
     game_results.save
   end
-
-  def self.change_curr_noble_res_screen(number)
-    game_results = GameParameter.find(RESULTS)
-    game_results.params["noble_display"] = number 
-    game_results.save
-  end
-
-
 
   def self.sort_and_save_results(result_hash = nil)
     game_results = GameParameter.find(RESULTS)

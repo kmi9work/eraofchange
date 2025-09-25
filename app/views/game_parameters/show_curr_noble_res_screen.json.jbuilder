@@ -1,1 +1,0 @@
-json.noble_screen @noble_screen
