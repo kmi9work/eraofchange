@@ -5,5 +5,6 @@ class PlayerType < ApplicationRecord
   NOBLE = 2     # Знать
   SAGE = 3      # Мудрец
   REBEL = 4     # Дух бунта
+  REBEL_NAME = "Дух бунта"
 
 end
