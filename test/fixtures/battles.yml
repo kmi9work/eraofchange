@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  attacker_army: one
+  defender_army: one
+  winner_army: one
+  damage: 1
+  year: 1
+  comment: MyText
+
+two:
+  attacker_army: two
+  defender_army: two
+  winner_army: two
+  damage: 1
+  year: 1
+  comment: MyText

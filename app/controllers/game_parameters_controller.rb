@@ -7,15 +7,31 @@ class GameParametersController < ApplicationController
   end
 
   def pay_state_expenses
-    GameParameter.pay_state_expenses
+    result = GameParameter.pay_state_expenses
+    render json: result
   end
 
   def unpay_state_expenses
-    GameParameter.unpay_state_expenses
+    result = GameParameter.unpay_state_expenses
+    render json: result
   end
 
   def increase_year
-    GameParameter.increase_year(params[:kaznachei_bonus])
+    old_year = GameParameter.current_year
+    result = GameParameter.increase_year(params[:kaznachei_bonus])
+    new_year = GameParameter.current_year
+    
+    # Создаем аудит для смены года
+    current_year_param = GameParameter.find_by(identificator: "current_year")
+    current_year_param.audits.create!(
+      action: 'update',
+      auditable: current_year_param,
+      user: current_user,
+      audited_changes: { 'value' => [old_year.to_s, new_year.to_s] },
+      comment: "Год изменен с #{old_year} на #{new_year}"
+    )
+    
+    render json: result
   end
 
   # GET /game_parameters/1 or /game_parameters/1.json

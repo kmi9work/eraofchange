@@ -3,7 +3,7 @@ class InfluenceItemsController < ApplicationController
 
   # GET /influence_items or /influence_items.json
   def index
-    @influence_items = InfluenceItem.all
+    @influence_items = InfluenceItem.includes(:player, :entity)
   end
 
   # GET /influence_items/1 or /influence_items/1.json

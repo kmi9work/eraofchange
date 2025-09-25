@@ -134,6 +134,10 @@ Rails.application.routes.draw do
   get '/current_user', to: 'users#current_user'
 
   get '/audits', to: 'audits#index'
+  post '/audits/mark_as_viewed', to: 'audits#mark_as_viewed'
+  post '/audits/mark_all_as_viewed', to: 'audits#mark_all_as_viewed'
+  get '/audits/yearly_stats', to: 'audits#yearly_stats'
+  get '/audits/detailed_yearly_stats', to: 'audits#detailed_yearly_stats'
 
 
   resources :game_parameters

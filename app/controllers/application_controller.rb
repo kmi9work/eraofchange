@@ -7,7 +7,11 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
-    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+    @current_user ||= if session[:user_id]
+                        User.find(session[:user_id])
+                      else
+                        User.find_by(name: 'Аноним') || User.create(name: 'Аноним', job: 'Система')
+                      end
   end
 
   def login(user)

@@ -41,3 +41,4 @@
 /config/credentials.yml.enc
 /config/database.key
 /config/database.yml
+config/database.yml

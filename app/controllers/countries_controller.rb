@@ -15,6 +15,7 @@ class CountriesController < ApplicationController
 
   def set_embargo
     @country.set_embargo
+    render json: { success: true, embargo: @country.embargo }
   end
 
   def join_peace

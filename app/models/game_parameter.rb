@@ -1,5 +1,5 @@
 class GameParameter < ApplicationRecord
-
+  
   TIMER = 4
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
@@ -19,8 +19,25 @@ class GameParameter < ApplicationRecord
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
-  ###Результаты
+  # def audit_comment
+  #   case identificator
+  #   when "current_year"
+  #     if params_changed? && params_change[1]
+  #       new_params = params_change[1]
+  #       old_params = params_change[0] || {}
+        
+  #       if new_params["state_expenses"] == true && old_params["state_expenses"] == false
+  #         "Оплачены госрасходы за #{value} год"
+  #       elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
+  #         "Отменена оплата госрасходов за #{value} год"
+  #       end
+  #     elsif value_changed?
+  #       "Год изменен с #{value_change[0]} на #{value_change[1]}"
+  #     end
+  #   end
+  # end
 
+  ###Результаты
   def self.show_noble_results
     game_results = GameParameter.find(RESULTS)
     players = Player.where(player_type_id: PlayerType::NOBLE)
@@ -111,7 +128,7 @@ class GameParameter < ApplicationRecord
 
   def self.update_results(result_hash)   
     result_hash.transform_keys!(&:to_sym) 
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym) ### ключи хэша
     game_results.params[:merchant_results].map! {|par| par.transform_keys!(&:to_sym)}
     
@@ -128,7 +145,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.delete_result(player_id_hash)
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym)
     player_id_hash.transform_keys!(&:to_sym)
     game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
@@ -139,7 +156,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.show_sorted_results
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym)
     return []  if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) 
 
@@ -156,7 +173,7 @@ class GameParameter < ApplicationRecord
     game_results.save
   end
 
-  ###Управление экраном
+###Управление экраном
   def self.toggle_screen(screen_value)
     screen = GameParameter.find(SCREEN)
     screen.value = screen_value
@@ -167,7 +184,8 @@ class GameParameter < ApplicationRecord
     return GameParameter.find(SCREEN).value
   end
 
-  ###Таймер и расписание
+###Таймер и расписание
+
   def self.show_schedule
     timer = GameParameter.find(TIMER)
     schedule_item = {}
@@ -187,6 +205,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.add_schedule_item(schedule_item)
+    #{"identificator"=>"Пятый цикл", "finish"=>"18:30"}
     timer = GameParameter.find(TIMER)
     params = timer.params
     new_start = params.last["finish"]

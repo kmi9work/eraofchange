@@ -3,7 +3,7 @@ class PoliticalActionsController < ApplicationController
 
   # GET /political_actions or /political_actions.json
   def index
-    @political_actions = PoliticalAction.all
+    @political_actions = PoliticalAction.includes(:job, :political_action_type, :player)
   end
 
   # GET /political_actions/1 or /political_actions/1.json

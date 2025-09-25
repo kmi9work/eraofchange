@@ -37,7 +37,7 @@ namespace :custom do
       execute :mkdir, "-p #{shared_path}/public/uploads"
       execute :mkdir, "-p #{shared_path}/log"
 
-      upload!('config/database_prod.yml', "#{shared_path}/config/database.yml") if File.exist?('config/database_prod.yml')
+      upload!('config/database_prod.yml', "#{shared_path}/config/database_prod.yml") if File.exist?('config/database_prod.yml')
       upload!('config/master.key', "#{shared_path}/config/master.key") if File.exist?('config/master.key')
       
       execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
@@ -87,7 +87,7 @@ end
 before 'deploy:check:linked_files', 'custom:setup_config'
 #after 'deploy:publishing', 'deploy:restart'
 
-append :linked_files, "config/database.yml", 'config/master.key'
+append :linked_files, "config/database_prod.yml", 'config/master.key'
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
 
 

@@ -13,6 +13,7 @@ class Player < ApplicationRecord
   has_many :plants, :as => :economic_subject,
            :inverse_of => :economic_subject
   has_many :settlements
+  has_many :regions
   has_many :armies, :as => :owner,
            :inverse_of => :owner
   has_many :credits
@@ -20,6 +21,24 @@ class Player < ApplicationRecord
   has_many :influence_items
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
+
+  def my_buildings
+    (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
+    regions.map{|r| r.capital.buildings.map{|b| b.building_level}}.flatten).
+      sort_by{|bl| bl.building_type_id}.
+      map.with_index do |bl, idx|
+      {
+        building_type_id: bl.building_type_id,
+        level: bl.level,
+        icon: bl.building_type.icon,
+        index: idx
+      }
+    end
+  end
+
+  def own_count
+    settlements.count + regions.count
+  end
 
   def check_credit(plant_ids)
     plants = Plant.where(id: plant_ids)
@@ -90,11 +109,16 @@ class Player < ApplicationRecord
   def influence_buildings
     sum = 0
     if job_ids.include?(Job::METROPOLITAN)
-      church_params = Building.joins({settlement: :region}, :building_level).
+      # Получаем церкви, которые были оплачены в предыдущем году
+      previous_year = GameParameter.current_year - 1
+      church_buildings = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
         where(regions: {country_id: Country::RUS}).
-        select('building_levels.params')
-      sum += church_params.map{|p| p.params['metropolitan_influence'].to_i}.sum
+        where("buildings.params::jsonb->'paid' @> ?::jsonb", [previous_year].to_json)
+      
+      sum += church_buildings.joins(:building_level).sum do |building|
+        building.building_level.params['metropolitan_influence'].to_i
+      end
     end
     def_params = Building.joins({settlement: :region}, :building_level).
       where(building_levels: {building_type_id: BuildingType::DEFENCE}).
