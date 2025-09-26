@@ -88,6 +88,23 @@ class GameParametersController < ApplicationController
    render json: @game_results
   end  
 
+  def show_noble_results
+   @noble_results = GameParameter.show_noble_results
+   render json: @noble_results
+
+  end
+
+  def display_results
+   @current_display = GameParameter.display_results
+   render json: @current_display
+  end
+
+
+  def change_results_display
+    GameParameter.change_results_display(params[:request])
+  end
+
+
   # GET /game_parameters/new
   def new
     @game_parameter = GameParameter.new

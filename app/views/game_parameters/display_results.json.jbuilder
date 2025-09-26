@@ -1,0 +1,1 @@
+json.display_results @display_results
