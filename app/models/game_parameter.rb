@@ -1,6 +1,11 @@
 class GameParameter < ApplicationRecord
   audited
 
+  def audited?
+    # Аудит только для current_year (изменение года и оплата госрасходов)
+    identificator == "current_year"
+  end
+
   def audit_comment
     case identificator
     when "current_year"
@@ -291,10 +296,6 @@ def self.sort_and_save_results(result_hash = nil)
 
   def self.current_year #показывает номер года
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
-  end
-
-  def self.initial_audit_id #показывает последний ID аудитов из сидов
-    GameParameter.find_by(identificator: "current_year")&.params&.dig("initial_audit_id")&.to_i || 0
   end
 
   def self.pay_state_expenses

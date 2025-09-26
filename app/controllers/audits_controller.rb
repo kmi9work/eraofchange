@@ -83,11 +83,9 @@ class AuditsController < ApplicationController
   end
 
   def yearly_stats
-    # Получаем все аудиты с группировкой по году и категории, исключая начальные условия (id <= initial_audit_id)
-    initial_audit_id = GameParameter.initial_audit_id
+    # Получаем все аудиты с группировкой по году и категории
     audits = Audited::Audit.includes(:auditable)
       .where.not(auditable_type: nil)
-      .where('id > ?', initial_audit_id)
       .order(:created_at)
     
     # Группируем по году
@@ -109,12 +107,10 @@ class AuditsController < ApplicationController
   def detailed_yearly_stats
     year = params[:year]&.to_i || GameParameter.current_year
     
-        # Получаем все аудиты, исключая начальные условия (id <= initial_audit_id)
-        initial_audit_id = GameParameter.initial_audit_id
-        audits = Audited::Audit.includes(:auditable)
-          .where.not(auditable_type: nil)
-          .where('id > ?', initial_audit_id)
-    
+    # Получаем все аудиты
+    audits = Audited::Audit.includes(:auditable)
+      .where.not(auditable_type: nil)
+
     # Фильтруем по игровому году для объектов с полем year
     audits = audits.select do |audit|
       if audit.auditable&.respond_to?(:year)
