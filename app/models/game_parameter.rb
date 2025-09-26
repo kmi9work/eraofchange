@@ -1,5 +1,24 @@
 class GameParameter < ApplicationRecord
-  
+  audited
+
+  def audit_comment
+    case identificator
+    when "current_year"
+      if params_changed? && params_change[1]
+        new_params = params_change[1]
+        old_params = params_change[0] || {}
+        
+        if new_params["state_expenses"] == true && old_params["state_expenses"] == false
+          "Оплачены госрасходы за #{value} год"
+        elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
+          "Отменена оплата госрасходов за #{value} год"
+        end
+      elsif value_changed?
+        "Год изменен с #{value_change[0]} на #{value_change[1]}"
+      end
+    end
+  end
+
   TIMER = 4
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
@@ -19,62 +38,10 @@ class GameParameter < ApplicationRecord
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
-  # def audit_comment
-  #   case identificator
-  #   when "current_year"
-  #     if params_changed? && params_change[1]
-  #       new_params = params_change[1]
-  #       old_params = params_change[0] || {}
-        
-  #       if new_params["state_expenses"] == true && old_params["state_expenses"] == false
-  #         "Оплачены госрасходы за #{value} год"
-  #       elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
-  #         "Отменена оплата госрасходов за #{value} год"
-  #       end
-  #     elsif value_changed?
-  #       "Год изменен с #{value_change[0]} на #{value_change[1]}"
-  #     end
-  #   end
-  # end
-
   ###Результаты
-  def self.show_noble_results
-    game_results = GameParameter.find(RESULTS)
-    players = Player.where(player_type_id: PlayerType::NOBLE)
-    nobles_inf = []
-    nobles_inf = players.map do |player|
-      {noble_name: player.name,
-      noble_influence: player.influence}
-    end
-    sorted_nobles =  nobles_inf.sort_by { |hash| -hash[:noble_influence].to_i }
+def self.sort_and_save_results(result_hash = nil)
 
-    place = 0
-    previous_value = nil
-
-    sorted_nobles.delete_if { |n| n[:noble_name] == PlayerType::REBEL_NAME && n[:noble_influence] == 0 }
-    
-    sorted_nobles.each do |result|
-      current_value = result[:noble_influence]
-      place += 1 if current_value != previous_value    
-      result[:place] = place
-      previous_value = current_value
-    end
-
-    return sorted_nobles
-  end
-
-  def self.display_results
-   return GameParameter.find(RESULTS).params["display"]
-  end
-
-  def self.change_results_display(string)
-    game_results = GameParameter.find(RESULTS)
-    game_results.params["display"] = string 
-    game_results.save
-  end
-
-  def self.sort_and_save_results(result_hash = nil)
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params.transform_keys!(&:to_sym) ### ключи в символы
     if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
       game_results.params[:merchant_results] = []
@@ -168,26 +135,31 @@ class GameParameter < ApplicationRecord
   end  
 
   def self.clear_results
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params = []
     game_results.save
   end
 
+
+
+
+
+
 ###Управление экраном
   def self.toggle_screen(screen_value)
-    screen = GameParameter.find(SCREEN)
+    screen = GameParameter.find_by(identificator: "screen")
     screen.value = screen_value
     screen.save 
   end
 
   def self.get_screen
-    return GameParameter.find(SCREEN).value
+    return GameParameter.find_by(identificator: "screen").value
   end
 
 ###Таймер и расписание
 
   def self.show_schedule
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     schedule_item = {}
     id = 0
     schedule = timer.params.map do |item|
@@ -205,29 +177,28 @@ class GameParameter < ApplicationRecord
   end
 
   def self.add_schedule_item(schedule_item)
-    #{"identificator"=>"Пятый цикл", "finish"=>"18:30"}
-    timer = GameParameter.find(TIMER)
+    schedule_item.transform_keys(&:to_sym)
+    timer = GameParameter.find_by(identificator: "schedule")
     params = timer.params
-    new_start = params.last["finish"]
-    last_id = params.last["id"]
+    last_id = params.present? ? params.last["id"]  : 0
     new_item   = {id: last_id + 1,
-                  identificator: schedule_item["identificator"], 
-                  start: new_start,
-                  finish: schedule_item["finish"]
+                  identificator: schedule_item[:identificator],
+                  start: schedule_item[:start],
+                  finish: schedule_item[:finish]
                 }
     timer.params << new_item
     timer.save
   end
 
   def self.update_schedule_item(schedule_item)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     new_schedule = timer.params.map{|item| item["id"] == schedule_item["id"] ? schedule_item : item}
     timer.params = new_schedule
     timer.save
   end
 
   def self.delete_schedule_item(schedule_item_id)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.params.delete_if {|item| item["id"] == schedule_item_id["id"]}
     timer.save
   end
@@ -252,7 +223,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.toggle_timer(value = nil)    
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.value = value.to_i              unless value.nil?
     timer.value = 1-timer.value.to_i      if     value.nil?
     timer.save
@@ -267,7 +238,7 @@ class GameParameter < ApplicationRecord
   end
 
   def self.create_schedule(schedule = nil)
-    timer = GameParameter.find(TIMER)
+    timer = GameParameter.find_by(identificator: "schedule")
     timer.value = NOT_TICKING 
     timer.params = []
     timer.params = schedule || SCHEDULE
@@ -320,6 +291,10 @@ class GameParameter < ApplicationRecord
 
   def self.current_year #показывает номер года
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
+  end
+
+  def self.initial_audit_id #показывает последний ID аудитов из сидов
+    GameParameter.find_by(identificator: "current_year")&.params&.dig("initial_audit_id")&.to_i || 0
   end
 
   def self.pay_state_expenses
