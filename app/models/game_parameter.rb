@@ -1,5 +1,5 @@
 class GameParameter < ApplicationRecord
-  audited
+ audited
 
   def audit_comment
     case identificator
@@ -139,11 +139,6 @@ def self.sort_and_save_results(result_hash = nil)
     game_results.params = []
     game_results.save
   end
-
-
-
-
-
 
 ###Управление экраном
   def self.toggle_screen(screen_value)
