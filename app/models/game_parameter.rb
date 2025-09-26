@@ -39,6 +39,43 @@ class GameParameter < ApplicationRecord
           ]
 
   ###Результаты
+
+def self.show_noble_results
+    game_results = GameParameter.find(RESULTS)
+    players = Player.where(player_type_id: PlayerType::NOBLE)
+    nobles_inf = []
+    nobles_inf = players.map do |player|
+      {noble_name: player.name,
+      noble_influence: player.influence}
+    end
+    sorted_nobles =  nobles_inf.sort_by { |hash| -hash[:noble_influence].to_i }
+
+    place = 0
+    previous_value = nil
+
+    sorted_nobles.delete_if { |n| n[:noble_name] == PlayerType::REBEL_NAME && n[:noble_influence] == 0 }
+
+    sorted_nobles.each do |result|
+      current_value = result[:noble_influence]
+      place += 1 if current_value != previous_value    
+      result[:place] = place
+      previous_value = current_value
+    end
+
+    return sorted_nobles
+  end
+
+  def self.display_results
+   return GameParameter.find(RESULTS).params["display"]
+  end
+
+  def self.change_results_display(string)
+    game_results = GameParameter.find(RESULTS)
+    game_results.params["display"] = string 
+    game_results.save
+  end
+
+
 def self.sort_and_save_results(result_hash = nil)
 
     game_results = GameParameter.find_by(identificator: "results")
