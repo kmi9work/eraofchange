@@ -145,11 +145,6 @@ def self.sort_and_save_results(result_hash = nil)
     game_results.save
   end
 
-
-
-
-
-
 ###Управление экраном
   def self.toggle_screen(screen_value)
     screen = GameParameter.find_by(identificator: "screen")
