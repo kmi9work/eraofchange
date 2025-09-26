@@ -20,7 +20,7 @@ class AuditsController < ApplicationController
         army: [:settlement, :owner],
         troop_type: []
       ]
-    ).last(50).reverse
+    ).last(200).reverse
     
     # Загружаем просмотренные события для текущего пользователя
     if current_user
@@ -111,14 +111,9 @@ class AuditsController < ApplicationController
     audits = Audited::Audit.includes(:auditable)
       .where.not(auditable_type: nil)
 
-    # Фильтруем по игровому году для объектов с полем year
+    # Фильтруем по году из аудита
     audits = audits.select do |audit|
-      if audit.auditable&.respond_to?(:year)
-        audit.auditable.year == year
-      else
-        # Для объектов без поля year используем текущий игровой год
-        GameParameter.current_year == year
-      end
+      audit.year == year
     end
     
     detailed_stats = {
@@ -187,7 +182,7 @@ class AuditsController < ApplicationController
       
       value = audit.auditable&.value || 0
       comment = audit.auditable&.comment || ''
-      year = audit.auditable&.year || 'неизвестный год'
+      year = audit.year || 'неизвестный год'
       
       by_country[country_name][:changes] << {
         value: value,
@@ -246,13 +241,8 @@ class AuditsController < ApplicationController
   private
 
   def get_audit_year(audit)
-    # Пытаемся получить год из auditable объекта
-    if audit.auditable&.respond_to?(:year)
-      audit.auditable.year
-    else
-      # Fallback на текущий год игры
-      GameParameter.current_year
-    end
+    # Используем год из самого аудита
+    audit.year if audit.respond_to?(:year) && audit.year
   end
 
   def get_audit_category(audit)

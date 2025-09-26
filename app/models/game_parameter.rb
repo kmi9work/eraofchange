@@ -1,9 +1,23 @@
 class GameParameter < ApplicationRecord
-  audited
+  audited if: :should_audit?
 
-  def audited?
+  private
+
+  def should_audit?
     # Аудит только для current_year (изменение года и оплата госрасходов)
-    identificator == "current_year"
+    return false unless identificator == "current_year"
+    
+    # Проверяем, что изменились нужные поля
+    value_changed? || (params_changed? && state_expenses_changed?)
+  end
+
+  def state_expenses_changed?
+    return false unless params_changed?
+    
+    old_params = params_was || {}
+    new_params = params || {}
+    
+    old_params['state_expenses'] != new_params['state_expenses']
   end
 
   def audit_comment

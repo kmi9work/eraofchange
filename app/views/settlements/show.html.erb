@@ -23,7 +23,7 @@
 <p>
   Постройки во владении:<br>
   <ul>
-    <% @settlement.buildings.each do |building| %>
+    <% @settlement.sorted_buildings.each do |building| %>
       <li>
         <%= link_to building.building_level&.name, building_path(building) %>
         <%= button_to 'Улучшить здание', upgrade_building_path(building), method: :patch %>
