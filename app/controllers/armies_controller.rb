@@ -2,7 +2,7 @@ class ArmiesController < ApplicationController
   before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop]
 
   def goto
-    @army.goto(params[:settlement_id], current_user)
+    @army.goto(params[:settlement_id])
   end
 
   def attack
