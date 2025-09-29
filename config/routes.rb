@@ -17,19 +17,13 @@ Rails.application.routes.draw do
   ### Результаты
   get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
   get   '/game_parameters/show_noble_results', to: 'game_parameters#show_noble_results'
-  get   '/game_parameters/display_results', to: 'game_parameters#display_results'
-
-
-  get   '/game_parameters/show_curr_merch_res_screen', to: 'game_parameters#show_curr_merch_res_screen'
-  get   '/game_parameters/show_curr_noble_res_screen', to: 'game_parameters#show_curr_noble_res_screen'
-
-  patch '/game_parameters/change_results_display', to: 'game_parameters#change_results_display'
-
-
   patch '/game_parameters/save_sorted_results', to: 'game_parameters#save_sorted_results'
   patch '/game_parameters/clear_results',       to: 'game_parameters#clear_results'
   patch '/game_parameters/update_results',      to: 'game_parameters#update_results'
   patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
+
+  get   '/game_parameters/display_results', to: 'game_parameters#display_results'
+  patch '/game_parameters/change_results_display', to: 'game_parameters#change_results_display'
 
   ###Таймер и расписание
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'
@@ -37,7 +31,6 @@ Rails.application.routes.draw do
   patch '/game_parameters/add_schedule_item', to: 'game_parameters#add_schedule_item'
   patch '/game_parameters/update_schedule_item', to: 'game_parameters#update_schedule_item'
   patch '/game_parameters/delete_schedule_item', to: 'game_parameters#delete_schedule_item'
-
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
   ###Экран

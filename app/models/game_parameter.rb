@@ -269,11 +269,11 @@ def self.sort_and_save_results(result_hash = nil)
     return unix_time
   end
 
-  def self.create_schedule(schedule = nil)
+  def self.create_schedule
     timer = GameParameter.find_by(identificator: "schedule")
     timer.value = NOT_TICKING 
     timer.params = []
-    timer.params = schedule || SCHEDULE
+    timer.params = SCHEDULE
     timer.save
   end
 
