@@ -14,6 +14,10 @@ class Settlement < ApplicationRecord
     self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
   end
 
+  def sorted_buildings
+    buildings.joins(:building_level).order('building_levels.building_type_id')
+  end
+
   def build(building_type_id)
     return if building_type_id.blank?
     already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == building_type_id}

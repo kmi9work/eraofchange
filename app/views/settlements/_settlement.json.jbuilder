@@ -4,6 +4,6 @@ json.player do
     json.partial! "players/player", player: settlement.player
   end
 end
-json.buildings settlement.buildings, partial: "buildings/building", as: :building
+json.buildings settlement.sorted_buildings, partial: "buildings/building", as: :building
 json.url settlement_url(settlement, format: :json)
 

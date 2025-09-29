@@ -1,7 +1,12 @@
 json.extract! audit, :id, :auditable, :auditable_type, :action, :created_at
 
 # Добавляем год для всех аудитов
-json.year audit.auditable&.respond_to?(:year) ? audit.auditable.year : GameParameter.current_year
+def get_audit_year(audit)
+  # Используем только год из самого аудита
+  audit.year if audit.respond_to?(:year) && audit.year
+end
+
+json.year get_audit_year(audit)
 
 # Добавляем информацию о пользователе системы (кто совершил действие)
 if audit.user
@@ -71,10 +76,22 @@ if audit.auditable_type == 'PoliticalAction' && audit.auditable
 end
 
 # Добавляем дополнительные поля для элементов влияния
-if audit.auditable_type == 'InfluenceItem' && audit.auditable
-  json.player_name audit.auditable.player&.name
-  json.value audit.auditable.value
-  json.comment audit.auditable.comment
+if audit.auditable_type == 'InfluenceItem'
+  if audit.auditable
+    # Для существующих элементов влияния
+    json.player_name audit.auditable.player&.name
+    json.value audit.auditable.value
+    json.comment audit.auditable.comment
+  else
+    # Для удаленных элементов влияния получаем данные из audited_changes
+    player_id = audit.audited_changes&.dig('player_id')
+    if player_id
+      player = Player.find_by(id: player_id)
+      json.player_name player&.name
+    end
+    json.value audit.audited_changes&.dig('value')
+    json.comment audit.audited_changes&.dig('comment')
+  end
 end
 
 # Добавляем дополнительные поля для зданий
@@ -184,7 +201,7 @@ if audit.auditable_type == 'Battle'
   json.defender_army_name audit.auditable&.defender_army_name
   json.winner_army_name audit.auditable&.winner_army_name
   json.damage audit.auditable&.damage
-  json.year audit.auditable&.year || GameParameter.current_year
+  json.year audit.year
 end
 
 # Добавляем дополнительные поля для армий
@@ -258,7 +275,7 @@ if audit.auditable_type == 'RelationItem'
     json.country_name audit.auditable.country&.name
     json.relation_value audit.auditable.value
     json.relation_comment audit.auditable.comment
-    json.relation_year audit.auditable.year
+    json.relation_year audit.year
   else
     # Для удаленных RelationItem получаем данные из audited_changes
     country_id = audit.audited_changes&.dig('country_id')
@@ -266,7 +283,7 @@ if audit.auditable_type == 'RelationItem'
     json.country_name country&.name
     json.relation_value audit.audited_changes&.dig('value')
     json.relation_comment audit.audited_changes&.dig('comment')
-    json.relation_year audit.audited_changes&.dig('year')
+    json.relation_year audit.year
   end
 end
 

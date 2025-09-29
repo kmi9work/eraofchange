@@ -2,13 +2,13 @@ class ArmiesController < ApplicationController
   before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop]
 
   def goto
-    @army.goto(params[:settlement_id], current_user)
+    @army.goto(params[:settlement_id])
   end
 
   def attack
     enemy = Army.active.find_by(id: params[:enemy_id])
     if enemy
-      @army = @army.attack(params[:enemy_id], params[:voevoda_bonus], current_user)
+      @army = @army.attack(params[:enemy_id], params[:voevoda_bonus])
       if @army
         render :show
       else
@@ -38,7 +38,7 @@ class ArmiesController < ApplicationController
   end
 
   def add_troop
-    @army.add_troop(params[:troop_type_id], current_user)
+    @army.add_troop(params[:troop_type_id])
     render :show, status: :created, location: @army
   end
 

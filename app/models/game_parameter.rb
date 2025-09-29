@@ -1,5 +1,24 @@
 class GameParameter < ApplicationRecord
-  audited
+  audited if: :should_audit?
+
+  private
+
+  def should_audit?
+    # Аудит только для current_year (изменение года и оплата госрасходов)
+    return false unless identificator == "current_year"
+    
+    # Проверяем, что изменились нужные поля
+    value_changed? || (params_changed? && state_expenses_changed?)
+  end
+
+  def state_expenses_changed?
+    return false unless params_changed?
+    
+    old_params = params_was || {}
+    new_params = params || {}
+    
+    old_params['state_expenses'] != new_params['state_expenses']
+  end
 
   def audit_comment
     case identificator
@@ -323,10 +342,6 @@ def self.sort_and_save_results(result_hash = nil)
 
   def self.current_year #показывает номер года
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
-  end
-
-  def self.initial_audit_id #показывает последний ID аудитов из сидов
-    GameParameter.find_by(identificator: "current_year")&.params&.dig("initial_audit_id")&.to_i || 0
   end
 
   def self.pay_state_expenses

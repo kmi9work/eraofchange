@@ -4,6 +4,12 @@ class Building < ApplicationRecord
   belongs_to :building_level
   belongs_to :settlement
 
+  before_create :set_first_year
+
+  def set_first_year
+    self.params['first_year'] = GameParameter.current_year
+  end
+
   def upgrade! zodchiy_bonus
     level = self.building_level&.level
     if level < BuildingLevel::MAX_LEVEL
