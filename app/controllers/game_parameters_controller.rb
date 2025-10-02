@@ -37,11 +37,10 @@ class GameParametersController < ApplicationController
   # GET /game_parameters/1 or /game_parameters/1.json
   def show
   end
-
+  
   def create_schedule
-    GameParameter.create_temp_schedule
+    GameParameter.create_schedule
   end
-
   def show_schedule
     @time = GameParameter.show_schedule
   end

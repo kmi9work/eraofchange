@@ -7,6 +7,8 @@ class CreatePlayers < ActiveRecord::Migration[7.0]
       t.integer :player_type_id
       t.integer :family_id
       t.integer :guild_id
+      t.string :identificator
+      t.json :resources
       t.json :params, default: {}
       t.timestamps
     end
