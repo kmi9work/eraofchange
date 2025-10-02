@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  # Аутентификация
+  post '/auth/login', to: 'auth#login'
+  post '/auth/logout', to: 'auth#logout'
+  get '/auth/current_player', to: 'auth#current_player'
+  get '/auth/generate_qr/:id', to: 'auth#generate_qr'
+  
+  # QR-коды для печати
+  get '/qr_codes', to: 'qr_codes#index'
+  
   resources :public_order_items
   resources :technology_items
   resources :relation_items

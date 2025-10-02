@@ -37,12 +37,18 @@ noble_names = ["Рюрикович", "Геронтий", "Аксаков", "Па
 @buyers = []
 
 # ОБЯЗАТЕЛЬНЫЙ КУПЕЦ-ГЛАВА ГИЛЬДИИ
-Player.create(id: 1, name: "КУПЕЦ", human: @humans.shuffle.first, player_type: @player_types[0], family: @families.shuffle.first, jobs: [@jobs.last], params: {"contraband" => []})
+merchant_human = @humans.shuffle.first
+merchant_family = @families.shuffle.first
+merchant_identificator = Player.generate_identificator("КУПЕЦ", merchant_human.name, merchant_family.name, @jobs.last.name)
+Player.create(id: 1, name: "КУПЕЦ", identificator: merchant_identificator, human: merchant_human, player_type: @player_types[0], family: merchant_family, jobs: [@jobs.last], params: {"contraband" => []})
 
 ActiveRecord::Base.connection.reset_pk_sequence!('players')
 
 noble_names.each_with_index do |name, i|
-  p = Player.create(name: name, human: @humans.shuffle.first, player_type: @player_types[1], jobs: [@jobs[i]], family: @families.shuffle.first, params: {"income_taken" => false})
+  noble_human = @humans.shuffle.first
+  noble_family = @families.shuffle.first
+  noble_identificator = Player.generate_identificator(name, noble_human.name, noble_family.name, @jobs[i].name, i)
+  p = Player.create(name: name, identificator: noble_identificator, human: noble_human, player_type: @player_types[1], jobs: [@jobs[i]], family: noble_family, params: {"income_taken" => false})
   @nobles.push 
   InfluenceItem.add(0, "Ручная правка", p)
 end

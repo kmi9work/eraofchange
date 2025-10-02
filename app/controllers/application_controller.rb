@@ -1,7 +1,10 @@
 class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
-  helper_method :current_user 
+  helper_method :current_user, :current_player, :player_signed_in?
   before_action :set_csrf_cookie
+  before_action :set_current_player
+  
+  include PlayerAuthentication
 
 
   private
@@ -20,5 +23,14 @@ class ApplicationController < ActionController::Base
 
   def set_csrf_cookie
     cookies["CSRF-TOKEN"] = form_authenticity_token
+  end
+  
+  def set_current_player
+    if session[:player_id]
+      player = Player.find_by(id: session[:player_id])
+      Player.current = player if player
+    else
+      Player.current = nil
+    end
   end
 end

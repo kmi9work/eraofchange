@@ -1,4 +1,4 @@
-json.extract! player, :id, :name, :human, :own_count, :my_buildings, :player_type, :family, :guild, :params, :income, :influence, :player_military_outlays
+json.extract! player, :id, :name, :identificator, :human, :own_count, :my_buildings, :player_type, :family, :guild, :params, :income, :influence, :player_military_outlays
 
 json.owner_type 'Player'
 json.jobs player.jobs do |job|

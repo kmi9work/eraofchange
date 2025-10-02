@@ -21,6 +21,33 @@ class Player < ApplicationRecord
   has_many :influence_items
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
+  validates :identificator, presence: true, uniqueness: true
+  
+  # Получение текущего игрока из сессии
+  def self.current
+    return nil unless Thread.current[:current_player_id]
+    
+    @current_player ||= find_by(id: Thread.current[:current_player_id])
+  end
+  
+  # Установка текущего игрока в поток
+  def self.current=(player)
+    if player
+      Thread.current[:current_player_id] = player.id
+      @current_player = player
+    else
+      Thread.current[:current_player_id] = nil
+      @current_player = nil
+    end
+  end
+  
+  # Генерация постоянного идентификатора на основе данных игрока
+  def self.generate_identificator(name, human_name, family_name, job_name, index = nil)
+    base_string = "#{name}_#{human_name}_#{family_name}_#{job_name}"
+    base_string += "_#{index}" if index
+    hash = Digest::SHA256.hexdigest(base_string)[0..15].upcase
+    "#{name.upcase.gsub(' ', '_')}_#{hash}"
+  end
 
   def my_buildings
     (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
