@@ -22,6 +22,68 @@ class Player < ApplicationRecord
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
 
+  ####MOBILE##########
+  def exchange_resources(with_whom, hashed_resources)
+    # Приводим ключи к символам без изменения оригинальных данных
+    normalized_resources = hashed_resources.map { |res| res.transform_keys(&:to_sym) }
+    
+    # Проверяем, что у текущего игрока достаточно ресурсов
+    validate_resources_availability(normalized_resources)
+
+    counterpart = Player.find_by(identificator: identificator)
+    raise "Игрок не найден" unless counterpart
+
+    # Вычитаем ресурсы у текущего игрока
+    subtract_resources_from_sender(normalized_resources)
+
+    # Добавляем ресурсы контрагенту
+    add_resources_to_recipient(counterpart, normalized_resources)
+
+    # Сохраняем изменения
+    self.save!
+    counterpart.save!
+  end
+
+  def validate_resources_availability(resources)
+    resources.each do |res|
+      available = available_resources.find { |avail| avail[:identificator] == res[:identificator] }
+      unless available && available[:count] >= res[:count]
+        raise "Недостаточно ресурсов #{res[:identificator]}"
+      end
+    end
+  end
+
+  def subtract_resources_from_sender(resources)
+    resources.each do |res|
+      available_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
+      available_res["count"] -= res[:count] if available_res
+    end
+  end
+
+  def add_resources_to_recipient(recipient, resources)
+    resources.each do |res|
+      recipient_res = recipient.resources.find { |r| r["identificator"] == res[:identificator] }
+      if recipient_res
+        recipient_res["count"] += res[:count]
+      else
+        # Если у контрагента нет такого ресурса, добавляем его
+        recipient.resources << { "identificator" => res[:identificator], "count" => res[:count] }
+      end
+    end
+  end
+
+  # Вспомогательный метод для получения доступных ресурсов
+  def available_resources
+    self.resources.map { |res| res.transform_keys(&:to_sym) }
+  end
+
+  # Вспомогательный метод для получения доступных ресурсов
+  def available_resources
+    self.resources.map { |res| res.transform_keys(&:to_sym) }
+  end
+
+  #####################
+
   def my_buildings
     (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
     regions.map{|r| r.capital.buildings.map{|b| b.building_level}}.flatten).
