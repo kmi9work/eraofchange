@@ -1,5 +1,19 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: %i[ show edit update destroy add_influence ]
+  before_action :set_player, only: %i[ show edit update destroy add_influence  show_players_resources exchange_resources]
+
+  def show_players_resources
+     render json: @player.resources || []
+  end
+
+  def exchange_resources
+    result = @player.exchange_resources(
+      params[:request][:with_whom], 
+      params[:request][:hashed_resources]
+    )
+    render json: { success: true, result: result }
+    rescue => e
+      render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
 
   # GET /players or /players.json
   def index

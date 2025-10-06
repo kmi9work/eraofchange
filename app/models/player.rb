@@ -57,7 +57,7 @@ class Player < ApplicationRecord
     # Проверяем, что у текущего игрока достаточно ресурсов
     validate_resources_availability(normalized_resources)
 
-    counterpart = Player.find_by(identificator: identificator)
+    counterpart = Player.find_by(identificator: with_whom)
     raise "Игрок не найден" unless counterpart
 
     # Вычитаем ресурсы у текущего игрока
@@ -88,6 +88,7 @@ class Player < ApplicationRecord
   end
 
   def add_resources_to_recipient(recipient, resources)
+    recipient.resources = resources if recipient.resources == nil
     resources.each do |res|
       recipient_res = recipient.resources.find { |r| r["identificator"] == res[:identificator] }
       if recipient_res
@@ -97,11 +98,6 @@ class Player < ApplicationRecord
         recipient.resources << { "identificator" => res[:identificator], "count" => res[:count] }
       end
     end
-  end
-
-  # Вспомогательный метод для получения доступных ресурсов
-  def available_resources
-    self.resources.map { |res| res.transform_keys(&:to_sym) }
   end
 
   # Вспомогательный метод для получения доступных ресурсов

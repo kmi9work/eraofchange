@@ -17,6 +17,12 @@ Rails.application.routes.draw do
   patch '/troops/:id/upgrade', to: 'troops#upgrade'
   get '/troop_types/upgrade_paths', to: 'troop_types#upgrade_paths'
 
+
+  ### мобильная
+get '/players/:id/show_players_resources', to: 'players#show_players_resources'
+post '/players/:id/exchange_resources', to: 'players#exchange_resources'
+
+  ###
   patch '/players/:id/add_influence', to: 'players#add_influence'
 
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
