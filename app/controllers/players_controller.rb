@@ -57,11 +57,11 @@ class PlayersController < ApplicationController
   def update
     respond_to do |format|
       if @player.update(player_params)
-        format.html { redirect_to political_action_type_url(@political_action_type), notice: "Political action type was successfully updated." }
-        format.json { render :show, status: :ok, location: @political_action_type }
+        format.html { redirect_to player_url(@player), notice: "Player was successfully updated." }
+        format.json { render :show, status: :ok, location: @player }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @political_action_type.errors, status: :unprocessable_entity }
+        format.json { render json: @player.errors, status: :unprocessable_entity }
       end
     end
   end

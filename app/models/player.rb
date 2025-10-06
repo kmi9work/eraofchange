@@ -174,7 +174,13 @@ class Player < ApplicationRecord
   def subtract_resources_from_sender(resources)
     resources.each do |res|
       available_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
-      available_res["count"] -= res[:count] if available_res
+      if available_res
+        available_res["count"] -= res[:count]
+        # Удаляем ресурс, если его количество стало 0 или меньше
+        if available_res["count"] <= 0
+          self.resources.delete(available_res)
+        end
+      end
     end
   end
 
@@ -200,6 +206,73 @@ class Player < ApplicationRecord
   # Вспомогательный метод для получения доступных ресурсов
   def available_resources
     self.resources.map { |res| res.transform_keys(&:to_sym) }
+  end
+
+  def own_count
+    settlements.count + regions.count
+  end
+
+  def my_buildings
+    (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
+    regions.map{|r| r.capital.buildings.map{|b| b.building_level}}.flatten).
+      sort_by{|bl| bl.building_type_id}.
+      map.with_index do |bl, idx|
+      {
+        building_type_id: bl.building_type_id,
+        building_type: bl.building_type,
+        level: bl.level,
+        index: idx
+      }
+    end
+  end
+
+  def income
+    sum = 0
+    if job_ids.include?(Job::METROPOLITAN)
+      church_params = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        select('building_levels.params')
+      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
+    end
+    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
+  end
+
+  def player_military_outlays
+    cost = 0
+    self.armies.each do |army|
+      cost += army.troops.count * Troop::RENEWAL_COST
+    end
+    cost
+  end
+
+  def influence_buildings
+    sum = 0
+    if job_ids.include?(Job::METROPOLITAN)
+      # Получаем церкви, которые были оплачены в предыдущем году ИЛИ созданы в текущем году
+      previous_year = GameParameter.current_year - 1
+      current_year = GameParameter.current_year
+      
+      church_buildings = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        where("buildings.params::jsonb->'paid' @> ?::jsonb OR buildings.params::jsonb->'first_year' = ?::jsonb", 
+              [previous_year].to_json, current_year.to_json)
+      
+      sum += church_buildings.joins(:building_level).sum do |building|
+        building.building_level.params['metropolitan_influence'].to_i
+      end
+    end
+    def_params = Building.joins({settlement: :region}, :building_level).
+      where(building_levels: {building_type_id: BuildingType::DEFENCE}).
+      where(regions: {country_id: Country::RUS}).
+      where(settlements: {player_id: self.id}).
+      select('building_levels.params')
+    sum + def_params.map{|p| p.params['influence'].to_i}.sum
+  end
+
+  def influence
+    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
   end
 
   private
@@ -286,24 +359,6 @@ class Player < ApplicationRecord
 
   #####################
 
-  def my_buildings
-    (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
-    regions.map{|r| r.capital.buildings.map{|b| b.building_level}}.flatten).
-      sort_by{|bl| bl.building_type_id}.
-      map.with_index do |bl, idx|
-      {
-        building_type_id: bl.building_type_id,
-        level: bl.level,
-        icon: bl.building_type.icon,
-        index: idx
-      }
-    end
-  end
-
-  def own_count
-    settlements.count + regions.count
-  end
-
   def check_credit(plant_ids)
     plants = Plant.where(id: plant_ids)
     plants.all?{|p| p.credit_id.blank?}
@@ -336,26 +391,6 @@ class Player < ApplicationRecord
     self.armies.create(army_size_id: army_size_id, region_id: region_id)
   end
 
-  def income
-    sum = 0
-    if job_ids.include?(Job::METROPOLITAN)
-      church_params = Building.joins({settlement: :region}, :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
-        select('building_levels.params')
-      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
-    end
-    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
-  end
-
-  def player_military_outlays
-    cost = 0
-    self.armies.each do |army|
-      cost += army.troops.count * Troop::RENEWAL_COST
-    end
-    cost
-  end
-
   def run_political_action(political_action_type_id, year, success, options)
     pat = PoliticalActionType.find_by_id(political_action_type_id)
     result = pat.execute(success, options)
@@ -370,33 +405,5 @@ class Player < ApplicationRecord
     InfluenceItem.add(value, comment, self, entity)
   end
 
-  def influence_buildings
-    sum = 0
-    if job_ids.include?(Job::METROPOLITAN)
-      # Получаем церкви, которые были оплачены в предыдущем году ИЛИ созданы в текущем году
-      previous_year = GameParameter.current_year - 1
-      current_year = GameParameter.current_year
-      
-      church_buildings = Building.joins({settlement: :region}, :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
-        where("buildings.params::jsonb->'paid' @> ?::jsonb OR buildings.params::jsonb->'first_year' = ?::jsonb", 
-              [previous_year].to_json, current_year.to_json)
-      
-      sum += church_buildings.joins(:building_level).sum do |building|
-        building.building_level.params['metropolitan_influence'].to_i
-      end
-    end
-    def_params = Building.joins({settlement: :region}, :building_level).
-      where(building_levels: {building_type_id: BuildingType::DEFENCE}).
-      where(regions: {country_id: Country::RUS}).
-      where(settlements: {player_id: self.id}).
-      select('building_levels.params')
-    sum + def_params.map{|p| p.params['influence'].to_i}.sum
-  end
-
-  def influence
-    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
-  end
 end
 
