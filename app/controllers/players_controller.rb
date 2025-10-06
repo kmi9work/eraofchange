@@ -1,8 +1,16 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: %i[ show edit update destroy add_influence  show_players_resources exchange_resources]
+  before_action :set_player, only: %i[ show edit update destroy add_influence  show_players_resources exchange_resources show_players_plants]
 
   def show_players_resources
      render json: @player.resources || []
+  end
+
+  def show_players_plants
+    render json: @player.plants || []
+  end
+
+  def produce_at_plant
+    @player.produce(params[:plant_id], params[:hashed_resources])
   end
 
   def exchange_resources

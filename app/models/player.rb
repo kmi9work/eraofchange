@@ -50,6 +50,97 @@ class Player < ApplicationRecord
   end
 
   ####MOBILE##########
+
+  ###производство
+
+  def produce_at_plant(plant_id, hashed_resources = [])
+
+    # Валидация входных данных
+    raise ArgumentError, "plant_id is required" if plant_id.blank?
+    raise ArgumentError, "hashed_resources must be an array" unless hashed_resources.is_a?(Array)
+    
+    # Нормализация данных
+    normalized_res = hashed_resources.map { |res| res.transform_keys(&:to_sym) }
+    
+    # Проверяем, что у игрока достаточно ресурсов
+    validate_resources_availability(normalized_res)
+    
+    # Находим предприятие игрока
+    plant = self.plants.find(plant_id)
+    raise "Предприятие не найдено или не принадлежит игроку" unless plant
+    
+    # Проверяем, что предприятие не производило в текущем году
+    current_year = GameParameter.current_year
+    if plant.params["produced"].include?(current_year)
+      raise "Предприятие уже производило в текущем году"
+    end
+    
+    # Проверяем, что у предприятия есть уровень
+    raise "У предприятия не указан уровень" unless plant.plant_level
+    
+    # Вычитаем ресурсы у игрока
+    subtract_resources_from_sender(normalized_res)
+    
+    # Производим на предприятии
+    result = plant.plant_level.feed_to_plant!(normalized_res, 'from')
+    
+    # Добавляем произведенные ресурсы игроку
+    add_resources_to_recipient(self, result[:to])
+    
+    # Отмечаем, что предприятие произвело в текущем году
+    plant.params["produced"] << current_year
+    plant.save!
+    
+    # Сохраняем изменения игрока
+    self.save!
+    
+    result
+  rescue => e
+    Rails.logger.error "Production error for player #{self.id}, plant #{plant_id}: #{e.message}"
+    raise e
+  end
+
+
+  ###рынок
+  def show_player_gold
+    return {:identificator=>"gold", :count=> 0} if self.resources.nil?
+    normalized_res = self.resources.map { |res| res.transform_keys(&:to_sym) }
+    gold = normalized_res.find {|g| g[:identificator] == "gold"}
+    gold_res = gold.empty? ? {:identificator=>"gold", :count=> 0} : gold
+    return gold_res
+  end
+  
+  def buy_and_sell_res(country_id, res_pl_sells = [], res_pl_buys = [])
+    # Валидация входных данных
+    raise ArgumentError, "country_id is required" if country_id.blank?
+    raise ArgumentError, "res_pl_sells must be an array" unless res_pl_sells.is_a?(Array)
+    raise ArgumentError, "res_pl_buys must be an array" unless res_pl_buys.is_a?(Array)
+    
+    # Нормализация данных
+    normalized_res_pl_sells = res_pl_sells.map { |res| res.transform_keys(&:to_sym) }
+    normalized_res_pl_buys = res_pl_buys.map { |res| res.transform_keys(&:to_sym) }
+
+    # Проверяем, что у игрока достаточно ресурсов для продажи
+    validate_resources_availability(normalized_res_pl_sells)
+    
+    # Проверяем, что у игрока достаточно золота для покупки
+    validate_gold_availability(normalized_res_pl_buys, country_id)
+
+    # Выполняем торговлю через Resource.send_caravan (получаем результат)
+    result = Resource.send_caravan(country_id, normalized_res_pl_sells, normalized_res_pl_buys)
+    
+    # Применяем изменения к ресурсам игрока
+    apply_trade_changes(normalized_res_pl_sells, normalized_res_pl_buys, result[:res_to_player])
+    
+    # Сохраняем изменения
+    self.save!
+    
+    result
+  rescue => e
+    Rails.logger.error "Trade error for player #{self.id}: #{e.message}"
+    raise e
+  end
+
   def exchange_resources(with_whom, hashed_resources)
     # Приводим ключи к символам без изменения оригинальных данных
     normalized_resources = hashed_resources.map { |res| res.transform_keys(&:to_sym) }
@@ -87,15 +178,21 @@ class Player < ApplicationRecord
     end
   end
 
-  def add_resources_to_recipient(recipient, resources)
-    recipient.resources = resources if recipient.resources == nil
-    resources.each do |res|
-      recipient_res = recipient.resources.find { |r| r["identificator"] == res[:identificator] }
-      if recipient_res
-        recipient_res["count"] += res[:count]
-      else
-        # Если у контрагента нет такого ресурса, добавляем его
-        recipient.resources << { "identificator" => res[:identificator], "count" => res[:count] }
+  def add_resources_to_recipient(recipient, resources)    
+    if recipient.resources == nil
+      recipient.resources  = resources
+    else
+      normalized_recipient_resources = recipient.resources.map { |res| res.transform_keys(&:to_sym) }
+      normalized_resources = resources.map { |res| res.transform_keys(&:to_sym) }
+
+      normalized_resources.each do |res|
+        recipient_res = normalized_recipient_resources.find { |r| r[:identificator] == res[:identificator] }
+        if recipient_res
+          recipient_res[:count] += res[:count]
+        else
+          # Если у контрагента нет такого ресурса, добавляем его
+          recipient.resources << {identificator: res[:identificator], count: res[:count] }
+        end
       end
     end
   end
@@ -103,6 +200,88 @@ class Player < ApplicationRecord
   # Вспомогательный метод для получения доступных ресурсов
   def available_resources
     self.resources.map { |res| res.transform_keys(&:to_sym) }
+  end
+
+  private
+
+  # Проверка достаточности золота для покупки ресурсов
+  def validate_gold_availability(res_pl_buys, country_id)
+    return if res_pl_buys.empty?
+    
+    # Рассчитываем стоимость покупки
+    total_cost = 0
+    res_pl_buys.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      resource_obj = Resource.find_by(identificator: res[:identificator])
+      next unless resource_obj
+      
+      cost_result = Resource.calculate_cost("sale", res[:count], resource_obj)
+      next unless cost_result[:cost]
+      
+      total_cost += cost_result[:cost]
+    end
+    
+    # Проверяем, что у игрока достаточно золота
+    current_gold = show_player_gold[:count] || 0
+    if current_gold < total_cost
+      raise "Недостаточно золота. Требуется: #{total_cost}, доступно: #{current_gold}"
+    end
+  end
+
+  # Применение изменений к ресурсам игрока после торговли
+  def apply_trade_changes(res_pl_sells, res_pl_buys, trade_result)
+    # 1. Вычитаем проданные ресурсы у игрока
+    res_pl_sells.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      current_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
+      if current_res
+        current_res["count"] -= res[:count]
+        # Удаляем ресурс, если количество стало 0 или отрицательным
+        if current_res["count"] <= 0
+          self.resources.delete(current_res)
+        end
+      end
+    end
+    
+    # 2. Добавляем купленные ресурсы игроку
+    res_pl_buys.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      current_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
+      if current_res
+        current_res["count"] += res[:count]
+      else
+        # Добавляем новый ресурс
+        self.resources << { "identificator" => res[:identificator], "count" => res[:count] }
+      end
+    end
+    
+    # 3. Применяем итоговое изменение золота из результата торговли
+    trade_result.each do |resource|
+      next unless resource[:identificator] == "gold"
+      
+      current_gold = self.resources.find { |r| r["identificator"] == "gold" }
+      if current_gold
+        current_gold["count"] += resource[:count]
+        # Удаляем золото, если количество стало 0 или отрицательным
+        if current_gold["count"] <= 0
+          self.resources.delete(current_gold)
+        end
+      else
+        # Добавляем золото только если количество положительное
+        if resource[:count] > 0
+          self.resources << { "identificator" => "gold", "count" => resource[:count] }
+        end
+      end
+    end
+    
+    # 4. Финальная проверка: убеждаемся, что золото не стало отрицательным
+    gold_res = self.resources.find { |r| r["identificator"] == "gold" }
+    if gold_res && gold_res["count"] < 0
+      raise "Ошибка: золото не может быть отрицательным. Текущее значение: #{gold_res["count"]}"
+    end
   end
 
   #####################

@@ -1,15 +1,12 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
  allow do
-  # Разрешаем все локальные адреса для разработки
-  origins '*'
+  origins '192.168.1.*:5173', 'localhost:5173', ' 192.168.1.45:5173', ' 192.168.*.*:8081', 'localhost:8081', 'localhost:19000', 'localhost:19006', '192.168.1.*:8081', '192.168.1.101:19006'
  
   resource '*',
     headers: :any,
     methods: [:get, :post, :put, :patch, :delete, :options, :head],
-    credentials: false  # Отключаем credentials для мобильных приложений
+    credentials: true
   end
  end
 
  # https://pragmaticstudio.com/tutorials/rails-session-cookies-for-api-authentication
-
-
