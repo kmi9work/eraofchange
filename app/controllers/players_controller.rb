@@ -1,5 +1,27 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: %i[ show edit update destroy add_influence ]
+  before_action :set_player, only: %i[ show edit update destroy add_influence  show_players_resources exchange_resources show_players_plants]
+
+  def show_players_resources
+     render json: @player.resources || []
+  end
+
+  def show_players_plants
+    render json: @player.plants || []
+  end
+
+  def produce_at_plant
+    @player.produce(params[:plant_id], params[:hashed_resources])
+  end
+
+  def exchange_resources
+    result = @player.exchange_resources(
+      params[:request][:with_whom], 
+      params[:request][:hashed_resources]
+    )
+    render json: { success: true, result: result }
+    rescue => e
+      render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
 
   # GET /players or /players.json
   def index
@@ -35,11 +57,11 @@ class PlayersController < ApplicationController
   def update
     respond_to do |format|
       if @player.update(player_params)
-        format.html { redirect_to political_action_type_url(@political_action_type), notice: "Political action type was successfully updated." }
-        format.json { render :show, status: :ok, location: @political_action_type }
+        format.html { redirect_to player_url(@player), notice: "Player was successfully updated." }
+        format.json { render :show, status: :ok, location: @player }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @political_action_type.errors, status: :unprocessable_entity }
+        format.json { render json: @player.errors, status: :unprocessable_entity }
       end
     end
   end

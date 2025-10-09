@@ -363,3 +363,5 @@ PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "m
 
 
 Plant.create(plant_level_id: 1, plant_place_id: 1, economic_subject_id: 1, economic_subject_type: "Guild", params: {"produced" => []})
+
+
