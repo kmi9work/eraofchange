@@ -109,37 +109,45 @@ class Player < ApplicationRecord
     gold_res = gold.empty? ? {:identificator=>"gold", :count=> 0} : gold
     return gold_res
   end
-  
-  def buy_and_sell_res(country_id, res_pl_sells = [], res_pl_buys = [])
-    # Валидация входных данных
-    raise ArgumentError, "country_id is required" if country_id.blank?
-    raise ArgumentError, "res_pl_sells must be an array" unless res_pl_sells.is_a?(Array)
-    raise ArgumentError, "res_pl_buys must be an array" unless res_pl_buys.is_a?(Array)
-    
-    # Нормализация данных
-    normalized_res_pl_sells = res_pl_sells.map { |res| res.transform_keys(&:to_sym) }
-    normalized_res_pl_buys = res_pl_buys.map { |res| res.transform_keys(&:to_sym) }
 
-    # Проверяем, что у игрока достаточно ресурсов для продажи
-    validate_resources_availability(normalized_res_pl_sells)
-    
-    # Проверяем, что у игрока достаточно золота для покупки
-    validate_gold_availability(normalized_res_pl_buys, country_id)
-
-    # Выполняем торговлю через Resource.send_caravan (получаем результат)
-    result = Resource.send_caravan(country_id, normalized_res_pl_sells, normalized_res_pl_buys)
-    
-    # Применяем изменения к ресурсам игрока
-    apply_trade_changes(normalized_res_pl_sells, normalized_res_pl_buys, result[:res_to_player])
-    
-    # Сохраняем изменения
+  def buy_and_sell_res(sold_resources = [], purchased_resources = [])
+    normalized_sold_resources       = sold_resources.map      { |res| res.transform_keys(&:to_sym) }
+    normalized_purchased_resources  = purchased_resources.map { |res| res.transform_keys(&:to_sym) }
+    subtract_resources_from_sender(normalized_sold_resources)
+    add_resources_to_recipient(self, normalized_purchased_resources)
     self.save!
-    
-    result
-  rescue => e
-    Rails.logger.error "Trade error for player #{self.id}: #{e.message}"
-    raise e
   end
+  
+  # def buy_and_sell_res(country_id, res_pl_sells = [], res_pl_buys = [])
+  #   # Валидация входных данных
+  #   raise ArgumentError, "country_id is required" if country_id.blank?
+  #   raise ArgumentError, "res_pl_sells must be an array" unless res_pl_sells.is_a?(Array)
+  #   raise ArgumentError, "res_pl_buys must be an array" unless res_pl_buys.is_a?(Array)
+    
+  #   # Нормализация данных
+  #   normalized_res_pl_sells = res_pl_sells.map { |res| res.transform_keys(&:to_sym) }
+  #   normalized_res_pl_buys = res_pl_buys.map { |res| res.transform_keys(&:to_sym) }
+
+  #   # Проверяем, что у игрока достаточно ресурсов для продажи
+  #   validate_resources_availability(normalized_res_pl_sells)
+    
+  #   # Проверяем, что у игрока достаточно золота для покупки
+  #   validate_gold_availability(normalized_res_pl_buys, country_id)
+
+  #   # Выполняем торговлю через Resource.send_caravan (получаем результат)
+  #   result = Resource.send_caravan(country_id, normalized_res_pl_sells, normalized_res_pl_buys)
+    
+  #   # Применяем изменения к ресурсам игрока
+  #   apply_trade_changes(normalized_res_pl_sells, normalized_res_pl_buys, result[:res_to_player])
+    
+  #   # Сохраняем изменения
+  #   self.save!
+    
+  #   result
+  # rescue => e
+  #   Rails.logger.error "Trade error for player #{self.id}: #{e.message}"
+  #   raise e
+  # end
 
   def exchange_resources(with_whom, hashed_resources)
     # Приводим ключи к символам без изменения оригинальных данных
@@ -184,20 +192,21 @@ class Player < ApplicationRecord
     end
   end
 
-  def add_resources_to_recipient(recipient, resources)    
+  def add_resources_to_recipient(recipient, resources)
     if recipient.resources == nil
       recipient.resources  = resources
     else
-      normalized_recipient_resources = recipient.resources.map { |res| res.transform_keys(&:to_sym) }
       normalized_resources = resources.map { |res| res.transform_keys(&:to_sym) }
 
       normalized_resources.each do |res|
-        recipient_res = normalized_recipient_resources.find { |r| r[:identificator] == res[:identificator] }
-        if recipient_res
-          recipient_res[:count] += res[:count]
-        else
-          # Если у контрагента нет такого ресурса, добавляем его
-          recipient.resources << {identificator: res[:identificator], count: res[:count] }
+        # Ищем ресурс напрямую в recipient.resources
+      recipient_res = recipient.resources.find { |r| r["identificator"] == res[:identificator] }
+      if recipient_res
+          # Изменяем напрямую в оригинальном массиве
+        recipient_res["count"] += res[:count]
+      else
+        # Если у контрагента нет такого ресурса, добавляем его
+          recipient.resources << {"name" => res[:name], "identificator" => res[:identificator], "count" => res[:count] }
         end
       end
     end

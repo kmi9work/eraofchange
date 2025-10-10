@@ -19,8 +19,10 @@ Rails.application.routes.draw do
 
 
   ### мобильная
-get '/players/:id/show_players_resources', to: 'players#show_players_resources'
-post '/players/:id/exchange_resources', to: 'players#exchange_resources'
+  get '/players/:id/show_players_resources', to: 'players#show_players_resources'
+  post '/players/:id/exchange_resources', to: 'players#exchange_resources'
+  post '/players/:id/receive_from_masters', to: 'players#receive_from_masters'
+  post '/players/:id/buy_and_sell_res', to: 'players#buy_and_sell_res'
 
   ###
   patch '/players/:id/add_influence', to: 'players#add_influence'
@@ -82,7 +84,10 @@ post '/players/:id/exchange_resources', to: 'players#exchange_resources'
 
 
   get '/resources/show_prices',  to: 'resources#show_prices'
+  get '/resources/show_all_resources',  to: 'resources#show_all_resources'
   post '/resources/send_caravan', to: 'resources#send_caravan'
+
+  
 
   #TODO Населенный пункт надо бы сделать тоже через ресурс.
   get '/settlements', to: 'settlements#index'
