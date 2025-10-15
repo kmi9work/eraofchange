@@ -17,6 +17,14 @@ Rails.application.routes.draw do
   patch '/troops/:id/upgrade', to: 'troops#upgrade'
   get '/troop_types/upgrade_paths', to: 'troop_types#upgrade_paths'
 
+
+  ### мобильная
+  get '/players/:id/show_players_resources', to: 'players#show_players_resources'
+  post '/players/:id/exchange_resources', to: 'players#exchange_resources'
+  post '/players/:id/receive_from_masters', to: 'players#receive_from_masters'
+  post '/players/:id/buy_and_sell_res', to: 'players#buy_and_sell_res'
+
+  ###
   patch '/players/:id/add_influence', to: 'players#add_influence'
 
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
@@ -72,11 +80,15 @@ Rails.application.routes.draw do
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
 
   get '/plant_levels/prod_info', to: 'plant_levels#prod_info'
+  get '/plant_levels/prod_info_full', to: 'plant_levels#prod_info_full'
   post '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
 
   get '/resources/show_prices',  to: 'resources#show_prices'
+  get '/resources/show_all_resources',  to: 'resources#show_all_resources'
   post '/resources/send_caravan', to: 'resources#send_caravan'
+
+  
 
   #TODO Населенный пункт надо бы сделать тоже через ресурс.
   get '/settlements', to: 'settlements#index'

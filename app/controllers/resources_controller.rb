@@ -8,6 +8,11 @@ class ResourcesController < ApplicationController
   def show
   end
 
+  def show_all_resources
+    @resources = Resource.all
+    render json: @resources
+  end
+
   def show_prices
     @prices = Resource.show_prices
   end

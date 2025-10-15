@@ -50,6 +50,105 @@ class Player < ApplicationRecord
   end
 
   ####MOBILE##########
+
+  ###производство
+
+  def produce_at_plant(plant_id, hashed_resources = [])
+
+    # Валидация входных данных
+    raise ArgumentError, "plant_id is required" if plant_id.blank?
+    raise ArgumentError, "hashed_resources must be an array" unless hashed_resources.is_a?(Array)
+    
+    # Нормализация данных
+    normalized_res = hashed_resources.map { |res| res.transform_keys(&:to_sym) }
+    
+    # Проверяем, что у игрока достаточно ресурсов
+    validate_resources_availability(normalized_res)
+    
+    # Находим предприятие игрока
+    plant = self.plants.find(plant_id)
+    raise "Предприятие не найдено или не принадлежит игроку" unless plant
+    
+    # Проверяем, что предприятие не производило в текущем году
+    current_year = GameParameter.current_year
+    if plant.params["produced"].include?(current_year)
+      raise "Предприятие уже производило в текущем году"
+    end
+    
+    # Проверяем, что у предприятия есть уровень
+    raise "У предприятия не указан уровень" unless plant.plant_level
+    
+    # Вычитаем ресурсы у игрока
+    subtract_resources_from_sender(normalized_res)
+    
+    # Производим на предприятии
+    result = plant.plant_level.feed_to_plant!(normalized_res, 'from')
+    
+    # Добавляем произведенные ресурсы игроку
+    add_resources_to_recipient(self, result[:to])
+    
+    # Отмечаем, что предприятие произвело в текущем году
+    plant.params["produced"] << current_year
+    plant.save!
+    
+    # Сохраняем изменения игрока
+    self.save!
+    
+    result
+  rescue => e
+    Rails.logger.error "Production error for player #{self.id}, plant #{plant_id}: #{e.message}"
+    raise e
+  end
+
+
+  ###рынок
+  def show_player_gold
+    return {:identificator=>"gold", :count=> 0} if self.resources.nil?
+    normalized_res = self.resources.map { |res| res.transform_keys(&:to_sym) }
+    gold = normalized_res.find {|g| g[:identificator] == "gold"}
+    gold_res = gold.empty? ? {:identificator=>"gold", :count=> 0} : gold
+    return gold_res
+  end
+
+  def buy_and_sell_res(sold_resources = [], purchased_resources = [])
+    normalized_sold_resources       = sold_resources.map      { |res| res.transform_keys(&:to_sym) }
+    normalized_purchased_resources  = purchased_resources.map { |res| res.transform_keys(&:to_sym) }
+    subtract_resources_from_sender(normalized_sold_resources)
+    add_resources_to_recipient(self, normalized_purchased_resources)
+    self.save!
+  end
+  
+  # def buy_and_sell_res(country_id, res_pl_sells = [], res_pl_buys = [])
+  #   # Валидация входных данных
+  #   raise ArgumentError, "country_id is required" if country_id.blank?
+  #   raise ArgumentError, "res_pl_sells must be an array" unless res_pl_sells.is_a?(Array)
+  #   raise ArgumentError, "res_pl_buys must be an array" unless res_pl_buys.is_a?(Array)
+    
+  #   # Нормализация данных
+  #   normalized_res_pl_sells = res_pl_sells.map { |res| res.transform_keys(&:to_sym) }
+  #   normalized_res_pl_buys = res_pl_buys.map { |res| res.transform_keys(&:to_sym) }
+
+  #   # Проверяем, что у игрока достаточно ресурсов для продажи
+  #   validate_resources_availability(normalized_res_pl_sells)
+    
+  #   # Проверяем, что у игрока достаточно золота для покупки
+  #   validate_gold_availability(normalized_res_pl_buys, country_id)
+
+  #   # Выполняем торговлю через Resource.send_caravan (получаем результат)
+  #   result = Resource.send_caravan(country_id, normalized_res_pl_sells, normalized_res_pl_buys)
+    
+  #   # Применяем изменения к ресурсам игрока
+  #   apply_trade_changes(normalized_res_pl_sells, normalized_res_pl_buys, result[:res_to_player])
+    
+  #   # Сохраняем изменения
+  #   self.save!
+    
+  #   result
+  # rescue => e
+  #   Rails.logger.error "Trade error for player #{self.id}: #{e.message}"
+  #   raise e
+  # end
+
   def exchange_resources(with_whom, hashed_resources)
     # Приводим ключи к символам без изменения оригинальных данных
     normalized_resources = hashed_resources.map { |res| res.transform_keys(&:to_sym) }
@@ -57,7 +156,7 @@ class Player < ApplicationRecord
     # Проверяем, что у текущего игрока достаточно ресурсов
     validate_resources_availability(normalized_resources)
 
-    counterpart = Player.find_by(identificator: identificator)
+    counterpart = Player.find_by(identificator: with_whom)
     raise "Игрок не найден" unless counterpart
 
     # Вычитаем ресурсы у текущего игрока
@@ -83,18 +182,32 @@ class Player < ApplicationRecord
   def subtract_resources_from_sender(resources)
     resources.each do |res|
       available_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
-      available_res["count"] -= res[:count] if available_res
+      if available_res
+        available_res["count"] -= res[:count]
+        # Удаляем ресурс, если его количество стало 0 или меньше
+        if available_res["count"] <= 0
+          self.resources.delete(available_res)
+        end
+      end
     end
   end
 
   def add_resources_to_recipient(recipient, resources)
-    resources.each do |res|
+    if recipient.resources == nil
+      recipient.resources  = resources
+    else
+      normalized_resources = resources.map { |res| res.transform_keys(&:to_sym) }
+
+      normalized_resources.each do |res|
+        # Ищем ресурс напрямую в recipient.resources
       recipient_res = recipient.resources.find { |r| r["identificator"] == res[:identificator] }
       if recipient_res
+          # Изменяем напрямую в оригинальном массиве
         recipient_res["count"] += res[:count]
       else
         # Если у контрагента нет такого ресурса, добавляем его
-        recipient.resources << { "identificator" => res[:identificator], "count" => res[:count] }
+          recipient.resources << {"name" => res[:name], "identificator" => res[:identificator], "count" => res[:count] }
+        end
       end
     end
   end
@@ -104,12 +217,9 @@ class Player < ApplicationRecord
     self.resources.map { |res| res.transform_keys(&:to_sym) }
   end
 
-  # Вспомогательный метод для получения доступных ресурсов
-  def available_resources
-    self.resources.map { |res| res.transform_keys(&:to_sym) }
+  def own_count
+    settlements.count + regions.count
   end
-
-  #####################
 
   def my_buildings
     (settlements.map{|s| s.buildings.map{|b| b.building_level}}.flatten + 
@@ -118,16 +228,145 @@ class Player < ApplicationRecord
       map.with_index do |bl, idx|
       {
         building_type_id: bl.building_type_id,
+        building_type: bl.building_type,
         level: bl.level,
-        icon: bl.building_type.icon,
         index: idx
       }
     end
   end
 
-  def own_count
-    settlements.count + regions.count
+  def income
+    sum = 0
+    if job_ids.include?(Job::METROPOLITAN)
+      church_params = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        select('building_levels.params')
+      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
+    end
+    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
   end
+
+  def player_military_outlays
+    cost = 0
+    self.armies.each do |army|
+      cost += army.troops.count * Troop::RENEWAL_COST
+    end
+    cost
+  end
+
+  def influence_buildings
+    sum = 0
+    if job_ids.include?(Job::METROPOLITAN)
+      # Получаем церкви, которые были оплачены в предыдущем году ИЛИ созданы в текущем году
+      previous_year = GameParameter.current_year - 1
+      current_year = GameParameter.current_year
+      
+      church_buildings = Building.joins({settlement: :region}, :building_level).
+        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
+        where(regions: {country_id: Country::RUS}).
+        where("buildings.params::jsonb->'paid' @> ?::jsonb OR buildings.params::jsonb->'first_year' = ?::jsonb", 
+              [previous_year].to_json, current_year.to_json)
+      
+      sum += church_buildings.joins(:building_level).sum do |building|
+        building.building_level.params['metropolitan_influence'].to_i
+      end
+    end
+    def_params = Building.joins({settlement: :region}, :building_level).
+      where(building_levels: {building_type_id: BuildingType::DEFENCE}).
+      where(regions: {country_id: Country::RUS}).
+      where(settlements: {player_id: self.id}).
+      select('building_levels.params')
+    sum + def_params.map{|p| p.params['influence'].to_i}.sum
+  end
+
+  def influence
+    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
+  end
+
+  private
+
+  # Проверка достаточности золота для покупки ресурсов
+  def validate_gold_availability(res_pl_buys, country_id)
+    return if res_pl_buys.empty?
+    
+    # Рассчитываем стоимость покупки
+    total_cost = 0
+    res_pl_buys.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      resource_obj = Resource.find_by(identificator: res[:identificator])
+      next unless resource_obj
+      
+      cost_result = Resource.calculate_cost("sale", res[:count], resource_obj)
+      next unless cost_result[:cost]
+      
+      total_cost += cost_result[:cost]
+    end
+    
+    # Проверяем, что у игрока достаточно золота
+    current_gold = show_player_gold[:count] || 0
+    if current_gold < total_cost
+      raise "Недостаточно золота. Требуется: #{total_cost}, доступно: #{current_gold}"
+    end
+  end
+
+  # Применение изменений к ресурсам игрока после торговли
+  def apply_trade_changes(res_pl_sells, res_pl_buys, trade_result)
+    # 1. Вычитаем проданные ресурсы у игрока
+    res_pl_sells.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      current_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
+      if current_res
+        current_res["count"] -= res[:count]
+        # Удаляем ресурс, если количество стало 0 или отрицательным
+        if current_res["count"] <= 0
+          self.resources.delete(current_res)
+        end
+      end
+    end
+    
+    # 2. Добавляем купленные ресурсы игроку
+    res_pl_buys.each do |res|
+      next unless res[:count] && res[:count] > 0
+      
+      current_res = self.resources.find { |r| r["identificator"] == res[:identificator] }
+      if current_res
+        current_res["count"] += res[:count]
+      else
+        # Добавляем новый ресурс
+        self.resources << { "identificator" => res[:identificator], "count" => res[:count] }
+      end
+    end
+    
+    # 3. Применяем итоговое изменение золота из результата торговли
+    trade_result.each do |resource|
+      next unless resource[:identificator] == "gold"
+      
+      current_gold = self.resources.find { |r| r["identificator"] == "gold" }
+      if current_gold
+        current_gold["count"] += resource[:count]
+        # Удаляем золото, если количество стало 0 или отрицательным
+        if current_gold["count"] <= 0
+          self.resources.delete(current_gold)
+        end
+      else
+        # Добавляем золото только если количество положительное
+        if resource[:count] > 0
+          self.resources << { "identificator" => "gold", "count" => resource[:count] }
+        end
+      end
+    end
+    
+    # 4. Финальная проверка: убеждаемся, что золото не стало отрицательным
+    gold_res = self.resources.find { |r| r["identificator"] == "gold" }
+    if gold_res && gold_res["count"] < 0
+      raise "Ошибка: золото не может быть отрицательным. Текущее значение: #{gold_res["count"]}"
+    end
+  end
+
+  #####################
 
   def check_credit(plant_ids)
     plants = Plant.where(id: plant_ids)
@@ -161,26 +400,6 @@ class Player < ApplicationRecord
     self.armies.create(army_size_id: army_size_id, region_id: region_id)
   end
 
-  def income
-    sum = 0
-    if job_ids.include?(Job::METROPOLITAN)
-      church_params = Building.joins({settlement: :region}, :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
-        select('building_levels.params')
-      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
-    end
-    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
-  end
-
-  def player_military_outlays
-    cost = 0
-    self.armies.each do |army|
-      cost += army.troops.count * Troop::RENEWAL_COST
-    end
-    cost
-  end
-
   def run_political_action(political_action_type_id, year, success, options)
     pat = PoliticalActionType.find_by_id(political_action_type_id)
     result = pat.execute(success, options)
@@ -195,33 +414,5 @@ class Player < ApplicationRecord
     InfluenceItem.add(value, comment, self, entity)
   end
 
-  def influence_buildings
-    sum = 0
-    if job_ids.include?(Job::METROPOLITAN)
-      # Получаем церкви, которые были оплачены в предыдущем году ИЛИ созданы в текущем году
-      previous_year = GameParameter.current_year - 1
-      current_year = GameParameter.current_year
-      
-      church_buildings = Building.joins({settlement: :region}, :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
-        where("buildings.params::jsonb->'paid' @> ?::jsonb OR buildings.params::jsonb->'first_year' = ?::jsonb", 
-              [previous_year].to_json, current_year.to_json)
-      
-      sum += church_buildings.joins(:building_level).sum do |building|
-        building.building_level.params['metropolitan_influence'].to_i
-      end
-    end
-    def_params = Building.joins({settlement: :region}, :building_level).
-      where(building_levels: {building_type_id: BuildingType::DEFENCE}).
-      where(regions: {country_id: Country::RUS}).
-      where(settlements: {player_id: self.id}).
-      select('building_levels.params')
-    sum + def_params.map{|p| p.params['influence'].to_i}.sum
-  end
-
-  def influence
-    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
-  end
 end
 
