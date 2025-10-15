@@ -42,6 +42,7 @@ class GameParameter < ApplicationRecord
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
   RESULTS = 6
+  CURRENT_PRICES = 7
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0

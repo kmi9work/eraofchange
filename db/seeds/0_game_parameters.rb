@@ -24,4 +24,7 @@ GameParameter.create(id: GameParameter::RESULTS, name: "Результаты к�
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
 
+GameParameter.create(id: GameParameter::CURRENT_PRICES, name: "Текущие цены", identificator: "current_prices", 	 value: 0, params: [])
+
+
 
