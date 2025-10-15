@@ -6,6 +6,15 @@ class Resource < ApplicationRecord
 
   belongs_to :country, optional: true
 
+  def self.shuffle_resources!
+    foreign_countries_ids = Country.foreign_countries.map {|c| c.id }
+    resources = Resource.all 
+    resources.each do |res |
+      res.country_id =  foreign_countries_ids.shuffle!.pop unless foreign_countries_ids.empty?
+      res.save
+    end
+  end
+
   def self.country_filter(country_id, resources)
     resources.select do |res|
       Resource.where(country_id: country_id).any?{|r| r[:identificator] == res[:identificator]}
