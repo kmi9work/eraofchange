@@ -80,6 +80,7 @@ Rails.application.routes.draw do
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
 
   get '/plant_levels/prod_info', to: 'plant_levels#prod_info'
+  get '/plant_levels/prod_info_full', to: 'plant_levels#prod_info_full'
   post '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
 

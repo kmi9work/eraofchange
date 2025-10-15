@@ -22,6 +22,24 @@ class PlantLevel < ApplicationRecord
     return pl_levels
   end
 
+  def self.show_pl_levels_full
+    pl_levels = []
+    tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
+    
+    PlantLevel.all.each do |p_l|
+      next if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
+      pl_levels.push({id: p_l.id,
+                      formula_from: p_l.formula_conversion[:from],
+                      formula_to:   p_l.formula_conversion[:to],
+                      formulas:     p_l.formulas,
+                      name: p_l.plant_type.name,
+                      level: p_l.level,
+                      tech_schools_open: tech_schools_open
+                    })
+    end
+    return pl_levels
+  end
+
   def formula_conversion
     to, from = [], []
     self.formulas.each do |res|
