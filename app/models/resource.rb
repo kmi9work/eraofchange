@@ -15,6 +15,9 @@ class Resource < ApplicationRecord
     end
   end
 
+
+
+
   def self.country_filter(country_id, resources)
     resources.select do |res|
       Resource.where(country_id: country_id).any?{|r| r[:identificator] == res[:identificator]}
@@ -88,47 +91,66 @@ class Resource < ApplicationRecord
   end
 
   def self.show_prices
-    resources = Resource.all
-
-    off_market = [] # То, что продается с рынка
-    to_market =  [] # То, что продается на рынок
-
-    off_and_to_market_prices = {off_market: off_market, to_market: to_market} # хэш с данным для покупки и продажи
-
-    prices_array = []
-
-    resources.each do |res|
-      next if res.country_id == nil
-      relations = res.country.relations.to_s
-
-      not_for_sale = true if res.params["sale_price"][relations] == nil
-
-      to_prices =  {}
-      off_prices = {}
-
-      to_prices[:name]  = res.name
-      off_prices[:name] = res.name
-
-      to_prices[:identificator]  = res.identificator
-      off_prices[:identificator] = res.identificator
-
-      to_prices[:sell_price] = res.params["buy_price"][relations] #игрок продает на рынок
-      off_prices[:buy_price] = res.params["sale_price"][relations]  #игрок покупает на рынке
-
-      to_prices[:embargo]  = res.country.params["embargo"]
-      off_prices[:embargo] = res.country.params["embargo"]
-
-
-      to_prices[:country]  = res.country.as_json(only: [:id, :name])
-      off_prices[:country] = res.country.as_json(only: [:id, :name])
-
-      to_market.push(to_prices)
-      off_market.push(off_prices) if !not_for_sale
-
-    end
-
-    return off_and_to_market_prices
+    return GameParameter.find(GameParameter::CURRENT_PRICES).params unless GameParameter.find(GameParameter::CURRENT_PRICES).params.empty?
+    return Resource.define_prices
   end
+
+  def self.define_prices
+  off_market = [] # То, что покупается с рынка
+  to_market = [] # То, что продается на рынок
+
+  foreign_countries = Country.foreign_countries.as_json(only: [:id, :name])
+
+  sell_res = []
+  buy_res = []
+
+  Resource.all.each do |resource|
+    next if resource.country_id.nil?
+    
+    # Добавляем в продажу только если есть цены продажи
+    if resource.params['sale_price'] && !resource.params['sale_price'].value?(nil)
+      sell_res.push({
+        name: resource.name, 
+        identificator: resource.identificator, 
+        sale_price: resource.params['sale_price']
+      })
+    end
+    
+    # Добавляем в покупку только если есть цены покупки
+    if resource.params['buy_price'] && !resource.params['buy_price'].value?(nil)
+      buy_res.push({
+        name: resource.name, 
+        identificator: resource.identificator, 
+        buy_price: resource.params['buy_price']
+      })
+    end
+  end
+
+  # Распределяем sell_res по странам
+  n = 0
+  sell_res.shuffle!
+  sell_res.each_with_index do |resource, i|
+    country_index = n % foreign_countries.length
+    off_market << resource.merge({country: foreign_countries[country_index]})
+    n += 1
+  end
+
+  # Распределяем buy_res по странам
+  n = 0
+  buy_res.shuffle!
+  buy_res.each_with_index do |resource, i|
+    country_index = n % foreign_countries.length
+    to_market << resource.merge({country: foreign_countries[country_index]})
+    n += 1
+  end
+
+  game_parameter = GameParameter.find(GameParameter::CURRENT_PRICES)
+  game_parameter.params = { off_market: off_market, to_market: to_market }
+  game_parameter.save
+  return { off_market: off_market, to_market: to_market }
+end
+
+
 
 end
 
