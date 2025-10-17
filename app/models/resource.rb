@@ -12,29 +12,58 @@ class Resource < ApplicationRecord
     end
   end
 
-  def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [], gold = 0)
-   #ресурсы, которые игрок продает рынку
-    gold = res_pl_sells.select {|d|  d[:identificator] == "gold"}[0][:count] || 0
+  def self.send_caravan(country_id, res_pl_sells = [], res_pl_buys = [])
+    # Валидация входных данных
+    raise ArgumentError, "country_id is required" if country_id.blank?
+    raise ArgumentError, "res_pl_sells must be an array" unless res_pl_sells.is_a?(Array)
+    raise ArgumentError, "res_pl_buys must be an array" unless res_pl_buys.is_a?(Array)
+    
+    # Извлекаем золото из ресурсов, которые игрок продает рынку
+    gold_item = res_pl_sells.find {|d| d[:identificator] == "gold"}
+    gold = gold_item&.dig(:count) || 0
+    # Обрабатываем ресурсы, которые игрок продает рынку
     elig_resources = country_filter(country_id, res_pl_sells)
     elig_resources.each do |res|
-      #ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
-      gold += calculate_cost("buy", res[:count], Resource.find_by(identificator: res[:identificator]))[:cost]
+      next if res[:identificator] == "gold" # Пропускаем золото, оно уже обработано
+      next unless res[:count] && res[:count] > 0 # Пропускаем пустые значения
+      
+      resource_obj = Resource.find_by(identificator: res[:identificator])
+      next unless resource_obj # Пропускаем несуществующие ресурсы
+      
+      cost_result = calculate_cost("buy", res[:count], resource_obj)
+      gold += cost_result[:cost] if cost_result[:cost]
     end
 
+    # Обрабатываем ресурсы, которые игрок покупает с рынка
     res_to_player = []
     elig_resources = country_filter(country_id, res_pl_buys)
     elig_resources.each do |res|
-      resource = calculate_cost("sale", res[:count], Resource.find_by(identificator: res[:identificator]))
-      gold -= resource[:cost]
-      res_to_player.push({name: Resource.find_by(identificator: resource[:identificator]).name,
-                          identificator: resource[:identificator],
-                          count: resource[:count].to_i})
+      next unless res[:count] && res[:count] > 0 # Пропускаем пустые значения
+      
+      resource_obj = Resource.find_by(identificator: res[:identificator])
+      next unless resource_obj # Пропускаем несуществующие ресурсы
+      
+      cost_result = calculate_cost("sale", res[:count], resource_obj)
+      next unless cost_result[:cost] # Пропускаем ресурсы, которые нельзя купить
+      
+      gold -= cost_result[:cost]
+      res_to_player.push({
+        name: resource_obj.name,
+        identificator: resource_obj.identificator,
+        count: cost_result[:count].to_i
+      })
     end
+    
+    # Добавляем итоговое золото к результату
     gold_as_res = Resource.find_by(identificator: "gold")
-    res_to_player.push({name: gold_as_res.name, identificator: gold_as_res.identificator, count: gold})
+    if gold_as_res && gold != 0
+      res_to_player.push({
+        name: gold_as_res.name, 
+        identificator: gold_as_res.identificator, 
+        count: gold
+      })
+    end
 
-
-    #/ПРОВЕРИТЬ ПОТОМ ВНИМАТЕЛЬНЕЕ
     return {res_to_player: res_to_player}
   end
 
