@@ -1,6 +1,8 @@
-Guild.create(name: "Забавники")
-Guild.create(name: "Каменщики")
-Guild.create(name: "Пивовары")
+
+guild_names = ["Забавники", "Каменщики","Пивовары"]
+
+guild_names.each {|name| Guild.create(name: name)} 
+  
 
 
 dob = PlantCategory.create(name: "Добывающее")
