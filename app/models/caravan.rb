@@ -3,7 +3,10 @@ class Caravan < ApplicationRecord
   belongs_to :country
   
   def self.register_caravan(params)
-    trade_turnover = params[:purchase_cost].to_i + params[:sale_income].to_i 
+    purchase_cost = params[:purchase_cost].to_i  # Стоимость покупки
+    sale_income = params[:sale_income].to_i      # Выручка от продажи
+    
+    trade_turnover = purchase_cost + sale_income
     
     # Разделяем ресурсы из incoming (БЕЗ золота)
     incoming_resources = []
