@@ -81,6 +81,6 @@ class CaravansController < ApplicationController
     end
     
     def register_caravan_params
-      params.permit(:country_id, incoming: [:identificator, :name, :count], outcoming: [:identificator, :name, :count])
+      params.permit(:country_id, :purchase_cost, :sale_income, incoming: [:identificator, :name, :count], outcoming: [:identificator, :name, :count])
     end
 end
