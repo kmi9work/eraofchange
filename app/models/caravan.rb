@@ -1,11 +1,6 @@
 class Caravan < ApplicationRecord
   belongs_to :guild, optional: true
   belongs_to :country
-
-   # {"country_id"=>2, "incoming"=>[{"identificator"=>"horses", "name"=>"Лошади", "count"=>111,
-   #  "current_sell_price"=>58}], "outcoming"=>[], "purchase_cost"=>0, 
-   # "sale_income"=>6438, "gold_paid"=>0, "controller"=>"caravans", 
-   # "action"=>"register_caravan", "caravan"=>{"country_id"=>2}
   
   def self.register_caravan(params)
     caravan = Caravan.create!(

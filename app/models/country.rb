@@ -6,6 +6,7 @@ class Country < ApplicationRecord
 	has_many :regions
   has_many :relation_items
   has_many :armies
+  has_many :caravans
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
 
@@ -23,7 +24,6 @@ class Country < ApplicationRecord
   TVER = 11       #Тверь
   NOVGOROD = 12   #Великий Новгород
 
-
   BY_WAR = 1
   BY_DIPLOMACY = 0
 
@@ -32,11 +32,11 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
-  def calculate_trade_balance
-    caravans = Caravan.where(country_id: self.id)
-    trade_balance = 0
-    caravans.each {|car| trade_balance = car.incoming_gold - car.outcoming_gold}
-    return trade_balance
+  def calculate_trade_turnover
+    caravans = self.caravans
+    trade_turnover = 0
+    caravans.each {|car| trade_turnover += car.gold_from_pl + car.gold_to_pl}
+    return trade_turnover
   end
 
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
