@@ -2,7 +2,7 @@ class CaravansController < ApplicationController
   before_action :set_caravan, only: %i[ show edit update destroy ]
 
   def register_caravan
-    result = Caravan.register_caravan(register_caravan_params)
+    result = Caravan.register_caravan(params)
     
     if result[:success]
       render json: { message: 'Caravan registered successfully', caravan: result[:caravan] }, status: :ok
@@ -80,7 +80,7 @@ class CaravansController < ApplicationController
       params.require(:caravan).permit(:title, :body)
     end
     
-    def register_caravan_params
-      params.permit(:country_id, :purchase_cost, :sale_income, :gold_paid, incoming: [:identificator, :name, :count], outcoming: [:identificator, :name, :count])
-    end
+    # def register_caravan_params
+    #   params.permit(:country_id, :purchase_cost, :sale_income, :gold_paid, incoming: [:identificator, :name, :count, :price], outcoming: [:identificator, :name, :count, :price])
+    # end
 end

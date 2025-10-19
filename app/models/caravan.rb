@@ -1,45 +1,19 @@
 class Caravan < ApplicationRecord
   belongs_to :guild, optional: true
   belongs_to :country
+
+   # {"country_id"=>2, "incoming"=>[{"identificator"=>"horses", "name"=>"Лошади", "count"=>111,
+   #  "current_sell_price"=>58}], "outcoming"=>[], "purchase_cost"=>0, 
+   # "sale_income"=>6438, "gold_paid"=>0, "controller"=>"caravans", 
+   # "action"=>"register_caravan", "caravan"=>{"country_id"=>2}
   
   def self.register_caravan(params)
-    purchase_cost = params[:purchase_cost].to_i  # Стоимость покупки
-    sale_income = params[:sale_income].to_i      # Выручка от продажи
-    
-    trade_turnover = purchase_cost + sale_income
-    
-    # Разделяем ресурсы из incoming (БЕЗ золота)
-    incoming_resources = []
-    
-    params[:incoming]&.each do |item|
-      if item[:count].present? && item[:count].to_i > 0
-        incoming_resources << { 
-          identificator: item[:identificator], 
-          name: item[:name],
-          count: item[:count].to_i 
-        }
-      end
-    end
-    
-    # Разделяем ресурсы из outcoming (БЕЗ золота)
-    outcoming_resources = []
-    
-    params[:outcoming]&.each do |item|
-      if item[:count].present? && item[:count].to_i != 0
-        outcoming_resources << { 
-          identificator: item[:identificator],
-          name: item[:name], 
-          count: item[:count].to_i 
-        }
-      end
-    end
-    
-    # Создаем караван
     caravan = Caravan.create!(
-      country_id: params[:country_id],
-      resources_from_pl: incoming_resources,
-      resources_to_pl: outcoming_resources,
-      trade_turnover: trade_turnover
+      country_id:        params[:country_id],
+      resources_from_pl: params[:incoming],
+      resources_to_pl:   params[:outcoming],
+      gold_from_pl:      params[:purchase_cost],
+      gold_to_pl:        params[:sale_income] 
     )
     
     { success: true, caravan: caravan }
@@ -47,5 +21,7 @@ class Caravan < ApplicationRecord
     { success: false, error: e.message }
   rescue => e
     { success: false, error: e.message }
-  end
+  end  
+
+
 end
