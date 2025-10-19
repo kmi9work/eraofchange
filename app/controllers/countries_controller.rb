@@ -1,5 +1,5 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture add_relation_item join_peace]
+  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture add_relation_item join_peace calculate_trade_turnover]
 
   # GET /countries or /countries.json
   def index
@@ -42,6 +42,13 @@ class CountriesController < ApplicationController
 
   # GET /countries/1/edit
   def edit
+  end
+
+  def calculate_trade_turnover
+    result = @country.calculate_trade_turnover
+    render json: result
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
   end
 
   # POST /countries or /countries.json
