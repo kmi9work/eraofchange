@@ -79,6 +79,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
   patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
+  get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'
   get '/countries/:id/calculate_trade_turnover', to: 'countries#calculate_trade_turnover'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'

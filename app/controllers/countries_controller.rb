@@ -44,8 +44,8 @@ class CountriesController < ApplicationController
   def edit
   end
 
-  def calculate_trade_turnover
-    result = @country.calculate_trade_turnover
+  def show_trade_turnover
+    result = Country.show_trade_turnover
     render json: result
   rescue => e
     render json: { error: e.message }, status: :internal_server_error

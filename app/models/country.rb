@@ -32,11 +32,24 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
+  def self.show_trade_turnover
+    foreign_countries = Country.foreign_countries
+    overall_trade_turnover = foreign_countries.map do |f_c|
+      car_data = f_c.calculate_trade_turnover
+      {country_id:    f_c.id,
+      country_name:   f_c.name,
+      trade_turnover: car_data[:trade_turnover],
+      car_count:      car_data[:num_of_car]}
+    end
+
+    return overall_trade_turnover
+  end
+
   def calculate_trade_turnover
     caravans = self.caravans
     trade_turnover = 0
     caravans.each {|car| trade_turnover += car.gold_from_pl + car.gold_to_pl}
-    return trade_turnover
+    return {trade_turnover: trade_turnover, num_of_car: self.caravans.count}
   end
 
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
