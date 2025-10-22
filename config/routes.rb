@@ -77,6 +77,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/set_embargo', to: 'countries#set_embargo'
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
+  patch '/countries/:id/improve_relations_via_trade', to: 'countries#improve_relations_via_trade'
   patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
   get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'

@@ -1,5 +1,6 @@
 json.extract! country, :id, :name, :embargo, :params, :relations, :created_at, :updated_at
 json.owner_type 'Country'
+json.relation_points (country.params&.dig('relation_points') || 0)
 
 relation_items = []
 if Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1 && 

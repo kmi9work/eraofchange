@@ -35,9 +35,32 @@ class Country < ApplicationRecord
   def show_current_trade_level
     levels = self.level_thresholds
     current_trade_turnover = self.calculate_trade_turnover[:trade_turnover]
-    current_level = levels.find{|lev| lev["threshold"].to_i > current_trade_turnover}
-    to_next_level = current_level["threshold"].to_i - current_trade_turnover
-    return {current_level: current_level["level"], threshold: current_level["threshold"], to_next_level: to_next_level}
+    
+    # Находим текущий уровень: максимальный уровень, порог которого <= товарооборота
+    current_level_info = levels.reverse.find { |lev| lev["threshold"].to_i <= current_trade_turnover }
+    
+    # Если не найден (товарооборот меньше первого порога), берём первый уровень
+    if current_level_info.nil?
+      current_level_info = levels.first
+      current_level_number = 0
+      next_level_info = levels.first
+    else
+      current_level_number = current_level_info["level"]
+      # Находим следующий уровень
+      next_level_info = levels.find { |lev| lev["level"] > current_level_number }
+      
+      # Если следующего уровня нет (достигнут максимум), используем текущий
+      next_level_info ||= current_level_info
+    end
+    
+    to_next_level = next_level_info["threshold"].to_i - current_trade_turnover
+    to_next_level = 0 if to_next_level < 0
+    
+    return {
+      current_level: current_level_number,
+      threshold: next_level_info["threshold"],
+      to_next_level: to_next_level
+    }
   end
 
   def self.show_trade_turnover
@@ -69,6 +92,32 @@ class Country < ApplicationRecord
     return false if params['embargo'].nil?
     self.params['embargo'] = params['embargo'] == 0 ? 1 : 0
     self.save
+  end
+
+  def improve_relations_via_trade
+    current_params = self.params || {}
+    relation_points = current_params['relation_points'].to_i
+    
+    # Проверяем, что есть relation_points для траты
+    if relation_points < 1
+      return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
+    end
+    
+    # Уменьшаем relation_points на 1
+    current_params['relation_points'] = relation_points - 1
+    self.params = current_params
+    
+    # Улучшаем отношения на 1
+    change_relations(1, self, "Улучшение через торговлю")
+    
+    # Сохраняем изменения
+    if self.save
+      { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+    else
+      { success: false, error: self.errors.full_messages.join(', ') }
+    end
+  rescue => e
+    { success: false, error: e.message }
   end
 
   def change_relations(count, entity, comment = nil)
