@@ -72,9 +72,9 @@ class Resource < ApplicationRecord
     relations = resource.country&.relations.to_s
     unit_cost = resource.params["#{transaction_type}_price"][relations]
     if unit_cost
-      {identificator: resource.identificator, count: amount, cost: unit_cost*amount.to_i, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount, cost: unit_cost*amount.to_i, embargo: resource.country.params[0]["embargo"]}
     else
-      {identificator: resource.identificator, count: amount,  cost: nil, embargo: resource.country.params["embargo"]}
+      {identificator: resource.identificator, count: amount,  cost: nil, embargo: resource.country.params[0]["embargo"]}
     end
   end
 

@@ -81,6 +81,9 @@ Rails.application.routes.draw do
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
   get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'
   get '/countries/:id/calculate_trade_turnover', to: 'countries#calculate_trade_turnover'
+  get '/countries/:id/show_current_trade_level', to: 'countries#show_current_trade_level'
+  get '/countries/:id/show_trade_thresholds', to: 'countries#show_trade_thresholds'
+  patch '/countries/:id/update_trade_thresholds', to: 'countries#update_trade_thresholds'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'

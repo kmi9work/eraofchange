@@ -1,5 +1,5 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture add_relation_item join_peace calculate_trade_turnover]
+  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture edit_trade_thresholds show_trade_thresholds update_trade_thresholds add_relation_item show_current_trade_level join_peace calculate_trade_turnover]
 
   # GET /countries or /countries.json
   def index
@@ -42,6 +42,36 @@ class CountriesController < ApplicationController
 
   # GET /countries/1/edit
   def edit
+  end
+
+  def show_current_trade_level
+    result = @country.show_current_trade_level
+    render json: result
+    rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
+  def show_trade_thresholds
+    result = @country.level_thresholds
+    render json: result
+    rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
+  def update_trade_thresholds
+    new_thresholds = params[:thresholds]
+    if new_thresholds.present?
+      @country.level_thresholds = new_thresholds
+      if @country.save
+        render json: { success: true, thresholds: @country.level_thresholds }
+      else
+        render json: { error: @country.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Thresholds parameter is required' }, status: :bad_request
+    end
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
   end
 
   def show_trade_turnover

@@ -32,6 +32,14 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
+  def show_current_trade_level
+    levels = self.level_thresholds
+    current_trade_turnover = self.calculate_trade_turnover[:trade_turnover]
+    current_level = levels.find{|lev| lev["threshold"].to_i > current_trade_turnover}
+    to_next_level = current_level["threshold"].to_i - current_trade_turnover
+    return {current_level: current_level["level"], threshold: current_level["threshold"], to_next_level: to_next_level}
+  end
+
   def self.show_trade_turnover
     foreign_countries = Country.foreign_countries
     overall_trade_turnover = foreign_countries.map do |f_c|
@@ -39,7 +47,8 @@ class Country < ApplicationRecord
       {country_id:    f_c.id,
       country_name:   f_c.name,
       trade_turnover: car_data[:trade_turnover],
-      car_count:      car_data[:num_of_car]}
+      car_count:      car_data[:num_of_car],
+      relations:      f_c.relations}
     end
 
     return overall_trade_turnover
