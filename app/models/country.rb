@@ -33,7 +33,7 @@ class Country < ApplicationRecord
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
   def show_current_trade_level
-    levels = self.level_thresholds
+    levels = self.params["level_thresholds"]
     current_trade_turnover = self.calculate_trade_turnover[:trade_turnover]
     
     # Находим текущий уровень: максимальный уровень, порог которого <= товарооборота

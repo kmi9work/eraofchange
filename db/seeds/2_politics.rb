@@ -46,7 +46,7 @@ while str = f.gets
   id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = str.split(';').map(&:strip)
   country = Country.find_by_name(country_name)
   if country.blank?
-    country = Country.create(id: id, name: country_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0}, level_thresholds: levels)
+    country = Country.create(id: id, name: country_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "level_thresholds" =>  levels})
     RelationItem.add(relations.to_i, "Ручная правка", country)
   end
   region = Region.find_by_name(region_name)
