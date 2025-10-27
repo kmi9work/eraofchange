@@ -10,6 +10,51 @@ class PlantPlacesController < ApplicationController
   def show
   end
 
+  # GET /plant_places/available_places
+  # API метод для получения доступных мест строительства для каждого типа предприятия
+  def available_places
+    result = PlantType.all.map do |plant_type|
+      # Для перерабатывающих предприятий - все PlantPlace с категорией "Перерабатывающее"
+      # Для добывающих - только PlantPlace, которые связаны с нужным fossil_type
+      # Фильтруем только регионы, принадлежащие Руси
+      if plant_type.plant_category_id == PlantCategory::PROCESSING
+        available_places = PlantPlace.includes(:region)
+                                      .where(plant_category_id: PlantCategory::PROCESSING)
+                                      .joins(:region)
+                                      .where(regions: { country_id: Country::RUS })
+      else
+        # Добывающее предприятие
+        if plant_type.fossil_type_id.present?
+          # Находим PlantPlace, которые содержат нужный fossil_type и в регионах Руси
+          available_places = PlantPlace.includes(:region, :fossil_types)
+                                        .where(plant_category_id: PlantCategory::EXTRACTIVE)
+                                        .joins(:region, :fossil_types)
+                                        .where(regions: { country_id: Country::RUS })
+                                        .where(fossil_types: { id: plant_type.fossil_type_id })
+        else
+          available_places = []
+        end
+      end
+
+      {
+        plant_type_id: plant_type.id,
+        plant_type_name: plant_type.name,
+        plant_category: plant_type.plant_category&.name,
+        plant_category_id: plant_type.plant_category_id,
+        available_places: available_places.map do |place|
+          {
+            id: place.id,
+            name: place.name,
+            region_id: place.region_id,
+            region_name: place.region&.name
+          }
+        end
+      }
+    end
+
+    render json: result
+  end
+
   # GET /plant_places/new
   def new
     @plant_place = PlantPlace.new

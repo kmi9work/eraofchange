@@ -30,6 +30,7 @@ Rails.application.routes.draw do
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
   get '/plants/:id/has_produced', to: 'plants#has_produced'
+  post '/plants/:id/print_barcode', to: 'plants#print_barcode'
 
   ### Результаты
   get   '/game_parameters/show_sorted_results', to: 'game_parameters#show_sorted_results'
@@ -83,6 +84,7 @@ Rails.application.routes.draw do
   get '/plant_levels/prod_info_full', to: 'plant_levels#prod_info_full'
   post '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
+  get '/plant_places/available_places', to: 'plant_places#available_places'
 
   get '/resources/show_prices',  to: 'resources#show_prices'
   get '/resources/show_all_resources',  to: 'resources#show_all_resources'
@@ -141,7 +143,7 @@ Rails.application.routes.draw do
   get '/plants/:id', to: 'plants#show', as: :plant
   get '/plants/:id/edit', to: 'plants#edit', as: :edit_plant
   patch '/plants/:id', to: 'plants#update'
-  delete '/plants/:id/destroy', to: 'plants#destroy', as: :destroy_plant
+  delete '/plants/:id', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
 
   get '/login/:id', to: 'users#login'

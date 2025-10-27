@@ -9,7 +9,12 @@ class Plant < ApplicationRecord
   belongs_to :economic_subject, polymorphic: true, optional: true
   belongs_to :credit, optional: true
 
+  before_validation :initialize_params, on: :create
   before_destroy :check_credit, prepend: true
+
+  def initialize_params
+    self.params ||= {"produced" => []}
+  end
 
   def check_credit
     if self.credit.present?
