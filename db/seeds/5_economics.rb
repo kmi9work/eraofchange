@@ -8,25 +8,33 @@ guild_names.each {|name| Guild.create(name: name)}
 dob = PlantCategory.create(name: "Добывающее")
 per = PlantCategory.create(name: "Перерабатывающее")
 
+# Типы месторождений
+timber_fossil = FossilType.create(name: "Строевой лес")
+pasture_fossil = FossilType.create(name: "Пастбище")
+fertile_land_fossil = FossilType.create(name: "Плодородная земля")
+stone_fossil = FossilType.create(name: "Камень")
+iron_ore_fossil = FossilType.create(name: "Железная руда")
+gem_ore_fossil = FossilType.create(name: "Драгоценная руда")
+
 delyan = 1
-PlantType.create(id: delyan, name: "Делянка", plant_category: dob)
+PlantType.create(id: delyan, name: "Делянка", plant_category: dob, fossil_type: timber_fossil)
 
 farm = 2
-PlantType.create(id: farm, name: "Ферма", plant_category: dob)
+PlantType.create(id: farm, name: "Ферма", plant_category: dob, fossil_type: pasture_fossil)
 
 field = 3
-PlantType.create(id: field, name: "Поле пшеницы", plant_category: dob)
+PlantType.create(id: field, name: "Поле пшеницы", plant_category: dob, fossil_type: fertile_land_fossil)
 
 quarry = 4
-PlantType.create(id: quarry, name: "Каменоломня", plant_category: dob)
+PlantType.create(id: quarry, name: "Каменоломня", plant_category: dob, fossil_type: stone_fossil)
 
 
 iron_mine = 5
-PlantType.create(id: iron_mine, name: "Железный рудник", plant_category: dob)
+PlantType.create(id: iron_mine, name: "Железный рудник", plant_category: dob, fossil_type: iron_ore_fossil)
 
 
 gold_mine = 6
-PlantType.create(id: gold_mine, name: "Драгоценный рудник", plant_category: dob)
+PlantType.create(id: gold_mine, name: "Драгоценный рудник", plant_category: dob, fossil_type: gem_ore_fossil)
 
 
 
@@ -365,5 +373,49 @@ PlantLevel.create(level: "3", deposit: "10500", price: {"stone_brick" => 200, "m
 
 
 Plant.create(plant_level_id: 1, plant_place_id: 1, economic_subject_id: 1, economic_subject_type: "Guild", params: {"produced" => []})
+
+
+# Создание PlantPlace для регионов
+# Перерабатывающие предприятия - доступны во всех регионах
+Region.all.each do |region|
+  PlantPlace.create(name: "Место для перерабатывающих предприятий в #{region.name}", plant_category: per, region: region)
+end
+
+# Добывающие предприятия - только в регионах с соответствующими месторождениями
+# Поля пшеницы, Делянка, Каменоломня
+["Великое Московское княжество", "Вологодская земля", "Нижегородская земля", "Ярославское княжество"].each do |region_name|
+  region = Region.find_by(name: region_name)
+  if region
+    pp = PlantPlace.create(name: "Место для добывающих предприятий в #{region_name}", plant_category: dob, region: region)
+    pp.fossil_types << [fertile_land_fossil, timber_fossil, stone_fossil]
+  end
+end
+
+# Ферма
+["Псковское княжество", "Новгородская земля", "Подвинье", "Тверское княжество"].each do |region_name|
+  region = Region.find_by(name: region_name)
+  if region
+    pp = PlantPlace.create(name: "Место для добывающих предприятий в #{region_name}", plant_category: dob, region: region)
+    pp.fossil_types << pasture_fossil
+  end
+end
+
+# Драгоценный рудник
+["Канинская земля", "Ненецкая земля", "Чернигово-Северское княжество"].each do |region_name|
+  region = Region.find_by(name: region_name)
+  if region
+    pp = PlantPlace.create(name: "Место для добывающих предприятий в #{region_name}", plant_category: dob, region: region)
+    pp.fossil_types << gem_ore_fossil
+  end
+end
+
+# Железный рудник
+["Малая Пермь", "Великая Пермь", "Вятская земля", "Рязанское княжество", "Смоленское княжество", "Верховское княжество", "Торопецкое княжество"].each do |region_name|
+  region = Region.find_by(name: region_name)
+  if region
+    pp = PlantPlace.create(name: "Место для добывающих предприятий в #{region_name}", plant_category: dob, region: region)
+    pp.fossil_types << iron_ore_fossil
+  end
+end
 
 

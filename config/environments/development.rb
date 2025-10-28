@@ -10,6 +10,18 @@ Rails.application.configure do
 
   #config.hosts << "epoha.igroteh.su"
   
+  # Allow access from development IP address
+  if ENV["DEV_IP"]
+    config.hosts << ENV["DEV_IP"]
+    config.hosts << "#{ENV['DEV_IP']}:#{ENV.fetch('BACKEND_PORT', 3000)}"
+  end
+  
+  # Allow access from localhost and common network ranges
+  config.hosts << /.*\.local$/
+  config.hosts << /192\.168\.\d+\.\d+/
+  config.hosts << /10\.\d+\.\d+\.\d+/
+  config.hosts << /172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+/
+  
   # Do not eager load code on boot.
   config.eager_load = false
 

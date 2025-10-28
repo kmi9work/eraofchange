@@ -22,13 +22,46 @@ class PlantLevel < ApplicationRecord
     return pl_levels
   end
 
+  def self.show_pl_levels_full
+    pl_levels = []
+    tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
+    
+    PlantLevel.all.each do |p_l|
+      # Для добывающих предприятий используем только formula_to
+      if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
+        pl_levels.push({id: p_l.id,
+                        formula_from: [],
+                        formula_to:   p_l.formula_conversion[:to],
+                        formulas:     [],
+                        name: p_l.plant_type.name,
+                        level: p_l.level,
+                        tech_schools_open: tech_schools_open
+                      })
+      else
+        pl_levels.push({id: p_l.id,
+                        formula_from: p_l.formula_conversion[:from],
+                        formula_to:   p_l.formula_conversion[:to],
+                        formulas:     p_l.formulas,
+                        name: p_l.plant_type.name,
+                        level: p_l.level,
+                        tech_schools_open: tech_schools_open
+                      })
+      end
+    end
+    return pl_levels
+  end
+
   def formula_conversion
     to, from = [], []
+    # Для добывающих предприятий formulas может быть пустым или nil
+    return {from: [], to: []} if self.formulas.nil? || self.formulas.empty?
+    
     self.formulas.each do |res|
-      res["from"].each{|uu| from.push({name: look_up_res(uu["identificator"]), identificator: uu["identificator"], count: nil})}
-      res["to"].each{|ii|   to.push({name: look_up_res(ii["identificator"]), identificator:   ii["identificator"], count: nil})}
+      res["from"].each{|uu| from.push({name: look_up_res(uu["identificator"]), identificator: uu["identificator"], count: uu["count"]})} if res["from"]
+      res["to"].each{|ii|   to.push({name: look_up_res(ii["identificator"]), identificator:   ii["identificator"], count: ii["count"]})} if res["to"]
     end
-    return {from: from.uniq, to: to.uniq}
+    # Убираем дубликаты по identificator, оставляя первое вхождение
+    return {from: from.uniq { |item| item[:identificator] }, to: to.uniq { |item| item[:identificator] }}
   end
 
   def feed_to_plant!(request = [], way = 'from')
