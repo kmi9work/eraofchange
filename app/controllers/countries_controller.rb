@@ -52,7 +52,7 @@ class CountriesController < ApplicationController
   end
 
   def show_trade_thresholds
-    result = @country.params["level_thresholds"]
+    result = @country.params&.dig("level_thresholds") || []
     render json: result
     rescue => e
     render json: { error: e.message }, status: :internal_server_error
@@ -61,9 +61,12 @@ class CountriesController < ApplicationController
   def update_trade_thresholds
     new_thresholds = params[:thresholds]
     if new_thresholds.present?
-      @country.params["level_thresholds"] = new_thresholds
+      current_params = @country.params || {}
+      current_params["level_thresholds"] = new_thresholds
+      @country.params = current_params
+      
       if @country.save
-        render json: { success: true, thresholds: @country.params["level_thresholds"] }
+        render json: { success: true, thresholds: current_params["level_thresholds"] }
       else
         render json: { error: @country.errors.full_messages }, status: :unprocessable_entity
       end

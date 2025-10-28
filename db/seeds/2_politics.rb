@@ -30,16 +30,9 @@ f = File.open('./db/seeds/countries.csv', 'r+')
 f.gets #Заголовки
 
 
-levels = [{ level: 1, threshold: 1000},
-{ level: 2, threshold: 11000},
-{ level: 3, threshold: 21000},
-{ level: 4, threshold: 31000},
-{ level: 5, threshold: 41000},
-{ level: 6, threshold: 51000},
-{ level: 7, threshold: 61000},
-{ level: 8, threshold: 71000},
-{ level: 9, threshold: 81000},
-{ level: 10, threshold: 111000}]
+levels = [{ level: 1, threshold: 1000, name: "Низкий"},
+{ level: 2, threshold: 11000, name: "Средний"},
+{ level: 3, threshold: 21000, name: "Высокий"}]
 
 po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets

@@ -33,8 +33,11 @@ class Country < ApplicationRecord
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
   def show_current_trade_level
-    levels = self.params["level_thresholds"]
-    current_trade_turnover = self.calculate_trade_turnover[:trade_turnover]
+    # level_thresholds хранится в params
+    levels = self.params&.dig("level_thresholds") || []
+    return { current_level: 0, threshold: 0, to_next_level: 0 } if levels.empty?
+    
+    current_trade_turnover = self.calculate_trade_turnover[:trade_turnover] || 0
     
     # Находим текущий уровень: максимальный уровень, порог которого <= товарооборота
     current_level_info = levels.reverse.find { |lev| lev["threshold"].to_i <= current_trade_turnover }
@@ -78,10 +81,10 @@ class Country < ApplicationRecord
   end
 
   def calculate_trade_turnover
-    caravans = self.caravans
+    caravans = self.caravans || []
     trade_turnover = 0
-    caravans.each {|car| trade_turnover += car.gold_from_pl + car.gold_to_pl}
-    return {trade_turnover: trade_turnover, num_of_car: self.caravans.count}
+    caravans.each {|car| trade_turnover += (car.gold_from_pl || 0) + (car.gold_to_pl || 0)}
+    return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
   end
 
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
