@@ -32,6 +32,13 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
+  def calculate_trade_balance
+    caravans = Caravan.where(country_id: self.id)
+    trade_balance = 0
+    caravans.each {|car| trade_balance = car.incoming_gold - car.outcoming_gold}
+    return trade_balance
+  end
+
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
     params['embargo']
   end

@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @caravan %>
+
+<div>
+  <%= link_to "Edit this caravan", edit_caravan_path(@caravan) %> |
+  <%= link_to "Back to caravans", caravans_path %>
+
+  <%= button_to "Destroy this caravan", @caravan, method: :delete %>
+</div>

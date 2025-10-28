@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  
   # Аутентификация
   post '/auth/login', to: 'auth#login'
   post '/auth/logout', to: 'auth#logout'
@@ -12,6 +13,9 @@ Rails.application.routes.draw do
   resources :technology_items
   resources :relation_items
   resources :influence_items
+  resources :caravans
+
+  post '/caravans/register_caravan', to: 'caravans#register_caravan'
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'
   patch '/troops/:id/upgrade', to: 'troops#upgrade'

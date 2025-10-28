@@ -86,3 +86,44 @@ Resource.create(name: "Оружие", identificator: "weapon", country_id: crime
 Resource.create(name: "Золото", identificator: "gold", country_id: nil, params:
   {"sale_price" => {-2 => 0, -1 => 0, 0 => 0,   1 => 2, 2 => 0},
   "buy_price" => {-2 => 0, -1 => 61, 0 => 0, 1 => 0, 2 => 0}})
+
+# Распределение ресурсов игрокам
+all_resources = Resource.all.pluck(:identificator)
+
+# Получаем всех игроков
+all_players = Player.all.to_a
+
+# Первому игроку даём 1 ресурс
+first_player = all_players[0]
+first_player.resources = [{
+  "identificator" => all_resources.sample,
+  "count" => rand(10..50)
+}]
+first_player.save!
+puts "Игрок #{first_player.name}: 1 вид ресурса"
+
+# Второму игроку даём все 17 ресурсов
+second_player = all_players[1]
+second_player.resources = all_resources.map do |res_id|
+  {
+    "identificator" => res_id,
+    "count" => rand(10..50)
+  }
+end
+second_player.save!
+puts "Игрок #{second_player.name}: 17 видов ресурсов"
+
+# Остальным игрокам даём случайное количество от 1 до 17
+all_players[2..-1].each do |player|
+  resource_count = rand(1..17)
+  selected_resources = all_resources.sample(resource_count)
+  
+  player.resources = selected_resources.map do |res_id|
+    {
+      "identificator" => res_id,
+      "count" => rand(10..50)
+    }
+  end
+  player.save!
+  puts "Игрок #{player.name}: #{resource_count} #{'вид' if resource_count == 1}#{'вида' if [2,3,4].include?(resource_count)}#{'видов' if resource_count >= 5} ресурсов"
+end
