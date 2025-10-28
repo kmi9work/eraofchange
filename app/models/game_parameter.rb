@@ -262,6 +262,7 @@ def self.sort_and_save_results(result_hash = nil)
     item_name = 1 
     30.times do | item |
       dummy_schedule_item = {}
+      dummy_schedule_item[:id] = item_name
       dummy_schedule_item[:identificator] = "Цикл #{item_name}"
       dummy_schedule_item[:start]  = current_time.strftime("%H:%M")
       current_time += (minutes_to_add * 60)
@@ -273,7 +274,7 @@ def self.sort_and_save_results(result_hash = nil)
     GameParameter.create_schedule(dummy_schedule)
   end
 
-  def self.toggle_timer(value = nil)    
+  def self.toggle_timer(value = nil)  
     timer = GameParameter.find_by(identificator: "schedule")
     timer.value = value.to_i              unless value.nil?
     timer.value = 1-timer.value.to_i      if     value.nil?
@@ -288,11 +289,11 @@ def self.sort_and_save_results(result_hash = nil)
     return unix_time
   end
 
-  def self.create_schedule
+  def self.create_schedule(schedule = nil)
     timer = GameParameter.find_by(identificator: "schedule")
     timer.value = NOT_TICKING 
     timer.params = []
-    timer.params = SCHEDULE
+    timer.params = schedule || SCHEDULE
     timer.save
   end
 

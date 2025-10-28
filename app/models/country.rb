@@ -6,6 +6,7 @@ class Country < ApplicationRecord
 	has_many :regions
   has_many :relation_items
   has_many :armies
+  has_many :caravans
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
 
@@ -23,7 +24,6 @@ class Country < ApplicationRecord
   TVER = 11       #Тверь
   NOVGOROD = 12   #Великий Новгород
 
-
   BY_WAR = 1
   BY_DIPLOMACY = 0
 
@@ -32,11 +32,59 @@ class Country < ApplicationRecord
 
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
 
-  def calculate_trade_balance
-    caravans = Caravan.where(country_id: self.id)
-    trade_balance = 0
-    caravans.each {|car| trade_balance = car.incoming_gold - car.outcoming_gold}
-    return trade_balance
+  def show_current_trade_level
+    # level_thresholds хранится в params
+    levels = self.params&.dig("level_thresholds") || []
+    return { current_level: 0, threshold: 0, to_next_level: 0 } if levels.empty?
+    
+    current_trade_turnover = self.calculate_trade_turnover[:trade_turnover] || 0
+    
+    # Находим текущий уровень: максимальный уровень, порог которого <= товарооборота
+    current_level_info = levels.reverse.find { |lev| lev["threshold"].to_i <= current_trade_turnover }
+    
+    # Если не найден (товарооборот меньше первого порога), берём первый уровень
+    if current_level_info.nil?
+      current_level_info = levels.first
+      current_level_number = 0
+      next_level_info = levels.first
+    else
+      current_level_number = current_level_info["level"]
+      # Находим следующий уровень
+      next_level_info = levels.find { |lev| lev["level"] > current_level_number }
+      
+      # Если следующего уровня нет (достигнут максимум), используем текущий
+      next_level_info ||= current_level_info
+    end
+    
+    to_next_level = next_level_info["threshold"].to_i - current_trade_turnover
+    to_next_level = 0 if to_next_level < 0
+    
+    return {
+      current_level: current_level_number,
+      threshold: next_level_info["threshold"],
+      to_next_level: to_next_level
+    }
+  end
+
+  def self.show_trade_turnover
+    foreign_countries = Country.foreign_countries
+    overall_trade_turnover = foreign_countries.map do |f_c|
+      car_data = f_c.calculate_trade_turnover
+      {country_id:    f_c.id,
+      country_name:   f_c.name,
+      trade_turnover: car_data[:trade_turnover],
+      car_count:      car_data[:num_of_car],
+      relations:      f_c.relations}
+    end
+
+    return overall_trade_turnover
+  end
+
+  def calculate_trade_turnover
+    caravans = self.caravans || []
+    trade_turnover = 0
+    caravans.each {|car| trade_turnover += (car.gold_from_pl || 0) + (car.gold_to_pl || 0)}
+    return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
   end
 
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
@@ -47,6 +95,32 @@ class Country < ApplicationRecord
     return false if params['embargo'].nil?
     self.params['embargo'] = params['embargo'] == 0 ? 1 : 0
     self.save
+  end
+
+  def improve_relations_via_trade
+    current_params = self.params || {}
+    relation_points = current_params['relation_points'].to_i
+    
+    # Проверяем, что есть relation_points для траты
+    if relation_points < 1
+      return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
+    end
+    
+    # Уменьшаем relation_points на 1
+    current_params['relation_points'] = relation_points - 1
+    self.params = current_params
+    
+    # Улучшаем отношения на 1
+    change_relations(1, self, "Улучшение через торговлю")
+    
+    # Сохраняем изменения
+    if self.save
+      { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+    else
+      { success: false, error: self.errors.full_messages.join(', ') }
+    end
+  rescue => e
+    { success: false, error: e.message }
   end
 
   def change_relations(count, entity, comment = nil)
