@@ -15,6 +15,11 @@ class PlantLevelsController < ApplicationController
     render json: @prod
   end
 
+  def prod_info_full
+    @prod = PlantLevel.show_pl_levels_full
+    render json: @prod
+  end
+
   def feed_to_plant
     @output = @plant_level.feed_to_plant!(params[:request], params[:way])
     render json: @output
