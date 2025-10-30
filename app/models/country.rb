@@ -9,6 +9,9 @@ class Country < ApplicationRecord
   has_many :caravans
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
+  
+  # Бонус от технологии "Москва — Третий Рим" (можно переопределить в плагинах)
+  class_attribute :moscow_third_rome_bonus, default: 2
 
   RUS = 1         #Русь
   HORDE = 2       #Большая орда
@@ -142,7 +145,7 @@ class Country < ApplicationRecord
 
   def relations
     sum = 0
-    sum += 2 if (Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1) && [PERMIAN, VYATKA, RYAZAN, TVER, NOVGOROD].include?(self.id)
+    sum += self.class.moscow_third_rome_bonus if (Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1) && [PERMIAN, VYATKA, RYAZAN, TVER, NOVGOROD].include?(self.id)
     sum += relation_items.sum(&:value)
     sum.abs > REL_RANGE ? (sum / sum.abs)*[sum.abs, REL_RANGE].min : sum
   end

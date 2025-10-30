@@ -7,7 +7,7 @@ if Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1 &&
   [Country::PERMIAN, Country::VYATKA, Country::RYAZAN, Country::TVER, Country::NOVGOROD].include?(country.id)
   relation_items << RelationItem.new(
     id: 0,
-    value: 2,
+    value: country.class.moscow_third_rome_bonus,
     comment: 'Технология помазанник божий',
     country: country
   )

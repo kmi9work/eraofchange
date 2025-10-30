@@ -82,3 +82,6 @@ group :test do
 end
 
 gem "concurrent-ruby", "= 1.3.4"
+
+# Game Engines
+gem 'vassals_and_robbers', path: 'engines/vassals_and_robbers'
