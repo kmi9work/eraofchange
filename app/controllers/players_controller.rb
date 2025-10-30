@@ -60,6 +60,9 @@ class PlayersController < ApplicationController
   # GET /players or /players.json
   def index
     scope = Player.order(:id)
+    if params[:without_guild].to_s == '1'
+      scope = scope.where(guild_id: nil)
+    end
     if params[:player_type_id].present?
       scope = scope.where(player_type_id: params[:player_type_id])
     end
@@ -81,10 +84,14 @@ class PlayersController < ApplicationController
 
   def create
     @player = Player.new(player_params)
-     if @player.save
-      redirect_to player_url(@player)
-    else
-      render :new, status: :unprocessable_entity
+    respond_to do |format|
+      if @player.save
+        format.html { redirect_to player_url(@player) }
+        format.json { render json: @player, status: :created }
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { errors: @player.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -102,7 +109,10 @@ class PlayersController < ApplicationController
 
   def destroy
     @player.destroy
-    redirect_to ("/players/")
+    respond_to do |format|
+      format.html { redirect_to ("/players/") }
+      format.json { render json: { success: true } }
+    end
   end
 
   def add_army

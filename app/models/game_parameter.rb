@@ -325,6 +325,9 @@ def self.sort_and_save_results(result_hash = nil)
       end
     end
 
+    # Сбрасываем счетчики ограблений караванов при смене года
+    reset_caravan_robbery_counters(self.current_year + 1)
+
     current_year.value = (self.current_year  + 1).to_s
     current_year.params["state_expenses"] = false
     current_year.save
@@ -377,5 +380,139 @@ def self.sort_and_save_results(result_hash = nil)
     cy.save
 
     return {msg: "Параметры переведены в исходное состояние"}
+  end
+
+  def self.get_years_count
+    setting = GameParameter.find_by(identificator: "years_count")
+    if setting && setting.value
+      setting.value.to_i
+    else
+      1 # Значение по умолчанию
+    end
+  end
+
+  def self.update_years_count(value)
+    setting = GameParameter.find_or_initialize_by(identificator: "years_count")
+    setting.value = value.to_s
+    setting.save
+
+    return {msg: "Установлено #{value} лет в игре", years_count: value}
+  end
+
+  def self.get_caravan_robbery_settings
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    if setting && setting.params
+      {
+        robbery_by_year: setting.params['robbery_by_year'] || {},
+        protected_guilds_by_year: setting.params['protected_guilds_by_year'] || {}
+      }
+    else
+      {
+        robbery_by_year: {},
+        protected_guilds_by_year: {}
+      }
+    end
+  end
+
+  def self.update_caravan_robbery_settings(settings_hash)
+    setting = GameParameter.find_or_initialize_by(identificator: "caravan_robbery_settings")
+    setting.params ||= {}
+    setting.params['robbery_by_year'] = settings_hash[:robbery_by_year] || {}
+    setting.params['protected_guilds_by_year'] = settings_hash[:protected_guilds_by_year] || {}
+    setting.save
+
+    return {msg: "Настройки ограбления караванов обновлены", settings: setting.params}
+  end
+
+  def self.get_robbery_count_for_year(year)
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    if setting && setting.params && setting.params['robbery_by_year']
+      setting.params['robbery_by_year'][year.to_s]&.to_i || 0
+    else
+      0
+    end
+  end
+
+  def self.get_protected_guilds_for_year(year)
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    if setting && setting.params && setting.params['protected_guilds_by_year']
+      setting.params['protected_guilds_by_year'][year.to_s] || []
+    else
+      []
+    end
+  end
+
+  def self.get_caravans_per_guild
+    setting = GameParameter.find_by(identificator: "caravans_per_guild")
+    if setting && setting.value
+      setting.value.to_i
+    else
+      1 # Значение по умолчанию
+    end
+  end
+
+  def self.update_caravans_per_guild(value)
+    setting = GameParameter.find_or_initialize_by(identificator: "caravans_per_guild")
+    setting.value = value.to_s
+    setting.save
+
+    return {msg: "Установлено #{value} караванов в гильдии", caravans_per_guild: value}
+  end
+
+  # Статистика ограблений для скользящей вероятности
+  def self.get_arrived_count_for_year(year)
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    if setting && setting.params && setting.params['arrived_count_by_year']
+      setting.params['arrived_count_by_year'][year.to_s]&.to_i || 0
+    else
+      0
+    end
+  end
+
+  def self.get_robbed_count_for_year(year)
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    if setting && setting.params && setting.params['robbed_count_by_year']
+      setting.params['robbed_count_by_year'][year.to_s]&.to_i || 0
+    else
+      0
+    end
+  end
+
+  def self.increment_arrived_count(year)
+    setting = GameParameter.find_or_initialize_by(identificator: "caravan_robbery_settings")
+    setting.params ||= {}
+    setting.params['arrived_count_by_year'] ||= {}
+    setting.params['arrived_count_by_year'][year.to_s] ||= 0
+    setting.params['arrived_count_by_year'][year.to_s] += 1
+    setting.save
+  end
+
+  def self.increment_robbed_count(year)
+    setting = GameParameter.find_or_initialize_by(identificator: "caravan_robbery_settings")
+    setting.params ||= {}
+    setting.params['robbed_count_by_year'] ||= {}
+    setting.params['robbed_count_by_year'][year.to_s] ||= 0
+    setting.params['robbed_count_by_year'][year.to_s] += 1
+    setting.save
+  end
+
+  def self.reset_caravan_robbery_counters(year)
+    setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
+    return unless setting
+    
+    setting.params ||= {}
+    setting.params['arrived_count_by_year'] ||= {}
+    setting.params['robbed_count_by_year'] ||= {}
+    setting.params['arrived_count_by_year'][year.to_s] = 0
+    setting.params['robbed_count_by_year'][year.to_s] = 0
+    setting.save
+  end
+
+  def self.get_robbery_stats_for_current_year
+    current_year = self.current_year
+    {
+      robbed_count: get_robbed_count_for_year(current_year),
+      planned_robberies: get_robbery_count_for_year(current_year)
+    }
   end
 end

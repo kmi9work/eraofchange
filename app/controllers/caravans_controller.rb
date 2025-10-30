@@ -1,11 +1,37 @@
 class CaravansController < ApplicationController
   before_action :set_caravan, only: %i[ show edit update destroy ]
 
+  def check_robbery
+    # Проверяем вероятность
+    result = Caravan.check_robbery(params[:guild_id])
+    render json: result
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+  
+  def check_robbery_with_decide
+    # Проверяем вероятность и принимаем решение
+    result = Caravan.check_robbery_with_decide(params[:guild_id])
+    
+    # Если караван ограблен, инкрементируем счетчики
+    if result[:robbed]
+      current_year = GameParameter.current_year
+      GameParameter.increment_arrived_count(current_year)
+      GameParameter.increment_robbed_count(current_year)
+    end
+    
+    render json: result
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   def register_caravan
     result = Caravan.register_caravan(params)
     
     if result[:success]
       render json: { message: 'Caravan registered successfully', caravan: result[:caravan] }, status: :ok
+    elsif result[:robbed]
+      render json: { robbed: true, error: result[:error] }, status: :unprocessable_entity
     else
       render json: { error: result[:error] }, status: :unprocessable_entity
     end
