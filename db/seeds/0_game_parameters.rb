@@ -23,5 +23,23 @@ GameParameter.create(id: GameParameter::RESULTS, name: "Результаты к�
 
 ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
+GameParameter.create(name: "Количество лет", identificator: "years_count", value: "5", params: {})
+
+ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
+
+GameParameter.create(
+  name: "Настройки ограбления караванов", 
+  identificator: "caravan_robbery_settings",
+  value: "0",
+  params: {
+    robbery_by_year: {},
+    protected_guilds_by_year: {},
+    arrived_count_by_year: {},
+    robbed_count_by_year: {}
+  }
+)
+
+GameParameter.create(name: "Количество караванов в гильдии", identificator: "caravans_per_guild", value: "3", params: {})
+
 
 

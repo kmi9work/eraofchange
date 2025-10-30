@@ -1,4 +1,5 @@
 json.extract! guild, :id, :name, :created_at, :updated_at
+json.player_ids guild.player_ids
 json.players guild.players.order(:name), partial: "players/player", as: :player
 json.plants guild.plants.includes(:plant_level => {:plant_type => :plant_category}) do |plant|
   json.id plant.id

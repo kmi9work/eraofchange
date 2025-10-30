@@ -84,6 +84,32 @@ class CountriesController < ApplicationController
     render json: { error: e.message }, status: :internal_server_error
   end
 
+  # GET /countries/trade_levels_and_thresholds?ids=1,2,3
+  def trade_levels_and_thresholds
+    ids_param = params[:ids]
+    country_ids =
+      case ids_param
+      when String
+        ids_param.split(',').map { |s| s.strip.to_i }.reject(&:zero?)
+      when Array
+        ids_param.map(&:to_i).reject(&:zero?)
+      else
+        []
+      end
+
+    countries = country_ids.present? ? Country.where(id: country_ids) : Country.none
+
+    data = countries.map do |c|
+      level = c.show_current_trade_level
+      thresholds = c.params&.dig("level_thresholds") || []
+      { country_id: c.id, level: level, thresholds: thresholds }
+    end
+
+    render json: { data: data }
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   # POST /countries or /countries.json
   def create
     @country = Country.new(country_params)

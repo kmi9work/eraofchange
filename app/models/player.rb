@@ -20,6 +20,8 @@ class Player < ApplicationRecord
   has_many :political_actions
   has_many :influence_items
 
+  before_validation :generate_identificator_if_blank
+
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
   validates :identificator, presence: true, uniqueness: true
   
@@ -41,12 +43,13 @@ class Player < ApplicationRecord
     end
   end
   
-  # Генерация постоянного идентификатора на основе данных игрока
-  def self.generate_identificator(name, human_name, family_name, job_name, index = nil)
+  # Генерация уникального идентификатора
+  # Используется в seeds и при автоматической генерации
+  def self.generate_identificator(name, human_name = nil, family_name = nil, job_name = nil, index = nil)
     base_string = "#{name}_#{human_name}_#{family_name}_#{job_name}"
     base_string += "_#{index}" if index
     hash = Digest::SHA256.hexdigest(base_string)[0..15].upcase
-    "#{name.upcase.gsub(' ', '_')}_#{hash}"
+    hash
   end
 
   ####MOBILE##########
@@ -326,6 +329,23 @@ class Player < ApplicationRecord
   end
 
   private
+
+  # Генерация identificator, если он не заполнен
+  def generate_identificator_if_blank
+    return if identificator.present?
+    
+    # Используем единый метод генерации
+    timestamp = Time.now.to_i
+    base_id = self.class.generate_identificator(name, timestamp.to_s)
+    
+    # Проверяем уникальность и добавляем суффикс, если нужно
+    index = 1
+    self.identificator = base_id
+    while Player.exists?(identificator: self.identificator)
+      self.identificator = self.class.generate_identificator(name, timestamp.to_s, nil, nil, index)
+      index += 1
+    end
+  end
 
   # Проверка достаточности золота для покупки ресурсов
   def validate_gold_availability(res_pl_buys, country_id)

@@ -13,9 +13,12 @@ Rails.application.routes.draw do
   resources :technology_items
   resources :relation_items
   resources :influence_items
-  resources :caravans
-
+  
+  # Кастомные маршруты для караванов должны быть ДО resources
+  get '/caravans/check_robbery', to: 'caravans#check_robbery'
+  get '/caravans/check_robbery_with_decide', to: 'caravans#check_robbery_with_decide'
   post '/caravans/register_caravan', to: 'caravans#register_caravan'
+  resources :caravans
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'
   patch '/troops/:id/upgrade', to: 'troops#upgrade'
@@ -45,6 +48,7 @@ Rails.application.routes.draw do
   patch '/game_parameters/delete_result',       to: 'game_parameters#delete_result'
 
   get   '/game_parameters/display_results', to: 'game_parameters#display_results'
+  get   '/game_parameters/screen_bundle', to: 'game_parameters#screen_bundle'
   patch '/game_parameters/change_results_display', to: 'game_parameters#change_results_display'
 
   ###Таймер и расписание
@@ -63,6 +67,15 @@ Rails.application.routes.draw do
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
+  
+  ###Настройки
+  get '/game_parameters/get_years_count', to: 'game_parameters#get_years_count'
+  patch '/game_parameters/update_years_count', to: 'game_parameters#update_years_count'
+  get '/game_parameters/get_caravan_robbery_settings', to: 'game_parameters#get_caravan_robbery_settings'
+  patch '/game_parameters/update_caravan_robbery_settings', to: 'game_parameters#update_caravan_robbery_settings'
+  get '/game_parameters/get_caravans_per_guild', to: 'game_parameters#get_caravans_per_guild'
+  patch '/game_parameters/update_caravans_per_guild', to: 'game_parameters#update_caravans_per_guild'
+  get '/game_parameters/get_robbery_stats', to: 'game_parameters#get_robbery_stats'
 
 
 
@@ -85,6 +98,7 @@ Rails.application.routes.draw do
   get '/countries/:id/calculate_trade_turnover', to: 'countries#calculate_trade_turnover'
   get '/countries/:id/show_current_trade_level', to: 'countries#show_current_trade_level'
   get '/countries/:id/show_trade_thresholds', to: 'countries#show_trade_thresholds'
+  get '/countries/trade_levels_and_thresholds', to: 'countries#trade_levels_and_thresholds'
   patch '/countries/:id/update_trade_thresholds', to: 'countries#update_trade_thresholds'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
@@ -174,6 +188,9 @@ Rails.application.routes.draw do
   resources :plant_types
   resources :plant_categories
   resources :settlement_types
+  # Специальный список гильдий должен идти раньше resources, чтобы не совпадать с :id
+  get '/guilds/list', to: 'guilds#list'
+  patch '/guilds/:id/assign_players', to: 'guilds#assign_players'
   resources :guilds
   resources :merchants
   resources :families

@@ -98,11 +98,62 @@ class GameParametersController < ApplicationController
    render json: @current_display
   end
 
+  # Объединённый ответ для экрана: текущий подэкран, результаты купцов и знати
+  def screen_bundle
+    merchants = GameParameter.show_sorted_results
+    nobles   = GameParameter.show_noble_results
+    display  = GameParameter.display_results
+
+    render json: {
+      display: display,
+      merchants: merchants,
+      nobles: nobles
+    }
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
 
   def change_results_display
     GameParameter.change_results_display(params[:request])
   end
 
+  def get_years_count
+    years_count = GameParameter.get_years_count
+    render json: { years_count: years_count }
+  end
+
+  def update_years_count
+    years_count = params[:years_count].to_i
+    result = GameParameter.update_years_count(years_count)
+    render json: result
+  end
+
+  def get_caravan_robbery_settings
+    settings = GameParameter.get_caravan_robbery_settings
+    render json: settings
+  end
+
+  def update_caravan_robbery_settings
+    result = GameParameter.update_caravan_robbery_settings(params.permit(:robbery_by_year => {}, :protected_guilds_by_year => {}).to_h.symbolize_keys)
+    render json: result
+  end
+
+  def get_caravans_per_guild
+    caravans_per_guild = GameParameter.get_caravans_per_guild
+    render json: { caravans_per_guild: caravans_per_guild }
+  end
+
+  def update_caravans_per_guild
+    caravans_per_guild = params[:caravans_per_guild].to_i
+    result = GameParameter.update_caravans_per_guild(caravans_per_guild)
+    render json: result
+  end
+
+  def get_robbery_stats
+    stats = GameParameter.get_robbery_stats_for_current_year
+    render json: stats
+  end
 
   # GET /game_parameters/new
   def new
