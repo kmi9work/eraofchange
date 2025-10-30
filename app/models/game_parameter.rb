@@ -45,6 +45,11 @@ class GameParameter < ApplicationRecord
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
+  
+  # Автоматический запуск следующего цикла таймера (можно переопределить в плагинах)
+  # true - следующий цикл запускается автоматически
+  # false - следующий цикл запускается по кнопке (базовая игра)
+  class_attribute :auto_start_next_cycle, default: false
 
   SCHEDULE = [
             {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
@@ -224,7 +229,11 @@ def self.sort_and_save_results(result_hash = nil)
         }
     end
     
-    return {schedule: schedule, ticking: timer.value}
+    return {
+      schedule: schedule, 
+      ticking: timer.value,
+      auto_start_next_cycle: self.auto_start_next_cycle
+    }
   end
 
   def self.add_schedule_item(schedule_item)

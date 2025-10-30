@@ -1,3 +1,9 @@
+PATH
+  remote: engines/vassals_and_robbers
+  specs:
+    vassals_and_robbers (0.1.0)
+      rails (~> 7.0.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -286,6 +292,7 @@ DEPENDENCIES
   stimulus-rails
   turbo-rails
   tzinfo-data
+  vassals_and_robbers!
   web-console
   webdrivers
 

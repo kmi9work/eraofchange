@@ -1,0 +1,7 @@
+# EXAMPLE: Это шаблонный файл для создания своего Engine
+source 'https://rubygems.org'
+
+gemspec
+
+gem 'sqlite3'
+
