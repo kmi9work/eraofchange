@@ -44,13 +44,16 @@ end
 namespace :game do 
 #rake game:core
   task core: :environment  do
+    ENV['APP_VERSION'] = 'core'
     Rake::Task['db:clear_and_create_db:all'].invoke 
     puts "Сидирую основное"
     Rake::Task['db:seed:all'].invoke 
   end
 #rake game:vassals
   task vassals: :environment do
-    Rake::Task['game:core'].invoke    
+    ENV['APP_VERSION'] = 'vassals'
+    Rake::Task['db:clear_and_create_db:all'].invoke 
+    Rake::Task['db:seed:all'].invoke 
     Rake::Task['db:seed:vassals'].invoke
   end
 
