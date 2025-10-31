@@ -7,11 +7,16 @@ class Country < ApplicationRecord
   has_many :relation_items
   has_many :armies
   has_many :caravans
+  has_many :alliances
+  has_many :partner_alliances, class_name: 'Alliance', foreign_key: 'partner_country_id'
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
   
   # Бонус от технологии "Москва — Третий Рим" (можно переопределить в плагинах)
   class_attribute :moscow_third_rome_bonus, default: 2
+  
+  # Функционал управления союзами (можно включить в плагинах)
+  class_attribute :alliances_enabled, default: false
 
   RUS = 1         #Русь
   HORDE = 2       #Большая орда

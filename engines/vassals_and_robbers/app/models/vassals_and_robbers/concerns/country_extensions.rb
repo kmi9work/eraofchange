@@ -6,6 +6,9 @@ module VassalsAndRobbers
       included do
         # В игре Vassals and Robbers бонус от технологии "Москва — Третий Рим" = 1
         self.moscow_third_rome_bonus = 1
+        
+        # Включаем функционал управления союзами
+        self.alliances_enabled = true
 
         # TODO: Добавьте associations для функционала игры
         # Например:
