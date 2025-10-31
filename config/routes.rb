@@ -100,6 +100,9 @@ Rails.application.routes.draw do
   get '/countries/:id/show_trade_thresholds', to: 'countries#show_trade_thresholds'
   get '/countries/trade_levels_and_thresholds', to: 'countries#trade_levels_and_thresholds'
   patch '/countries/:id/update_trade_thresholds', to: 'countries#update_trade_thresholds'
+  get '/countries/:country_id/alliances', to: 'alliances#index'
+  post '/alliances', to: 'alliances#create'
+  delete '/alliances/:id', to: 'alliances#destroy'
 
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
@@ -214,6 +217,7 @@ Rails.application.routes.draw do
   resources :technologies
   resources :political_actions
   resources :political_action_types
+  resources :alliance_types
 
   root to: 'welcome#index'
 end
