@@ -1,8 +1,18 @@
 # lib/tasks/custom_seed.rake
 
 namespace :db do
-  namespace :seed do
+  namespace :clear_and_create_db do
+    task all: :environment do
+      puts "Удаляю старую базу"
+      Rake::Task['db:drop'].invoke
+      puts "Создаю новую базу"
+      Rake::Task['db:create'].invoke
+      puts "Делаю миграции"
+      Rake::Task['db:migrate'].invoke  
+    end
+  end
 
+  namespace :seed do
     Dir[File.join(Rails.root, 'db', 'seeds', '*.rb')].each do |filename|
       task_name = File.basename(filename, '.rb').intern
 
@@ -14,23 +24,38 @@ namespace :db do
     end
 
     # This is for if you want to run all seeds inside db/seeds directory
-    task :all => :environment do
+    task all: :environment do
       Dir[File.join(Rails.root, 'db', 'seeds', '*.rb')].sort.each do |filename|
         puts filename
         load(filename)
       end
     end
 
+    task vassals: :environment do
+      Dir[File.join(Rails.root, 'engines', 'vassals_and_robbers', 'db', 'seeds', '*.rb')].sort.each do |filename|
+        puts filename
+        load(filename)
+      end
+    end
   end
 end
 
-#rake game:core
+
 namespace :game do 
-  namespace :core do 
-
-
+#rake game:core
+  task core: :environment  do
+    Rake::Task['db:clear_and_create_db:all'].invoke 
+    puts "Сидирую основное"
+    Rake::Task['db:seed:all'].invoke 
+  end
+#rake game:vassals
+  task vassals: :environment do
+    Rake::Task['game:core'].invoke    
+    Rake::Task['db:seed:vassals'].invoke
   end
 
 
 
+
 end
+
