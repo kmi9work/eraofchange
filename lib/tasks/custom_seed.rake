@@ -23,3 +23,14 @@ namespace :db do
 
   end
 end
+
+#rake game:core
+namespace :game do 
+  namespace :core do 
+
+
+  end
+
+
+
+end
