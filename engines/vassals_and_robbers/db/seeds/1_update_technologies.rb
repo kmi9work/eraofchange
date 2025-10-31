@@ -33,3 +33,4 @@ end
 
 puts "=== Технологии обновлены для игры Vassals and Robbers ==="
 
+Building.where(building_level_id: [1,2,3]).destroy_all #Удаляем все церкви

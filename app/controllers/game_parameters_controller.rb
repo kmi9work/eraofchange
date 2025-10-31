@@ -155,6 +155,32 @@ class GameParametersController < ApplicationController
     render json: stats
   end
 
+  # GET /game_parameters/get_vassalage_settings
+  def get_vassalage_settings
+    vassalage_settings = GameParameter.find_by(identificator: "vassalage_settings")
+    if vassalage_settings && vassalage_settings.params
+      render json: vassalage_settings.params
+    else
+      render json: { vassal_incomes: {} }
+    end
+  end
+
+  # PATCH /game_parameters/update_vassalage_settings
+  def update_vassalage_settings
+    vassalage_settings = GameParameter.find_or_create_by(identificator: "vassalage_settings") do |gp|
+      gp.name = "Настройки вассалитета"
+      gp.value = "1"
+    end
+    
+    vassalage_settings.params ||= {}
+    vassalage_settings.params['vassal_incomes'] = params[:vassal_incomes] || {}
+    vassalage_settings.save!
+    
+    render json: { success: true, message: "Настройки вассалитета обновлены" }
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   # GET /game_parameters/new
   def new
     @game_parameter = GameParameter.new
@@ -209,7 +235,7 @@ class GameParametersController < ApplicationController
     end
 
     # Only allow a list of trusted parameters through.
-    def game_parameter_params
-      params.fetch(:game_parameter, {})
-    end
+  def game_parameter_params
+    params.fetch(:game_parameter, {}).permit(:name, :identificator, :value, params: {})
+  end
 end

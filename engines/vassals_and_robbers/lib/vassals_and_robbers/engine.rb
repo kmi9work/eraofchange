@@ -25,11 +25,11 @@ module VassalsAndRobbers
         ::Plant.include VassalsAndRobbers::Concerns::PlantExtensions if defined?(::Plant)
         ::Country.include VassalsAndRobbers::Concerns::CountryExtensions if defined?(::Country)
         ::GameParameter.include VassalsAndRobbers::Concerns::GameParameterExtensions if defined?(::GameParameter)
+        ::Player.include VassalsAndRobbers::Concerns::PlayerExtensions if defined?(::Player)
         
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
         
         # Здесь можно добавить другие расширения моделей ядра:
-        # ::Player.include VassalsAndRobbers::Concerns::PlayerExtensions if defined?(::Player)
         # ::Region.include VassalsAndRobbers::Concerns::RegionExtensions if defined?(::Region)
       end
     end

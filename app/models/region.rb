@@ -3,6 +3,12 @@ class Region < ApplicationRecord
   # public_order (integer) - Общественный порядок
   audited
 
+  # Константы для княжеств Руси
+  MOSCOW_KNYAZESTVO = 1
+  VOLOGODSKOE_KNYAZESTVO = 2
+  NIGERODSKOE_KNYAZESTVO = 3
+  YAROSLAVSKOE_KNYAZESTVO = 4
+
   belongs_to :country
   belongs_to :player, optional: true
 

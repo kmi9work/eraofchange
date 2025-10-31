@@ -76,6 +76,8 @@ Rails.application.routes.draw do
   get '/game_parameters/get_caravans_per_guild', to: 'game_parameters#get_caravans_per_guild'
   patch '/game_parameters/update_caravans_per_guild', to: 'game_parameters#update_caravans_per_guild'
   get '/game_parameters/get_robbery_stats', to: 'game_parameters#get_robbery_stats'
+  get '/game_parameters/get_vassalage_settings', to: 'game_parameters#get_vassalage_settings'
+  patch '/game_parameters/update_vassalage_settings', to: 'game_parameters#update_vassalage_settings'
 
 
 
@@ -218,6 +220,9 @@ Rails.application.routes.draw do
   resources :political_actions
   resources :political_action_types
   resources :alliance_types
+
+  # Game engines
+  mount VassalsAndRobbers::Engine, at: '/vassals_and_robbers'
 
   root to: 'welcome#index'
 end
