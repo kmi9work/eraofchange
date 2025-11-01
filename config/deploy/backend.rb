@@ -112,10 +112,18 @@ namespace :custom do
       # Убеждаемся, что директория shared существует
       execute :mkdir, "-p #{shared_path}"
       
-      # Создаем или обновляем файл .env.production с ACTIVE_GAME
-      # Используем простой echo для создания файла
-      execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
-      execute :chmod, "644 #{shared_path}/.env.production"
+      # Обновляем файл .env.production с ACTIVE_GAME=vassals-and-robbers
+      # Проверяем текущее значение, чтобы не перезаписывать, если уже правильное
+      current_value = capture(:bash, "-c", %Q{grep "^ACTIVE_GAME=" #{shared_path}/.env.production 2>/dev/null | cut -d'=' -f2 || echo ''}).strip
+      
+      if current_value != 'vassals-and-robbers'
+        execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
+        execute :chmod, "644 #{shared_path}/.env.production"
+        info "Updated .env.production with ACTIVE_GAME=vassals-and-robbers"
+      else
+        info ".env.production already has ACTIVE_GAME=vassals-and-robbers"
+      end
+      
       # Проверяем, что файл создан правильно
       execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
       
@@ -132,10 +140,18 @@ namespace :custom do
       # Убеждаемся, что директория shared существует
       execute :mkdir, "-p #{shared_path}"
       
-      # Создаем или обновляем файл .env.production с ACTIVE_GAME для базовой игры
-      # Используем простой echo для создания файла
-      execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
-      execute :chmod, "644 #{shared_path}/.env.production"
+      # Обновляем файл .env.production с ACTIVE_GAME=base-game
+      # Проверяем текущее значение, чтобы не перезаписывать, если уже правильное
+      current_value = capture(:bash, "-c", %Q{grep "^ACTIVE_GAME=" #{shared_path}/.env.production 2>/dev/null | cut -d'=' -f2 || echo ''}).strip
+      
+      if current_value != 'base-game'
+        execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
+        execute :chmod, "644 #{shared_path}/.env.production"
+        info "Updated .env.production with ACTIVE_GAME=base-game"
+      else
+        info ".env.production already has ACTIVE_GAME=base-game"
+      end
+      
       # Проверяем, что файл создан правильно
       execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
       
