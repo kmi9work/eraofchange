@@ -239,7 +239,13 @@ class Player < ApplicationRecord
   end
 
   def income
+    if self.jobs.map(&:name).include?("Великий князь") && GameParameter.any_lingering_effects?("support_export")
+      added_income = Caravan.count_caravan_revenue
+    else
+      added_income = 0
+    end
     sum = 0
+    sum += added_income
     if job_ids.include?(Job::METROPOLITAN)
       church_params = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
@@ -248,6 +254,7 @@ class Player < ApplicationRecord
       sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
     end
     sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
+
   end
 
   def player_military_outlays

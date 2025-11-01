@@ -62,6 +62,17 @@ class GameParameter < ApplicationRecord
             {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
           ]
 
+### 
+def self.any_lingering_effects?(effect_name, year = GameParameter.current_year)
+  effects_param = GameParameter.find_by(identificator: "lingering_effects")
+  return false unless effects_param&.params
+  
+  effects_param.params.any? do |effect|
+    effect["effect"] == effect_name.to_s && effect["year"] == year
+  end
+end
+
+
   ###Результаты
 def self.show_noble_results
     game_results = GameParameter.find(RESULTS)

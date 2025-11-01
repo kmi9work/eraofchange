@@ -132,6 +132,7 @@ class Country < ApplicationRecord
   end
 
   def change_relations(count, entity, comment = nil)
+    return "НЕЛЬЗЯ" if GameParameter.any_lingering_effects?("support_export") 
     count = count.to_i
     rel = relations
     r = rel + count

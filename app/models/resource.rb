@@ -6,6 +6,8 @@ class Resource < ApplicationRecord
 
   belongs_to :country, optional: true
 
+  TARIFF = 1.20
+
   def self.country_filter(country_id, resources)
     resources.select do |res|
       Resource.where(country_id: country_id).any?{|r| r[:identificator] == res[:identificator]}
@@ -118,8 +120,20 @@ class Resource < ApplicationRecord
 
     end
 
-    return off_and_to_market_prices
+    if GameParameter.any_lingering_effects?("support_export") 
+      return Resource.increase_prices(off_and_to_market_prices) 
+    else 
+      return off_and_to_market_prices 
+    end
   end
+
+  def self.increase_prices(hashed_array)
+    hashed_array[:to_market].each do |resource|
+      resource[:sell_price] = (resource[:sell_price] * TARIFF).floor
+    end
+    hashed_array
+  end
+
 
 end
 

@@ -34,6 +34,8 @@ class Army < ApplicationRecord
   end
 
   def goto settlement_id
+    return "НЕЛЬЗЯ" if self.owner.jobs.map(&:name).include?("Великий князь") && GameParameter.any_lingering_effects?("make_a_trip")
+
     settlement = Settlement.find_by_id(settlement_id)
     if settlement
       self.settlement_id = settlement.id
@@ -42,7 +44,11 @@ class Army < ApplicationRecord
   end
 
   def power
-    troops.sum{|t| t.power}
+    set = self.settlement
+    add_p = set&.buildings&.first&.building_level&.building_type&.name == "Кремль" ? 1 : 0
+
+    troops.sum{|t| t.power + add_p}
+
   end
   
   def soft_delete!
