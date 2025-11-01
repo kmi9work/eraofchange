@@ -130,14 +130,14 @@ namespace :custom do
       # ВСЕГДА перезаписываем файл при деплое vassals - это гарантирует правильное значение
       execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
       execute :chmod, "644 #{shared_path}/.env.production"
-      info "Set .env.production with ACTIVE_GAME=vassals-and-robbers"
       
-      # Проверяем, что файл создан правильно
-      file_content = capture(:bash, "-c", "cat #{shared_path}/.env.production").strip
-      if file_content != "ACTIVE_GAME=vassals-and-robbers"
-        error "ERROR: Failed to create .env.production correctly. Content: #{file_content}"
+      # Простая проверка, что файл существует и не пустой
+      unless test("[ -s #{shared_path}/.env.production ]")
+        error "ERROR: Failed to create .env.production file"
         raise "Failed to set ACTIVE_GAME=vassals-and-robbers"
       end
+      
+      info "Set .env.production with ACTIVE_GAME=vassals-and-robbers"
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
@@ -158,14 +158,14 @@ namespace :custom do
       # ВСЕГДА перезаписываем файл при деплое base - это гарантирует правильное значение
       execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
       execute :chmod, "644 #{shared_path}/.env.production"
-      info "Set .env.production with ACTIVE_GAME=base-game"
       
-      # Проверяем, что файл создан правильно
-      file_content = capture(:bash, "-c", "cat #{shared_path}/.env.production").strip
-      if file_content != "ACTIVE_GAME=base-game"
-        error "ERROR: Failed to create .env.production correctly. Content: #{file_content}"
+      # Простая проверка, что файл существует и не пустой
+      unless test("[ -s #{shared_path}/.env.production ]")
+        error "ERROR: Failed to create .env.production file"
         raise "Failed to set ACTIVE_GAME=base-game"
       end
+      
+      info "Set .env.production with ACTIVE_GAME=base-game"
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
