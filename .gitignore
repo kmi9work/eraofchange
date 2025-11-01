@@ -42,3 +42,4 @@
 /config/database.key
 /config/database.yml
 config/database.yml
+.env.production
