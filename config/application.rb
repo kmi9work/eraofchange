@@ -11,6 +11,27 @@ module First
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
+    # Загружаем .env.production ДО инициализации engines, чтобы ACTIVE_GAME был доступен
+    # Это критично для правильной активации плагинов (например, vassals_and_robbers)
+    config.before_initialize do
+      if Rails.env.production?
+        env_file = Rails.root.join('.env.production')
+        if File.exist?(env_file)
+          Rails.logger.info "[Application] Loading environment variables from .env.production" if defined?(Rails.logger)
+          File.readlines(env_file).each do |line|
+            line.strip!
+            next if line.empty? || line.start_with?('#')
+            
+            if line.include?('=')
+              key, value = line.split('=', 2)
+              ENV[key.strip] = value.strip if key && value
+            end
+          end
+          Rails.logger.info "[Application] ACTIVE_GAME is now: #{ENV['ACTIVE_GAME'] || 'not set'}" if defined?(Rails.logger)
+        end
+      end
+    end
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

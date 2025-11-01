@@ -17,11 +17,21 @@ namespace :custom do
       on roles(:app) do
         execute :git, :clone, "--depth 1", "git@github.com:kmi9work/era_front.git", fetch(:release_path) 
         within release_path do
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && nvm install v22"'
-          execute :bash, "-c", '"curl -fsSL https://get.pnpm.io/install.sh | sh -"'
-
+          # Установка Node.js v22 (если еще не установлен)
+          # Используем nvm для установки, но не для использования (nvm use не работает через SSH)
+          execute :bash, '-lc', "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm install v22 2>/dev/null || true"
+          
+          # Установка pnpm (если еще не установлен)
+          unless test("[ -f /home/deploy/.local/share/pnpm/pnpm ]")
+            execute :bash, '-lc', "curl -fsSL https://get.pnpm.io/install.sh | sh -", raise_on_non_zero_exit: false
+          end
+          
+          # Используем абсолютный путь к pnpm
+          pnpm_path = '/home/deploy/.local/share/pnpm/pnpm'
+          
           # Установка зависимостей через pnpm
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
+          # Используем env для установки PATH глобально в одной команде
+          execute :bash, '-c', 'NODE_BIN=$(ls -d $HOME/.nvm/versions/node/v22* 2>/dev/null | sort -V | tail -1)/bin && env PATH="$NODE_BIN:$PATH" '"#{pnpm_path}"' install --ignore-scripts'
           
           # Настройка .env файла
           execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", ".env"
@@ -33,8 +43,9 @@ namespace :custom do
             execute :bash, "-c", "echo 'VITE_ACTIVE_GAME=base-game' >> .env"
           end
 
-         # Сборка проекта 
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm build"' 
+         # Сборка проекта
+          # Используем env для установки PATH, чтобы все подпроцессы видели node
+          execute :bash, '-c', 'NODE_BIN=$(ls -d $HOME/.nvm/versions/node/v22* 2>/dev/null | sort -V | tail -1)/bin && env PATH="$NODE_BIN:$PATH" '"#{pnpm_path}"' build'
           execute :mkdir, "-p #{current_path}"    
           execute :ln, '-sfn',  "#{release_path}/dist", "#{current_path}" 
         end
@@ -46,11 +57,20 @@ namespace :custom do
       on roles(:app) do
         execute :git, :clone, "--depth 1", "git@github.com:kmi9work/era_front.git", fetch(:release_path) 
         within release_path do
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && nvm install v22"'
-          execute :bash, "-c", '"curl -fsSL https://get.pnpm.io/install.sh | sh -"'
-
+          # Установка Node.js v22 (если еще не установлен)
+          execute :bash, '-lc', "export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && nvm install v22 2>/dev/null || true"
+          
+          # Установка pnpm (если еще не установлен)
+          unless test("[ -f /home/deploy/.local/share/pnpm/pnpm ]")
+            execute :bash, '-lc', "curl -fsSL https://get.pnpm.io/install.sh | sh -", raise_on_non_zero_exit: false
+          end
+          
+          # Используем абсолютный путь к pnpm
+          pnpm_path = '/home/deploy/.local/share/pnpm/pnpm'
+          
           # Установка зависимостей через pnpm
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
+          # Используем env для установки PATH глобально в одной команде
+          execute :bash, '-c', 'NODE_BIN=$(ls -d $HOME/.nvm/versions/node/v22* 2>/dev/null | sort -V | tail -1)/bin && env PATH="$NODE_BIN:$PATH" '"#{pnpm_path}"' install --ignore-scripts'
           
           # Настройка .env файла
           execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", ".env"
@@ -62,8 +82,9 @@ namespace :custom do
             execute :bash, "-c", "echo 'VITE_ACTIVE_GAME=vassals-and-robbers' >> .env"
           end
 
-         # Сборка проекта 
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm build"' 
+         # Сборка проекта
+          # Используем env для установки PATH, чтобы все подпроцессы видели node
+          execute :bash, '-c', 'NODE_BIN=$(ls -d $HOME/.nvm/versions/node/v22* 2>/dev/null | sort -V | tail -1)/bin && env PATH="$NODE_BIN:$PATH" '"#{pnpm_path}"' build'
           execute :mkdir, "-p #{current_path}"    
           execute :ln, '-sfn',  "#{release_path}/dist", "#{current_path}" 
         end
