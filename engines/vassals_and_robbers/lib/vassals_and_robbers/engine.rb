@@ -26,6 +26,7 @@ module VassalsAndRobbers
         ::Country.include VassalsAndRobbers::Concerns::CountryExtensions if defined?(::Country)
         ::GameParameter.include VassalsAndRobbers::Concerns::GameParameterExtensions if defined?(::GameParameter)
         ::Player.include VassalsAndRobbers::Concerns::PlayerExtensions if defined?(::Player)
+        ::PoliticalAction.include VassalsAndRobbers::Concerns::PoliticalActionExtensions if defined?(::PoliticalAction)
         
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
         

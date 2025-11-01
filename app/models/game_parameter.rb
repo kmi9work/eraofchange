@@ -42,6 +42,7 @@ class GameParameter < ApplicationRecord
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
   RESULTS = 6
+  LINGERING_EFFECTS = "lingering_effects"
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
@@ -64,7 +65,7 @@ class GameParameter < ApplicationRecord
 
 ### 
 def self.any_lingering_effects?(effect_name, year = GameParameter.current_year)
-  effects_param = GameParameter.find_by(identificator: "lingering_effects")
+  effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
   return false unless effects_param&.params
   
   effects_param.params.any? do |effect|
@@ -72,6 +73,44 @@ def self.any_lingering_effects?(effect_name, year = GameParameter.current_year)
   end
 end
 
+def self.register_lingering_effects(action, effects, years = GameParameter.current_year, target = nil)
+    #year - год, когда он действует. 
+    # name_of_action - название полит.действия
+    # effects - сам эффект или массив эффектов
+    # target  - на кого он действует
+    duration = []
+    duration << years
+    duration.flatten!
+  
+  g_p = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+  
+  # Если записи нет, создаем её
+  unless g_p
+    Rails.logger.warn "[GameParameter] LINGERING_EFFECTS record not found, creating..."
+    g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
+  end
+  
+  # Получаем текущие params или создаем пустой массив
+  current_params = g_p.params || []
+  
+  # Если effects - массив, создаем запись для каждого эффекта
+  # Если effects - строка, создаем одну запись
+  effects_array = effects.is_a?(Array) ? effects : [effects]
+  
+  # Создаем новые записи
+  new_effects = effects_array.map do |effect|
+    {
+      duration: duration, 
+      name_of_action: action, 
+      effect: effect, 
+      target: target
+    }
+  end
+  
+  # Присваиваем новый массив (ActiveRecord заметит изменение)
+  g_p.params = current_params + new_effects
+  g_p.save
+end
 
   ###Результаты
 def self.show_noble_results

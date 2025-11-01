@@ -38,7 +38,11 @@ class Country < ApplicationRecord
   MILITARILY = -3
   PEACEFULLY = 3
 
+  #Иностранные государства
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
+  
+  #Русские государства ЗА ИСКЛЮЧЕНИЕМ ВЯТКИ
+  scope :russian_countries, -> { where.not(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA, VYATKA]) }
 
   def show_current_trade_level
     # level_thresholds хранится в params

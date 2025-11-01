@@ -33,6 +33,30 @@ class Army < ApplicationRecord
     end
   end
 
+  def lease_to(country)
+    self.params["additional"] = {"leased_to" => country.id, "active" => true}
+    self.save
+  end
+
+  def unlease
+    self.params["additional"] ||= {}
+    self.params["additional"]["active"] = false
+    self.save if changed?
+    
+    # Поиск армии с активной арендой
+    leased_army = Army.all.find do |army|
+      army.params.dig("additional", "active") == true
+    end
+  
+  # Если активных аренд нет, очищаем параметры игры
+  unless leased_army
+    g_p = GameParameter.find_by(identificator: GameParameter::LINGERING_EFFECTS)
+    g_p&.params&.delete_if { |p| p["name_of_action"] == "transfere_army" }
+    g_p&.save
+  end
+end
+
+
   def goto settlement_id
     return "НЕЛЬЗЯ" if self.owner.jobs.map(&:name).include?("Великий князь") && GameParameter.any_lingering_effects?("make_a_trip")
 
