@@ -20,15 +20,26 @@ namespace :passenger do
           # 1. Обновляем systemd service файл (если используется)
           service_file = "/etc/systemd/system/passenger.service"
           if test("[ -f #{service_file} ]")
-            execute :bash, "-c", %Q{
-              if ! grep -q "EnvironmentFile=" #{service_file}; then
-                sudo sed -i '/\\[Service\\]/a\\EnvironmentFile=#{env_file}' #{service_file}
-                sudo systemctl daemon-reload
-              elif ! grep -q "EnvironmentFile=#{env_file}" #{service_file}; then
-                sudo sed -i "s|EnvironmentFile=.*|EnvironmentFile=#{env_file}|" #{service_file}
-                sudo systemctl daemon-reload
-              fi
-            }
+            # Проверяем, есть ли уже EnvironmentFile
+            env_file_exists = capture(:bash, "-c", %Q{grep -q "EnvironmentFile=" #{service_file} && echo "yes" || echo "no"}).strip
+            
+            if env_file_exists == "no"
+              # Добавляем EnvironmentFile после [Service]
+              execute :bash, "-c", %Q{sudo sed -i '/^\\[Service\\]$/a EnvironmentFile=#{env_file}' #{service_file}}
+              execute :bash, "-c", "sudo systemctl daemon-reload"
+              info "Added EnvironmentFile to systemd service"
+            else
+              # Проверяем, указывает ли EnvironmentFile на правильный файл
+              current_env_file = capture(:bash, "-c", %Q{grep "^EnvironmentFile=" #{service_file} | cut -d'=' -f2 || echo ''}).strip
+              if current_env_file != env_file
+                # Обновляем путь к EnvironmentFile
+                execute :bash, "-c", %Q{sudo sed -i "s|^EnvironmentFile=.*|EnvironmentFile=#{env_file}|" #{service_file}}
+                execute :bash, "-c", "sudo systemctl daemon-reload"
+                info "Updated EnvironmentFile path in systemd service"
+              else
+                info "EnvironmentFile already correctly configured"
+              end
+            end
           end
           
           # 2. Обновляем Nginx конфигурацию для Passenger (если используется)

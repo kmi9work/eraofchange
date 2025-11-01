@@ -61,10 +61,16 @@ class GameParametersController < ApplicationController
 
   def plugin_status
     # Проверка статуса плагинов
+    begin
+      country_extensions_loaded = Country.included_modules.include?(VassalsAndRobbers::Concerns::CountryExtensions)
+    rescue
+      country_extensions_loaded = false
+    end
+    
     status = {
       active_game: ENV['ACTIVE_GAME'] || 'not set',
       alliances_enabled: Country.alliances_enabled,
-      country_extensions_loaded: Country.included_modules.include?(VassalsAndRobbers::Concerns::CountryExtensions) rescue false,
+      country_extensions_loaded: country_extensions_loaded,
       env_file_exists: File.exist?(Rails.root.join('.env.production')),
       env_file_content: File.exist?(Rails.root.join('.env.production')) ? File.read(Rails.root.join('.env.production')).strip : 'not found'
     }
