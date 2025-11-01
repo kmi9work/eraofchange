@@ -42,24 +42,9 @@ namespace :custom do
       
       execute :chmod, "640 #{shared_path}/config/master.key" if test("[ -f #{shared_path}/config/master.key ]")
       
-      # Создаем .env.production по умолчанию (base-game), если его еще нет или он пустой
-      # НО: не перезаписываем, если файл уже содержит значение (оно могло быть установлено setup_vassals_env или setup_base_env)
-      file_exists = test("[ -f #{shared_path}/.env.production ]")
-      file_size = 0
-      has_value = false
-      
-      if file_exists
-        file_size = capture(:bash, "-c", %Q{test -s #{shared_path}/.env.production && echo "1" || echo "0"}).strip.to_i
-        if file_size > 0
-          has_value = capture(:bash, "-c", %Q{grep -q "^ACTIVE_GAME=" #{shared_path}/.env.production 2>/dev/null && echo "1" || echo "0"}).strip.to_i > 0
-        end
-      end
-      
-      # Создаем файл только если его нет или он пустой И не содержит ACTIVE_GAME
-      unless file_exists && file_size > 0 && has_value
-        execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
-        execute :chmod, "644 #{shared_path}/.env.production"
-      end
+      # НЕ создаем .env.production здесь - это делается в setup_vassals_env или setup_base_env
+      # Если файла нет, Capistrano сам создаст пустой файл при создании симлинка
+      # Мы полагаемся на то, что setup_vassals_env или setup_base_env уже установили файл
     end
   end
 
@@ -191,41 +176,15 @@ end
 # Хуки должны быть вне namespace
 before 'deploy:check:linked_files', 'custom:setup_config'
 # После создания симлинков убеждаемся, что .env.production заполнен
-after 'deploy:symlink:linked_files', 'custom:ensure_env_file'
+# Временно отключено из-за возможного зависания - файл должен устанавливаться в setup_vassals_env/setup_base_env
+# after 'deploy:symlink:linked_files', 'custom:ensure_env_file'
 
-namespace :custom do
-  # Эта задача вызывается ПОСЛЕ создания симлинков для linked_files
-  # и гарантирует, что файл .env.production содержит правильное значение
-  task :ensure_env_file do
-    on roles(:app) do
-      # Проверяем содержимое файла после создания симлинка
-      file_content = capture(:bash, "-c", %Q{cat #{shared_path}/.env.production 2>/dev/null || echo ''}).strip
-      file_size = capture(:bash, "-c", %Q{test -s #{shared_path}/.env.production && wc -c < #{shared_path}/.env.production | tr -d ' ' || echo '0'}).strip.to_i
-      
-      # Если файл пустой (только пробелы/новая строка) или не содержит ACTIVE_GAME,
-      # определяем, что должно быть установлено, проверяя логику вызова
-      # Но проще - проверить последнее значение, которое должно было быть установлено
-      # Если файл содержит меньше 20 символов (ACTIVE_GAME=vassals-and-robbers = 34 символа, base-game = 20), он скорее всего пустой
-      
-      if file_size < 15 || !file_content.include?('ACTIVE_GAME=')
-        # Файл слишком маленький или не содержит ACTIVE_GAME
-        # Проверяем, есть ли способ определить правильное значение
-        # Используем переменную окружения Capistrano, если она установлена
-        expected_game = fetch(:active_game_env, nil)
-        
-        if expected_game.nil?
-          # Если не можем определить, ставим base-game как безопасное значение по умолчанию
-          info "WARNING: .env.production is empty or corrupted, setting base-game as fallback"
-          execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
-        else
-          info "WARNING: .env.production is empty or corrupted, setting #{expected_game}"
-          execute :bash, "-c", %Q{echo "ACTIVE_GAME=#{expected_game}" > #{shared_path}/.env.production}
-        end
-        execute :chmod, "644 #{shared_path}/.env.production"
-      end
-    end
-  end
-end
+# Задача ensure_env_file временно отключена - файл устанавливается в setup_vassals_env/setup_base_env
+# namespace :custom do
+#   task :ensure_env_file do
+#     # Отключено
+#   end
+# end
 
 append :linked_files, "config/database.yml", 'config/master.key', '.env.production'
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
