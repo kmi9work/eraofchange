@@ -39,7 +39,9 @@ class GameParametersController < ApplicationController
   end
   
   def create_schedule
+    # create_schedule автоматически использует default_schedule из ядра или плагина
     GameParameter.create_schedule
+    render json: { success: true, message: "Расписание создано" }
   end
   def show_schedule
     @time = GameParameter.show_schedule
@@ -83,7 +85,8 @@ class GameParametersController < ApplicationController
   end
 
   def show_sorted_results
-   @game_results = GameParameter.show_sorted_results
+   sort_by = params[:sort_by] || :capital
+   @game_results = GameParameter.show_sorted_results(sort_by: sort_by)
    render json: @game_results
   end  
 
@@ -100,9 +103,21 @@ class GameParametersController < ApplicationController
 
   # Объединённый ответ для экрана: текущий подэкран, результаты купцов и знати
   def screen_bundle
-    merchants = GameParameter.show_sorted_results
+    # Определяем тип сортировки из display параметра
+    display = GameParameter.display_results.to_s
+    sort_by = :capital # По умолчанию по капиталу
+    
+    # Если экран связан с боярскими милостями, используем соответствующую сортировку
+    if display.include?('Boyar')
+      if display.include?('WithCapital')
+        sort_by = :boyar_favor_with_capital
+      else
+        sort_by = :boyar_favor
+      end
+    end
+    
+    merchants = GameParameter.show_sorted_results(sort_by: sort_by)
     nobles   = GameParameter.show_noble_results
-    display  = GameParameter.display_results
 
     render json: {
       display: display,

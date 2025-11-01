@@ -11,14 +11,8 @@ class CaravansController < ApplicationController
   
   def check_robbery_with_decide
     # Проверяем вероятность и принимаем решение
+    # НЕ инкрементируем счетчики здесь - это будет сделано при регистрации каравана
     result = Caravan.check_robbery_with_decide(params[:guild_id])
-    
-    # Если караван ограблен, инкрементируем счетчики
-    if result[:robbed]
-      current_year = GameParameter.current_year
-      GameParameter.increment_arrived_count(current_year)
-      GameParameter.increment_robbed_count(current_year)
-    end
     
     render json: result
   rescue => e

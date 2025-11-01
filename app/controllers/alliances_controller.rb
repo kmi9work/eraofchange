@@ -10,7 +10,9 @@ class AlliancesController < ApplicationController
         id: a.id,
         partner_country: {
           id: a.partner_country.id,
-          name: a.partner_country.name
+          name: a.partner_country.name,
+          short_name: a.partner_country.short_name,
+          flag_image_name: a.partner_country.flag_image_name
         },
         alliance_type: {
           id: a.alliance_type.id,
@@ -52,7 +54,8 @@ class AlliancesController < ApplicationController
         id: @alliance.id,
         partner_country: {
           id: @alliance.partner_country.id,
-          name: @alliance.partner_country.name
+          name: @alliance.partner_country.name,
+          short_name: @alliance.partner_country.short_name
         },
         alliance_type: {
           id: @alliance.alliance_type.id,

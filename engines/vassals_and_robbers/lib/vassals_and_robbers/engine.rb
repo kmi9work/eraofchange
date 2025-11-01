@@ -27,6 +27,9 @@ module VassalsAndRobbers
         ::GameParameter.include VassalsAndRobbers::Concerns::GameParameterExtensions if defined?(::GameParameter)
         ::Player.include VassalsAndRobbers::Concerns::PlayerExtensions if defined?(::Player)
         
+        # Подключаем concerns к контроллерам ядра
+        ::PlantPlacesController.include VassalsAndRobbers::Concerns::PlantPlacesControllerExtensions if defined?(::PlantPlacesController)
+        
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
         
         # Здесь можно добавить другие расширения моделей ядра:

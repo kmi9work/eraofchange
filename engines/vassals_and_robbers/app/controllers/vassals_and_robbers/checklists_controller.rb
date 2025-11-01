@@ -8,15 +8,24 @@ module VassalsAndRobbers
         vassal_param_key = "vassal_#{checklist.vassal_country_id}_established"
         is_vassalage_established = checklist.params && checklist.params[vassal_param_key] == true
         
+        validated_conditions = checklist.validate_all_conditions
+        completed_count = validated_conditions.count { |c| c[:is_completed] }
+        total_count = validated_conditions.count
+        
         {
           id: checklist.id,
           vassal_country: {
             id: checklist.vassal_country.id,
-            name: checklist.vassal_country.name
+            name: checklist.vassal_country.name,
+            short_name: checklist.vassal_country.short_name,
+            flag_image_name: checklist.vassal_country.flag_image_name
           },
-          conditions: checklist.validate_all_conditions,
+          conditions: validated_conditions,
           completion_percentage: checklist.completion_percentage,
-          vassalage_established: is_vassalage_established
+          completed_count: completed_count,
+          total_count: total_count,
+          vassalage_established: is_vassalage_established,
+          relations: checklist.vassal_country.relations
         }
       end
       

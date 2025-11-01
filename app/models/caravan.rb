@@ -17,7 +17,35 @@ class Caravan < ApplicationRecord
   def self.register_caravan(params)
     country = Country.find(params[:country_id])
     current_year = GameParameter.current_year
+    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
   
+    # Если караван идет через Вятку, пропускаем проверку ограбления и не учитываем в товарообороте
+    if via_vyatka
+      # Создаем караван без проверки ограбления и без учета в товарообороте
+      result = create_caravan(params)
+      
+      # Инкрементируем счетчик пришедших караванов (только если караван создан)
+      if result[:success]
+        GameParameter.increment_arrived_count(current_year)
+      end
+      
+      return { success: true, caravan: result[:caravan], level_increased: false, via_vyatka: true } if result[:success]
+      return result
+    end
+    
+    # Для караванов не через Вятку проверяем ограбление при регистрации
+    # (на случай, если пользователь не проверил при выборе гильдии или изменил галочку)
+    if !via_vyatka
+      robbery_check = check_robbery_with_decide(params[:guild_id])
+      if robbery_check[:robbed]
+        current_year = GameParameter.current_year
+        GameParameter.increment_arrived_count(current_year)
+        GameParameter.increment_robbed_count(current_year)
+        return { success: false, robbed: true, error: "Караван был ограблен" }
+      end
+    end
+    
+    # Обычная логика для караванов не через Вятку
     # Получаем предыдущий уровень ДО создания каравана
     previous_level_info = country.show_current_trade_level
     previous_level = previous_level_info[:current_level]
@@ -136,7 +164,7 @@ class Caravan < ApplicationRecord
       random_value = rand
       robbed = random_value < result[:probability]
       
-      Rails.logger.debug("Caravan robbery decision: random=#{random_value}, robbed=#{robbed}")
+      Rails.logger.debug("Caravan robbery decision: probability=#{result[:probability]}, random=#{random_value}, robbed=#{robbed}")
       
       result.merge(robbed: robbed, random_value: random_value)
     end
@@ -148,7 +176,8 @@ class Caravan < ApplicationRecord
         resources_from_pl: params[:incoming],
         resources_to_pl:   params[:outcoming],
         gold_from_pl:      params[:purchase_cost],
-        gold_to_pl:        params[:sale_income] 
+        gold_to_pl:        params[:sale_income],
+        via_vyatka:        params[:via_vyatka] || false
       )
       
       { success: true, caravan: caravan }

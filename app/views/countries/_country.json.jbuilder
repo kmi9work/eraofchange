@@ -1,4 +1,4 @@
-json.extract! country, :id, :name, :embargo, :params, :relations, :created_at, :updated_at
+json.extract! country, :id, :name, :short_name, :flag_image_name, :embargo, :params, :relations, :created_at, :updated_at
 json.owner_type 'Country'
 json.relation_points (country.params&.dig('relation_points') || 0)
 json.alliances_enabled Country.alliances_enabled
@@ -33,6 +33,7 @@ if Country.alliances_enabled
     json.partner_country do
       json.id alliance.partner_country.id
       json.name alliance.partner_country.name
+      json.short_name alliance.partner_country.short_name
     end
     json.alliance_type do
       json.id alliance.alliance_type.id

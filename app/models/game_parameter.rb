@@ -52,15 +52,20 @@ class GameParameter < ApplicationRecord
   class_attribute :auto_start_next_cycle, default: false
 
   SCHEDULE = [
-            {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00"},
-            {id: 2, identificator: "Инструктаж", start: "11:00",  finish: "11:30"},
-            {id: 3, identificator: "Первый цикл", start: "11:30",  finish: "13:00"},
-            {id: 4, identificator: "Второй цикл", start: "13:00",  finish: "14:00"},
-            {id: 5, identificator: "Обед", start:"14:00",    finish: "14:30"},
-            {id: 6, identificator: "Третий цикл", start: "14:30",  finish: "15:30"},              
-            {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30"},
-            {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30"}
+            {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00", type: "play"},
+            {id: 2, identificator: "Инструктаж", start: "11:00",  finish: "11:30", type: "pause"},
+            {id: 3, identificator: "Первый цикл", start: "11:30",  finish: "13:00", type: "play"},
+            {id: 4, identificator: "Второй цикл", start: "13:00",  finish: "14:00", type: "play"},
+            {id: 5, identificator: "Обед", start:"14:00",    finish: "14:30", type: "pause"},
+            {id: 6, identificator: "Третий цикл", start: "14:30",  finish: "15:30", type: "play"},              
+            {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30", type: "play"},
+            {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30", type: "play"}
           ]
+
+  # Метод для получения стандартного расписания (может быть переопределен в плагинах)
+  def self.default_schedule
+    SCHEDULE
+  end
 
   ###Результаты
 def self.show_noble_results
@@ -100,27 +105,31 @@ def self.show_noble_results
 
 
 
-def self.sort_and_save_results(result_hash = nil)
-
+  def self.sort_and_save_results(result_hash = nil)
+    # Этот метод теперь не используется для ручного добавления,
+    # так как данные собираются автоматически из гильдий
+    # Но оставим для обратной совместимости
     game_results = GameParameter.find_by(identificator: "results")
-    game_results.params.transform_keys!(&:to_sym) ### ключи в символы
-    if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) || game_results.params[:merchant_results].empty?
-      game_results.params[:merchant_results] = []
-      max_id = 0
-    else
-      game_results.params[:merchant_results].map! {|res| res.transform_keys(&:to_sym)}
-      max_id = game_results.params[:merchant_results].max_by { |h| h[:player_id]}[:player_id]
+    game_results.params ||= {}
+    game_results.params.transform_keys!(&:to_sym)
+    
+    if result_hash
+      result_hash.transform_keys!(&:to_sym)
+      guild_id = result_hash[:guild_id]
+      
+      if guild_id
+        # Инициализируем хранилище для дополнительных данных гильдий
+        game_results.params[:guild_extra_data] ||= {}
+        game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+        
+        guild_id_sym = guild_id.to_s.to_sym
+        game_results.params[:guild_extra_data][guild_id_sym] = {
+          money: result_hash[:money].to_i || 0,
+          boyar_favor: result_hash[:boyar_favor].to_i || 0
+        }
+      end
     end
-
-    if result_hash != nil
-      result_hash[:player_id] = max_id + 1  ##заменить на merchant_id
-      results = game_results.params[:merchant_results].push(result_hash)
-    else
-      results = game_results.params[:merchant_results]
-    end
-
-    results.map! {|res| res.transform_keys(&:to_sym)}
-    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(results)  
+    
     game_results.save
   end
 
@@ -140,10 +149,28 @@ def self.sort_and_save_results(result_hash = nil)
     sorted_results
   end
 
+  def self.sort_and_rank_results_by_boyar_favor(results)
+    # Добавляем капитал на игрока для полноты информации
+    per_pl_cap = GameParameter.find_cap_per_pl(results)
+    # Сортируем по боярским милостям (по убыванию)
+    sorted_results = per_pl_cap.sort_by { |hash| -hash[:boyar_favor].to_i }
+    place = 0
+    previous_value = nil
+    
+    sorted_results.each do |result|
+      current_value = result[:boyar_favor]
+      place += 1 if current_value != previous_value    
+      result[:place] = place
+      previous_value = current_value
+    end
+
+    sorted_results
+  end
+
   def self.find_cap_per_pl(results)    
     per_pl_cap = []
-    results.map! {|par| par.transform_keys(&:to_sym)}
     results.each do |result|
+      result.transform_keys!(&:to_sym) if result.is_a?(Hash)
       num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1
       capital = result[:capital].to_i
       result[:cap_per_pl] = capital/num_of_players
@@ -157,42 +184,98 @@ def self.sort_and_save_results(result_hash = nil)
   def self.update_results(result_hash)   
     result_hash.transform_keys!(&:to_sym) 
     game_results = GameParameter.find_by(identificator: "results")
-    game_results.params.transform_keys!(&:to_sym) ### ключи хэша
-    game_results.params[:merchant_results].map! {|par| par.transform_keys!(&:to_sym)}
+    game_results.params ||= {}
+    game_results.params.transform_keys!(&:to_sym)
     
-    updated_params = game_results.params[:merchant_results].map do |result|
-      if result_hash[:player_id] == result[:player_id]
-        result_hash 
-      else
-        result 
-      end
+    # Инициализируем хранилище для дополнительных данных гильдий
+    game_results.params[:guild_extra_data] ||= {}
+    game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+    
+    guild_id = result_hash[:guild_id].to_s.to_sym
+    
+    # Сохраняем деньги и боярскую милость для гильдии
+    game_results.params[:guild_extra_data][guild_id] = {
+      money: result_hash[:money].to_i || 0,
+      boyar_favor: result_hash[:boyar_favor].to_i || 0
+    }
+    
+    game_results.save
+  end
+
+  def self.delete_result(result_hash)
+    # Удаление дополнительных данных для гильдии (обнуление денег и боярской милости)
+    game_results = GameParameter.find_by(identificator: "results")
+    game_results.params ||= {}
+    game_results.params.transform_keys!(&:to_sym)
+    result_hash.transform_keys!(&:to_sym)
+    
+    guild_id = result_hash[:guild_id]
+    if guild_id
+      game_results.params[:guild_extra_data] ||= {}
+      game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+      
+      guild_id_sym = guild_id.to_s.to_sym
+      # Удаляем данные гильдии (обнуляем)
+      game_results.params[:guild_extra_data].delete(guild_id_sym)
     end
-
-    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(updated_params)
+    
     game_results.save
   end
 
-  def self.delete_result(player_id_hash)
+  def self.show_sorted_results(sort_by: :capital)
     game_results = GameParameter.find_by(identificator: "results")
+    game_results.params ||= {}
     game_results.params.transform_keys!(&:to_sym)
-    player_id_hash.transform_keys!(&:to_sym)
-    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
-    game_results.params[:merchant_results].delete_if{|h| h[:player_id] == player_id_hash[:player_id] }
-    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
-
-    game_results.save
-  end
-
-  def self.show_sorted_results
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params.transform_keys!(&:to_sym)
-    return []  if game_results.params.empty? || !game_results.params.has_key?(:merchant_results) 
-
-    game_results.params[:merchant_results].map! {|par| par.transform_keys(&:to_sym)}
-    game_results.params[:merchant_results] = GameParameter.sort_and_rank_results(game_results.params[:merchant_results])
-    game_results.save
-    game_results.params.transform_keys!(&:to_sym)
-    return game_results.params[:merchant_results]
+    
+    # Инициализируем хранилище для дополнительных данных гильдий (деньги и боярская милость)
+    guild_extra_data = game_results.params[:guild_extra_data] || {}
+    guild_extra_data.transform_keys!(&:to_sym) if guild_extra_data.is_a?(Hash)
+    
+    # Собираем результаты по всем гильдиям
+    results = []
+    Guild.all.each do |guild|
+      # Считаем стоимость предприятий (сумма deposit)
+      plants_value = guild.plants.sum { |plant| plant.plant_level&.deposit.to_i || 0 }
+      
+      # Количество игроков в гильдии
+      number_of_players = guild.players.count
+      
+    # Получаем дополнительные данные (деньги и боярская милость)
+    # Проверяем как символ строки и как число (для обратной совместимости)
+    guild_id_key = guild.id.to_s.to_sym
+    guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
+    guild_data.transform_keys!(&:to_sym) if guild_data.is_a?(Hash)
+      
+      money = guild_data[:money].to_i || 0
+      boyar_favor = guild_data[:boyar_favor].to_i || 0
+      
+      # Итоговый капитал = деньги + стоимость предприятий
+      capital = money + plants_value
+      
+      results << {
+        guild_id: guild.id,
+        player: guild.name,
+        capital: capital,
+        plants_value: plants_value,
+        money: money,
+        number_of_players: number_of_players > 0 ? number_of_players : 1,
+        boyar_favor: boyar_favor
+      }
+    end
+    
+    # Сортируем и ранжируем в зависимости от параметра
+    case sort_by.to_sym
+    when :boyar_favor
+      sorted_results = GameParameter.sort_and_rank_results_by_boyar_favor(results)
+    when :boyar_favor_with_capital
+      # Комбинированный вывод: сортируем по боярским милостям, но показываем и капитал
+      sorted_results = GameParameter.sort_and_rank_results_by_boyar_favor(results)
+    else
+      # По умолчанию сортируем по капиталу
+      sorted_results = GameParameter.sort_and_rank_results(results)
+    end
+    
+    sorted_results
   end  
 
   def self.clear_results
@@ -225,7 +308,8 @@ def self.sort_and_save_results(result_hash = nil)
           start: item["start"],
           unix_start: GameParameter.modify_date(item["start"]),
           finish: item["finish"],
-          unix_finish: GameParameter.modify_date(item["finish"])
+          unix_finish: GameParameter.modify_date(item["finish"]),
+          type: item["type"] || "play"
         }
     end
     
@@ -244,7 +328,8 @@ def self.sort_and_save_results(result_hash = nil)
     new_item   = {id: last_id + 1,
                   identificator: schedule_item[:identificator],
                   start: schedule_item[:start],
-                  finish: schedule_item[:finish]
+                  finish: schedule_item[:finish],
+                  type: schedule_item[:type] || "play"
                 }
     timer.params << new_item
     timer.save
@@ -276,6 +361,8 @@ def self.sort_and_save_results(result_hash = nil)
       dummy_schedule_item[:start]  = current_time.strftime("%H:%M")
       current_time += (minutes_to_add * 60)
       dummy_schedule_item[:finish] = current_time.strftime("%H:%M")
+      # Чередуем play и pause
+      dummy_schedule_item[:type] = item_name.odd? ? "play" : "pause"
       item_name += 1
       dummy_schedule.push(dummy_schedule_item)
     end
@@ -302,7 +389,10 @@ def self.sort_and_save_results(result_hash = nil)
     timer = GameParameter.find_by(identificator: "schedule")
     timer.value = NOT_TICKING 
     timer.params = []
-    timer.params = schedule || SCHEDULE
+    
+    # Если расписание не передано, используем default_schedule (может быть переопределен в плагинах)
+    timer.params = schedule || default_schedule
+    
     timer.save
   end
 

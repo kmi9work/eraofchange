@@ -80,6 +80,8 @@ class Country < ApplicationRecord
       car_data = f_c.calculate_trade_turnover
       {country_id:    f_c.id,
       country_name:   f_c.name,
+      short_name:     f_c.short_name || f_c.name,
+      flag_image_name: f_c.flag_image_name,
       trade_turnover: car_data[:trade_turnover],
       car_count:      car_data[:num_of_car],
       relations:      f_c.relations}
@@ -91,7 +93,8 @@ class Country < ApplicationRecord
   def calculate_trade_turnover
     caravans = self.caravans || []
     trade_turnover = 0
-    caravans.each {|car| trade_turnover += (car.gold_from_pl || 0) + (car.gold_to_pl || 0)}
+    # Исключаем караваны через Вятку из расчета товарооборота
+    caravans.each {|car| trade_turnover += (car.gold_from_pl || 0) + (car.gold_to_pl || 0) unless car.via_vyatka == true}
     return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
   end
 

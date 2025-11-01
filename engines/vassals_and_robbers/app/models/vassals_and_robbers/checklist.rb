@@ -39,6 +39,13 @@ module VassalsAndRobbers
       completed_count = results.count { |r| r[:is_completed] }
       (completed_count.to_f / results.count * 100).round
     end
+    
+    # Метод класса для получения списка ID стран, у которых установлен вассалитет
+    def self.vassal_country_ids
+      all.select do |checklist|
+        vassal_param_key = "vassal_#{checklist.vassal_country_id}_established"
+        checklist.params && checklist.params[vassal_param_key] == true
+      end.map(&:vassal_country_id)
+    end
   end
 end
-

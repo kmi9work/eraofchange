@@ -37,12 +37,41 @@ levels = [
   { level: 3, threshold: 70000, name: "Высокий"}
 ]
 
+# Маппинг коротких имен стран
+short_names_map = {
+  'Большая Орда' => 'Орда',
+  'Ливонский орден' => 'Ливония',
+  'Королевство Швеция' => 'Швеция',
+  'Великое княжество Литовское' => 'Литва',
+  'Казанское ханство' => 'Казань',
+  'Крымское ханство' => 'Крым',
+  'Великий Новгород' => 'Новгород',
+}
+
+# Маппинг названий файлов изображений флагов (латиница, без пробелов)
+flag_image_map = {
+  1 => 'rus',           # Русь
+  2 => 'horde',         # Большая Орда
+  3 => 'livonian',      # Ливонский орден
+  4 => 'sweden',        # Королевство Швеция
+  5 => 'lithuania',     # Великое княжество Литовское
+  6 => 'kazan',         # Казанское ханство
+  7 => 'crimea',        # Крымское ханство
+  8 => 'perm',          # Пермь
+  9 => 'vyatka',        # Вятка
+  10 => 'ryazan',       # Рязань
+  11 => 'tver',         # Тверь
+  12 => 'novgorod',     # Великий Новгород
+}
+
 po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets
   id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = str.split(';').map(&:strip)
   country = Country.find_by_name(country_name)
   if country.blank?
-    country = Country.create(id: id, name: country_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "level_thresholds" =>  levels})
+    short_name = short_names_map[country_name] || country_name
+    flag_image_name = flag_image_map[id.to_i]
+    country = Country.create(id: id, name: country_name, short_name: short_name, flag_image_name: flag_image_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "level_thresholds" =>  levels})
     RelationItem.add(relations.to_i, "Ручная правка", country)
   end
   region = Region.find_by_name(region_name)

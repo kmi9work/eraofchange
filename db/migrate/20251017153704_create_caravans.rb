@@ -6,7 +6,8 @@ class CreateCaravans < ActiveRecord::Migration[7.0]
       t.json    :resources_from_pl 
       t.json    :resources_to_pl 
       t.integer :gold_from_pl
-      t.integer :gold_to_pl      
+      t.integer :gold_to_pl
+      t.boolean :via_vyatka, default: false
       t.timestamps
     end
   end
