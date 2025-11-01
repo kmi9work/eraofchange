@@ -44,8 +44,8 @@ namespace :custom do
       
       # Создаем .env.production по умолчанию (base-game), если его еще нет
       unless test("[ -f #{shared_path}/.env.production ]")
-        env_content = "ACTIVE_GAME=base-game"
-        execute :bash, "-c", "echo '#{env_content}' > #{shared_path}/.env.production"
+        # Используем простой echo для создания файла
+        execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
         execute :chmod, "644 #{shared_path}/.env.production"
       end
     end
@@ -113,9 +113,11 @@ namespace :custom do
       execute :mkdir, "-p #{shared_path}"
       
       # Создаем или обновляем файл .env.production с ACTIVE_GAME
-      env_content = "ACTIVE_GAME=vassals-and-robbers"
-      execute :bash, "-c", "echo '#{env_content}' > #{shared_path}/.env.production"
+      # Используем простой echo для создания файла
+      execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
       execute :chmod, "644 #{shared_path}/.env.production"
+      # Проверяем, что файл создан правильно
+      execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
@@ -131,9 +133,11 @@ namespace :custom do
       execute :mkdir, "-p #{shared_path}"
       
       # Создаем или обновляем файл .env.production с ACTIVE_GAME для базовой игры
-      env_content = "ACTIVE_GAME=base-game"
-      execute :bash, "-c", "echo '#{env_content}' > #{shared_path}/.env.production"
+      # Используем простой echo для создания файла
+      execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
       execute :chmod, "644 #{shared_path}/.env.production"
+      # Проверяем, что файл создан правильно
+      execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")

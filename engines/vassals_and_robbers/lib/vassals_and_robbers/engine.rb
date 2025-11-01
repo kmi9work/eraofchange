@@ -49,7 +49,14 @@ module VassalsAndRobbers
         
         # Подключаем concerns к моделям ядра
         ::Plant.include VassalsAndRobbers::Concerns::PlantExtensions if defined?(::Plant) && defined?(VassalsAndRobbers::Concerns::PlantExtensions)
-        ::Country.include VassalsAndRobbers::Concerns::CountryExtensions if defined?(::Country) && defined?(VassalsAndRobbers::Concerns::CountryExtensions)
+        
+        if defined?(::Country) && defined?(VassalsAndRobbers::Concerns::CountryExtensions)
+          ::Country.include VassalsAndRobbers::Concerns::CountryExtensions
+          # Явно устанавливаем alliances_enabled на случай, если included блок не сработал
+          ::Country.alliances_enabled = true unless ::Country.alliances_enabled
+          Rails.logger.info "[VassalsAndRobbers] Country.alliances_enabled set to #{::Country.alliances_enabled}"
+        end
+        
         ::GameParameter.include VassalsAndRobbers::Concerns::GameParameterExtensions if defined?(::GameParameter) && defined?(VassalsAndRobbers::Concerns::GameParameterExtensions)
         ::Player.include VassalsAndRobbers::Concerns::PlayerExtensions if defined?(::Player) && defined?(VassalsAndRobbers::Concerns::PlayerExtensions)
         
@@ -59,6 +66,8 @@ module VassalsAndRobbers
         end
         
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
+        Rails.logger.info "[VassalsAndRobbers] ENV['ACTIVE_GAME'] = #{ENV['ACTIVE_GAME'].inspect}"
+        Rails.logger.info "[VassalsAndRobbers] Country.alliances_enabled = #{Country.alliances_enabled}" if defined?(Country)
         
         # Здесь можно добавить другие расширения моделей ядра:
         # ::Region.include VassalsAndRobbers::Concerns::RegionExtensions if defined?(::Region)

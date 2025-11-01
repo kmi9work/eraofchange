@@ -1,18 +1,24 @@
 # Загрузка переменных окружения из .env.production (если существует)
 # Используется для управления ACTIVE_GAME в production
-# Примечание: основная загрузка происходит в config/application.rb (before_initialize)
-# Этот файл оставлен для совместимости и дополнительной загрузки, если нужно
+# Этот initializer загружается ДО инициализации engines, чтобы гарантировать загрузку ACTIVE_GAME
 
-# Дополнительная проверка и логирование (выполняется после инициализации)
-Rails.application.config.after_initialize do
-  if Rails.env.production?
-    env_file = Rails.root.join('.env.production')
-    if File.exist?(env_file)
-      Rails.logger.info "[LoadEnv] Verifying ACTIVE_GAME: #{ENV['ACTIVE_GAME'] || 'not set'}"
-      Rails.logger.info "[LoadEnv] Country.alliances_enabled: #{Country.alliances_enabled}" if defined?(Country)
-    else
-      Rails.logger.warn "[LoadEnv] .env.production file not found at #{env_file}"
+if Rails.env.production?
+  env_file = Rails.root.join('.env.production')
+  if File.exist?(env_file)
+    Rails.logger.info "[LoadEnv] Loading environment variables from .env.production at #{env_file}" if defined?(Rails.logger)
+    File.readlines(env_file).each do |line|
+      line.strip!
+      next if line.empty? || line.start_with?('#')
+      
+      if line.include?('=')
+        key, value = line.split('=', 2)
+        ENV[key.strip] = value.strip if key && value
+        Rails.logger.debug "[LoadEnv] Set #{key.strip}=#{value.strip}" if defined?(Rails.logger)
+      end
     end
+    Rails.logger.info "[LoadEnv] ACTIVE_GAME is now: #{ENV['ACTIVE_GAME'] || 'not set'}" if defined?(Rails.logger)
+  else
+    Rails.logger.warn "[LoadEnv] .env.production file not found at #{env_file}" if defined?(Rails.logger)
   end
 end
 
