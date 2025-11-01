@@ -23,15 +23,50 @@ namespace :custom do
           # Установка зависимостей через pnpm
           execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
           
-          execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", "#{fetch(:release_path)}/.env"
+          # Настройка .env файла
+          execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", ".env"
+          
+          # Устанавливаем VITE_ACTIVE_GAME=base-game
+          if test("grep -q '^VITE_ACTIVE_GAME=' .env")
+            execute :sed, '-i', "'s|^VITE_ACTIVE_GAME=.*|VITE_ACTIVE_GAME=base-game|g'", ".env"
+          else
+            execute :bash, "-c", "echo 'VITE_ACTIVE_GAME=base-game' >> .env"
+          end
 
          # Сборка проекта 
-          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && /home/deploy/.local/share/pnpm/pnpm build"' 
+          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm build"' 
           execute :mkdir, "-p #{current_path}"    
           execute :ln, '-sfn',  "#{release_path}/dist", "#{current_path}" 
         end
+      end
+   end
 
+  task :front_deploy_vassals do
+      invoke 'custom:front_setup'
+      on roles(:app) do
+        execute :git, :clone, "--depth 1", "git@github.com:kmi9work/era_front.git", fetch(:release_path) 
+        within release_path do
+          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && nvm install v22"'
+          execute :bash, "-c", '"curl -fsSL https://get.pnpm.io/install.sh | sh -"'
 
+          # Установка зависимостей через pnpm
+          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm install --ignore-scripts"'
+          
+          # Настройка .env файла
+          execute :sed, '-i', "'s|VITE_PROXY=http://localhost:3000|VITE_PROXY=https://epoha.igroteh.su/backend|g'", ".env"
+          
+          # Устанавливаем VITE_ACTIVE_GAME=vassals-and-robbers
+          if test("grep -q '^VITE_ACTIVE_GAME=' .env")
+            execute :sed, '-i', "'s|^VITE_ACTIVE_GAME=.*|VITE_ACTIVE_GAME=vassals-and-robbers|g'", ".env"
+          else
+            execute :bash, "-c", "echo 'VITE_ACTIVE_GAME=vassals-and-robbers' >> .env"
+          end
+
+         # Сборка проекта 
+          execute :bash, '-lc', '"source ~/.nvm/nvm.sh && export PATH=$HOME/.nvm/versions/node/v22/bin:$HOME/.local/share/pnpm:$PATH && pnpm build"' 
+          execute :mkdir, "-p #{current_path}"    
+          execute :ln, '-sfn',  "#{release_path}/dist", "#{current_path}" 
+        end
       end
    end
 end
