@@ -120,33 +120,24 @@ namespace :custom do
 
   task :setup_vassals_env do
     invoke 'custom:setup'
+    # Устанавливаем переменную для ensure_env_file
+    set :active_game_env, 'vassals-and-robbers'
+    
     on roles(:app) do
       # Убеждаемся, что директория shared существует
       execute :mkdir, "-p #{shared_path}"
       
-      # Проверяем, существует ли файл и не пустой ли он
-      file_exists = test("[ -f #{shared_path}/.env.production ]")
-      file_size = 0
-      if file_exists
-        file_size = capture(:bash, "-c", %Q{test -s #{shared_path}/.env.production && echo "1" || echo "0"}).strip.to_i
-      end
-      
-      # Обновляем файл .env.production с ACTIVE_GAME=vassals-and-robbers
-      # Проверяем текущее значение, чтобы не перезаписывать, если уже правильное
-      current_value = capture(:bash, "-c", %Q{grep "^ACTIVE_GAME=" #{shared_path}/.env.production 2>/dev/null | cut -d'=' -f2 || echo ''}).strip
-      
-      # Если файл не существует, пустой или содержит другое значение - обновляем
-      if !file_exists || file_size == 0 || current_value != 'vassals-and-robbers'
-        execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
-        execute :chmod, "644 #{shared_path}/.env.production"
-        reason = !file_exists ? "file didn't exist" : (file_size == 0 ? "file was empty" : "value was different")
-        info "Updated .env.production with ACTIVE_GAME=vassals-and-robbers (#{reason})"
-      else
-        info ".env.production already has ACTIVE_GAME=vassals-and-robbers"
-      end
+      # ВСЕГДА перезаписываем файл при деплое vassals - это гарантирует правильное значение
+      execute :bash, "-c", %Q{echo "ACTIVE_GAME=vassals-and-robbers" > #{shared_path}/.env.production}
+      execute :chmod, "644 #{shared_path}/.env.production"
+      info "Set .env.production with ACTIVE_GAME=vassals-and-robbers"
       
       # Проверяем, что файл создан правильно
-      execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
+      file_content = capture(:bash, "-c", "cat #{shared_path}/.env.production").strip
+      if file_content != "ACTIVE_GAME=vassals-and-robbers"
+        error "ERROR: Failed to create .env.production correctly. Content: #{file_content}"
+        raise "Failed to set ACTIVE_GAME=vassals-and-robbers"
+      end
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
@@ -157,33 +148,24 @@ namespace :custom do
 
   task :setup_base_env do
     invoke 'custom:setup'
+    # Устанавливаем переменную для ensure_env_file
+    set :active_game_env, 'base-game'
+    
     on roles(:app) do
       # Убеждаемся, что директория shared существует
       execute :mkdir, "-p #{shared_path}"
       
-      # Проверяем, существует ли файл и не пустой ли он
-      file_exists = test("[ -f #{shared_path}/.env.production ]")
-      file_size = 0
-      if file_exists
-        file_size = capture(:bash, "-c", %Q{test -s #{shared_path}/.env.production && echo "1" || echo "0"}).strip.to_i
-      end
-      
-      # Обновляем файл .env.production с ACTIVE_GAME=base-game
-      # Проверяем текущее значение, чтобы не перезаписывать, если уже правильное
-      current_value = capture(:bash, "-c", %Q{grep "^ACTIVE_GAME=" #{shared_path}/.env.production 2>/dev/null | cut -d'=' -f2 || echo ''}).strip
-      
-      # Если файл не существует, пустой или содержит другое значение - обновляем
-      if !file_exists || file_size == 0 || current_value != 'base-game'
-        execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
-        execute :chmod, "644 #{shared_path}/.env.production"
-        reason = !file_exists ? "file didn't exist" : (file_size == 0 ? "file was empty" : "value was different")
-        info "Updated .env.production with ACTIVE_GAME=base-game (#{reason})"
-      else
-        info ".env.production already has ACTIVE_GAME=base-game"
-      end
+      # ВСЕГДА перезаписываем файл при деплое base - это гарантирует правильное значение
+      execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
+      execute :chmod, "644 #{shared_path}/.env.production"
+      info "Set .env.production with ACTIVE_GAME=base-game"
       
       # Проверяем, что файл создан правильно
-      execute :bash, "-c", "test -f #{shared_path}/.env.production && cat #{shared_path}/.env.production || echo 'ERROR: File not created'"
+      file_content = capture(:bash, "-c", "cat #{shared_path}/.env.production").strip
+      if file_content != "ACTIVE_GAME=base-game"
+        error "ERROR: Failed to create .env.production correctly. Content: #{file_content}"
+        raise "Failed to set ACTIVE_GAME=base-game"
+      end
       
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
@@ -208,7 +190,42 @@ end
 
 # Хуки должны быть вне namespace
 before 'deploy:check:linked_files', 'custom:setup_config'
-#after 'deploy:publishing', 'deploy:restart'
+# После создания симлинков убеждаемся, что .env.production заполнен
+after 'deploy:symlink:linked_files', 'custom:ensure_env_file'
+
+namespace :custom do
+  # Эта задача вызывается ПОСЛЕ создания симлинков для linked_files
+  # и гарантирует, что файл .env.production содержит правильное значение
+  task :ensure_env_file do
+    on roles(:app) do
+      # Проверяем содержимое файла после создания симлинка
+      file_content = capture(:bash, "-c", %Q{cat #{shared_path}/.env.production 2>/dev/null || echo ''}).strip
+      file_size = capture(:bash, "-c", %Q{test -s #{shared_path}/.env.production && wc -c < #{shared_path}/.env.production | tr -d ' ' || echo '0'}).strip.to_i
+      
+      # Если файл пустой (только пробелы/новая строка) или не содержит ACTIVE_GAME,
+      # определяем, что должно быть установлено, проверяя логику вызова
+      # Но проще - проверить последнее значение, которое должно было быть установлено
+      # Если файл содержит меньше 20 символов (ACTIVE_GAME=vassals-and-robbers = 34 символа, base-game = 20), он скорее всего пустой
+      
+      if file_size < 15 || !file_content.include?('ACTIVE_GAME=')
+        # Файл слишком маленький или не содержит ACTIVE_GAME
+        # Проверяем, есть ли способ определить правильное значение
+        # Используем переменную окружения Capistrano, если она установлена
+        expected_game = fetch(:active_game_env, nil)
+        
+        if expected_game.nil?
+          # Если не можем определить, ставим base-game как безопасное значение по умолчанию
+          info "WARNING: .env.production is empty or corrupted, setting base-game as fallback"
+          execute :bash, "-c", %Q{echo "ACTIVE_GAME=base-game" > #{shared_path}/.env.production}
+        else
+          info "WARNING: .env.production is empty or corrupted, setting #{expected_game}"
+          execute :bash, "-c", %Q{echo "ACTIVE_GAME=#{expected_game}" > #{shared_path}/.env.production}
+        end
+        execute :chmod, "644 #{shared_path}/.env.production"
+      end
+    end
+  end
+end
 
 append :linked_files, "config/database.yml", 'config/master.key', '.env.production'
 append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system", "vendor", "storage"
