@@ -107,7 +107,11 @@ namespace :custom do
   end
 
   task :setup_vassals_env do
+    invoke 'custom:setup'
     on roles(:app) do
+      # Убеждаемся, что директория shared существует
+      execute :mkdir, "-p #{shared_path}"
+      
       # Создаем или обновляем файл .env.production с ACTIVE_GAME
       env_content = "ACTIVE_GAME=vassals-and-robbers"
       execute :bash, "-c", "echo '#{env_content}' > #{shared_path}/.env.production"
@@ -121,7 +125,11 @@ namespace :custom do
   end
 
   task :setup_base_env do
+    invoke 'custom:setup'
     on roles(:app) do
+      # Убеждаемся, что директория shared существует
+      execute :mkdir, "-p #{shared_path}"
+      
       # Создаем или обновляем файл .env.production с ACTIVE_GAME для базовой игры
       env_content = "ACTIVE_GAME=base-game"
       execute :bash, "-c", "echo '#{env_content}' > #{shared_path}/.env.production"
