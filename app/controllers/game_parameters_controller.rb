@@ -59,6 +59,18 @@ class GameParametersController < ApplicationController
     GameParameter.update_schedule_item(params[:request])
   end
 
+  def plugin_status
+    # Проверка статуса плагинов
+    status = {
+      active_game: ENV['ACTIVE_GAME'] || 'not set',
+      alliances_enabled: Country.alliances_enabled,
+      country_extensions_loaded: Country.included_modules.include?(VassalsAndRobbers::Concerns::CountryExtensions) rescue false,
+      env_file_exists: File.exist?(Rails.root.join('.env.production')),
+      env_file_content: File.exist?(Rails.root.join('.env.production')) ? File.read(Rails.root.join('.env.production')).strip : 'not found'
+    }
+    render json: status
+  end
+
   def toggle_screen
     GameParameter.toggle_screen(params[:request])
   end

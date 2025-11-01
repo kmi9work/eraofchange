@@ -35,19 +35,17 @@ namespace :passenger do
           # Passenger может использовать passenger_env_var для передачи переменных
           nginx_config = "/etc/nginx/sites-available/epoha.igroteh.su"
           if test("[ -f #{nginx_config} ]")
-            # Проверяем, есть ли уже passenger_env_var для ACTIVE_GAME
-            unless capture(:bash, "-c", "grep -q 'passenger_env_var ACTIVE_GAME' #{nginx_config} || echo 'not found'").include?("ACTIVE_GAME")
-              execute :bash, "-c", %Q{
-                # Добавляем passenger_env_var после passenger_app_env
-                sudo sed -i '/passenger_app_env production;/a\\        passenger_env_var ACTIVE_GAME #{active_game};' #{nginx_config}
-                sudo nginx -t && sudo systemctl reload nginx || true
-              }
+            # Проверяем, есть ли уже passenger_env_var для ACTIVE_GAME в блоке location /backend
+            grep_result = capture(:bash, "-c", "grep -A 10 'location /backend' #{nginx_config} | grep -q 'passenger_env_var ACTIVE_GAME' && echo 'found' || echo 'not found'").strip
+            
+            if grep_result != 'found'
+              # Добавляем passenger_env_var после passenger_app_env в блоке location /backend
+              execute :bash, "-c", %Q{sudo sed -i '/location \\/backend/,/}/ { /passenger_app_env production;/a\\        passenger_env_var ACTIVE_GAME #{active_game}; }' #{nginx_config}}
+              execute :bash, "-c", "sudo nginx -t && sudo systemctl reload nginx || true"
             else
-              # Обновляем существующий passenger_env_var
-              execute :bash, "-c", %Q{
-                sudo sed -i 's|passenger_env_var ACTIVE_GAME .*|passenger_env_var ACTIVE_GAME #{active_game};|' #{nginx_config}
-                sudo nginx -t && sudo systemctl reload nginx || true
-              }
+              # Обновляем существующий passenger_env_var в блоке location /backend
+              execute :bash, "-c", %Q{sudo sed -i '/location \\/backend/,/}/ s|passenger_env_var ACTIVE_GAME .*|passenger_env_var ACTIVE_GAME #{active_game};|' #{nginx_config}}
+              execute :bash, "-c", "sudo nginx -t && sudo systemctl reload nginx || true"
             end
           end
         end

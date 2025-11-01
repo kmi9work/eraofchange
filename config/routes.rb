@@ -67,6 +67,7 @@ Rails.application.routes.draw do
   patch '/game_parameters/pay_state_expenses', to: 'game_parameters#pay_state_expenses'
   patch '/game_parameters/unpay_state_expenses', to: 'game_parameters#unpay_state_expenses'
   patch '/game_parameters/increase_year', to: 'game_parameters#increase_year'
+  get '/game_parameters/plugin_status', to: 'game_parameters#plugin_status'
   
   ###Настройки
   get '/game_parameters/get_years_count', to: 'game_parameters#get_years_count'
