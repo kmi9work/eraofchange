@@ -138,7 +138,11 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
   
   # Преобразуем effects и targets в массивы
   effects_array = effects.is_a?(Array) ? effects : [effects]
-  targets_array = targets.is_a?(Array) ? targets : [targets]
+  targets_array = if targets.nil?
+    [] # Пустой массив для nil, чтобы не ломать логику проверки в any_lingering_effects?
+  else
+    targets.is_a?(Array) ? targets : [targets]
+  end
   
   # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
   
@@ -148,7 +152,7 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
     "duration" => duration, 
     "name_of_action" => action, 
     "effects" => effects_array,
-    "targets" => targets
+    "targets" => targets_array
   }
   
   # Присваиваем новый массив
@@ -623,6 +627,20 @@ def self.show_noble_results
     else
       []
     end
+  end
+
+  def self.add_protected_guild_for_year(guild_id, year)
+    setting = GameParameter.find_or_initialize_by(identificator: "caravan_robbery_settings")
+    setting.params ||= {}
+    setting.params['protected_guilds_by_year'] ||= {}
+    setting.params['protected_guilds_by_year'][year.to_s] ||= []
+    
+    # Добавляем ID гильдии, если его еще нет
+    protected_list = setting.params['protected_guilds_by_year'][year.to_s]
+    protected_list << guild_id.to_i unless protected_list.include?(guild_id.to_i)
+    
+    setting.params_will_change!
+    setting.save
   end
 
   def self.get_caravans_per_guild

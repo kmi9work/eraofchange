@@ -115,7 +115,7 @@ class Country < ApplicationRecord
     self.save
   end
 
-  def improve_relations_via_trade
+  def improve_relations_via_trade(force: false)
     current_params = self.params || {}
     relation_points = current_params['relation_points'].to_i
     
@@ -129,11 +129,22 @@ class Country < ApplicationRecord
     self.params = current_params
     
     # Улучшаем отношения на 1
-    change_relations(1, self, "Улучшение через торговлю")
+    result = change_relations(1, self, "Улучшение через торговлю", force: force)
+    
+    # Проверяем, было ли предупреждение
+    warning = nil
+    if result.is_a?(Hash) && result[:warning]
+      warning = result[:warning]
+    elsif result.is_a?(String)
+      # Если вернулась ошибка (не force режим)
+      return { success: false, error: result }
+    end
     
     # Сохраняем изменения
     if self.save
-      { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+      response = { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+      response[:warning] = warning if warning
+      response
     else
       { success: false, error: self.errors.full_messages.join(', ') }
     end
@@ -143,13 +154,21 @@ class Country < ApplicationRecord
 
 # вынести на фронт
 
-  def change_relations(count, entity, comment = nil)
+  def change_relations(count, entity, comment = nil, force: false)
     count = count.to_i
     rel = relations
     
     # Проверяем эффект запрета улучшения отношений
+    # Если force == true (ручная правка мастера), пропускаем проверку, но помечаем предупреждение
     if GameParameter.any_lingering_effects?("no_relation_improvement", GameParameter.current_year)
-       return "Нельзя улучшить отношения в этом году" if count > 0
+      if count > 0
+        if force
+          # Для ручных правок мастера - разрешаем, но возвращаем предупреждение
+          # Продолжаем выполнение ниже
+        else
+          return "Нельзя улучшить отношения в этом году"
+        end
+      end
     end  
 
     # Проверяем эффект "отношения не падают ниже нейтральных" для ЭТОЙ страны
@@ -162,6 +181,13 @@ class Country < ApplicationRecord
     
     rel = relations
     r = rel + count
+    
+    # Проверяем, было ли предупреждение о блокировке улучшения
+    warning_message = nil
+    if force && count > 0 && GameParameter.any_lingering_effects?("no_relation_improvement", GameParameter.current_year)
+      warning_message = "⚠️ Внимание: Отношения не были улучшены из-за эффекта 'Поддержать экспорт', но изменение применено вручную."
+    end
+    
     if entity.is_a?(PoliticalAction)
       comment = entity.political_action_type&.name
     elsif comment.blank?
@@ -173,6 +199,11 @@ class Country < ApplicationRecord
       self,
       entity
     )
+    
+    # Возвращаем предупреждение, если оно было
+    return { warning: warning_message } if warning_message
+    
+    return true
   end
 
   def relations

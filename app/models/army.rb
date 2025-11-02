@@ -83,10 +83,10 @@ class Army < ApplicationRecord
 
 
   def goto settlement_id
-    # Проверяем эффект NO_ARMY_MOVEMENT для текущего года
-    if self.owner.jobs.map(&:name).include?("Великий князь") && 
-       GameParameter.any_lingering_effects?("no_army_movement", GameParameter.current_year)
-      return "НЕЛЬЗЯ - Великий князь не может командовать армией (эффект 'Личный визит')"
+    # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
+    if self.owner.jobs.map(&:name).include?("Воевода") && 
+       GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
+      return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
     end
 
     settlement = Settlement.find_by_id(settlement_id)
@@ -113,6 +113,12 @@ class Army < ApplicationRecord
   end
 
   def attack enemy_id, voevoda_bonus
+    # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
+    if self.owner.jobs.map(&:name).include?("Воевода") && 
+       GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
+      return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
+    end
+    
     enemy = Army.active.find_by_id(enemy_id)
     if enemy
       winner, looser = self.power > enemy.power ? [self, enemy] : [enemy, self]

@@ -155,19 +155,28 @@ class CountriesController < ApplicationController
   def add_relation_item
     value = params[:value].to_i
     comment = params[:comment].presence || "Ручная правка"
-    @country.change_relations(value, @country, comment)
+    result = @country.change_relations(value, @country, comment, force: true)
+    
+    if result.is_a?(Hash) && result[:warning]
+      render json: { success: true, warning: result[:warning] }
+    else
+      render json: { success: true }
+    end
   end
 
   def improve_relations_via_trade
-    result = @country.improve_relations_via_trade
+    # Используем force: true для мастера, чтобы разрешить улучшение, но получить предупреждение
+    result = @country.improve_relations_via_trade(force: true)
     
     if result[:success]
-      render json: { 
+      response = { 
         success: true, 
         new_relations: result[:new_relations], 
         relation_points_left: result[:relation_points_left],
         message: 'Отношения улучшены через торговлю'
       }
+      response[:warning] = result[:warning] if result[:warning]
+      render json: response
     else
       render json: { success: false, error: result[:error] }, status: :unprocessable_entity
     end

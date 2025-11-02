@@ -186,21 +186,23 @@ module VassalsAndRobbers
         target = Job.find_by_id(Job::VOEVODA)&.players&.first
         return {error: "Воевода не найден"} unless target
         
-        # ВАЖНО: Используем другое имя переменной, чтобы не перезаписать self.params
+        # Обновляем params гильдии (для исторических данных)
         current_guild_params = guild.params || {}
         protected_years = current_guild_params["caravan_protected"] || []
         protected_years << GameParameter.current_year
         
-        # Обновляем params гильдии
         current_guild_params["caravan_protected"] = protected_years
         guild.params = current_guild_params
         guild.params_will_change!
         guild.save
         
-        # Регистрируем эффект для воеводы
-        GameParameter.register_lingering_effects("protect_caravan", effects, GameParameter.current_year + 1, target)
+        # СИНХРОНИЗАЦИЯ: Обновляем protected_guilds_by_year для корректной работы check_robbery
+        GameParameter.add_protected_guild_for_year(guild.id, GameParameter.current_year)
         
-        return {success: true, message: "Караван гильдии '#{guild.name}' защищен. Воевода не сможет командовать армией в следующем году."}
+        # Регистрируем эффект для воеводы НА ТЕКУЩИЙ ГОД
+        GameParameter.register_lingering_effects("protect_caravan", effects, GameParameter.current_year, target.name)
+        
+        return {success: true, message: "Караван гильдии '#{guild.name}' защищен. Воевода не сможет командовать армией в текущем году."}
       end
 
         #Контрразведка
