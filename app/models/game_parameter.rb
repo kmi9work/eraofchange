@@ -64,20 +64,32 @@ class GameParameter < ApplicationRecord
           ]
 
 ### 
-def self.any_lingering_effects?(effect_name, year = GameParameter.current_year)
+def self.any_lingering_effects?(effect_name, year = GameParameter.current_year, target = nil)
   effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
   return false unless effects_param&.params
   
-  effects_param.params.any? do |effect|
-    effect["effect"] == effect_name.to_s && effect["year"] == year
+  effects_param.params.any? do |entry|
+    # Проверяем массив effects в каждой записи
+    has_effect = entry["effects"]&.include?(effect_name.to_s)
+    is_year = entry["duration"]&.include?(year)
+    
+    # Если target указан, проверяем что эффект применяется к этой цели
+    if target
+      targets_match = entry["targets"]&.include?(target) || 
+                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.id) ||
+                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.name)
+      has_effect && is_year && targets_match
+    else
+      has_effect && is_year
+    end
   end
 end
 
-def self.register_lingering_effects(action, effects, years = GameParameter.current_year, target = nil)
+def self.register_lingering_effects(action, effects, years = GameParameter.current_year, targets = nil)
     #year - год, когда он действует. 
     # name_of_action - название полит.действия
-    # effects - сам эффект или массив эффектов
-    # target  - на кого он действует
+    # effects - массив эффектов или один эффект
+    # targets  - массив целей или одна цель
     duration = []
     duration << years
     duration.flatten!
@@ -89,26 +101,41 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
     Rails.logger.warn "[GameParameter] LINGERING_EFFECTS record not found, creating..."
     g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
   end
-  
-  # Получаем текущие params или создаем пустой массив
+
+  # Получаем текущие params
   current_params = g_p.params || []
   
-  # Если effects - массив, создаем запись для каждого эффекта
-  # Если effects - строка, создаем одну запись
+  # Преобразуем effects и targets в массивы
   effects_array = effects.is_a?(Array) ? effects : [effects]
+  targets_array = targets.is_a?(Array) ? targets : [targets]
   
-  # Создаем новые записи
-  new_effects = effects_array.map do |effect|
-    {
-      duration: duration, 
-      name_of_action: action, 
-      effect: effect, 
-      target: target
-    }
+  # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
+  processed_targets = targets_array.map do |t|
+    case t
+    when Integer
+      t  # ID как есть
+    when String
+      t  # Строка как есть (например, имя страны)
+    when nil
+      nil
+    else
+      t.id  # Объект ActiveRecord - берем ID
+    end
   end
   
-  # Присваиваем новый массив (ActiveRecord заметит изменение)
-  g_p.params = current_params + new_effects
+  # Создаем ОДНУ запись с массивами эффектов и целей
+  new_entry = {
+    "duration" => duration, 
+    "name_of_action" => action, 
+    "effects" => effects_array,
+    "targets" => processed_targets
+  }
+  
+  # Присваиваем новый массив
+  g_p.params = current_params + [new_entry]
+  
+  # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
+  g_p.params_will_change!
   g_p.save
 end
 

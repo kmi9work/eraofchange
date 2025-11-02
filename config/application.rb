@@ -2,6 +2,9 @@ require_relative "boot"
 
 require "rails/all"
 
+# Устанавливаем активную игру для плагина vassals-and-robbers
+ENV['ACTIVE_GAME'] ||= 'vassals-and-robbers'
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)

@@ -120,13 +120,15 @@ class Resource < ApplicationRecord
 
     end
 
-    if GameParameter.any_lingering_effects?("support_export") 
+    # Проверяем эффект HIGHER_SELL_PRICES для текущего года
+    if GameParameter.any_lingering_effects?("higher_sell_prices", GameParameter.current_year) 
       return Resource.increase_prices(off_and_to_market_prices) 
     else 
       return off_and_to_market_prices 
     end
   end
 
+  private
   def self.increase_prices(hashed_array)
     hashed_array[:to_market].each do |resource|
       resource[:sell_price] = (resource[:sell_price] * TARIFF).floor

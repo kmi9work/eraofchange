@@ -201,7 +201,11 @@ Rails.application.routes.draw do
   resources :families
   resources :players
   resources :countries
-  resources :armies
+  resources :armies do
+    member do
+      patch :unlease
+    end
+  end
   resources :army_sizes
   resources :troop_types
   resources :plant_places

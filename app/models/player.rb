@@ -239,7 +239,9 @@ class Player < ApplicationRecord
   end
 
   def income
-    if self.jobs.map(&:name).include?("Великий князь") && GameParameter.any_lingering_effects?("support_export")
+    # Проверяем эффект увеличенного дохода от торговли для текущего года
+    if self.job_ids.include?(Job::GRAND_PRINCE) && 
+       GameParameter.any_lingering_effects?("increased_trade_revenue", GameParameter.current_year-1)
       added_income = Caravan.count_caravan_revenue
     else
       added_income = 0

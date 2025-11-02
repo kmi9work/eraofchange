@@ -79,9 +79,9 @@ class PoliticalAction < ApplicationRecord
   def send_embassy #Отправить посольство
     if success.to_i == 1
       modify_influence(1)
-      countries = Country.where(id: params['country_ids'])
-      if countries.present?
-        countries.each {|c| c.change_relations(1, self)}
+      country = Country.find_by_id(params['country_id'])
+      if country
+        country.change_relations(1, self)
       end
     end
   end

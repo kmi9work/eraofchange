@@ -100,11 +100,11 @@ class PoliticalActionsController < ApplicationController
       # Методы ядра игры, которые проверяют success
       core_actions_with_success = %w[
         sedition charity sabotage contraband open_gate new_fisheries people_support
-        ceremonial defective_coin call_a_meeting take_bribe equip_caravan
+        ceremonial defective_coin call_a_meeting send_embassy take_bribe equip_caravan
         conduct_audit peculation disperse_bribery implement_sabotage name_of_grand_prince
-        drain_the_swamps contract_to_cousin improving_the_city root_out_heresies
-        counterintelligence fabricate_a_denunciation favoritism dev_the_economy
-        confused_mine
+        recruiting drain_the_swamps contract_to_cousin improving_the_city sermon
+        root_out_heresies call_for_unity counterintelligence fabricate_a_denunciation 
+        favoritism dev_the_economy confused_mine patronage_of_infidel
       ]
       
       core_actions_with_success.include?(action_method.to_s)
