@@ -84,7 +84,10 @@ class Army < ApplicationRecord
 
   def goto settlement_id
     # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
-    if self.owner.jobs.map(&:name).include?("Воевода") && 
+    # Проверяем только если owner - Player (не Country)
+    if self.owner_type == 'Player' && 
+       self.owner.respond_to?(:jobs) &&
+       self.owner.jobs.map(&:name).include?("Воевода") && 
        GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
       return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
     end
@@ -114,7 +117,10 @@ class Army < ApplicationRecord
 
   def attack enemy_id, voevoda_bonus
     # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
-    if self.owner.jobs.map(&:name).include?("Воевода") && 
+    # Проверяем только если owner - Player (не Country)
+    if self.owner_type == 'Player' && 
+       self.owner.respond_to?(:jobs) &&
+       self.owner.jobs.map(&:name).include?("Воевода") && 
        GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
       return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
     end
