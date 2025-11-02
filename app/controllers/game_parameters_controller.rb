@@ -123,6 +123,16 @@ class GameParametersController < ApplicationController
     render json: { years_count: years_count }
   end
 
+  def get_active_lingering_effects
+    year = params[:year]&.to_i || GameParameter.current_year
+    effects = GameParameter.get_active_lingering_effects(year)
+    render json: { 
+      year: year,
+      effects: effects,
+      count: effects.length
+    }
+  end
+
   def update_years_count
     years_count = params[:years_count].to_i
     result = GameParameter.update_years_count(years_count)

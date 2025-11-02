@@ -78,6 +78,7 @@ Rails.application.routes.draw do
   get '/game_parameters/get_robbery_stats', to: 'game_parameters#get_robbery_stats'
   get '/game_parameters/get_vassalage_settings', to: 'game_parameters#get_vassalage_settings'
   patch '/game_parameters/update_vassalage_settings', to: 'game_parameters#update_vassalage_settings'
+  get '/game_parameters/get_active_lingering_effects', to: 'game_parameters#get_active_lingering_effects'
 
 
 

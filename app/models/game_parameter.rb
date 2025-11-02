@@ -85,6 +85,32 @@ def self.any_lingering_effects?(effect_name, year = GameParameter.current_year, 
   end
 end
 
+# Возвращает все активные эффекты для указанного года
+def self.get_active_lingering_effects(year = GameParameter.current_year)
+  effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+  return [] unless effects_param&.params
+  
+  active_effects = []
+  
+  effects_param.params.each do |entry|
+    # Проверяем, активен ли эффект в указанном году
+    if entry["duration"]&.include?(year)
+      # Для каждого эффекта в массиве effects создаем отдельную запись
+      effects_array = entry["effects"] || []
+      effects_array.each do |effect|
+        active_effects << {
+          action: entry["name_of_action"],
+          effect: effect,
+          duration: entry["duration"],
+          targets: entry["targets"] || []
+        }
+      end
+    end
+  end
+  
+  active_effects
+end
+
 def self.register_lingering_effects(action, effects, years = GameParameter.current_year, targets = nil)
     #year - год, когда он действует. 
     # name_of_action - название полит.действия
@@ -110,25 +136,14 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
   targets_array = targets.is_a?(Array) ? targets : [targets]
   
   # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
-  processed_targets = targets_array.map do |t|
-    case t
-    when Integer
-      t  # ID как есть
-    when String
-      t  # Строка как есть (например, имя страны)
-    when nil
-      nil
-    else
-      t.id  # Объект ActiveRecord - берем ID
-    end
-  end
+  
   
   # Создаем ОДНУ запись с массивами эффектов и целей
   new_entry = {
     "duration" => duration, 
     "name_of_action" => action, 
     "effects" => effects_array,
-    "targets" => processed_targets
+    "targets" => targets
   }
   
   # Присваиваем новый массив

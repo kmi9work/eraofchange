@@ -41,8 +41,7 @@ module VassalsAndRobbers
         target = Job.find_by_id(Job::GRAND_PRINCE).players.first
         country = Country.find_by_id(params['country_id'])
         country.change_relations(2, self, "Личный визит")
-        effects = []
-        GameParameter.register_lingering_effects("make_a_trip", effects, GameParameter.current_year, target)
+        GameParameter.register_lingering_effects("make_a_trip", effects, GameParameter.current_year, target.name)
       end
 
 # Отношения с выбранным соседом не падают ниже "Нейтральных". 
@@ -109,12 +108,12 @@ module VassalsAndRobbers
         #Армии страны в текущем ходу не могут перемещаться
       def lease_cattle
         effects = [ALL_ARMIES_BLOCKED]
-        GameParameter.register_lingering_effects("lease_cattle", effects, GameParameter.current_year + 1)
+        GameParameter.register_lingering_effects("lease_cattle", effects, GameParameter.current_year)
         end
 
 
         #Покровительство иноверцам
-      def patronage_of_infidel #Покровительство иноверцам
+      def patronage_of_infidel_vassals #Покровительство иноверцам
         it = Technology.find_by_id(params['technology_id'])
         it.open_it
         regions = Country.find_by_id(Country::RUS).regions
@@ -126,7 +125,7 @@ module VassalsAndRobbers
       def boost_innovation
         effects = [HIGHER_PRODUCTION_YIELD]
         target = Guild.find_by_id(params["guild_id"])
-        GameParameter.register_lingering_effects("boost_innovation", effects, GameParameter.current_year + 1, target)
+        GameParameter.register_lingering_effects("boost_innovation", effects, GameParameter.current_year + 1, target.name)
         end
 
       def send_embassy_vassals #Отправить посольство
@@ -178,12 +177,31 @@ module VassalsAndRobbers
         #Воевода не может распоряжаться своей армией в текущем году
       def protect_caravan
         effects = [SINGLE_ARMY_COMPLETE_BLOCK]
+        
+        # Проверяем наличие гильдии
         guild = Guild.find_by_id(params["guild_id"])
-        guild.params[:caravan_protected] << GameParameter.current_year
-        target = Job.find_by_id(Job::VOEVODA).players.first
-
+        return {error: "Гильдия не найдена"} unless guild
+        
+        # Проверяем наличие воеводы
+        target = Job.find_by_id(Job::VOEVODA)&.players&.first
+        return {error: "Воевода не найден"} unless target
+        
+        # ВАЖНО: Используем другое имя переменной, чтобы не перезаписать self.params
+        current_guild_params = guild.params || {}
+        protected_years = current_guild_params["caravan_protected"] || []
+        protected_years << GameParameter.current_year
+        
+        # Обновляем params гильдии
+        current_guild_params["caravan_protected"] = protected_years
+        guild.params = current_guild_params
+        guild.params_will_change!
+        guild.save
+        
+        # Регистрируем эффект для воеводы
         GameParameter.register_lingering_effects("protect_caravan", effects, GameParameter.current_year + 1, target)
-        end
+        
+        return {success: true, message: "Караван гильдии '#{guild.name}' защищен. Воевода не сможет командовать армией в следующем году."}
+      end
 
         #Контрразведка
       def spy_away_mutiny
