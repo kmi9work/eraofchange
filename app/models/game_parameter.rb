@@ -42,6 +42,7 @@ class GameParameter < ApplicationRecord
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
   RESULTS = 6
+  LINGERING_EFFECTS = "lingering_effects"
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
@@ -66,6 +67,97 @@ class GameParameter < ApplicationRecord
   def self.default_schedule
     SCHEDULE
   end
+
+### 
+def self.any_lingering_effects?(effect_name, year = GameParameter.current_year, target = nil)
+  effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+  return false unless effects_param&.params
+  
+  effects_param.params.any? do |entry|
+    # Проверяем массив effects в каждой записи
+    has_effect = entry["effects"]&.include?(effect_name.to_s)
+    is_year = entry["duration"]&.include?(year)
+    
+    # Если target указан, проверяем что эффект применяется к этой цели
+    if target
+      targets_match = entry["targets"]&.include?(target) || 
+                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.id) ||
+                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.name)
+      has_effect && is_year && targets_match
+    else
+      has_effect && is_year
+    end
+  end
+end
+
+# Возвращает все активные эффекты для указанного года
+def self.get_active_lingering_effects(year = GameParameter.current_year)
+  effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+  return [] unless effects_param&.params
+  
+  active_effects = []
+  
+  effects_param.params.each do |entry|
+    # Проверяем, активен ли эффект в указанном году
+    if entry["duration"]&.include?(year)
+      # Для каждого эффекта в массиве effects создаем отдельную запись
+      effects_array = entry["effects"] || []
+      effects_array.each do |effect|
+        active_effects << {
+          action: entry["name_of_action"],
+          effect: effect,
+          duration: entry["duration"],
+          targets: entry["targets"] || []
+        }
+      end
+    end
+  end
+  
+  active_effects
+end
+
+def self.register_lingering_effects(action, effects, years = GameParameter.current_year, targets = nil)
+    #year - год, когда он действует. 
+    # name_of_action - название полит.действия
+    # effects - массив эффектов или один эффект
+    # targets  - массив целей или одна цель
+    duration = []
+    duration << years
+    duration.flatten!
+  
+  g_p = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+  
+  # Если записи нет, создаем её
+  unless g_p
+    Rails.logger.warn "[GameParameter] LINGERING_EFFECTS record not found, creating..."
+    g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
+  end
+
+  # Получаем текущие params
+  current_params = g_p.params || []
+  
+  # Преобразуем effects и targets в массивы
+  effects_array = effects.is_a?(Array) ? effects : [effects]
+  targets_array = targets.is_a?(Array) ? targets : [targets]
+  
+  # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
+  
+  
+  # Создаем ОДНУ запись с массивами эффектов и целей
+  new_entry = {
+    "duration" => duration, 
+    "name_of_action" => action, 
+    "effects" => effects_array,
+    "targets" => targets
+  }
+  
+  # Присваиваем новый массив
+  g_p.params = current_params + [new_entry]
+  
+  # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
+  g_p.params_will_change!
+  g_p.save
+end
 
   ###Результаты
 def self.show_noble_results
@@ -169,6 +261,7 @@ def self.show_noble_results
 
   def self.find_cap_per_pl(results)    
     per_pl_cap = []
+    results.map! {|par| par.transform_keys(&:to_sym)}
     results.each do |result|
       result.transform_keys!(&:to_sym) if result.is_a?(Hash)
       num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1

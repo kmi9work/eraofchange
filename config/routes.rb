@@ -79,6 +79,7 @@ Rails.application.routes.draw do
   get '/game_parameters/get_robbery_stats', to: 'game_parameters#get_robbery_stats'
   get '/game_parameters/get_vassalage_settings', to: 'game_parameters#get_vassalage_settings'
   patch '/game_parameters/update_vassalage_settings', to: 'game_parameters#update_vassalage_settings'
+  get '/game_parameters/get_active_lingering_effects', to: 'game_parameters#get_active_lingering_effects'
 
 
 
@@ -202,7 +203,11 @@ Rails.application.routes.draw do
   resources :families
   resources :players
   resources :countries
-  resources :armies
+  resources :armies do
+    member do
+      patch :unlease
+    end
+  end
   resources :army_sizes
   resources :troop_types
   resources :plant_places

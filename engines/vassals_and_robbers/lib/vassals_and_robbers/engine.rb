@@ -64,6 +64,7 @@ module VassalsAndRobbers
         if defined?(::PlantPlacesController) && defined?(VassalsAndRobbers::Concerns::PlantPlacesControllerExtensions)
           ::PlantPlacesController.include VassalsAndRobbers::Concerns::PlantPlacesControllerExtensions
         end
+        ::PoliticalAction.include VassalsAndRobbers::Concerns::PoliticalActionExtensions if defined?(::PoliticalAction)
         
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
         Rails.logger.info "[VassalsAndRobbers] ENV['ACTIVE_GAME'] = #{ENV['ACTIVE_GAME'].inspect}"

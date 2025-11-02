@@ -25,8 +25,33 @@ class PoliticalActionsController < ApplicationController
     @political_action.year = GameParameter.current_year
     @political_action.player_id = Job.find_by_id(political_action_params[:job_id])&.players&.first&.id
 
+    # Проверяем, требует ли метод success (старая система) или выполняется напрямую (плагин)
+    action_method = @political_action.political_action_type&.action
+    uses_plugin_system = action_method && @political_action.respond_to?(action_method) && 
+                         !action_requires_success?(action_method)
+
     respond_to do |format|
-      if @political_action.execute
+      if @political_action.save
+        # Выполняем действие
+        begin
+          if uses_plugin_system
+            # Новая система плагина - выполняем метод напрямую
+            Rails.logger.info "[PoliticalAction] Executing plugin method: #{action_method}"
+            result = @political_action.send(action_method)
+            Rails.logger.info "[PoliticalAction] Plugin method executed successfully: #{result.inspect}"
+          else
+            # Старая система - используем execute с проверкой success
+            Rails.logger.info "[PoliticalAction] Executing core method: #{action_method}"
+            @political_action.execute
+          end
+        rescue => e
+          Rails.logger.error "[PoliticalAction] Error executing #{action_method}: #{e.message}"
+          Rails.logger.error e.backtrace.join("\n")
+          format.html { redirect_to political_actions_url, alert: "Ошибка выполнения действия: #{e.message}" }
+          format.json { render json: {error: e.message}, status: :unprocessable_entity }
+          return
+        end
+        
         format.html { redirect_to political_action_url(@political_action), notice: "Political action was successfully created." }
         format.json { render :show, status: :created, location: @political_action }
       else
@@ -68,5 +93,20 @@ class PoliticalActionsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def political_action_params
       params.require(:political_action).permit(:year, :success, :player_id, :job_id, :political_action_type_id, params: {})
+    end
+
+    # Проверяет, использует ли метод старую систему с success
+    def action_requires_success?(action_method)
+      # Методы ядра игры, которые проверяют success
+      core_actions_with_success = %w[
+        sedition charity sabotage contraband open_gate new_fisheries people_support
+        ceremonial defective_coin call_a_meeting send_embassy take_bribe equip_caravan
+        conduct_audit peculation disperse_bribery implement_sabotage name_of_grand_prince
+        recruiting drain_the_swamps contract_to_cousin improving_the_city sermon
+        root_out_heresies call_for_unity counterintelligence fabricate_a_denunciation 
+        favoritism dev_the_economy confused_mine patronage_of_infidel
+      ]
+      
+      core_actions_with_success.include?(action_method.to_s)
     end
 end

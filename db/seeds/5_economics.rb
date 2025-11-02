@@ -1,7 +1,7 @@
 
 guild_names = ["Забавники", "Каменщики","Пивовары"]
 
-guild_names.each {|name| Guild.create(name: name)} 
+guild_names.each {|name| Guild.create(name: name, params: {caravan_protected: []})} 
   
 
 

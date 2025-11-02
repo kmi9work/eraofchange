@@ -38,7 +38,14 @@ class Country < ApplicationRecord
   MILITARILY = -3
   PEACEFULLY = 3
 
+  #Иностранные государства
   scope :foreign_countries, -> {where(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA])}
+  
+  #Русские государства ЗА ИСКЛЮЧЕНИЕМ ВЯТКИ и Москвы, она же РУсь (RUS)
+  scope :russian_countries, -> { where.not(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA, VYATKA, RUS]) }
+
+#Русские государства ЗА ИСКЛЮЧЕНИЕМ ВЯТКИ и Москвы, она же РУсь (RUS)
+  scope :vyanka_free_countries, -> { where.not(id: [VYATKA, RUS]) }
 
   def show_current_trade_level
     # level_thresholds хранится в params
@@ -134,8 +141,25 @@ class Country < ApplicationRecord
     { success: false, error: e.message }
   end
 
+# вынести на фронт
+
   def change_relations(count, entity, comment = nil)
     count = count.to_i
+    rel = relations
+    
+    # Проверяем эффект запрета улучшения отношений
+    if GameParameter.any_lingering_effects?("no_relation_improvement", GameParameter.current_year)
+       return "Нельзя улучшить отношения в этом году" if count > 0
+    end  
+
+    # Проверяем эффект "отношения не падают ниже нейтральных" для ЭТОЙ страны
+    if GameParameter.any_lingering_effects?("non_negative_relations", GameParameter.current_year, self.name)
+       # ПРАВИЛЬНАЯ формула: rel + count (count может быть отрицательным при ухудшении)
+       if rel + count < 0
+         return "Нельзя - отношения с #{self.name} не могут падать ниже нейтральных (эффект 'Передача армии')"
+       end
+    end 
+    
     rel = relations
     r = rel + count
     if entity.is_a?(PoliticalAction)

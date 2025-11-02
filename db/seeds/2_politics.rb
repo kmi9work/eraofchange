@@ -115,7 +115,9 @@ while str = f.gets
     description: desc, cost: cost, probability: prob, success: success)
 end
 
-f = File.open('./db/seeds/pat_nobles.csv', 'r+')
+pat_path = ENV['APP_VERSION'] == 'core' ? './db/seeds/pat_nobles.csv' : './engines/vassals_and_robbers/db/seeds/pat_nobles_vassals.csv'
+
+f = File.open(pat_path, 'r+')
 f.gets #headers
 while str = f.gets
   job_name, name, action, icon, desc, prob, cost, success, failure = str.split(";").map{|i| i.strip}

@@ -5,6 +5,9 @@ class CountriesController < ApplicationController
   def index
     @countries = Country.all
     @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
+    @countries = Country.russian_countries if params[:russian].to_i == 1
+    @countries = Country.vyanka_free_countries if params[:vyanka_free].to_i == 1
+    @countries = Country.foreign_countries if params[:only_foreign].to_i == 1
     @countries = @countries.order(:name)
   end
 

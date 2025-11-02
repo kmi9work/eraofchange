@@ -3,6 +3,16 @@ class Caravan < ApplicationRecord
   belongs_to :country
 
    MAX_TRADE_POINTS = 3
+   GRAND_PRINCE_SHARE = 0.10
+  #Подсчет, сколько надо досыпать золота Великому Князю
+  def self.count_caravan_revenue
+    prev_year = GameParameter.current_year - 1
+    return 0 if Caravan.all.empty? or prev_year < 0
+    (Caravan.where(year: prev_year).sum(:gold_to_pl).to_i * GRAND_PRINCE_SHARE).floor
+  end
+
+
+
 
   # Публичный метод для проверки ограбления каравана
   def self.check_robbery(guild_id)
@@ -173,6 +183,7 @@ class Caravan < ApplicationRecord
       caravan = Caravan.create!(
         country_id:        params[:country_id],
         guild_id:          params[:guild_id],
+        year:              GameParameter.current_year,
         resources_from_pl: params[:incoming],
         resources_to_pl:   params[:outcoming],
         gold_from_pl:      params[:purchase_cost],

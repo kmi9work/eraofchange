@@ -1,5 +1,5 @@
 class ArmiesController < ApplicationController
-  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop]
+  before_action :set_army, only: %i[show edit update destroy demote_army pay_for_army goto attack add_troop unlease]
 
   def goto
     @army.goto(params[:settlement_id])
@@ -17,6 +17,11 @@ class ArmiesController < ApplicationController
     else
       render json: false
     end
+  end
+  
+  def unlease
+    @army.unlease
+    render :show, status: :ok, location: @army
   end
 
   def index

@@ -33,7 +33,62 @@ class Army < ApplicationRecord
     end
   end
 
+  def lease_to(country)
+    # Получаем текущие params или создаем пустой хеш
+    current_params = self.params || {}
+    
+    # Создаем новый хеш с данными об аренде
+    current_params["additional"] = {"leased_to" => country.name, "active" => true}
+    
+    # Присваиваем новый хеш
+    self.params = current_params
+    
+    # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
+    self.params_will_change!
+    
+    self.save
+  end
+
+  def unlease
+    # Получаем текущие params
+    current_params = self.params || {}
+    current_params["additional"] ||= {}
+    current_params["additional"]["active"] = false
+    
+    # Присваиваем новый хеш
+    self.params = current_params
+    
+    # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
+    self.params_will_change!
+    
+    self.save
+    
+    # Поиск армии с активной арендой
+    leased_army = Army.all.find do |army|
+      army.params.dig("additional", "active") == true
+    end
+  
+    # Если активных аренд нет, очищаем параметры игры
+    unless leased_army
+      g_p = GameParameter.find_by(identificator: GameParameter::LINGERING_EFFECTS)
+      if g_p && g_p.params.present?
+        current_g_p_params = g_p.params || []
+        new_params = current_g_p_params.reject { |p| p&.dig("name_of_action") == "transfere_army" }
+        g_p.params = new_params
+        g_p.params_will_change!
+        g_p.save
+      end
+    end
+  end
+
+
   def goto settlement_id
+    # Проверяем эффект NO_ARMY_MOVEMENT для текущего года
+    if self.owner.jobs.map(&:name).include?("Великий князь") && 
+       GameParameter.any_lingering_effects?("no_army_movement", GameParameter.current_year)
+      return "НЕЛЬЗЯ - Великий князь не может командовать армией (эффект 'Личный визит')"
+    end
+
     settlement = Settlement.find_by_id(settlement_id)
     if settlement
       self.settlement_id = settlement.id
@@ -42,7 +97,11 @@ class Army < ApplicationRecord
   end
 
   def power
-    troops.sum{|t| t.power}
+    set = self.settlement
+    add_p = set&.buildings&.first&.building_level&.building_type&.name == "Кремль" ? 1 : 0
+
+    troops.sum{|t| t.power + add_p}
+
   end
   
   def soft_delete!

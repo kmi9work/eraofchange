@@ -41,5 +41,7 @@ GameParameter.create(
 
 GameParameter.create(name: "Количество караванов в гильдии", identificator: "caravans_per_guild", value: "3", params: {})
 
+GameParameter.create(name: "Длительные эффекты", identificator: "lingering_effects", value: 0, params: [])
+
 
 
