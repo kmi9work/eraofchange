@@ -1,5 +1,24 @@
 puts "=== Vassals and Robbers: Создание чек-листов вассалитета ==="
 
+# Чек-лист для Вятки (присоединена автоматически)
+vyatka_param_key = "vassal_#{Country::VYATKA}_established"
+vyatka_checklist = VassalsAndRobbers::Checklist.find_or_create_by(vassal_country_id: Country::VYATKA) do |checklist|
+  checklist.conditions = {
+    "conditions" => []
+  }
+  checklist.params = {
+    vyatka_param_key => true
+  }
+end
+
+unless vyatka_checklist.params&.[](vyatka_param_key) == true
+  current_params = (vyatka_checklist.params || {}).stringify_keys
+  current_params[vyatka_param_key] = true
+  vyatka_checklist.update!(params: current_params)
+end
+
+puts "Создан чек-лист для Вятки (присоединена автоматически)"
+
 # Чек-лист для Новгорода
 novgorod_checklist = VassalsAndRobbers::Checklist.find_or_create_by(vassal_country_id: Country::NOVGOROD) do |checklist|
   checklist.conditions = {
