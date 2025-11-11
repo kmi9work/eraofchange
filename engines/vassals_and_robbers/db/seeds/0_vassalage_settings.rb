@@ -10,9 +10,9 @@ end
 vassalage_settings.params ||= {}
 vassalage_settings.params['vassal_incomes'] = {
   Country::NOVGOROD => 60000,
-  Country::PERMIAN => 20000,
-  Country::TVER => 10000,
-  Country::RYAZAN => 10000
+  Country::PERMIAN => 30000,
+  Country::TVER => 20000,
+  Country::RYAZAN => 20000
 }
 vassalage_settings.save!
 
