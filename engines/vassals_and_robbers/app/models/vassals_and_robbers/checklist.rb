@@ -34,7 +34,11 @@ module VassalsAndRobbers
     # Метод для расчета процента выполнения
     def completion_percentage
       results = validate_all_conditions
-      return 0 if results.empty?
+      if results.empty?
+        vassal_param_key = "vassal_#{vassal_country_id}_established"
+        return 100 if params&.[](vassal_param_key)
+        return 0
+      end
       
       completed_count = results.count { |r| r[:is_completed] }
       (completed_count.to_f / results.count * 100).round
