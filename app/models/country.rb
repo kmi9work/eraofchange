@@ -175,7 +175,12 @@ class Country < ApplicationRecord
     if GameParameter.any_lingering_effects?("non_negative_relations", GameParameter.current_year, self.name)
        # ПРАВИЛЬНАЯ формула: rel + count (count может быть отрицательным при ухудшении)
        if rel + count < 0
+        if force
+          # Для ручных правок мастера - разрешаем, но возвращаем предупреждение
+          # Продолжаем выполнение ниже
+        else
          return "Нельзя - отношения с #{self.name} не могут падать ниже нейтральных (эффект 'Передача армии')"
+        end
        end
     end 
     
