@@ -52,7 +52,7 @@ PlantLevel.create(level: "2", deposit: "1700", price: {"timber" => 50, "grain" =
                             max_product:  [{identificator: "timber", count:  200}]}],
                   plant_type_id: delyan)
 
-PlantLevel.create(level: "3", deposit: "4100", price: {"timber" => 75, "grain" => 225, "tools" => 30},
+PlantLevel.create(level: "3", deposit: "4100", price: {"timber" => 75, "grain" => 200, "tools" => 30},
                   formulas: [{from:         [],
                             to:           [{identificator: "timber", count: 500}],
                             max_product:  [{identificator: "timber", count:  500}]}],
@@ -85,7 +85,7 @@ PlantLevel.create(level: "1", deposit: "1200", price: {"grain" => 900, "stone" =
                             max_product:  [{identificator: "grain", count: 450}]}],
                   plant_type_id: field)
 
-PlantLevel.create(level: "2", deposit: "1900", price: {"grain" => 225, "stone" => 20},
+PlantLevel.create(level: "2", deposit: "1900", price: {"grain" => 200, "stone" => 20},
                   formulas: [{from:         [],
                             to:           [{identificator: "grain", count: 900}],
                             max_product:  [{identificator: "grain", count: 900}]}],
@@ -111,7 +111,7 @@ PlantLevel.create(level: "2", deposit: "2000", price: {"stone" => 30, "timber" =
                             max_product:  [{identificator: "stone", count: 120}]}],
                   plant_type_id: quarry)
 
-PlantLevel.create(level: "3", deposit: "3400", price: {"stone" => 45, "timber" => 50, "food" => 15},
+PlantLevel.create(level: "3", deposit: "3400", price: {"stone" => 40, "timber" => 50, "food" => 15},
                   formulas: [{from:         [],
                             to:           [{identificator: "stone", count: 300}],
                             max_product:  [{identificator: "stone", count: 300}]}],
@@ -119,13 +119,13 @@ PlantLevel.create(level: "3", deposit: "3400", price: {"stone" => 45, "timber" =
 
 
 
-PlantLevel.create(level: "1", deposit: "1800", price: {"stone_brick" => 200, "timber" => 75},
+PlantLevel.create(level: "1", deposit: "1800", price: {"stone_brick" => 200, "timber" => 70},
                   formulas: [{from:         [],
                             to:           [{identificator: "metal_ore", count: 200}],
                             max_product:  [{identificator: "metal_ore", count: 200}]}],
                   plant_type_id: iron_mine)
 
-PlantLevel.create(level: "2", deposit: "3000", price: {"stone_brick" => 75, "timber" => 75},
+PlantLevel.create(level: "2", deposit: "3000", price: {"stone_brick" => 70, "timber" => 70},
                   formulas: [{from:         [],
                             to:           [{identificator: "metal_ore", count: 400}],
                             max_product:  [{identificator: "metal_ore", count: 400}]}],
@@ -138,7 +138,7 @@ PlantLevel.create(level: "3", deposit: "5200", price: {"stone_brick" => 120, "ti
                   plant_type_id: iron_mine)
 
 
-PlantLevel.create(level: "1", deposit: "2000", price: {"stone" => 75, "boards" => 200},
+PlantLevel.create(level: "1", deposit: "2000", price: {"stone" => 70, "boards" => 200},
                   formulas: [{from:         [],
                             to:           [{identificator: "gem_ore", count: 200}],
                             max_product:  [{identificator: "gem_ore", count: 200}]}],
@@ -150,7 +150,7 @@ PlantLevel.create(level: "2", deposit: "3400", price: {"stone" => 40, "boards" =
                             max_product:  [{identificator: "gem_ore", count: 400}]}],
                   plant_type_id: gold_mine)
 
-PlantLevel.create(level: "3", deposit: "5500", price: {"stone" => 60, "boards" => 75, "metal" => 50},
+PlantLevel.create(level: "3", deposit: "5500", price: {"stone" => 60, "boards" => 70, "metal" => 50},
                   formulas: [{from:         [],
                             to:           [{identificator: "gem_ore", count: 1000}],
                             max_product:  [{identificator: "gem_ore", count: 1000}]}],
@@ -224,7 +224,7 @@ PlantLevel.create(level: "1", deposit: "1000", price: {"gold" => 1200},
                   plant_type_id: stonemason)
 
 
-PlantLevel.create(level: "2", deposit: "2200", price: {"flour" => 100, "metal" => 40},
+PlantLevel.create(level: "2", deposit: "2200", price: {"flour" => 150, "metal" => 40},
                   formulas: [{from:         [{identificator: "stone", count: 1}],
                             to:           [{identificator: "stone_brick", count: 3}],
                             max_product:  [{identificator: "stone_brick", count: 540}]}],
@@ -346,7 +346,7 @@ PlantLevel.create(level: "1", deposit: "1500", price: {"stone_brick" => 50, "met
                             ],
                   plant_type_id: forge)
 
-PlantLevel.create(level: "2", deposit: "4500", price: {"stone_brick" => 50, "metal" => 15, "tools" => 10},
+PlantLevel.create(level: "2", deposit: "4500", price: {"stone_brick" => 50, "metal" => 30, "tools" => 10},
                   formulas: [
                               { from:         [{identificator: "boards", count: 6}, {identificator: "metal", count: 1}],
                                 to:           [{identificator: "tools", count: 1}],
