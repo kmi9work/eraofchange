@@ -11,9 +11,6 @@ class Caravan < ApplicationRecord
     (Caravan.where(year: prev_year).sum(:gold_to_pl).to_i * GRAND_PRINCE_SHARE).floor
   end
 
-
-
-
   # Публичный метод для проверки ограбления каравана
   def self.check_robbery(guild_id)
     check_caravan_robbery(guild_id)
@@ -75,19 +72,21 @@ class Caravan < ApplicationRecord
 
     country.reload
   
-    new_level_info = country.show_current_trade_level
-    new_level = new_level_info[:current_level]
-    new_level ||= 1
+    # new_level_info = country.show_current_trade_level
+    # new_level = new_level_info[:current_level]
+    # new_level ||= 1
 
-    if new_level > previous_level
-      diff = new_level - previous_level
-      current_params = country.params || {}
-      current_params["relation_points"] = (current_params["relation_points"] || 0) + diff < MAX_TRADE_POINTS ? (current_params["relation_points"] || 0) + diff : MAX_TRADE_POINTS
-      country.params = current_params
-      country.save
-    end
+    # if new_level > previous_level
+    #   diff = new_level - previous_level
+    #   current_params = country.params || {}
+    #   current_params["relation_points"] = (current_params["relation_points"] || 0) + diff < MAX_TRADE_POINTS ? (current_params["relation_points"] || 0) + diff : MAX_TRADE_POINTS
+    #   country.params = current_params
+    #   country.save
+    # end
     
-    { success: true, caravan: caravan, level_increased: new_level > previous_level }
+    # { success: true, caravan: caravan, level_increased: new_level > previous_level }
+
+    { success: true, caravan: caravan, level_increased: false}
     
   rescue ActiveRecord::RecordNotFound => e
     { success: false, error: "Country not found: #{e.message}" }

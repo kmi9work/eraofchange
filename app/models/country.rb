@@ -115,42 +115,42 @@ class Country < ApplicationRecord
     self.save
   end
 
-  def improve_relations_via_trade(force: false)
-    current_params = self.params || {}
-    relation_points = current_params['relation_points'].to_i
+  # def improve_relations_via_trade(force: false)
+  #   current_params = self.params || {}
+  #   relation_points = current_params['relation_points'].to_i
     
-    # Проверяем, что есть relation_points для траты
-    if relation_points < 1
-      return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
-    end
+  #   # Проверяем, что есть relation_points для траты
+  #   if relation_points < 1
+  #     return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
+  #   end
     
-    # Уменьшаем relation_points на 1
-    current_params['relation_points'] = relation_points - 1
-    self.params = current_params
+  #   # Уменьшаем relation_points на 1
+  #   current_params['relation_points'] = relation_points - 1
+  #   self.params = current_params
     
-    # Улучшаем отношения на 1
-    result = change_relations(1, self, "Улучшение через торговлю", force: force)
+  #   # Улучшаем отношения на 1
+  #   result = change_relations(1, self, "Улучшение через торговлю", force: force)
     
-    # Проверяем, было ли предупреждение
-    warning = nil
-    if result.is_a?(Hash) && result[:warning]
-      warning = result[:warning]
-    elsif result.is_a?(String)
-      # Если вернулась ошибка (не force режим)
-      return { success: false, error: result }
-    end
+  #   # Проверяем, было ли предупреждение
+  #   warning = nil
+  #   if result.is_a?(Hash) && result[:warning]
+  #     warning = result[:warning]
+  #   elsif result.is_a?(String)
+  #     # Если вернулась ошибка (не force режим)
+  #     return { success: false, error: result }
+  #   end
     
-    # Сохраняем изменения
-    if self.save
-      response = { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
-      response[:warning] = warning if warning
-      response
-    else
-      { success: false, error: self.errors.full_messages.join(', ') }
-    end
-  rescue => e
-    { success: false, error: e.message }
-  end
+  #   # Сохраняем изменения
+  #   if self.save
+  #     response = { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+  #     response[:warning] = warning if warning
+  #     response
+  #   else
+  #     { success: false, error: self.errors.full_messages.join(', ') }
+  #   end
+  # rescue => e
+  #   { success: false, error: e.message }
+  # end
 
 # вынести на фронт
 
@@ -175,7 +175,12 @@ class Country < ApplicationRecord
     if GameParameter.any_lingering_effects?("non_negative_relations", GameParameter.current_year, self.name)
        # ПРАВИЛЬНАЯ формула: rel + count (count может быть отрицательным при ухудшении)
        if rel + count < 0
+        if force
+          # Для ручных правок мастера - разрешаем, но возвращаем предупреждение
+          # Продолжаем выполнение ниже
+        else
          return "Нельзя - отношения с #{self.name} не могут падать ниже нейтральных (эффект 'Передача армии')"
+        end
        end
     end 
     
