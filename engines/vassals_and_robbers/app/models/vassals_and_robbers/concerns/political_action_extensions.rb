@@ -111,7 +111,6 @@ module VassalsAndRobbers
         GameParameter.register_lingering_effects("lease_cattle", effects, GameParameter.current_year)
         end
 
-
         #Покровительство иноверцам
       def patronage_of_infidel_vassals #Покровительство иноверцам
         it = Technology.find_by_id(params['technology_id'])
@@ -131,8 +130,7 @@ module VassalsAndRobbers
       def send_embassy_vassals #Отправить посольство
         country = Country.find_by_id(params['country_id'])
         country.change_relations(1, self)
-        end
-
+      end
 
         #нужны ли тут проверки? Или проверки лучше на фронте?
       def make_alliance
@@ -142,12 +140,11 @@ module VassalsAndRobbers
                      alliance_type_id: al_type.id)
       end
 
-
         #Принести дары (для иностранцев)
       def bring_gifts_to_foreign_countries
         country = Country.foreign_countries.find_by_id(params['country_id'])
         country.change_relations(1, self, "Принести дары")
-        end
+      end
 
         #Призыв к единству
       def call_for_unity_vassals 
@@ -159,19 +156,19 @@ module VassalsAndRobbers
       def sermon_vassals 
           region = Region.find_by_id(params['region_id'])
           PublicOrderItem.add(5, self.political_action_type.name, region, self) if region
-        end
+      end
 
         #Принести дары (для Руси)
       def bring_gifts_to_russian_countries
         country = Country.russian_countries.find_by_id(params['country_id'])
         country.change_relations(1, self, "Принести дары")
-        end
+      end
 
         #Набрать рекрутов
-      def recruiting_vassals  
+      def recruiting_vassals        
         regions = Country.find_by_id(Country::RUS).regions
         regions.each {|r| PublicOrderItem.add(-1, "Набрать рекрутов", r, self)}
-        end
+      end
 
         #Защита каравана
         #Воевода не может распоряжаться своей армией в текущем году
@@ -210,11 +207,11 @@ module VassalsAndRobbers
         #на фронте будет выбор: убираем армию или повышаем. Если повышаем, то тогда изменения происходят на сервере
         region = Region.find_by_id(params["region_id"])
         if region.show_overall_po < 0
-        PublicOrderItem.add(5, "Контрразведка", region, self)
+         PublicOrderItem.add(5, "Контрразведка", region, self)
         else
-        return {msg: "Нельзя поднять общественный порядок"}
+          return {msg: "Нельзя поднять общественный порядок"}
         end
-        end
+      end
 
       def infiltrate_army
 

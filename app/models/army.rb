@@ -81,17 +81,7 @@ class Army < ApplicationRecord
     end
   end
 
-
   def goto settlement_id
-    # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
-    # Проверяем только если owner - Player (не Country)
-    if self.owner_type == 'Player' && 
-       self.owner.respond_to?(:jobs) &&
-       self.owner.jobs.map(&:name).include?("Воевода") && 
-       GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
-      return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
-    end
-
     settlement = Settlement.find_by_id(settlement_id)
     if settlement
       self.settlement_id = settlement.id

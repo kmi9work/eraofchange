@@ -217,7 +217,7 @@ ryazan_checklist = VassalsAndRobbers::Checklist.find_or_create_by(vassal_country
     "conditions" => [
       {
         "type" => "relations",
-        "target_country_id" => Country::RUS,
+        "target_country_id" => Country::RYAZAN,
         "requirement" => 1,
         "description" => "Отношения с Москвой"
       },
