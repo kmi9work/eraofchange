@@ -125,46 +125,46 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
     duration << years
     duration.flatten!
   
-  g_p = GameParameter.find_by(identificator: LINGERING_EFFECTS)
-  
-  # Если записи нет, создаем её
-  unless g_p
-    Rails.logger.warn "[GameParameter] LINGERING_EFFECTS record not found, creating..."
-    g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
+    g_p = GameParameter.find_by(identificator: LINGERING_EFFECTS)
+    
+    # Если записи нет, создаем её
+    unless g_p
+      Rails.logger.warn "[GameParameter] LINGERING_EFFECTS record not found, creating..."
+      g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
+    end
+
+    # Получаем текущие params
+    current_params = g_p.params || []
+    
+    # Преобразуем effects и targets в массивы
+    effects_array = effects.is_a?(Array) ? effects : [effects]
+    targets_array = if targets.nil?
+      [] # Пустой массив для nil, чтобы не ломать логику проверки в any_lingering_effects?
+    else
+      targets.is_a?(Array) ? targets : [targets]
+    end
+    
+    # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
+    
+    
+    # Создаем ОДНУ запись с массивами эффектов и целей
+    new_entry = {
+      "duration" => duration, 
+      "name_of_action" => action, 
+      "effects" => effects_array,
+      "targets" => targets_array
+    }
+    
+    # Присваиваем новый массив
+    g_p.params = current_params + [new_entry]
+    
+    # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
+    g_p.params_will_change!
+    g_p.save
   end
 
-  # Получаем текущие params
-  current_params = g_p.params || []
-  
-  # Преобразуем effects и targets в массивы
-  effects_array = effects.is_a?(Array) ? effects : [effects]
-  targets_array = if targets.nil?
-    [] # Пустой массив для nil, чтобы не ломать логику проверки в any_lingering_effects?
-  else
-    targets.is_a?(Array) ? targets : [targets]
-  end
-  
-  # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
-  
-  
-  # Создаем ОДНУ запись с массивами эффектов и целей
-  new_entry = {
-    "duration" => duration, 
-    "name_of_action" => action, 
-    "effects" => effects_array,
-    "targets" => targets_array
-  }
-  
-  # Присваиваем новый массив
-  g_p.params = current_params + [new_entry]
-  
-  # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
-  g_p.params_will_change!
-  g_p.save
-end
-
-  ###Результаты
-def self.show_noble_results
+    ###Результаты
+  def self.show_noble_results
     game_results = GameParameter.find(RESULTS)
     players = Player.where(player_type_id: PlayerType::NOBLE)
     nobles_inf = []

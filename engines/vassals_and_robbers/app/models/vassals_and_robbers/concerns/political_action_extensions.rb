@@ -102,14 +102,14 @@ module VassalsAndRobbers
         effects = [HIGHER_EXTRACTION_YIELD]
         target = Guild.find_by_id(params["guild_id"])
         GameParameter.register_lingering_effects("invest", effects, GameParameter.current_year + 1, target.name)
-        end
+      end
 
         #Передача государевых подвод
         #Армии страны в текущем ходу не могут перемещаться
       def lease_cattle
         effects = [ALL_ARMIES_BLOCKED]
         GameParameter.register_lingering_effects("lease_cattle", effects, GameParameter.current_year)
-        end
+      end
 
 
         #Покровительство иноверцам
@@ -118,10 +118,10 @@ module VassalsAndRobbers
         it.open_it
         regions = Country.find_by_id(Country::RUS).regions
         regions.each {|r| PublicOrderItem.add(-1, "Покровительство иноверцам", r, self)}
-        end
+      end
 
         #Внедрение инноваций
-        #Производительность перерабатывающих предприятий выбранной гильдии увеличивается на 20% в следующем ходу
+        #Производительность перерабатывающих предприятий выбранной гильдии увеличивается на 100% в следующем ходу
       def boost_innovation
         effects = [HIGHER_PRODUCTION_YIELD]
         target = Guild.find_by_id(params["guild_id"])
@@ -131,8 +131,7 @@ module VassalsAndRobbers
       def send_embassy_vassals #Отправить посольство
         country = Country.find_by_id(params['country_id'])
         country.change_relations(1, self)
-        end
-
+      end
 
         #нужны ли тут проверки? Или проверки лучше на фронте?
       def make_alliance
