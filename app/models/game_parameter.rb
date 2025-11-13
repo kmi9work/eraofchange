@@ -72,21 +72,18 @@ class GameParameter < ApplicationRecord
 def self.any_lingering_effects?(effect_name, year = GameParameter.current_year, target = nil)
   effects_param = GameParameter.find_by(identificator: LINGERING_EFFECTS)
   return false unless effects_param&.params
-  
+
   effects_param.params.any? do |entry|
-    # Проверяем массив effects в каждой записи
-    has_effect = entry["effects"]&.include?(effect_name.to_s)
-    is_year = entry["duration"]&.include?(year)
-    
-    # Если target указан, проверяем что эффект применяется к этой цели
-    if target
-      targets_match = entry["targets"]&.include?(target) || 
-                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.id) ||
-                      entry["targets"]&.include?(target.is_a?(String) ? target : target&.name)
-      has_effect && is_year && targets_match
-    else
-      has_effect && is_year
-    end
+    effects = Array(entry["effects"]).map(&:to_s)
+    has_effect = effects.include?(effect_name.to_s)
+    next false unless has_effect
+
+    is_year = Array(entry["duration"]).include?(year)
+    next false unless is_year
+
+    next true unless target
+
+    targets_match?(entry["targets"], target)
   end
 end
 
@@ -107,7 +104,7 @@ def self.get_active_lingering_effects(year = GameParameter.current_year)
           action: entry["name_of_action"],
           effect: effect,
           duration: entry["duration"],
-          targets: entry["targets"] || []
+          targets: serialize_targets_for_response(entry["targets"])
         }
       end
     end
@@ -117,14 +114,14 @@ def self.get_active_lingering_effects(year = GameParameter.current_year)
 end
 
 def self.register_lingering_effects(action, effects, years = GameParameter.current_year, targets = nil)
-    #year - год, когда он действует. 
-    # name_of_action - название полит.действия
-    # effects - массив эффектов или один эффект
-    # targets  - массив целей или одна цель
-    duration = []
-    duration << years
-    duration.flatten!
-  
+    duration = Array(years).flatten.compact.map do |value|
+      if value.is_a?(String) && value.match?(/\A[+-]?\d+\z/)
+        value.to_i
+      else
+        value
+      end
+    end.uniq
+
     g_p = GameParameter.find_by(identificator: LINGERING_EFFECTS)
     
     # Если записи нет, создаем её
@@ -133,21 +130,11 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
       g_p = GameParameter.create!(identificator: LINGERING_EFFECTS, value: "0", params: [])
     end
 
-    # Получаем текущие params
     current_params = g_p.params || []
     
-    # Преобразуем effects и targets в массивы
-    effects_array = effects.is_a?(Array) ? effects : [effects]
-    targets_array = if targets.nil?
-      [] # Пустой массив для nil, чтобы не ломать логику проверки в any_lingering_effects?
-    else
-      targets.is_a?(Array) ? targets : [targets]
-    end
+    effects_array = Array(effects).flatten.compact.map(&:to_s).uniq
+    targets_array = normalize_targets_for_storage(targets)
     
-    # Преобразуем targets - поддерживаем Integer, ActiveRecord объекты и строки
-    
-    
-    # Создаем ОДНУ запись с массивами эффектов и целей
     new_entry = {
       "duration" => duration, 
       "name_of_action" => action, 
@@ -155,13 +142,168 @@ def self.register_lingering_effects(action, effects, years = GameParameter.curre
       "targets" => targets_array
     }
     
-    # Присваиваем новый массив
     g_p.params = current_params + [new_entry]
     
-    # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
     g_p.params_will_change!
     g_p.save
   end
+
+def self.targets_match?(stored_targets, target)
+  targets = Array(stored_targets)
+  return false if targets.empty?
+
+  normalized_requested = normalize_lookup_target(target)
+
+  targets.any? do |stored_target|
+    single_target_match?(stored_target, normalized_requested)
+  end
+end
+
+def self.single_target_match?(stored_target, requested)
+  stored_normalized = normalize_lookup_target(stored_target)
+
+  stored_id = stored_normalized[:id]
+  stored_name = stored_normalized[:name]
+  stored_raw = stored_normalized[:raw]
+
+  requested_id = requested[:id]
+  requested_name = requested[:name]
+  requested_raw = requested[:raw]
+
+  id_match = stored_id && requested_id && stored_id.to_s == requested_id.to_s
+  name_match = stored_name && requested_name && stored_name.to_s == requested_name.to_s
+  raw_match = stored_raw.present? && requested_raw.present? && stored_raw.to_s == requested_raw.to_s
+
+  id_match || name_match || raw_match
+end
+
+def self.normalize_lookup_target(target)
+  if target.is_a?(Hash)
+    hash = target.stringify_keys
+    {
+      id: extract_id_from_hash(hash),
+      name: extract_name_from_hash(hash),
+      raw: hash["raw"] || hash
+    }
+  elsif target.respond_to?(:id)
+    {
+      id: target.id,
+      name: extract_name_from_object(target),
+      raw: target
+    }
+  elsif numeric_string?(target)
+    {
+      id: target.to_i,
+      name: nil,
+      raw: target
+    }
+  elsif target.is_a?(Integer)
+    {
+      id: target,
+      name: nil,
+      raw: target
+    }
+  else
+    {
+      id: nil,
+      name: target.present? ? target.to_s : nil,
+      raw: target
+    }
+  end
+end
+
+def self.extract_id_from_hash(hash)
+  candidates = [
+    hash["id"],
+    hash["guild_id"],
+    hash["value_id"],
+    hash["target_id"]
+  ].compact
+
+  candidates.each do |candidate|
+    return candidate.to_i if numeric_string?(candidate) || candidate.is_a?(Integer)
+  end
+
+  nil
+end
+
+def self.extract_name_from_hash(hash)
+  [
+    hash["name"],
+    hash["label"],
+    hash["value"],
+    hash["display"],
+    hash["title"]
+  ].compact.first&.to_s
+end
+
+def self.extract_name_from_object(object)
+  if object.respond_to?(:name) && object.name.present?
+    object.name
+  elsif object.respond_to?(:label) && object.label.present?
+    object.label
+  elsif object.respond_to?(:title) && object.title.present?
+    object.title
+  else
+    nil
+  end
+end
+
+def self.normalize_targets_for_storage(raw_targets)
+  return [] if raw_targets.nil?
+
+  targets_list =
+    if raw_targets.is_a?(Array)
+      raw_targets
+    elsif raw_targets.is_a?(Hash)
+      [raw_targets]
+    else
+      [raw_targets]
+    end
+
+  targets_list.compact.map { |target| normalize_target_for_storage(target) }
+end
+
+def self.normalize_target_for_storage(target)
+  if target.is_a?(Hash)
+    hash = target.stringify_keys
+    hash["type"] ||= default_target_type(hash)
+    hash["name"] ||= extract_name_from_hash(hash)
+    hash
+  elsif target.respond_to?(:id)
+    {
+      "type" => target.class.name.split("::").last.underscore,
+      "id" => target.id,
+      "name" => extract_name_from_object(target)
+    }.compact
+  elsif target.is_a?(Integer)
+    { "type" => "guild", "id" => target }
+  elsif numeric_string?(target)
+    { "type" => "guild", "id" => target.to_i }
+  else
+    {
+      "type" => "custom",
+      "name" => target.to_s
+    }
+  end
+end
+
+def self.default_target_type(hash)
+  return hash["type"] if hash["type"].present?
+  return "guild" if hash["id"].present? || hash["guild_id"].present?
+
+  "custom"
+end
+
+def self.numeric_string?(value)
+  value.is_a?(String) && value.match?(/\A[+-]?\d+\z/)
+end
+
+def self.serialize_targets_for_response(targets)
+  normalize_targets_for_storage(targets).map do |target|
+    target.is_a?(Hash) ? target.stringify_keys : target
+  end
+end
 
     ###Результаты
   def self.show_noble_results

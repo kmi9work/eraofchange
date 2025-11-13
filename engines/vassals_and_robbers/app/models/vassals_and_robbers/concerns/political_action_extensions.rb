@@ -101,7 +101,10 @@ module VassalsAndRobbers
       def invest #Инвестиции
         effects = [HIGHER_EXTRACTION_YIELD]
         target = Guild.find_by_id(params["guild_id"])
-        GameParameter.register_lingering_effects("invest", effects, GameParameter.current_year + 1, target.name)
+        return { error: "Гильдия не найдена" } unless target
+
+        target_info = build_guild_target_payload(target)
+        GameParameter.register_lingering_effects("invest", effects, GameParameter.current_year + 1, target_info)
       end
 
         #Передача государевых подвод
@@ -124,8 +127,11 @@ module VassalsAndRobbers
       def boost_innovation
         effects = [HIGHER_PRODUCTION_YIELD]
         target = Guild.find_by_id(params["guild_id"])
-        GameParameter.register_lingering_effects("boost_innovation", effects, GameParameter.current_year + 1, target.name)
-        end
+        return { error: "Гильдия не найдена" } unless target
+
+        target_info = build_guild_target_payload(target)
+        GameParameter.register_lingering_effects("boost_innovation", effects, GameParameter.current_year + 1, target_info)
+      end
 
       def send_embassy_vassals #Отправить посольство
         country = Country.find_by_id(params['country_id'])
@@ -215,6 +221,18 @@ module VassalsAndRobbers
 
       def infiltrate_army
 
+      end
+      
+      private
+
+      def build_guild_target_payload(guild)
+        return nil unless guild
+
+        {
+          "type" => "guild",
+          "id" => guild.id,
+          "name" => guild.name
+        }
       end
     end
   end
