@@ -33,7 +33,9 @@ class PlantsController < ApplicationController
     Rails.logger.info "Plant before economic_subject: #{@plant.inspect}"
     
     # Устанавливаем economic_subject после создания объекта
-    write_economic_subject if params[:plant][:economic_subject].present?
+    # Поддерживаем оба формата: params[:plant][:economic_subject] и params[:economic_subject]
+    economic_subject_value = params[:plant]&.dig(:economic_subject) || params[:economic_subject]
+    write_economic_subject if economic_subject_value.present?
     
     Rails.logger.info "Plant before save: #{@plant.inspect}"
     
@@ -54,7 +56,9 @@ class PlantsController < ApplicationController
 
   def update
     @plant.assign_attributes(plant_params)
-    write_economic_subject if params[:plant][:economic_subject].present?
+    # Поддерживаем оба формата: params[:plant][:economic_subject] и params[:economic_subject]
+    economic_subject_value = params[:plant]&.dig(:economic_subject) || params[:economic_subject]
+    write_economic_subject if economic_subject_value.present?
     if @plant.save
       redirect_to plant_url(@plant)
     else
@@ -140,17 +144,28 @@ class PlantsController < ApplicationController
 
       # Only allow a list of trusted parameters through.
     def plant_params
-      params.require(:plant).permit(:comments, :plant_level_id, :plant_place_id, :credit_id)
+      # Поддерживаем оба формата: обёрнутые в :plant и прямые параметры
+      if params[:plant].present?
+        params.require(:plant).permit(:comments, :plant_level_id, :plant_place_id, :credit_id)
+      else
+        params.permit(:comments, :plant_level_id, :plant_place_id, :credit_id)
+      end
     end
 
     def write_economic_subject
-      es_id, es_type = params[:plant][:economic_subject].split('_')
+      # Поддерживаем оба формата: params[:plant][:economic_subject] и params[:economic_subject]
+      economic_subject_value = params[:plant]&.dig(:economic_subject) || params[:economic_subject]
+      return unless economic_subject_value.present?
+      
+      es_id, es_type = economic_subject_value.split('_')
       
       # Находим объект economic_subject
       if es_type == 'Guild'
         @plant.economic_subject = Guild.find(es_id.to_i)
+        Rails.logger.info "Set economic_subject to Guild ID: #{es_id}"
       elsif es_type == 'Player'
         @plant.economic_subject = Player.find(es_id.to_i)
+        Rails.logger.info "Set economic_subject to Player ID: #{es_id}"
       end
     end
 end
