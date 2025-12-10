@@ -22,27 +22,15 @@ class Caravan < ApplicationRecord
   end
 
   def self.register_caravan(params)
+    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
+    return send_caravan_via_vyatka(params) if via_vyatka
+
+    is_protected = params[:is_protected] == true || params[:is_protected] == 'true' || params[:is_protected] == 1
+
     country = Country.find(params[:country_id])
     current_year = GameParameter.current_year
-    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
-  
-    # Если караван идет через Вятку, пропускаем проверку ограбления и не учитываем в товарообороте
-    if via_vyatka
-      # Создаем караван без проверки ограбления и без учета в товарообороте
-      result = create_caravan(params)
-      
-      # Инкрементируем счетчик пришедших караванов (только если караван создан)
-      if result[:success]
-        GameParameter.increment_arrived_count(current_year)
-      end
-      
-      return { success: true, caravan: result[:caravan], level_increased: false, via_vyatka: true } if result[:success]
-      return result
-    end
-    
-    # Для караванов не через Вятку проверяем ограбление при регистрации
-    # (на случай, если пользователь не проверил при выборе гильдии или изменил галочку)
-    if !via_vyatka
+
+    if !is_protected
       robbery_check = check_robbery_with_decide(params[:guild_id])
       if robbery_check[:robbed]
         current_year = GameParameter.current_year
@@ -51,12 +39,6 @@ class Caravan < ApplicationRecord
         return { success: false, robbed: true, error: "Караван был ограблен" }
       end
     end
-    
-    # Обычная логика для караванов не через Вятку
-    # Получаем предыдущий уровень ДО создания каравана
-    previous_level_info = country.show_current_trade_level
-    previous_level = previous_level_info[:current_level]
-    previous_level ||= 1
 
     # Создаем караван и проверяем результат
     result = create_caravan(params)
@@ -71,20 +53,6 @@ class Caravan < ApplicationRecord
     caravan = result[:caravan]
 
     country.reload
-  
-    # new_level_info = country.show_current_trade_level
-    # new_level = new_level_info[:current_level]
-    # new_level ||= 1
-
-    # if new_level > previous_level
-    #   diff = new_level - previous_level
-    #   current_params = country.params || {}
-    #   current_params["relation_points"] = (current_params["relation_points"] || 0) + diff < MAX_TRADE_POINTS ? (current_params["relation_points"] || 0) + diff : MAX_TRADE_POINTS
-    #   country.params = current_params
-    #   country.save
-    # end
-    
-    # { success: true, caravan: caravan, level_increased: new_level > previous_level }
 
     { success: true, caravan: caravan, level_increased: false}
     
@@ -96,7 +64,18 @@ class Caravan < ApplicationRecord
   
   class << self
     private
-    
+
+    def send_caravan_via_vyatka(params)
+      result = create_caravan(params)
+
+      if result[:success]
+        GameParameter.increment_arrived_count(GameParameter.current_year)
+      end
+      
+      return { success: true, caravan: result[:caravan], level_increased: false, via_vyatka: true } if result[:success]
+      return result
+    end
+      
     def check_caravan_robbery(guild_id)
       return { robbed: false } if guild_id.nil?
       
