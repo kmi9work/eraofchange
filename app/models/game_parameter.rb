@@ -62,7 +62,7 @@ class GameParameter < ApplicationRecord
 
   def self.toggle_helper
     g_p = GameParameter.find_by(identificator: MOBILE_HELPER)
-    g_p.value = (g_p.value - 1).abs
+    g_p.value = (g_p.value.to_i - 1).abs
     g_p.save    
   end
 
