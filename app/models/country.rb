@@ -45,7 +45,7 @@ class Country < ApplicationRecord
   scope :russian_countries, -> { where.not(id: [HORDE, LIVONIAN, SWEDEN, LITHUANIA, KAZAN, CRIMEA, VYATKA, RUS]) }
 
 #Русские государства ЗА ИСКЛЮЧЕНИЕМ ВЯТКИ и Москвы, она же РУсь (RUS)
-  scope :vyanka_free_countries, -> { where.not(id: [VYATKA, RUS]) }
+  scope :vyatka_free_countries, -> { where.not(id: [VYATKA, RUS]) }
 
   def show_current_trade_level
     # level_thresholds хранится в params

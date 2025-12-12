@@ -38,11 +38,14 @@ class GameParameter < ApplicationRecord
     end
   end
 
+
+
   TIMER = 4
   SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
   RESULTS = 6
   LINGERING_EFFECTS = "lingering_effects"
+  MOBILE_HELPER = "mobile_helper"
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
@@ -51,6 +54,17 @@ class GameParameter < ApplicationRecord
   # true - следующий цикл запускается автоматически
   # false - следующий цикл запускается по кнопке (базовая игра)
   class_attribute :auto_start_next_cycle, default: false
+
+  def self.show_mobile_helper
+    g_p = GameParameter.find_by(identificator: MOBILE_HELPER)
+    return g_p.value
+  end
+
+  def self.toggle_helper
+    g_p = GameParameter.find_by(identificator: MOBILE_HELPER)
+    g_p.value = (g_p.value.to_i - 1).abs
+    g_p.save    
+  end
 
   SCHEDULE = [
             {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00", type: "play"},
