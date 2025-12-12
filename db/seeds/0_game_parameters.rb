@@ -43,5 +43,5 @@ GameParameter.create(name: "Количество караванов в гиль�
 
 GameParameter.create(name: "Длительные эффекты", identificator: "lingering_effects", value: 0, params: [])
 
-
+GameParameter.create(name: "Мобильный помощник", identificator: "mobile_helper", value: 0, params: [])
 
