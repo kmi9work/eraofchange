@@ -309,3 +309,109 @@ if audit.auditable_type == 'Country'
     json.country_name audit.audited_changes&.dig('name')
   end
 end
+
+# Добавляем дополнительные поля для предприятий (Plant)
+if audit.auditable_type == 'Plant'
+  # Добавляем ID предприятия для отслеживания
+  if audit.auditable
+    json.auditable_plant_id audit.auditable.id
+  elsif audit.audited_changes['id']
+    # Для удаленных предприятий берем ID из audited_changes
+    plant_id = audit.audited_changes['id']
+    plant_id = plant_id.is_a?(Array) ? plant_id.first : plant_id
+    json.auditable_plant_id plant_id
+  end
+  json.auditable_id audit.auditable_id if audit.respond_to?(:auditable_id)
+  
+  # Для create и destroy нужно брать данные из audited_changes, чтобы получить уровень на момент создания/удаления
+  # Для update можно использовать текущий объект, но лучше тоже из audited_changes для консистентности
+  if audit.action == 'create' || audit.action == 'destroy' || !audit.auditable
+    # Для созданных или удаленных предприятий берем данные из audited_changes
+    if audit.audited_changes['economic_subject_id']
+      economic_subject_id = audit.audited_changes['economic_subject_id']
+      economic_subject_id = economic_subject_id.is_a?(Array) ? economic_subject_id.last : economic_subject_id
+      economic_subject_type = audit.audited_changes['economic_subject_type']
+      economic_subject_type = economic_subject_type.is_a?(Array) ? economic_subject_type.last : economic_subject_type
+      json.economic_subject_type economic_subject_type
+      
+      if economic_subject_type == 'Guild' && economic_subject_id
+        guild = Guild.find_by(id: economic_subject_id)
+        json.guild_name guild&.name
+      end
+    end
+    
+    if audit.audited_changes['plant_level_id']
+      plant_level_id = audit.audited_changes['plant_level_id']
+      # Для create берем последнее значение (новый уровень), для destroy - первое (старый уровень)
+      if plant_level_id.is_a?(Array)
+        plant_level_id = audit.action == 'create' ? plant_level_id.last : plant_level_id.first
+      end
+      plant_level = PlantLevel.find_by(id: plant_level_id)
+      json.plant_type_name plant_level&.plant_type&.name
+      json.plant_level_level plant_level&.level
+      json.cost plant_level&.price
+      # Добавляем максимальную производительность
+      if plant_level&.formulas
+        max_products = []
+        plant_level.formulas.each do |formula|
+          if formula['max_product']
+            max_products.concat(formula['max_product'])
+          end
+        end
+        json.max_products max_products
+      end
+    end
+  elsif audit.auditable
+    # Для существующих предприятий при update используем текущий объект как fallback
+    plant = audit.auditable
+    json.economic_subject_type plant.economic_subject_type
+    json.guild_name plant.economic_subject&.name if plant.economic_subject_type == 'Guild'
+    json.plant_type_name plant.plant_level&.plant_type&.name
+    json.plant_level_level plant.plant_level&.level
+    json.cost plant.plant_level&.price
+    # Добавляем максимальную производительность
+    if plant.plant_level&.formulas
+      max_products = []
+      plant.plant_level.formulas.each do |formula|
+        if formula['max_product']
+          max_products.concat(formula['max_product'])
+        end
+      end
+      json.max_products max_products
+    end
+  end
+  
+  # Обработка изменений уровня при upgrade
+  if audit.action == 'update' && audit.audited_changes['plant_level_id']
+    plant_level_changes = audit.audited_changes['plant_level_id']
+    if plant_level_changes.is_a?(Array)
+      old_level_id = plant_level_changes[0]
+      new_level_id = plant_level_changes[1]
+      old_level = PlantLevel.find_by(id: old_level_id)
+      new_level = PlantLevel.find_by(id: new_level_id)
+      json.old_plant_level_level old_level&.level
+      json.new_plant_level_level new_level&.level
+      json.old_cost old_level&.price
+      json.new_cost new_level&.price
+      # Добавляем максимальную производительность для старого и нового уровня
+      if old_level&.formulas
+        old_max_products = []
+        old_level.formulas.each do |formula|
+          if formula['max_product']
+            old_max_products.concat(formula['max_product'])
+          end
+        end
+        json.old_max_products old_max_products
+      end
+      if new_level&.formulas
+        new_max_products = []
+        new_level.formulas.each do |formula|
+          if formula['max_product']
+            new_max_products.concat(formula['max_product'])
+          end
+        end
+        json.new_max_products new_max_products
+      end
+    end
+  end
+end

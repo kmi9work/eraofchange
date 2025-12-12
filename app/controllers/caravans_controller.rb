@@ -38,6 +38,12 @@ class CaravansController < ApplicationController
     @caravans = Caravan.all
   end
 
+  # GET /caravans/all.json - получить все караваны для статистики
+  def all
+    @caravans = Caravan.includes(:guild, :country).order(year: :asc, created_at: :asc)
+    render json: @caravans
+  end
+
   # GET /caravans/1 or /caravans/1.json
   def show
   end

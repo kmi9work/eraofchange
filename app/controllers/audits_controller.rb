@@ -16,9 +16,12 @@ class AuditsController < ApplicationController
         :troop_type,
         :army,
         :owner,
+        :economic_subject,
+        :plant_level,
         building_level: :building_type,
         army: [:settlement, :owner],
-        troop_type: []
+        troop_type: [],
+        plant_level: :plant_type
       ]
     ).last(200).reverse
     
@@ -28,6 +31,26 @@ class AuditsController < ApplicationController
     else
       @viewed_audit_ids = []
     end
+  end
+
+  def plants
+    # Загружаем все аудиты предприятий без ограничений
+    @audits = Audited::Audit.includes(
+      auditable: [
+        :economic_subject,
+        :plant_level,
+        plant_level: :plant_type
+      ]
+    ).where(auditable_type: 'Plant').order(created_at: :asc)
+    
+    # Загружаем просмотренные события для текущего пользователя
+    if current_user
+      @viewed_audit_ids = current_user.viewed_audits.pluck(:audit_id)
+    else
+      @viewed_audit_ids = []
+    end
+    
+    render :index
   end
   
   def mark_as_viewed

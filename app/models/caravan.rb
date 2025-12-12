@@ -8,7 +8,7 @@ class Caravan < ApplicationRecord
   def self.count_caravan_revenue
     prev_year = GameParameter.current_year - 1
     return 0 if Caravan.all.empty? or prev_year < 0
-    (Caravan.where(year: prev_year).sum(:gold_to_pl).to_i * GRAND_PRINCE_SHARE).floor
+    (Caravan.where(year: prev_year).sum(:gold_import).to_i * GRAND_PRINCE_SHARE).floor
   end
 
   # Публичный метод для проверки ограбления каравана
@@ -183,10 +183,10 @@ class Caravan < ApplicationRecord
         country_id:        params[:country_id],
         guild_id:          params[:guild_id],
         year:              GameParameter.current_year,
-        resources_from_pl: params[:incoming],
-        resources_to_pl:   params[:outcoming],
-        gold_from_pl:      params[:purchase_cost],
-        gold_to_pl:        params[:sale_income],
+        resources_export: params[:incoming],
+        resources_import: params[:outcoming],
+        gold_export:      params[:purchase_cost],
+        gold_import:      params[:sale_income],
         via_vyatka:        params[:via_vyatka] || false
       )
       

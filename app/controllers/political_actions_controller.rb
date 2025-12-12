@@ -29,7 +29,7 @@ class PoliticalActionsController < ApplicationController
     action_method = @political_action.political_action_type&.action
     uses_plugin_system = action_method && @political_action.respond_to?(action_method) && 
                          !action_requires_success?(action_method)
-
+#TODO!!!!
     respond_to do |format|
       if @political_action.save
         # Выполняем действие

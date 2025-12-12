@@ -101,7 +101,7 @@ class Country < ApplicationRecord
     caravans = self.caravans || []
     trade_turnover = 0
     # Исключаем караваны через Вятку из расчета товарооборота
-    caravans.each {|car| trade_turnover += (car.gold_from_pl || 0) + (car.gold_to_pl || 0) unless car.via_vyatka == true}
+    caravans.each {|car| trade_turnover += (car.gold_export || 0) + (car.gold_import || 0) unless car.via_vyatka == true}
     return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
   end
 

@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   get '/caravans/check_robbery', to: 'caravans#check_robbery'
   get '/caravans/check_robbery_with_decide', to: 'caravans#check_robbery_with_decide'
   post '/caravans/register_caravan', to: 'caravans#register_caravan'
+  get '/caravans/all', to: 'caravans#all'
   resources :caravans
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'
@@ -181,6 +182,7 @@ Rails.application.routes.draw do
   get '/current_user', to: 'users#current_user'
 
   get '/audits', to: 'audits#index'
+  get '/audits/plants', to: 'audits#plants'
   post '/audits/mark_as_viewed', to: 'audits#mark_as_viewed'
   post '/audits/mark_all_as_viewed', to: 'audits#mark_all_as_viewed'
   get '/audits/yearly_stats', to: 'audits#yearly_stats'
