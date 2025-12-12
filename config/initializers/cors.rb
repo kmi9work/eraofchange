@@ -5,6 +5,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     frontend_port = ENV['FRONTEND_PORT'] || '5173'
     
     allowed_origins = [
+      # Production frontend URLs
+      'https://epoha.igroteh.su',
+      'https://calc.igroteh.su',
+      
       # Frontend URLs
       "http://#{dev_ip}:#{frontend_port}",
       "http://localhost:#{frontend_port}",
