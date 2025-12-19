@@ -89,12 +89,23 @@ class Army < ApplicationRecord
     end
   end
 
+  def defense_power
+    building_bonus = self.settlement
+      &.buildings
+      &.joins(building_level: :building_type)
+      &.where(building_types: { name: "Кремль" })
+      &.pick("building_levels.level")
+      .to_i
+
+    power + building_bonus * troops.count
+  end
+
+  def attack_power
+    power
+  end
+
   def power
-    set = self.settlement
-    add_p = set&.buildings&.first&.building_level&.building_type&.name == "Кремль" ? 1 : 0
-
-    troops.sum{|t| t.power + add_p}
-
+    troops.sum{|t| t.power}
   end
   
   def soft_delete!
@@ -117,7 +128,7 @@ class Army < ApplicationRecord
     
     enemy = Army.active.find_by_id(enemy_id)
     if enemy
-      winner, looser = self.power > enemy.power ? [self, enemy] : [enemy, self]
+      winner, looser = self.atack_power > enemy.defense_power ? [self, enemy] : [enemy, self]
       damage = (looser.power / 2.0).ceil
       
       # Создаем запись о сражении
