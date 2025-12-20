@@ -97,7 +97,7 @@ class Army < ApplicationRecord
       &.pick("building_levels.level")
       .to_i
 
-    power + building_bonus * troops.count
+    power + building_bonus * self.troops.count
   end
 
   def attack_power
@@ -128,7 +128,7 @@ class Army < ApplicationRecord
     
     enemy = Army.active.find_by_id(enemy_id)
     if enemy
-      winner, looser = self.atack_power > enemy.defense_power ? [self, enemy] : [enemy, self]
+      winner, looser = self.attack_power > enemy.defense_power ? [self, enemy] : [enemy, self]
       damage = (looser.power / 2.0).ceil
       
       # Создаем запись о сражении
