@@ -27,7 +27,7 @@ module VassalsAndRobbers
           is_completed: result[:success]
         }
       end
-      
+       
       validation_results
     end
     

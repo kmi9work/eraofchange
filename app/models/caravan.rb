@@ -21,10 +21,6 @@ class Caravan < ApplicationRecord
     check_caravan_robbery_with_decide(guild_id)
   end
 
-  def self.perform_robbery_attempt(guild_id)
-    perform_robbery_attempt(guild_id)
-  end
-
   def self.register_caravan(params)
     via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
     return send_caravan_via_vyatka(params) if via_vyatka
@@ -33,28 +29,16 @@ class Caravan < ApplicationRecord
 
     country = Country.find(params[:country_id])
     current_year = GameParameter.current_year
-    # if !is_protected
-    #   robbery_check = check_robbery_with_decide(params[:guild_id])
-    #   if robbery_check[:robbed]
-    #     current_year = GameParameter.current_year
-    #     GameParameter.increment_arrived_count(current_year)
-    #     GameParameter.increment_robbed_count(current_year)
-    #     return { success: false, robbed: true, error: "Караван был ограблен" }
-    #   end
-    # end
 
     # Флаг попытки ограбить караван
-    robbery_failure = false
-    robbery_attempt = check_caravan_robbery_attempt(current_year)
+    robbery_attempt = RobberyService.attempt_robbery(current_year)
     if robbery_attempt
-      GameParameter.increment_arrived_count(current_year)
-      GameParameter.decrement_robbery_count_for_year(current_year)
       if !is_protected
+        GameParameter.increment_arrived_count(current_year)
         GameParameter.increment_robbed_count(current_year)
         return { success: false, robbed: true, error: "Караван был ограблен" }
       end
     end
-      
 
     # Создаем караван и проверяем результат
     result = create_caravan(params)
@@ -69,14 +53,20 @@ class Caravan < ApplicationRecord
     caravan = result[:caravan]
 
     country.reload
-
-    { success: true, caravan: caravan, level_increased: false}
+    caravan_result = { 
+      success: true, 
+      caravan: caravan, 
+      level_increased: false
+    }
+    caravan_result[:error] = "Неудачное ограбление, Караван отбит" if robbery_attempt
+    caravan_result
     
   rescue ActiveRecord::RecordNotFound => e
     { success: false, error: "Country not found: #{e.message}" }
   rescue => e
     { success: false, error: e.message }
   end
+  
   
   class << self
     private
@@ -173,29 +163,6 @@ class Caravan < ApplicationRecord
       result.merge(robbed: robbed, random_value: random_value)
     end
 
-    def check_caravan_robbery_attempt(current_year)
-      # Новый подход к грабежу караванов.
-      # В начале года мы указываем сколько попыток ограблений совершит вятка - max_attempts (дальше не меняем)
-      # Число оставшихся попыток remained_attempts = max_attempts в начале
-      # Вероятность ограбления = remained_attempts / total_caravans  * 100
-      # Если караван защищен - попытка потрачена впустую
-      # Если не защищен - караван ограблен
-      #
-      # Этод метод вычисляет только лишь попытку ограбления карв
-      remained_robberies = GameParameter.get_robbery_count_for_year(current_year).to_i
-      caravans_per_guild = GameParameter.get_caravans_per_guild.to_f
-      total_guilds = Guild.count.to_f
-      # total_caravans - общее количество караванов, которые могут быть ограблены
-      total_caravans = caravans_per_guild * total_guilds
-      remained_caravans = total_caravans - GameParameter.get_arrived_count_for_year(current_year)
-      probability = remained_robberies / remained_caravans
-      random_value = rand
-      robbed = random_value < probability
-      Rails.logger.debug("Caravan robbery decision: probability=#{probability}, random=#{random_value}, robbed=#{robbed}")
-      return robbed
-    end
-
-    
     def create_caravan(params)
       caravan = Caravan.create!(
         country_id:        params[:country_id],
@@ -215,6 +182,4 @@ class Caravan < ApplicationRecord
       { success: false, error: e.message }
     end
   end
-
-
 end

@@ -3,8 +3,9 @@ class CaravansController < ApplicationController
 
   def check_robbery
     # Проверяем вероятность
-    result = Caravan.check_robbery(params[:guild_id])
-    render json: result
+    # result = Caravan.check_robbery(params[:guild_id])
+    probability = RobberyService.robbery_probability_status(GameParameter.current_year)
+    render json: { probability: probability}
   rescue => e
     render json: { error: e.message }, status: :internal_server_error
   end

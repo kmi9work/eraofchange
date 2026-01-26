@@ -855,8 +855,9 @@ end
 
   def self.decrement_robbery_count_for_year(year)
     setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
-    setting.params['robbery_by_year'][year.to_s] -= 1 
-    
+    setting.params['robbery_by_year'][year.to_s] -= 1
+    setting.save
+  end
 
   def self.reset_caravan_robbery_counters(year)
     setting = GameParameter.find_by(identificator: "caravan_robbery_settings")
