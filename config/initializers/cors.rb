@@ -8,6 +8,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
       # Production frontend URLs
       'https://epoha.igroteh.su',
       'https://calc.igroteh.su',
+      'https://noble.igroteh.su',
       
       # Frontend URLs
       "http://#{dev_ip}:#{frontend_port}",

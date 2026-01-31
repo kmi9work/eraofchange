@@ -1,4 +1,10 @@
 PATH
+  remote: engines/artel
+  specs:
+    artel (0.1.0)
+      rails (~> 7.0.6)
+
+PATH
   remote: engines/vassals_and_robbers
   specs:
     vassals_and_robbers (0.1.0)
@@ -267,6 +273,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-session_store
+  artel!
   audited
   bcrypt_pbkdf (~> 1.0)
   bootsnap

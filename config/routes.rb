@@ -231,6 +231,7 @@ Rails.application.routes.draw do
 
   # Game engines
   mount VassalsAndRobbers::Engine, at: '/vassals_and_robbers'
+  mount Artel::Engine, at: '/artel'
 
   root to: 'welcome#index'
 end
