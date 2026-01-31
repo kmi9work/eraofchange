@@ -30,10 +30,10 @@ class Caravan < ApplicationRecord
     country = Country.find(params[:country_id])
     current_year = GameParameter.current_year
 
-    if !is_protected
-      robbery_check = check_robbery_with_decide(params[:guild_id])
-      if robbery_check[:robbed]
-        current_year = GameParameter.current_year
+    # Флаг попытки ограбить караван
+    robbery_attempt = RobberyService.attempt_robbery(current_year)
+    if robbery_attempt
+      if !is_protected
         GameParameter.increment_arrived_count(current_year)
         GameParameter.increment_robbed_count(current_year)
         return { success: false, robbed: true, error: "Караван был ограблен" }
@@ -53,14 +53,20 @@ class Caravan < ApplicationRecord
     caravan = result[:caravan]
 
     country.reload
-
-    { success: true, caravan: caravan, level_increased: false}
+    caravan_result = { 
+      success: true, 
+      caravan: caravan, 
+      level_increased: false
+    }
+    caravan_result[:error] = "Неудачное ограбление, Караван отбит" if robbery_attempt
+    caravan_result
     
   rescue ActiveRecord::RecordNotFound => e
     { success: false, error: "Country not found: #{e.message}" }
   rescue => e
     { success: false, error: e.message }
   end
+  
   
   class << self
     private
@@ -156,7 +162,7 @@ class Caravan < ApplicationRecord
       
       result.merge(robbed: robbed, random_value: random_value)
     end
-    
+
     def create_caravan(params)
       caravan = Caravan.create!(
         country_id:        params[:country_id],
@@ -176,6 +182,4 @@ class Caravan < ApplicationRecord
       { success: false, error: e.message }
     end
   end
-
-
 end
