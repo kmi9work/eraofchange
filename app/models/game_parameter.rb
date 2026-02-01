@@ -355,6 +355,21 @@ end
     game_results.save
   end
 
+  def self.get_merchant_results_settings
+    game_results = GameParameter.find_by(identificator: "results")
+    game_results.params ||= {}
+    {
+      show_cap_per_player: game_results.params["show_cap_per_player"] != false # По умолчанию true
+    }
+  end
+
+  def self.update_merchant_results_settings(settings)
+    game_results = GameParameter.find_by(identificator: "results")
+    game_results.params ||= {}
+    game_results.params["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
+    game_results.save
+  end
+
 
 
   def self.sort_and_save_results(result_hash = nil)

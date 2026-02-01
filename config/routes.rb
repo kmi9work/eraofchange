@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   get '/caravans/check_robbery_with_decide', to: 'caravans#check_robbery_with_decide'
   post '/caravans/register_caravan', to: 'caravans#register_caravan'
   get '/caravans/all', to: 'caravans#all'
+  get '/caravans/by_country/:country_id', to: 'caravans#by_country'
   resources :caravans
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'
@@ -51,6 +52,8 @@ Rails.application.routes.draw do
   get   '/game_parameters/display_results', to: 'game_parameters#display_results'
   get   '/game_parameters/screen_bundle', to: 'game_parameters#screen_bundle'
   patch '/game_parameters/change_results_display', to: 'game_parameters#change_results_display'
+  get '/game_parameters/get_merchant_results_settings', to: 'game_parameters#get_merchant_results_settings'
+  patch '/game_parameters/update_merchant_results_settings', to: 'game_parameters#update_merchant_results_settings'
 
   ###Таймер и расписание
   get   '/game_parameters/show_schedule', to: 'game_parameters#show_schedule'

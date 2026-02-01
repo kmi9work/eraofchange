@@ -136,11 +136,13 @@ class GameParametersController < ApplicationController
     
     merchants = GameParameter.show_sorted_results(sort_by: sort_by)
     nobles   = GameParameter.show_noble_results
+    settings = GameParameter.get_merchant_results_settings
 
     render json: {
       display: display,
       merchants: merchants,
-      nobles: nobles
+      nobles: nobles,
+      show_cap_per_player: settings[:show_cap_per_player]
     }
   rescue => e
     render json: { error: e.message }, status: :internal_server_error
@@ -149,6 +151,18 @@ class GameParametersController < ApplicationController
 
   def change_results_display
     GameParameter.change_results_display(params[:request])
+  end
+
+  def get_merchant_results_settings
+    settings = GameParameter.get_merchant_results_settings
+    render json: settings
+  end
+
+  def update_merchant_results_settings
+    GameParameter.update_merchant_results_settings(params.permit(:show_cap_per_player).to_h.symbolize_keys)
+    render json: { success: true, message: "Настройки обновлены" }
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
   end
 
   def get_years_count

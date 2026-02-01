@@ -45,6 +45,15 @@ class CaravansController < ApplicationController
     render json: @caravans
   end
 
+  # GET /caravans/by_country/:country_id.json - получить караваны по стране
+  def by_country
+    country_id = params[:country_id]
+    @caravans = Caravan.includes(:guild, :country)
+                       .where(country_id: country_id)
+                       .order(year: :desc, created_at: :desc)
+    render json: @caravans
+  end
+
   # GET /caravans/1 or /caravans/1.json
   def show
   end
@@ -104,7 +113,16 @@ class CaravansController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def caravan_params
-      params.require(:caravan).permit(:title, :body)
+      params.require(:caravan).permit(
+        :country_id,
+        :guild_id,
+        :year,
+        :gold_export,
+        :gold_import,
+        :via_vyatka,
+        resources_export: {},
+        resources_import: {}
+      )
     end
     
     # def register_caravan_params
