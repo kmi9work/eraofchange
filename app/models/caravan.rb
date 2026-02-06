@@ -22,25 +22,30 @@ class Caravan < ApplicationRecord
   end
 
   def self.register_caravan(params)
-    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
+    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1    
     return send_caravan_via_vyatka(params) if via_vyatka
 
-    is_protected = params[:is_protected] == true || params[:is_protected] == 'true' || params[:is_protected] == 1
 
-    country = Country.find(params[:country_id])
+    force_protected = params[:is_protected] == true || params[:is_protected] == 'true' || params[:is_protected] == 1
     current_year = GameParameter.current_year
+    guild_id =  params[:guild_id].to_i
+    # Статус попытки ограбить караван
 
-    # Флаг попытки ограбить караван
-    robbery_attempt = RobberyService.attempt_robbery(current_year)
-    if robbery_attempt
-      if !is_protected
-        GameParameter.increment_arrived_count(current_year)
-        GameParameter.increment_robbed_count(current_year)
-        return { success: false, robbed: true, error: "Караван был ограблен" }
-      end
+    robbery_status = RobberyService.attempt_robbery(
+      current_year, 
+      guild_id: guild_id, 
+      force_protected: force_protected
+    )
+
+    if robbery_status == RobberyService::ROBBERY_SUCCESS
+      GameParameter.increment_arrived_count(current_year)
+      GameParameter.increment_robbed_count(current_year)
+      return { success: false, 
+               robbed: true, 
+               error: "Караван был ограблен" }
     end
-
     # Создаем караван и проверяем результат
+    country = Country.find(params[:country_id])
     result = create_caravan(params)
     
     # Инкрементируем счетчик пришедших караванов (только если караван создан)
@@ -54,11 +59,14 @@ class Caravan < ApplicationRecord
 
     country.reload
     caravan_result = { 
-      success: true, 
+      success: true,
       caravan: caravan, 
       level_increased: false
     }
-    caravan_result[:error] = "Неудачное ограбление, Караван отбит" if robbery_attempt
+    if robbery_status == RobberyService::ROBBERY_FAILURE
+      caravan_result[:error] = "Неудачное ограбление, Караван отбит" 
+      caravan_result[:robbed] = false
+    end
     caravan_result
     
   rescue ActiveRecord::RecordNotFound => e
