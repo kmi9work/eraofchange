@@ -19,6 +19,7 @@ class Player < ApplicationRecord
   has_many :credits
   has_many :political_actions
   has_many :influence_items
+  has_many :income_items
 
   before_validation :generate_identificator_if_blank
 
@@ -239,24 +240,122 @@ class Player < ApplicationRecord
   end
 
   def income
+    base = income_base
+    (base + income_items.sum(:value).to_i)
+  end
+
+  def income_base
+    year = GameParameter.current_year
+
     # Проверяем эффект увеличенного дохода от торговли для текущего года
-    if self.job_ids.include?(Job::GRAND_PRINCE) && 
-       GameParameter.any_lingering_effects?("increased_trade_revenue", GameParameter.current_year-1)
-      added_income = Caravan.count_caravan_revenue
-    else
-      added_income = 0
-    end
+    added_income =
+      if self.job_ids.include?(Job::GRAND_PRINCE) &&
+         GameParameter.any_lingering_effects?("increased_trade_revenue", year - 1)
+        Caravan.count_caravan_revenue
+      else
+        0
+      end
+
     sum = 0
     sum += added_income
-    if job_ids.include?(Job::METROPOLITAN)
-      church_params = Building.joins({settlement: :region}, :building_level).
-        where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
-        select('building_levels.params')
-      sum += church_params.map{|p| p.params['metropolitan_income'].to_i}.sum
-    end
-    sum + self.settlements.sum{|s| s.income + (Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0)}
 
+    if job_ids.include?(Job::METROPOLITAN)
+      church_params = Building.joins({ settlement: :region }, :building_level)
+                             .where(building_levels: { building_type_id: BuildingType::RELIGIOUS })
+                             .where(regions: { country_id: Country::RUS })
+                             .select('building_levels.params')
+      sum += church_params.map { |p| p.params['metropolitan_income'].to_i }.sum
+    end
+
+    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0
+    sum + self.settlements.sum { |s| s.income + st_george_bonus }
+  end
+
+  def income_breakdown
+    year = GameParameter.current_year
+    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0
+
+    settlements_data = self.settlements.includes(:settlement_type, buildings: { building_level: :building_type }).map do |s|
+      type_income = s.settlement_type&.params&.dig("income").to_i
+
+      buildings = s.buildings.map do |b|
+        {
+          building_id: b.id,
+          name: b.building_level&.name,
+          type: b.building_level&.building_type&.name,
+          level: b.building_level&.level,
+          income: b.income.to_i
+        }
+      end
+
+      markets_income = buildings.select { |b| b[:type].to_s == "Рынок" }.sum { |b| b[:income].to_i }
+      buildings_sum = buildings.sum { |b| b[:income].to_i }
+      total = type_income + buildings_sum + st_george_bonus
+
+      {
+        settlement_id: s.id,
+        name: s.name,
+        type_income: type_income,
+        markets_income: markets_income,
+        buildings_sum: buildings_sum,
+        st_george_bonus: st_george_bonus,
+        total: total,
+        buildings: buildings.sort_by { |b| [b[:type].to_s, b[:level].to_i, b[:name].to_s] }
+      }
+    end
+
+    settlements_total = settlements_data.sum { |s| s[:total].to_i }
+
+    trade_bonus =
+      if self.job_ids.include?(Job::GRAND_PRINCE) &&
+         GameParameter.any_lingering_effects?("increased_trade_revenue", year - 1)
+        Caravan.count_caravan_revenue
+      else
+        0
+      end
+
+    metropolitan_bonus = 0
+    if job_ids.include?(Job::METROPOLITAN)
+      church_params = Building.joins({ settlement: :region }, :building_level)
+                             .where(building_levels: { building_type_id: BuildingType::RELIGIOUS })
+                             .where(regions: { country_id: Country::RUS })
+                             .select('building_levels.params')
+      metropolitan_bonus = church_params.map { |p| p.params['metropolitan_income'].to_i }.sum
+    end
+
+    base_total = settlements_total + trade_bonus + metropolitan_bonus
+
+    items = income_items.order(created_at: :desc).map do |ii|
+      {
+        id: ii.id,
+        value: ii.value.to_i,
+        comment: ii.comment,
+        year: ii.year,
+        created_at: ii.created_at
+      }
+    end
+
+    manual_sum = items.sum { |ii| ii[:value].to_i }
+
+    {
+      player_id: id,
+      player_name: name,
+      year: year,
+      base_total: base_total,
+      manual_sum: manual_sum,
+      total: base_total + manual_sum,
+      components: {
+        settlements_total: settlements_total,
+        trade_bonus: trade_bonus,
+        metropolitan_bonus: metropolitan_bonus
+      },
+      settlements: settlements_data.sort_by { |s| s[:name].to_s },
+      income_items: items
+    }
+  end
+
+  def modify_income(value, comment, entity = nil)
+    IncomeItem.add(value, comment, self, entity)
   end
 
   def player_military_outlays

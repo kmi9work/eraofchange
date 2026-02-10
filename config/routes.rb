@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   resources :technology_items
   resources :relation_items
   resources :influence_items
+  resources :income_items
   
   # Кастомные маршруты для караванов должны быть ДО resources
   get '/caravans/check_robbery', to: 'caravans#check_robbery'
@@ -35,6 +36,8 @@ Rails.application.routes.draw do
 
   ###
   patch '/players/:id/add_influence', to: 'players#add_influence'
+  patch '/players/:id/add_income', to: 'players#add_income'
+  get '/players/:id/income_breakdown', to: 'players#income_breakdown'
 
   get '/plants/:id/name_of_plant', to: 'plants#name_of_plant'
   patch '/plants/:id/upgrade', to: 'plants#upgrade'
@@ -61,6 +64,7 @@ Rails.application.routes.draw do
   patch '/game_parameters/add_schedule_item', to: 'game_parameters#add_schedule_item'
   patch '/game_parameters/update_schedule_item', to: 'game_parameters#update_schedule_item'
   patch '/game_parameters/delete_schedule_item', to: 'game_parameters#delete_schedule_item'
+  patch '/game_parameters/shift_schedule', to: 'game_parameters#shift_schedule'
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
   ###Экран

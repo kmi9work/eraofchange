@@ -461,10 +461,14 @@ end
     
     guild_id = result_hash[:guild_id].to_s.to_sym
     
-    # Сохраняем деньги и боярскую милость для гильдии
+    number_of_players = result_hash[:number_of_players].to_i
+    number_of_players = nil if number_of_players <= 0
+
+    # Сохраняем деньги, боярскую милость и (опционально) количество игроков для гильдии
     game_results.params[:guild_extra_data][guild_id] = {
       money: result_hash[:money].to_i || 0,
-      boyar_favor: result_hash[:boyar_favor].to_i || 0
+      boyar_favor: result_hash[:boyar_favor].to_i || 0,
+      number_of_players: number_of_players
     }
     
     game_results.save
@@ -505,10 +509,10 @@ end
       # Считаем стоимость предприятий (сумма deposit)
       plants_value = guild.plants.sum { |plant| plant.plant_level&.deposit.to_i || 0 }
       
-      # Количество игроков в гильдии
-      number_of_players = guild.players.count
+      # Базовое количество игроков в гильдии (если не задано вручную)
+      base_number_of_players = guild.players.count
       
-    # Получаем дополнительные данные (деньги и боярская милость)
+    # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
     # Проверяем как символ строки и как число (для обратной совместимости)
     guild_id_key = guild.id.to_s.to_sym
     guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
@@ -516,6 +520,8 @@ end
       
       money = guild_data[:money].to_i || 0
       boyar_favor = guild_data[:boyar_favor].to_i || 0
+      manual_players = guild_data[:number_of_players].to_i
+      number_of_players = manual_players > 0 ? manual_players : base_number_of_players
       
       # Итоговый капитал = деньги + стоимость предприятий
       capital = money + plants_value
@@ -636,6 +642,46 @@ end
     end
 
     GameParameter.create_schedule(dummy_schedule)
+  end
+
+  # Сдвигает все пункты расписания на заданное количество минут (может быть отрицательным).
+  # request: { minutes: Integer }
+  def self.shift_schedule(request)
+    minutes = (request || {})["minutes"] || (request || {})[:minutes]
+    minutes = minutes.to_i
+
+    timer = GameParameter.find_by(identificator: "schedule")
+    raise "Расписание не найдено" unless timer
+    timer.params ||= []
+    return { success: true, message: "Расписание пустое" } if timer.params.empty?
+
+    shifted = timer.params.map do |item|
+      next item unless item.is_a?(Hash)
+
+      start_str = item["start"] || item[:start]
+      finish_str = item["finish"] || item[:finish]
+
+      # если чего-то нет — не трогаем
+      unless start_str.present? && finish_str.present?
+        next item
+      end
+
+      start_time = Time.strptime("#{Time.zone.today} #{start_str}", "%Y-%m-%d %H:%M")
+      finish_time = Time.strptime("#{Time.zone.today} #{finish_str}", "%Y-%m-%d %H:%M")
+
+      new_start = (start_time + minutes.minutes).strftime("%H:%M")
+      new_finish = (finish_time + minutes.minutes).strftime("%H:%M")
+
+      item.merge(
+        "start" => new_start,
+        "finish" => new_finish
+      )
+    end
+
+    timer.params = shifted
+    timer.save!
+
+    { success: true, minutes: minutes, message: "Расписание сдвинуто" }
   end
 
   def self.toggle_timer(value = nil)  

@@ -44,7 +44,9 @@ class CaravansController < ApplicationController
   # GET /caravans/all.json - получить все караваны для статистики
   def all
     @caravans = Caravan.includes(:guild, :country).order(year: :asc, created_at: :asc)
-    render json: @caravans
+    respond_to do |format|
+      format.json { render :index }
+    end
   end
 
   # GET /caravans/by_country/:country_id.json - получить караваны по стране
@@ -53,7 +55,9 @@ class CaravansController < ApplicationController
     @caravans = Caravan.includes(:guild, :country)
                        .where(country_id: country_id)
                        .order(year: :desc, created_at: :desc)
-    render json: @caravans
+    respond_to do |format|
+      format.json { render :index }
+    end
   end
 
   # GET /caravans/1 or /caravans/1.json

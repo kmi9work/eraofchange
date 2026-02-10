@@ -59,6 +59,13 @@ class GameParametersController < ApplicationController
     GameParameter.update_schedule_item(params[:request])
   end
 
+  def shift_schedule
+    result = GameParameter.shift_schedule(params[:request])
+    render json: result
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
   def plugin_status
     # Проверка статуса плагинов
     begin

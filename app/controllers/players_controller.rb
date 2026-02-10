@@ -1,5 +1,9 @@
 class PlayersController < ApplicationController
-  before_action :set_player, only: %i[ show edit update destroy add_influence show_players_resources receive_from_masters exchange_resources show_players_plants buy_and_sell_res]
+  before_action :set_player, only: %i[
+    show edit update destroy
+    add_influence add_income income_breakdown
+    show_players_resources receive_from_masters exchange_resources show_players_plants buy_and_sell_res
+  ]
 
   def show_players_resources
      render json: @player.resources || []
@@ -125,6 +129,17 @@ class PlayersController < ApplicationController
     value = params[:value].to_i
     comment = params[:comment].presence || "Ручная правка"
     @player.modify_influence(value, comment, nil)
+  end
+
+  def add_income
+    value = params[:value].to_i
+    comment = params[:comment].presence || "Ручная правка"
+    @player.modify_income(value, comment, nil)
+    render json: { success: true }
+  end
+
+  def income_breakdown
+    render json: @player.income_breakdown
   end
 
   private

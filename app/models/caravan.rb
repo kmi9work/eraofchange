@@ -4,11 +4,18 @@ class Caravan < ApplicationRecord
 
    MAX_TRADE_POINTS = 3
    GRAND_PRINCE_SHARE = 0.10
-  #Подсчет, сколько надо досыпать золота Великому Князю
+  # Подсчет, сколько надо досыпать золота Великому Князю.
+  # Считается как 10% от товарооборота (gold_export + gold_import) за предыдущий год.
   def self.count_caravan_revenue
     prev_year = GameParameter.current_year - 1
     return 0 if Caravan.all.empty? or prev_year < 0
-    (Caravan.where(year: prev_year).sum(:gold_import).to_i * GRAND_PRINCE_SHARE).floor
+
+    turnover = Caravan
+      .where(year: prev_year)
+      .sum("ABS(COALESCE(gold_import, 0)) + ABS(COALESCE(gold_export, 0))")
+      .to_i
+
+    (turnover * GRAND_PRINCE_SHARE).floor
   end
 
   # Публичный метод для проверки ограбления каравана
