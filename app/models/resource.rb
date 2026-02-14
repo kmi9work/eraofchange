@@ -6,7 +6,25 @@ class Resource < ApplicationRecord
 
   belongs_to :country, optional: true
 
+  validates :identificator, uniqueness: { scope: :country_id }, presence: true
+
   TARIFF = 1.20
+
+  # Artel: ресурсы без страны и особая логика цен.
+  # В dev может случиться, что Engine-хук не успевает подмешать concern до первого запроса.
+  # Подмешиваем здесь гарантированно, если активна игра Artel.
+  if ENV["ACTIVE_GAME"] == "artel"
+    begin
+      if defined?(Artel::Engine)
+        require_dependency Artel::Engine.root.join("app", "models", "artel", "concerns", "resource_extensions.rb").to_s
+      end
+      if defined?(Artel::Concerns::ResourceExtensions) && !included_modules.include?(Artel::Concerns::ResourceExtensions)
+        include Artel::Concerns::ResourceExtensions
+      end
+    rescue => e
+      Rails.logger.warn("[Artel] Failed to include ResourceExtensions: #{e.class}: #{e.message}") if defined?(Rails)
+    end
+  end
 
   def self.country_filter(country_id, resources)
     resources.select do |res|
@@ -83,42 +101,60 @@ class Resource < ApplicationRecord
   def self.show_prices
     resources = Resource.all
 
-    off_market = [] # То, что продается с рынка
-    to_market =  [] # То, что продается на рынок
-
-    off_and_to_market_prices = {off_market: off_market, to_market: to_market} # хэш с данным для покупки и продажи
-
-    prices_array = []
+    off_market = [] # То, что продается с рынка (покупает игрок)
+    to_market =  [] # То, что продается на рынок (продает игрок)
 
     resources.each do |res|
-      next if res.country_id == nil
-      relations = res.country.relations.to_s
+      # Определяем отношения (0 для ресурсов без страны)
+      if res.country_id.nil?
+        relations = "0"
+      else
+        relations = res.country.relations.to_s
+      end
 
-      not_for_sale = true if res.params["sale_price"][relations] == nil
+      # Базовая структура для цен
+      to_prices = {
+        name: res.name,
+        identificator: res.identificator
+      }
+      
+      off_prices = {
+        name: res.name,
+        identificator: res.identificator
+      }
 
-      to_prices =  {}
-      off_prices = {}
+      # Добавляем информацию о стране если есть
+      if res.country_id
+        to_prices[:country] = res.country.as_json(only: [:id, :name])
+        to_prices[:embargo] = res.country.params["embargo"] if res.country.params
+        
+        off_prices[:country] = res.country.as_json(only: [:id, :name])
+        off_prices[:embargo] = res.country.params["embargo"] if res.country.params
+      else
+        # Для ресурсов без страны
+        to_prices[:country] = nil
+        to_prices[:embargo] = 0
+        to_prices[:country_id] = nil
+        
+        off_prices[:country] = nil
+        off_prices[:embargo] = 0
+        off_prices[:country_id] = nil
+      end
 
-      to_prices[:name]  = res.name
-      off_prices[:name] = res.name
+      # Проверяем и добавляем цену продажи на рынок (игрок продает)
+      if res.params["buy_price"] && res.params["buy_price"][relations]
+        to_prices[:sell_price] = res.params["buy_price"][relations]
+        to_market.push(to_prices)
+      end
 
-      to_prices[:identificator]  = res.identificator
-      off_prices[:identificator] = res.identificator
-
-      to_prices[:sell_price] = res.params["buy_price"][relations] #игрок продает на рынок
-      off_prices[:buy_price] = res.params["sale_price"][relations]  #игрок покупает на рынке
-
-      to_prices[:embargo]  = res.country.params["embargo"]
-      off_prices[:embargo] = res.country.params["embargo"]
-
-
-      to_prices[:country]  = res.country.as_json(only: [:id, :name])
-      off_prices[:country] = res.country.as_json(only: [:id, :name])
-
-      to_market.push(to_prices)
-      off_market.push(off_prices) if !not_for_sale
-
+      # Проверяем и добавляем цену покупки с рынка (игрок покупает)
+      if res.params["sale_price"] && res.params["sale_price"][relations]
+        off_prices[:buy_price] = res.params["sale_price"][relations]
+        off_market.push(off_prices)
+      end
     end
+
+    off_and_to_market_prices = { off_market: off_market, to_market: to_market }
 
     # Проверяем эффект HIGHER_SELL_PRICES для текущего года
     if GameParameter.any_lingering_effects?("higher_sell_prices", GameParameter.current_year) 

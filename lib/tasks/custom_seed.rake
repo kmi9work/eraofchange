@@ -37,28 +37,54 @@ namespace :db do
         load(filename)
       end
     end
+
+    task artel: :environment do
+      artel_seeds = File.join(Rails.root, 'engines', 'artel', 'db', 'seeds', '*.rb')
+      Dir[artel_seeds].sort.each do |filename|
+        puts filename
+        load(filename)
+      end
+    end
   end
 end
 
 
 namespace :game do 
-#rake game:core
-  task core: :environment  do
+  # rake game:core
+  task core: :environment do
     ENV['APP_VERSION'] = 'core'
+    # Отключаем проверку среды для операций с БД
+    original_check = ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK']
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
     Rake::Task['db:clear_and_create_db:all'].invoke 
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = original_check
     puts "Сидирую основное"
     Rake::Task['db:seed:all'].invoke 
   end
-#rake game:vassals
+
+  # rake game:vassals
   task vassals: :environment do
     ENV['APP_VERSION'] = 'vassals'
+    original_check = ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK']
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
     Rake::Task['db:clear_and_create_db:all'].invoke 
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = original_check
     Rake::Task['db:seed:all'].invoke 
     Rake::Task['db:seed:vassals'].invoke
   end
 
-
-
-
+  # rake game:artel
+  task artel: :environment do
+    ENV['APP_VERSION'] = 'artel'
+    ENV['ACTIVE_GAME'] = 'artel'
+    original_check = ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK']
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = '1'
+    Rake::Task['db:clear_and_create_db:all'].invoke
+    ENV['DISABLE_DATABASE_ENVIRONMENT_CHECK'] = original_check
+    puts "Сидирую основное"
+    Rake::Task['db:seed:all'].invoke
+    puts "Сидирую Artel"
+    Rake::Task['db:seed:artel'].invoke
+  end
 end
 

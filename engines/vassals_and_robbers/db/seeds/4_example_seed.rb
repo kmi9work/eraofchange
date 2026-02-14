@@ -21,7 +21,7 @@ if remaining_to_create <= 0
 else
   processing_levels = PlantLevel
                       .joins(:plant_type)
-                      .where(plant_types: { plant_category_id: PlantCategory::PROCESSING })
+                      .where(plant_types: { plant_category_id: PlantCategory.where(is_extractive: false).ids })
 
   if processing_levels.empty?
     puts 'Перерабатывающие уровни предприятий не найдены. Создание пропущено.'

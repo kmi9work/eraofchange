@@ -63,6 +63,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem "roo" # временно для парсинга artel.xlsx
   gem 'capistrano', '~> 3.17'
   gem 'capistrano-rails', '~> 1.6'
   gem 'capistrano-passenger', '~> 0.2.1' 
@@ -86,3 +87,4 @@ gem "concurrent-ruby", "= 1.3.4"
 # Game Engines
 gem 'vassals_and_robbers', path: 'engines/vassals_and_robbers'
 gem 'artel', path: 'engines/artel'
+gem 'era_great', path: 'engines/era_great'

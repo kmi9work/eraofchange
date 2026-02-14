@@ -23,15 +23,15 @@ module VassalsAndRobbers
           result = PlantType.all.map do |plant_type|
             # Для перерабатывающих предприятий - все PlantPlace с категорией "Перерабатывающее"
             # Для добывающих - только PlantPlace, которые связаны с нужным fossil_type
-            if plant_type.plant_category_id == PlantCategory::PROCESSING
+            if !plant_type.plant_category.is_extractive
               available_places = PlantPlace.includes(:region)
-                                            .where(plant_category_id: PlantCategory::PROCESSING)
+                                            .where(plant_category_id: PlantCategory.where(is_extractive: false).ids)
             else
               # Добывающее предприятие
               if plant_type.fossil_type_id.present?
                 # Находим PlantPlace, которые содержат нужный fossil_type
                 available_places = PlantPlace.includes(:region, :fossil_types)
-                                              .where(plant_category_id: PlantCategory::EXTRACTIVE)
+                                              .where(plant_category_id: PlantCategory.where(is_extractive: true).ids)
                                               .joins(:fossil_types)
                                               .where(fossil_types: { id: plant_type.fossil_type_id })
               else

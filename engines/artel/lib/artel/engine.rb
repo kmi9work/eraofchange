@@ -47,6 +47,30 @@ module Artel
           end
         end
         
+        # В dev `config.to_prepare` может выполниться до автозагрузки моделей приложения.
+        # Гарантируем загрузку базовых классов, чтобы include не был пропущен.
+        begin
+          require_dependency Rails.root.join('app', 'models', 'resource.rb').to_s
+        rescue LoadError, Errno::ENOENT
+          # ignore
+        end
+        begin
+          require_dependency Rails.root.join('app', 'models', 'plant.rb').to_s
+        rescue LoadError, Errno::ENOENT
+          # ignore
+        end
+
+        # Ресурсы без привязки к стране, один уровень отношений 0
+        ::Resource.include Artel::Concerns::ResourceExtensions if defined?(Artel::Concerns::ResourceExtensions)
+        # Предприятия только у гильдии, без привязки к региону
+        ::Plant.include Artel::Concerns::PlantExtensions if defined?(Artel::Concerns::PlantExtensions)
+        if defined?(::PlantPlacesController) && defined?(Artel::Concerns::PlantPlacesControllerExtensions)
+          ::PlantPlacesController.include Artel::Concerns::PlantPlacesControllerExtensions
+        end
+        if defined?(::PlantsController) && defined?(Artel::Concerns::PlantsControllerExtensions)
+          ::PlantsController.include Artel::Concerns::PlantsControllerExtensions
+        end
+
         Rails.logger.info "[Artel] Plugin concerns activated"
         Rails.logger.info "[Artel] ENV['ACTIVE_GAME'] = #{ENV['ACTIVE_GAME'].inspect}"
       end

@@ -4,6 +4,7 @@ class CreatePlantTypes < ActiveRecord::Migration[7.0]
       t.string :name
       t.integer :plant_category_id
       t.integer :fossil_type_id
+      t.string :icon
                   
       t.timestamps
     end

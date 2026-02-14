@@ -81,6 +81,3 @@
 # end
 
 # puts "[Vassals and Robbers] Guilds and plants created successfully!"
-
-# ActiveRecord::Base.connection.reset_pk_sequence!('guilds')
-# ActiveRecord::Base.connection.reset_pk_sequence!('plants')

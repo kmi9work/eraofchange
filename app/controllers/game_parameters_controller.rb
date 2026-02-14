@@ -149,7 +149,8 @@ class GameParametersController < ApplicationController
       display: display,
       merchants: merchants,
       nobles: nobles,
-      show_cap_per_player: settings[:show_cap_per_player]
+      show_cap_per_player: settings[:show_cap_per_player],
+      intelligence_data_status: settings[:intelligence_data_status]
     }
   rescue => e
     render json: { error: e.message }, status: :internal_server_error
@@ -166,7 +167,15 @@ class GameParametersController < ApplicationController
   end
 
   def update_merchant_results_settings
-    GameParameter.update_merchant_results_settings(params.permit(:show_cap_per_player).to_h.symbolize_keys)
+    payload = params.permit(
+      :show_cap_per_player,
+      intelligence_data_status: [
+        :military_recruitment,
+        :scientists_recruitment,
+        :teaching_staff_recruitment
+      ]
+    ).to_h
+    GameParameter.update_merchant_results_settings(payload.deep_symbolize_keys)
     render json: { success: true, message: "Настройки обновлены" }
   rescue => e
     render json: { error: e.message }, status: :internal_server_error

@@ -1,6 +1,6 @@
 # Artel Engine
 
-Rails Engine для функциональности игры Artel.
+Rails Engine для функциональности игры Artel (ресурсы без привязки к стране, один уровень отношений, предприятия гильдий).
 
 ## Установка
 
@@ -20,25 +20,25 @@ bundle install
 
 ### Миграции
 
-Миграции плагина находятся в `engines/artel/db/migrate/` и выполняются вместе с миграциями ядра.
+Миграции плагина находятся в `engines/artel/db/migrate/` и выполняются вместе с миграциями ядра. Иконки для типов предприятий, категорий и гильдий добавляются миграцией в ядре (`add_icon_to_plant_types_guilds_and_plant_categories`).
 
-### Seeds
+### Сиды
 
-Для загрузки всех seeds плагина:
+Сиды движка лежат в `engines/artel/db/seeds/`. Используются Rake-задачи из главного приложения:
 
-```bash
-rake artel:db:seed:all
-```
+- **Только сиды Artel** (база и базовые сиды уже накатаны):
+  ```bash
+  bundle exec rake db:seed:artel
+  ```
 
-Для загрузки конкретного seed файла:
+- **Полная пересборка БД под игру Artel** (drop, create, migrate, базовые сиды, затем сиды Artel):
+  ```bash
+  bundle exec rake game:artel
+  ```
 
-```bash
-rake artel:db:seed:0_game_parameters
-```
+При `game:artel` выставляются `ENV['ACTIVE_GAME']=artel` и `ENV['APP_VERSION']=artel`.
 
-- Seed файлы находятся в `engines/artel/db/seeds/`
-
-## Запуск с плагином
+### Запуск приложения
 
 Установите переменную окружения:
 
@@ -46,24 +46,38 @@ rake artel:db:seed:0_game_parameters
 ACTIVE_GAME=artel rails server
 ```
 
+## API и иконки
+
+- **Ресурсы**: в JSON возвращается `icon_url` по конвенции `/images/resources/#{identificator}.png`. Фронт может подставлять `identificator` и показывать иконку.
+- **Типы предприятий (PlantType)**: в API есть поле `icon` (например класс Remix Icon) и `icon_url` — конвенция `/images/plant_types/#{id}.png`.
+- **Категории предприятий (PlantCategory)**: `icon` и `icon_url` — `/images/plant_categories/#{id}.png`.
+- **Гильдии (Guild)**: `icon` и `icon_url` — `/images/guilds/#{id}.png`.
+
+В сидах Artel для категорий и типов предприятий заданы иконки Remix Icon (поле `icon`). При необходимости можно положить PNG по путям выше.
+
+## Локализация
+
+Названия ресурсов и предприятий заданы в сидах. При необходимости можно вынести их в локали (например `config/locales/artel.ru.yml` в движке) и использовать `I18n.t` в API или фронте.
+
 ## Структура
 
 ```
 engines/artel/
 ├── app/
-│   ├── controllers/
-│   ├── models/
-│   ├── views/
+│   ├── controllers/concerns/
+│   ├── models/artel/concerns/
 │   └── ...
 ├── config/
 │   └── routes.rb
 ├── db/
-│   ├── migrate/
 │   └── seeds/
+│       └── 0_economics.rb   # ресурсы, гильдии, контракты, предприятия
 └── lib/
     └── artel/
         ├── engine.rb
         └── version.rb
 ```
 
+## Зависимости сидов
 
+Сид `0_economics.rb` создаёт ресурсы (country_id: nil), гильдии, категории предприятий, типы предприятий и уровни. Для полного сценария «игра Artel» обычно сначала выполняют базовые сиды приложения (игроки, параметры игры и т.д.), затем `db:seed:artel`. Задача `game:artel` делает это автоматически.

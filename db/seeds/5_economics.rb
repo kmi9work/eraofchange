@@ -5,8 +5,8 @@ guild_names.each {|name| Guild.create(name: name, params: {caravan_protected: []
   
 
 
-dob = PlantCategory.create(name: "Добывающее")
-per = PlantCategory.create(name: "Перерабатывающее")
+dob = PlantCategory.create(name: "Добывающее", is_extractive: true)
+per = PlantCategory.create(name: "Перерабатывающее", is_extractive: false)
 
 # Типы месторождений
 timber_fossil = FossilType.create(name: "Строевой лес")

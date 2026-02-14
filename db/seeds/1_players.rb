@@ -40,9 +40,7 @@ noble_names = ["Рюрикович", "Геронтий", "Аксаков", "Па
 merchant_human = @humans.shuffle.first
 merchant_family = @families.shuffle.first
 merchant_identificator = Player.generate_identificator("КУПЕЦ", merchant_human.name, merchant_family.name, @jobs.last.name)
-Player.create(id: 1, name: "КУПЕЦ", identificator: merchant_identificator, human: merchant_human, player_type: @player_types[0], family: merchant_family, jobs: [@jobs.last], params: {"contraband" => []})
-
-ActiveRecord::Base.connection.reset_pk_sequence!('players')
+Player.create(name: "КУПЕЦ", identificator: merchant_identificator, human: merchant_human, player_type: @player_types[0], family: merchant_family, jobs: [@jobs.last], params: {"contraband" => []})
 
 noble_names.each_with_index do |name, i|
   noble_human = @humans.shuffle.first

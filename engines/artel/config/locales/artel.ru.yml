@@ -1,0 +1,25 @@
+# Локализация названий для игры Artel.
+# В API названия приходят из БД (сиды). Здесь — запасной вариант для I18n.t('artel.resources.izolyaciya') и т.д.
+ru:
+  artel:
+    resources:
+      izolyaciya: "Изоляция"
+      kauchuk: "Каучук"
+      metall: "Металл"
+      polimery: "Полимеры"
+      reagenty: "Реагенты"
+      tkan: "Ткань"
+      odezhda: "Одежда"
+      el_komp: "Электронные компоненты"
+      farm_prep: "Фарм. препараты"
+      plastiny: "Пластины"
+      rez_teh_izd: "Резино-технические изделия"
+      plast_izd: "Пластмассовые изделия"
+      kadry: "Кадры"
+      stimulyatory: "Стимуляторы"
+      bronzhevety: "Бронежилеты"
+      ust_slezh: "Устройства слежения"
+    plant_categories:
+      contract: "Контракт"
+      enterprise: "Предприятие"
+      university: "Университет"

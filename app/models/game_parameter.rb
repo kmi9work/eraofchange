@@ -40,12 +40,10 @@ class GameParameter < ApplicationRecord
 
 
 
-  TIMER = 4
-  SCREEN = 5
   DEFAULT_SCREEN = "placeholder"
-  RESULTS = 6
   LINGERING_EFFECTS = "lingering_effects"
   MOBILE_HELPER = "mobile_helper"
+  ARTEL_INTELLIGENCE_STATUS = "artel_intelligence_status"
 
   NO_STATE_EXPENSES = -5
   NOT_TICKING = 0
@@ -321,7 +319,7 @@ end
 
     ###Результаты
   def self.show_noble_results
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     players = Player.where(player_type_id: PlayerType::NOBLE)
     nobles_inf = []
     nobles_inf = players.map do |player|
@@ -346,11 +344,11 @@ end
   end
 
   def self.display_results
-   return GameParameter.find(RESULTS).params["display"]
+   return GameParameter.find_by(identificator: "results").params["display"]
   end
 
   def self.change_results_display(string)
-    game_results = GameParameter.find(RESULTS)
+    game_results = GameParameter.find_by(identificator: "results")
     game_results.params["display"] = string 
     game_results.save
   end
@@ -358,8 +356,11 @@ end
   def self.get_merchant_results_settings
     game_results = GameParameter.find_by(identificator: "results")
     game_results.params ||= {}
+    intelligence_data = get_artel_intelligence_status
+
     {
-      show_cap_per_player: game_results.params["show_cap_per_player"] != false # По умолчанию true
+      show_cap_per_player: game_results.params["show_cap_per_player"] != false, # По умолчанию true
+      intelligence_data_status: intelligence_data
     }
   end
 
@@ -368,6 +369,33 @@ end
     game_results.params ||= {}
     game_results.params["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
     game_results.save
+
+    return if settings[:intelligence_data_status].nil?
+
+    incoming = settings[:intelligence_data_status].to_h.stringify_keys
+    status_param = GameParameter.find_or_initialize_by(identificator: ARTEL_INTELLIGENCE_STATUS)
+    status_param.name ||= "Статус разведданных Артели"
+    status_param.value ||= "1"
+    status_param.params ||= {}
+    status_param.params["military_recruitment"] = to_boolean(incoming["military_recruitment"])
+    status_param.params["scientists_recruitment"] = to_boolean(incoming["scientists_recruitment"])
+    status_param.params["teaching_staff_recruitment"] = to_boolean(incoming["teaching_staff_recruitment"])
+    status_param.save
+  end
+
+  def self.get_artel_intelligence_status
+    status_param = GameParameter.find_by(identificator: ARTEL_INTELLIGENCE_STATUS)
+    params = status_param&.params || {}
+
+    {
+      military_recruitment: to_boolean(params["military_recruitment"]),
+      scientists_recruitment: to_boolean(params["scientists_recruitment"]),
+      teaching_staff_recruitment: to_boolean(params["teaching_staff_recruitment"])
+    }
+  end
+
+  def self.to_boolean(value)
+    ActiveModel::Type::Boolean.new.cast(value)
   end
 
 

@@ -11,7 +11,7 @@ class PlantLevel < ApplicationRecord
     formula_from = []
     formula_to = []
     PlantLevel.all.each do |p_l|
-      next if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
+      next if p_l.plant_type.plant_category.is_extractive
       pl_levels.push({id: p_l.id,
                       formula_from: p_l.formula_conversion[:from],
                       formula_to:   p_l.formula_conversion[:to],
@@ -28,7 +28,7 @@ class PlantLevel < ApplicationRecord
     
     PlantLevel.all.each do |p_l|
       # Для добывающих предприятий используем только formula_to
-      if p_l.plant_type.plant_category.id == PlantCategory::EXTRACTIVE
+      if p_l.plant_type.plant_category.is_extractive
         pl_levels.push({id: p_l.id,
                         formula_from: [],
                         formula_to:   p_l.formula_conversion[:to],

@@ -1,31 +1,17 @@
-current_year = 1
-GameParameter.create(id: current_year, name: "Текущий год", identificator: "current_year", value: "1", params:
+GameParameter.create(name: "Текущий год", identificator: "current_year", value: "1", params:
 {"state_expenses" => false})
-
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
 GameParameter.create(name: "Ставка кредита (%)", identificator: "credit_size", value: "20")
 GameParameter.create(name: "Срок кредита (лет)", identificator: "credit_term", value: "3")
 
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
+GameParameter.create(name: "Расписание", identificator: "schedule", value: "1", params: [])
 
-GameParameter.create(id: GameParameter::TIMER, name: "Расписание", identificator: "schedule", 	 value: "1", params: [])
+GameParameter.create(name: "Экран", identificator: "screen", value: GameParameter::DEFAULT_SCREEN, params: [])
 
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
-
-GameParameter.create(id: GameParameter::SCREEN, name: "Экран", identificator: "screen", 	 value: GameParameter::DEFAULT_SCREEN, params: [])
-
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
-
-GameParameter.create(id: GameParameter::RESULTS, name: "Результаты купцов", identificator: "results", 	 
+GameParameter.create(name: "Результаты купцов", identificator: "results", 	 
 												 value: "0", params: {display: "merchPlaceholder", merchant_results: []})
 
-
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
-
 GameParameter.create(name: "Количество лет", identificator: "years_count", value: "5", params: {})
-
-ActiveRecord::Base.connection.reset_pk_sequence!('game_parameters')
 
 GameParameter.create(
   name: "Настройки ограбления караванов", 

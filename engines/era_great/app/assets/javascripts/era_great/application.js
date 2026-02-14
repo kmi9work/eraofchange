@@ -1,0 +1,2 @@
+// Engine assets placeholder
+
