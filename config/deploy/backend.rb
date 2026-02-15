@@ -103,6 +103,35 @@ namespace :custom do
     end
   end
 
+  desc "Перезалив базы с artel"
+  task :db_reinit_artel do
+    invoke 'custom:setup'
+    on roles(:db) do
+      within current_path do
+        with rails_env: fetch(:rails_env) do
+          # Получаем параметры подключения из database.yml
+          db_name = 'eraofchange_production'
+          db_user = 'deploy'
+
+          # 1. Дропаем базу (если существует)
+          execute :psql, "-U #{db_user} -c 'DROP DATABASE IF EXISTS #{db_name}' postgres"
+
+          # 2. Создаем новую базу
+          execute :psql, "-U #{db_user} -c 'CREATE DATABASE #{db_name}' postgres"
+
+          # 3. Выполняем миграции
+          execute :rake, 'db:migrate'
+
+          # 4. Заполняем данными базовой игры
+          execute :rake, 'db:seed:all'
+
+          # 5. Заполняем данными Artel
+          execute :rake, 'db:seed:artel'
+        end
+      end
+    end
+  end
+
   task :setup_vassals_env do
     invoke 'custom:setup'
     # Устанавливаем переменную для ensure_env_file
@@ -152,6 +181,34 @@ namespace :custom do
       
       info "Set .env.production with ACTIVE_GAME=base-game"
       
+      # Создаем симлинк в current (если он уже существует)
+      if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
+        execute :ln, "-sfn", "#{shared_path}/.env.production", "#{current_path}/.env.production"
+      end
+    end
+  end
+
+  task :setup_artel_env do
+    invoke 'custom:setup'
+    # Устанавливаем переменную для ensure_env_file
+    set :active_game_env, 'artel'
+
+    on roles(:app) do
+      # Убеждаемся, что директория shared существует
+      execute :mkdir, "-p #{shared_path}"
+
+      # ВСЕГДА перезаписываем файл при деплое artel - это гарантирует правильное значение
+      execute :bash, "-c", %Q{echo "ACTIVE_GAME=artel" > #{shared_path}/.env.production}
+      execute :chmod, "644 #{shared_path}/.env.production"
+
+      # Простая проверка, что файл существует и не пустой
+      unless test("[ -s #{shared_path}/.env.production ]")
+        error "ERROR: Failed to create .env.production file"
+        raise "Failed to set ACTIVE_GAME=artel"
+      end
+
+      info "Set .env.production with ACTIVE_GAME=artel"
+
       # Создаем симлинк в current (если он уже существует)
       if test("[ -L #{current_path} ]") || test("[ -d #{current_path} ]")
         execute :ln, "-sfn", "#{shared_path}/.env.production", "#{current_path}/.env.production"
