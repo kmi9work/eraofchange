@@ -115,7 +115,7 @@ while str = f.gets
     description: desc, cost: cost, probability: prob, success: success)
 end
 
-pat_path = ENV['APP_VERSION'] == 'core' ? './db/seeds/pat_nobles.csv' : './engines/vassals_and_robbers/db/seeds/pat_nobles_vassals.csv'
+pat_path = './db/seeds/pat_nobles.csv'
 
 f = File.open(pat_path, 'r+')
 f.gets #headers
