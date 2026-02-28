@@ -181,7 +181,7 @@ class PoliticalAction < ApplicationRecord
     if success.to_i == 1
       modify_influence(1)
       region = Region.find_by_id(params['region_id'])
-      PublicOrderItem.add(5, self.political_action_type.name, region, self) if region
+      PublicOrderItem.add(10, self.political_action_type.name, region, self) if region
     end  
   end
 
