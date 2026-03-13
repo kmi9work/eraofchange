@@ -967,4 +967,22 @@ end
       planned_robberies: get_robbery_count_for_year(current_year)
     }
   end
+
+  def self.get_max_relations_for_trade_points
+    setting = GameParameter.find_by(identificator: "max_relations_for_trade_points")
+    if setting && setting.value
+      setting.value.to_i
+    else
+      2 # Значение по умолчанию (максимальные отношения)
+    end
+  end
+
+  def self.update_max_relations_for_trade_points(value)
+    setting = GameParameter.find_or_initialize_by(identificator: "max_relations_for_trade_points")
+    setting.name = "Максимальные отношения для торговых очков"
+    setting.value = value.to_s
+    setting.save
+
+    return {msg: "Установлен лимит отношений для получения торговых очков: #{value}", max_relations: value}
+  end
 end

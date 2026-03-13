@@ -115,42 +115,152 @@ class Country < ApplicationRecord
     self.save
   end
 
-  # def improve_relations_via_trade(force: false)
-  #   current_params = self.params || {}
-  #   relation_points = current_params['relation_points'].to_i
+  def improve_relations_via_trade(force: false)
+    current_params = self.params || {}
+    relation_points = current_params['relation_points'].to_i
     
-  #   # Проверяем, что есть relation_points для траты
-  #   if relation_points < 1
-  #     return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
-  #   end
+    # Проверяем, что есть relation_points для траты
+    if relation_points < 1
+      return { success: false, error: 'Недостаточно торговых очков (relation_points)' }
+    end
     
-  #   # Уменьшаем relation_points на 1
-  #   current_params['relation_points'] = relation_points - 1
-  #   self.params = current_params
+    # Уменьшаем relation_points на 1
+    current_params['relation_points'] = relation_points - 1
+    self.params = current_params
     
-  #   # Улучшаем отношения на 1
-  #   result = change_relations(1, self, "Улучшение через торговлю", force: force)
+    # Улучшаем отношения на 1
+    result = change_relations(1, self, "Улучшение через торговлю", force: force)
     
-  #   # Проверяем, было ли предупреждение
-  #   warning = nil
-  #   if result.is_a?(Hash) && result[:warning]
-  #     warning = result[:warning]
-  #   elsif result.is_a?(String)
-  #     # Если вернулась ошибка (не force режим)
-  #     return { success: false, error: result }
-  #   end
+    # Проверяем, было ли предупреждение
+    warning = nil
+    if result.is_a?(Hash) && result[:warning]
+      warning = result[:warning]
+    elsif result.is_a?(String)
+      # Если вернулась ошибка (не force режим)
+      return { success: false, error: result }
+    end
     
-  #   # Сохраняем изменения
-  #   if self.save
-  #     response = { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
-  #     response[:warning] = warning if warning
-  #     response
-  #   else
-  #     { success: false, error: self.errors.full_messages.join(', ') }
-  #   end
-  # rescue => e
-  #   { success: false, error: e.message }
-  # end
+    # Сохраняем изменения
+    if self.save
+      response = { success: true, new_relations: self.relations, relation_points_left: current_params['relation_points'] }
+      response[:warning] = warning if warning
+      response
+    else
+      { success: false, error: self.errors.full_messages.join(', ') }
+    end
+  rescue => e
+    { success: false, error: e.message }
+  end
+
+  # Award relation points when trade volume level increases
+  # Returns hash with success status and points awarded
+  def check_and_award_trade_level_points(previous_trade_turnover: nil)
+    levels = self.params&.dig("level_thresholds") || []
+    return { success: false, error: 'No trade levels configured' } if levels.empty?
+    
+    current_trade_turnover = self.calculate_trade_turnover[:trade_turnover] || 0
+    
+    # Find current level
+    current_level_info = levels.reverse.find { |lev| lev["threshold"].to_i <= current_trade_turnover }
+    current_level_number = current_level_info ? current_level_info["level"] : 0
+    
+    # If we have previous turnover, calculate previous level
+    if previous_trade_turnover.nil?
+      # No previous data, just store current level for future comparison
+      current_params = self.params || {}
+      current_params['last_trade_turnover'] = current_trade_turnover
+      self.params = current_params
+      # SAVE the initial turnover so it persists
+      if self.save
+        return { success: false, message: 'Initial trade level recorded', current_level: current_level_number }
+      else
+        return { success: false, error: self.errors.full_messages.join(', ') }
+      end
+    end
+    
+    previous_level_info = levels.reverse.find { |lev| lev["threshold"].to_i <= previous_trade_turnover }
+    previous_level_number = previous_level_info ? previous_level_info["level"] : 0
+    
+    # Check if level increased
+    level_increase = current_level_number - previous_level_number
+    
+    if level_increase > 0
+      # Check if relations are already at or above the maximum for earning trade points
+      max_relations = GameParameter.get_max_relations_for_trade_points
+      current_relations = self.relations
+      
+      if current_relations >= max_relations
+        # Don't award points if relations are at or above the limit
+        # But still update last_trade_turnover for future tracking
+        current_params = self.params || {}
+        current_params['last_trade_turnover'] = current_trade_turnover
+        self.params = current_params
+        self.save
+        
+        return { 
+          success: false, 
+          message: "Relations too high (#{current_relations} >= #{max_relations}). No points awarded.",
+          current_level: current_level_number,
+          relations: current_relations,
+          max_relations: max_relations
+        }
+      end
+      
+      # Get existing relation points
+      current_params = self.params || {}
+      existing_points = (current_params['relation_points'] || 0).to_i
+      
+      # Calculate maximum points that can be awarded (don't exceed relations cap)
+      # Consider both existing points and the gap to max relations
+      max_points_allowed = max_relations - current_relations
+      max_total_points = existing_points + level_increase
+      
+      # Only award points if the total won't exceed the gap
+      if max_total_points > max_points_allowed
+        # Don't award any points if total would exceed the limit
+        current_params['last_trade_turnover'] = current_trade_turnover
+        self.params = current_params
+        self.save
+        
+        return {
+          success: false,
+          message: "Adding #{level_increase} points would exceed maximum (existing: #{existing_points}, gap: #{max_points_allowed}). No points awarded.",
+          current_level: current_level_number,
+          relations: current_relations,
+          max_relations: max_relations,
+          existing_points: existing_points,
+          points_would_exceed: level_increase
+        }
+      end
+      
+      # Award full points
+      points_to_award = level_increase
+      current_params['relation_points'] = existing_points + points_to_award
+      current_params['last_trade_turnover'] = current_trade_turnover
+      self.params = current_params
+      
+      if self.save
+        { 
+          success: true, 
+          points_awarded: points_to_award,
+          previous_level: previous_level_number,
+          current_level: current_level_number,
+          total_relation_points: current_params['relation_points']
+        }
+      else
+        { success: false, error: self.errors.full_messages.join(', ') }
+      end
+    else
+      # No level increase, just update stored turnover
+      current_params = self.params || {}
+      current_params['last_trade_turnover'] = current_trade_turnover
+      self.params = current_params
+      # Don't force save - only save if there are other changes
+      { success: false, message: 'No level increase', current_level: current_level_number }
+    end
+  rescue => e
+    { success: false, error: e.message }
+  end
 
 # вынести на фронт
 

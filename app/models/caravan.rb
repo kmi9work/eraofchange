@@ -1,6 +1,10 @@
 class Caravan < ApplicationRecord
   belongs_to :guild, optional: true
   belongs_to :country
+  
+  # Run after the transaction commits to avoid conflicts
+  after_commit :check_and_award_trade_level_points_on_create, on: :create
+  after_commit :check_and_award_trade_level_points_if_turnover_changed, on: :update
 
    MAX_TRADE_POINTS = 3
    GRAND_PRINCE_SHARE = 0.10
@@ -195,6 +199,40 @@ class Caravan < ApplicationRecord
       { success: false, error: e.message }
     rescue => e
       { success: false, error: e.message }
+    end
+  end
+  
+  # Instance methods for awarding trade level points (MUST be instance methods for callbacks)
+  def check_and_award_trade_level_points_on_create
+    Rails.logger.info "[CALLBACK] Starting check_and_award_trade_level_points_on_create for caravan #{id}"
+    return if country.blank?
+    
+    # Get stored previous turnover
+    previous_turnover = country.params&.dig('last_trade_turnover')
+    Rails.logger.info "[CALLBACK] Previous turnover: #{previous_turnover.inspect}"
+    
+    # Check and award points (don't raise errors, just log)
+    result = country.check_and_award_trade_level_points(previous_trade_turnover: previous_turnover)
+    
+    Rails.logger.info "[CALLBACK] Result: #{result.inspect}"
+    
+    # Log if points were awarded
+    if result && result[:success]
+      Rails.logger.info "Trade level increased for #{country.name}: +#{result[:points_awarded]} relation points (Level #{result[:previous_level]} -> #{result[:current_level]})"
+    elsif result && result[:error]
+      Rails.logger.error "Error checking trade level for #{country.name}: #{result[:error]}"
+    end
+  rescue => e
+    Rails.logger.error "Exception in check_and_award_trade_level_points_on_create: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    # Don't re-raise - allow caravan creation to succeed even if this fails
+  end
+  
+  def check_and_award_trade_level_points_if_turnover_changed
+    # Only check if gold_export or gold_import changed
+    # Use saved_changes to detect what was modified
+    if saved_changes.key?(:gold_export) || saved_changes.key?(:gold_import)
+      check_and_award_trade_level_points_on_create  # Reuse the same logic
     end
   end
 end

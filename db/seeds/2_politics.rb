@@ -71,7 +71,7 @@ while str = f.gets
   if country.blank?
     short_name = short_names_map[country_name] || country_name
     flag_image_name = flag_image_map[id.to_i]
-    country = Country.create(id: id, name: country_name, short_name: short_name, flag_image_name: flag_image_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "level_thresholds" =>  levels})
+    country = Country.create(id: id, name: country_name, short_name: short_name, flag_image_name: flag_image_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "last_trade_turnover" => 0, "level_thresholds" =>  levels})
     RelationItem.add(relations.to_i, "Ручная правка", country)
   end
   region = Region.find_by_name(region_name)

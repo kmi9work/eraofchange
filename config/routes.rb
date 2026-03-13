@@ -88,6 +88,8 @@ Rails.application.routes.draw do
   get '/game_parameters/get_vassalage_settings', to: 'game_parameters#get_vassalage_settings'
   patch '/game_parameters/update_vassalage_settings', to: 'game_parameters#update_vassalage_settings'
   get '/game_parameters/get_active_lingering_effects', to: 'game_parameters#get_active_lingering_effects'
+  get '/game_parameters/get_max_relations_for_trade_points', to: 'game_parameters#get_max_relations_for_trade_points'
+  patch '/game_parameters/update_max_relations_for_trade_points', to: 'game_parameters#update_max_relations_for_trade_points'
 
 
 
@@ -104,6 +106,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/capture/:region_id', to: 'countries#capture'
   patch '/countries/:id/add_relation_item',   to: 'countries#add_relation_item'
   patch '/countries/:id/improve_relations_via_trade', to: 'countries#improve_relations_via_trade'
+  patch '/countries/:id/award_trade_level_points', to: 'countries#award_trade_level_points'
   patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
   get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'

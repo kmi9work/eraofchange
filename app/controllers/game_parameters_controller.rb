@@ -228,6 +228,17 @@ class GameParametersController < ApplicationController
     render json: stats
   end
 
+  def get_max_relations_for_trade_points
+    max_relations = GameParameter.get_max_relations_for_trade_points
+    render json: { max_relations_for_trade_points: max_relations }
+  end
+
+  def update_max_relations_for_trade_points
+    max_relations = params[:max_relations_for_trade_points].to_i
+    result = GameParameter.update_max_relations_for_trade_points(max_relations)
+    render json: result
+  end
+
   # GET /game_parameters/get_vassalage_settings
   def get_vassalage_settings
     vassalage_settings = GameParameter.find_by(identificator: "vassalage_settings")

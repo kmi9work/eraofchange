@@ -1,5 +1,5 @@
 class CountriesController < ApplicationController
-  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture edit_trade_thresholds show_trade_thresholds update_trade_thresholds add_relation_item show_current_trade_level join_peace calculate_trade_turnover improve_relations_via_trade]
+  before_action :set_country, only: %i[ show edit update destroy set_embargo change_relations capture edit_trade_thresholds show_trade_thresholds update_trade_thresholds add_relation_item show_current_trade_level join_peace calculate_trade_turnover improve_relations_via_trade award_trade_level_points]
 
   # GET /countries or /countries.json
   def index
@@ -179,6 +179,21 @@ class CountriesController < ApplicationController
       render json: response
     else
       render json: { success: false, error: result[:error] }, status: :unprocessable_entity
+    end
+  rescue => e
+    render json: { success: false, error: e.message }, status: :internal_server_error
+  end
+
+  def award_trade_level_points
+    previous_turnover = params[:previous_trade_turnover]
+    result = @country.check_and_award_trade_level_points(
+      previous_trade_turnover: previous_turnover&.to_i
+    )
+    
+    if result[:success]
+      render json: result
+    else
+      render json: result, status: :ok
     end
   rescue => e
     render json: { success: false, error: e.message }, status: :internal_server_error
