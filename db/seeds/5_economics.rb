@@ -224,14 +224,14 @@ PlantLevel.create(level: "1", deposit: "1000", price: {"gold" => 1200},
                   plant_type_id: stonemason)
 
 
-PlantLevel.create(level: "2", deposit: "2200", price: {"flour" => 150, "metal" => 40},
+PlantLevel.create(level: "2", deposit: "2400", price: {"flour" => 150, "metal" => 40},
                   formulas: [{from:         [{identificator: "stone", count: 1}],
                             to:           [{identificator: "stone_brick", count: 3}],
                             max_product:  [{identificator: "stone_brick", count: 540}]}],
                   plant_type_id: stonemason)
 
 
-PlantLevel.create(level: "3", deposit: "5100", price: {"flour" => 200, "metal" => 130},
+PlantLevel.create(level: "3", deposit: "6100", price: {"flour" => 200, "metal" => 130},
                   formulas: [{from:         [{identificator: "stone", count: 1}],
                             to:           [{identificator: "stone_brick", count: 4}],
                             max_product:  [{identificator: "stone_brick", count: 1200}]}],
@@ -281,19 +281,19 @@ PlantLevel.create(level: "3", deposit: "9200", price: {"stone_brick" =>400, "foo
 
 
 #Таверна
-PlantLevel.create(level: "1", deposit: "1500", price: {"gold" => 1500},
+PlantLevel.create(level: "1", deposit: "1200", price: {"gold" => 1500},
                   formulas: [{from:         [{identificator: "meat", count: 3}, {identificator: "flour", count: 6}],
                             to:           [{identificator: "food", count: 1}],
                             max_product:  [{identificator: "food", count: 50}]}],
                   plant_type_id: tavern)
 
-PlantLevel.create(level: "2", deposit: "1500", price: {"flour" => 200, "metal" => 30},
+PlantLevel.create(level: "2", deposit: "2800", price: {"flour" => 200, "metal" => 30},
                   formulas: [{from:         [{identificator: "meat", count: 2}, {identificator: "flour", count: 4}],
                             to:           [{identificator: "food", count: 1}],
                             max_product:  [{identificator: "food", count: 150}]}],
                   plant_type_id: tavern)
 
-PlantLevel.create(level: "3", deposit: "1500", price: {"flour" => 400, "metal" => 80},
+PlantLevel.create(level: "3", deposit: "6200", price: {"flour" => 400, "metal" => 80},
                   formulas: [{from:         [{identificator: "meat", count: 3}, {identificator: "flour", count: 6}],
                             to:           [{identificator: "food", count: 2}],
                             max_product:  [{identificator: "food", count: 250}]}],

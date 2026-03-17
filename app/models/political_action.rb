@@ -4,6 +4,7 @@ class PoliticalAction < ApplicationRecord
   belongs_to :player
   belongs_to :job
   belongs_to :political_action_type
+  belongs_to :guild, optional: true
 
   def execute
     action_name = self.political_action_type&.action
@@ -16,21 +17,9 @@ class PoliticalAction < ApplicationRecord
   # ------- Купцы --------
 
   def sedition #Подстрекательство к бунту
-    if success.to_i == 1
-      region = Region.find_by_id(params['region_id'])
-      if region
-        PublicOrderItem.add(-5, self.political_action_type.name, region, self)
-      end
-    end
   end
 
   def charity #Благотворительность
-    if success.to_i == 1
-      region = Region.find_by_id(params['region_id'])
-      if region
-        PublicOrderItem.add(5, self.political_action_type.name, region, self)
-      end
-    end
   end
 
   def sabotage #Саботаж

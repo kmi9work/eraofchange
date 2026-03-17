@@ -3,8 +3,7 @@ TroopType.create(name: "Пехота", params: {
   'max_health' => 1,
   'buy_cost' => [
     {identificator: "money", count: 500},
-    {identificator: "food", count: 5}, 
-    {identificator: "weapon", count: 5}
+    {identificator: "meat", count: 50}
   ]
 }) #MILITIA = 1
 TroopType.create(name: "Тяжелая пехота", params: {
@@ -12,20 +11,20 @@ TroopType.create(name: "Тяжелая пехота", params: {
   'max_health' => 3,
   'buy_cost' => [
     {identificator: "money", count: 1000},
-    {identificator: "food", count: 10}, 
-    {identificator: "weapon", count: 0},
-    {identificator: "armor", count: 5}
+    {identificator: "meat", count: 70},
+    {identificator: "metal", count: 20}
   ]
 }) #HEAVY_MILITIA = 2
 TroopType.create(name: "Кавалерия", params: {
   'power' => 5,
   'max_health' => 5,
   'buy_cost' => [
-    {identificator: "money", count: 2000},
-    {identificator: "food", count: 30}, 
-    {identificator: "weapon", count: 0},
-    {identificator: "armor", count: 0},
-    {identificator: "horses", count: 30}
+    {identificator: "money", count: 3000},
+    {identificator: "meat", count: 0},
+    {identificator: "metal", count: 0},
+    {identificator: "food", count: 20}, 
+    {identificator: "horses", count: 30},
+    {identificator: "weapon", count: 5}
   ]
 }) #CAVALRY = 3
 
@@ -33,13 +32,14 @@ TroopType.create(name: "Пушка", params: {
   'power' => 8,
   'max_health' => 8,
   'buy_cost' => [
-    {identificator: "money", count: 1000},
+    {identificator: "money", count: 4000},
+    {identificator: "meat", count: 0},
+    {identificator: "metal", count: 0},
     {identificator: "food", count: 0}, 
-    {identificator: "weapon", count: 0},
-    {identificator: "armor", count: 0},
     {identificator: "horses", count: 0},
-    {identificator: "tools", count: 20}, 
-    {identificator: "metal", count: 20}
+    {identificator: "weapon", count: 0},
+    {identificator: "armor", count: 5},
+    {identificator: "tools", count: 30}
   ]
 }) #CANNON = 4
 

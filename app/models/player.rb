@@ -3,6 +3,19 @@ class Player < ApplicationRecord
   # influence (integer) - Влияние
   # contraband ([]) - Контрабанда
   audited
+  
+  after_update :log_income_taken_value, if: :income_taken_changed?
+  
+  def income_taken_changed?
+    return false unless previous_changes.key?(:params)
+    old_params = previous_changes[:params][0]
+    new_params = previous_changes[:params][1]
+    
+    old_taken = old_params&.dig('income_taken')
+    new_taken = new_params&.dig('income_taken')
+    
+    old_taken != new_taken && new_taken == true
+  end
 
   belongs_to :human, optional: true
   belongs_to :player_type, optional: true
@@ -434,6 +447,26 @@ class Player < ApplicationRecord
 
   def modify_influence(value, comment, entity) #Изменить влияние игрока
     InfluenceItem.add(value, comment, self, entity)
+  end
+
+  # Callback to log income value when income_taken changes from false to true
+  def log_income_taken_value
+    current_income = self.income
+    
+    # Find the last audit for this player with action 'update' and params change
+    last_audit = CustomAudit.where(
+      auditable_type: 'Player',
+      auditable_id: self.id,
+      action: 'update'
+    ).order(created_at: :desc).first
+    
+    if last_audit
+      # Update the audit with income value in a proper field
+      last_audit.update(
+        income_value: current_income,
+        comment: "Взят доход (Год #{GameParameter.current_year})"
+      )
+    end
   end
 
   private

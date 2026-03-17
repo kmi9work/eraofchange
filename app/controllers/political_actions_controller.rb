@@ -23,7 +23,18 @@ class PoliticalActionsController < ApplicationController
   def create
     @political_action = PoliticalAction.new(political_action_params)
     @political_action.year = GameParameter.current_year
-    @political_action.player_id = Job.find_by_id(political_action_params[:job_id])&.players&.first&.id
+    # Получаем job из political_action_type, а не из параметров
+    political_action_type = PoliticalActionType.find_by_id(political_action_params[:political_action_type_id])
+    if political_action_type
+      @political_action.job_id = political_action_type.job_id
+      @political_action.player_id = political_action_type.job&.players&.first&.id
+      
+      # Для действий купцов - получаем гильдию игрока
+      if political_action_type.job&.name == 'Глава гульдии'
+        player = Player.find_by_id(@political_action.player_id)
+        @political_action.guild_id = player&.guild_id if player
+      end
+    end
 
     # Проверяем, требует ли метод success (старая система) или выполняется напрямую (плагин)
     action_method = @political_action.political_action_type&.action
@@ -55,8 +66,12 @@ class PoliticalActionsController < ApplicationController
         format.html { redirect_to political_action_url(@political_action), notice: "Political action was successfully created." }
         format.json { render :show, status: :created, location: @political_action }
       else
+        # Логгируем ошибки валидации
+        Rails.logger.warn "[PoliticalAction] Validation failed: #{@political_action.errors.full_messages.join(', ')}"
+        Rails.logger.warn "[PoliticalAction] Attributes: #{@political_action.attributes.inspect}"
+        
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @political_action.errors, status: :unprocessable_entity }
+        format.json { render json: { errors: @political_action.errors }, status: :unprocessable_entity }
       end
     end
   end

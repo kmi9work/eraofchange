@@ -14,8 +14,10 @@ class Caravan < ApplicationRecord
     prev_year = GameParameter.current_year - 1
     return 0 if Caravan.all.empty? or prev_year < 0
 
+    # Исключаем ограбленные караваны и караваны через Вятку из расчета товарооборота
     turnover = Caravan
-      .where(year: prev_year)
+      .where(year: prev_year, is_robbed: false)
+      .where.not(via_vyatka: true)
       .sum("ABS(COALESCE(gold_import, 0)) + ABS(COALESCE(gold_export, 0))")
       .to_i
 
@@ -51,9 +53,13 @@ class Caravan < ApplicationRecord
     if robbery_status == RobberyService::ROBBERY_SUCCESS
       GameParameter.increment_arrived_count(current_year)
       GameParameter.increment_robbed_count(current_year)
+      # Создаем караван с флагом is_robbed = true
+      country = Country.find(params[:country_id])
+      result = create_caravan(params.merge(is_robbed: true))
       return { success: false, 
                robbed: true, 
-               error: "Караван был ограблен" }
+               error: "Караван был ограблен",
+               caravan: result[:caravan] }
     end
     # Создаем караван и проверяем результат
     country = Country.find(params[:country_id])
@@ -191,7 +197,8 @@ class Caravan < ApplicationRecord
         resources_import: params[:outcoming],
         gold_export:      params[:purchase_cost],
         gold_import:      params[:sale_income],
-        via_vyatka:        params[:via_vyatka] || false
+        via_vyatka:        params[:via_vyatka] || false,
+        is_robbed:         params[:is_robbed] || false
       )
       
       { success: true, caravan: caravan }

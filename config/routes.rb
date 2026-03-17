@@ -21,6 +21,9 @@ Rails.application.routes.draw do
   post '/caravans/register_caravan', to: 'caravans#register_caravan'
   get '/caravans/all', to: 'caravans#all'
   get '/caravans/by_country/:country_id', to: 'caravans#by_country'
+  get '/caravans/merchant_guilds_stats', to: 'caravans#merchant_guilds_stats'
+  get '/caravans/robbed_caravans_stats', to: 'caravans#robbed_caravans_stats'
+  get '/caravans/income_stats', to: 'caravans#income_stats'
   resources :caravans
 
   patch '/troops/:id/pay_for', to: 'troops#pay_for'

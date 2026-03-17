@@ -100,8 +100,8 @@ class Country < ApplicationRecord
   def calculate_trade_turnover
     caravans = self.caravans || []
     trade_turnover = 0
-    # Исключаем караваны через Вятку из расчета товарооборота
-    caravans.each {|car| trade_turnover += (car.gold_export || 0) + (car.gold_import || 0) unless car.via_vyatka == true}
+    # Исключаем караваны через Вятку и ограбленные караваны из расчета товарооборота
+    caravans.each {|car| trade_turnover += (car.gold_export || 0) + (car.gold_import || 0) unless car.via_vyatka == true || car.is_robbed == true}
     return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
   end
 
