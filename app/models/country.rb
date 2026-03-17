@@ -94,6 +94,18 @@ class Country < ApplicationRecord
       relations:      f_c.relations}
     end
 
+    # Add Vyatka trade turnover separately (always show, even with 0 caravans)
+    vyatka_data = calculate_vyatka_trade_turnover
+    overall_trade_turnover << {
+      country_id: Country::VYATKA,
+      country_name: 'Вятка',
+      short_name: 'Вятка',
+      flag_image_name: 'vyatka',
+      trade_turnover: vyatka_data[:trade_turnover],
+      car_count: vyatka_data[:num_of_car],
+      relations: nil
+    }
+
     return overall_trade_turnover
   end
 
@@ -103,6 +115,13 @@ class Country < ApplicationRecord
     # Исключаем караваны через Вятку и ограбленные караваны из расчета товарооборота
     caravans.each {|car| trade_turnover += (car.gold_export || 0) + (car.gold_import || 0) unless car.via_vyatka == true || car.is_robbed == true}
     return {trade_turnover: trade_turnover || 0, num_of_car: caravans.count}
+  end
+
+  def self.calculate_vyatka_trade_turnover
+    # Считаем все караваны прошедшие через Вятку
+    vyatka_caravans = Caravan.where(via_vyatka: true)
+    trade_turnover = vyatka_caravans.sum { |car| (car.gold_export || 0) + (car.gold_import || 0) }
+    return {trade_turnover: trade_turnover || 0, num_of_car: vyatka_caravans.count}
   end
 
   def embargo #1 - эмбарго есть, 0 - эмбарго нет
