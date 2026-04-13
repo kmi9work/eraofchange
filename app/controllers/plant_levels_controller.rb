@@ -3,21 +3,13 @@ class PlantLevelsController < ApplicationController
 
   # GET /plant_levels or /plant_levels.json
   def index
-    @plant_levels = PlantLevel.all
+    @plant_levels = PlantLevel.includes(plant_type: :plant_category).all
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   # GET /plant_levels/1 or /plant_levels/1.json
   def show
-  end
-
-  def prod_info
-    @prod = PlantLevel.show_pl_levels
-    render json: @prod
-  end
-
-  def prod_info_full
-    @prod = PlantLevel.show_pl_levels_full
-    render json: @prod
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   def feed_to_plant

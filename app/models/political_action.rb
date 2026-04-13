@@ -26,6 +26,9 @@ class PoliticalAction < ApplicationRecord
   end
 
   def contraband #Контрабанда
+    if success.to_i == 1
+      guild&.grant_contraband_card(GameParameter.current_year)
+    end
   end
 
   def open_gate #Открыть ворота!

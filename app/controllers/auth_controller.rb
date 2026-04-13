@@ -25,7 +25,8 @@ class AuthController < ApplicationController
           identificator: player.identificator,
           player_type: player.player_type&.name,
           family: player.family&.name,
-          jobs: player.jobs.pluck(:name)
+          jobs: player.jobs.pluck(:name),
+          guild_id: player.guild_id
         }
       }
     else
@@ -52,7 +53,8 @@ class AuthController < ApplicationController
           identificator: Player.current.identificator,
           player_type: Player.current.player_type&.name,
           family: Player.current.family&.name,
-          jobs: Player.current.jobs.pluck(:name)
+          jobs: Player.current.jobs.pluck(:name),
+          guild_id: Player.current.guild_id
         }
       }
     else

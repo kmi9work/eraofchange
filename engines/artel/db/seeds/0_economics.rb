@@ -79,7 +79,7 @@ tkan = PlantType.create(pt_attrs["Ткань", cont, "ri-t-shirt-line"])
  [tkan,       "tkan",       [100, 125, 150, 175]]].each do |plant_type, ident, counts|
   counts.each_with_index do |count, i|
     PlantLevel.create(level: "#{i + 1}", deposit: "0", price: {"kadry" => 1},
-                      formulas: [{from: [], to: [{identificator: ident, count: count}], max_product: [{identificator: ident, count: count}]}],
+                      formulas: [{'from' => [], 'to' => [{'identificator' => ident, 'count' => count}], 'max_product' => [{'identificator' => ident, 'count' => count}]}],
                       plant_type_id: plant_type.id)
   end
 end
@@ -102,122 +102,122 @@ universitet = PlantType.create(pt_attrs.call("Университет", univer, "
 # Комбинат синтетических изделий (artel.xlsx: макс из столбца Округл 20/50/130)
 # Уровень 1: ИС 1100, цена Изоляция 10 + Фарм. преп 2 + Кадры 2 | Из: Полимеры 7, Каучук 5 → В: Рез. тех. изделия 1
 PlantLevel.create(level: "1", deposit: "1100", price: {"izolyaciya" => 10, "farm_prep" => 2, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "polimery", count: 7}, {identificator: "kauchuk", count: 5}],
-                            to:           [{identificator: "rez_teh_izd", count: 1}],
-                            max_product:  [{identificator: "rez_teh_izd", count: 20}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 7}, {'identificator' => "kauchuk", 'count' => 5}],
+                            'to' =>           [{'identificator' => "rez_teh_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "rez_teh_izd", 'count' => 20}]}],
                   plant_type_id: kombinat_sinteticheskih.id)
 
 # Уровень 2: ИС 3300, Изоляция 15, Фарм. преп 4, Кадры 4 | Полимеры 6, Каучук 4 → Рез. тех. изделия 1 (макс 50)
 PlantLevel.create(level: "2", deposit: "3300", price: {"izolyaciya" => 15, "farm_prep" => 4, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "polimery", count: 6}, {identificator: "kauchuk", count: 4}],
-                            to:           [{identificator: "rez_teh_izd", count: 1}],
-                            max_product:  [{identificator: "rez_teh_izd", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 6}, {'identificator' => "kauchuk", 'count' => 4}],
+                            'to' =>           [{'identificator' => "rez_teh_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "rez_teh_izd", 'count' => 50}]}],
                   plant_type_id: kombinat_sinteticheskih.id)
 
 # Уровень 3: ИС 8000, Изоляция 50, Фарм. преп 8, Кадры 8 | Полимеры 4, Каучук 3 → Рез. тех. изделия 1 (макс 130)
 PlantLevel.create(level: "3", deposit: "8000", price: {"izolyaciya" => 50, "farm_prep" => 8, "kadry" => 4},
-                  formulas: [{from:         [{identificator: "polimery", count: 4}, {identificator: "kauchuk", count: 3}],
-                            to:           [{identificator: "rez_teh_izd", count: 1}],
-                            max_product:  [{identificator: "rez_teh_izd", count: 130}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 4}, {'identificator' => "kauchuk", 'count' => 3}],
+                            'to' =>           [{'identificator' => "rez_teh_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "rez_teh_izd", 'count' => 130}]}],
                   plant_type_id: kombinat_sinteticheskih.id)
 
 
 # Композитный цех (artel.xlsx: Полимеры+Эл.комп+Кадры → Изоляция+Металл → Пластины, Округл 20/50/140)
 PlantLevel.create(level: "1", deposit: "1200", price: {"polimery" => 50, "el_komp" => 5, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "izolyaciya", count: 3}, {identificator: "metall", count: 2}],
-                            to:           [{identificator: "plastiny", count: 1}],
-                            max_product:  [{identificator: "plastiny", count: 20}]}],
+                  formulas: [{'from' =>         [{'identificator' => "izolyaciya", 'count' => 3}, {'identificator' => "metall", 'count' => 2}],
+                            'to' =>           [{'identificator' => "plastiny", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "plastiny", 'count' => 20}]}],
                   plant_type_id: kompozitnyj_ceh.id)
 
 PlantLevel.create(level: "2", deposit: "3800", price: {"polimery" => 100, "el_komp" => 15, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "izolyaciya", count: 2}, {identificator: "metall", count: 2}],
-                            to:           [{identificator: "plastiny", count: 1}],
-                            max_product:  [{identificator: "plastiny", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "izolyaciya", 'count' => 2}, {'identificator' => "metall", 'count' => 2}],
+                            'to' =>           [{'identificator' => "plastiny", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "plastiny", 'count' => 50}]}],
                   plant_type_id: kompozitnyj_ceh.id)
 
 PlantLevel.create(level: "3", deposit: "10100", price: {"polimery" => 360, "el_komp" => 30, "kadry" => 4},
-                  formulas: [{from:         [{identificator: "izolyaciya", count: 2}, {identificator: "metall", count: 3}],
-                            to:           [{identificator: "plastiny", count: 2}],
-                            max_product:  [{identificator: "plastiny", count: 140}]}],
+                  formulas: [{'from' =>         [{'identificator' => "izolyaciya", 'count' => 2}, {'identificator' => "metall", 'count' => 3}],
+                            'to' =>           [{'identificator' => "plastiny", 'count' => 2}],
+                            'max_product' =>  [{'identificator' => "plastiny", 'count' => 140}]}],
                   plant_type_id: kompozitnyj_ceh.id)
 
 
 # Участок пластмассовых изделий (artel.xlsx: Каучук+Одежда+Кадры → Полимеры+Реагенты → Пласт. изд, Округл 50/110/330)
 PlantLevel.create(level: "1", deposit: "2000", price: {"kauchuk" => 80, "odezhda" => 3, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "polimery", count: 5}, {identificator: "reagenty", count: 5}],
-                            to:           [{identificator: "plast_izd", count: 1}],
-                            max_product:  [{identificator: "plast_izd", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 5}, {'identificator' => "reagenty", 'count' => 5}],
+                            'to' =>           [{'identificator' => "plast_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "plast_izd", 'count' => 50}]}],
                   plant_type_id: uchastok_plastmassovyh.id)
 
 PlantLevel.create(level: "2", deposit: "5900", price: {"kauchuk" => 150, "odezhda" => 6, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "polimery", count: 4}, {identificator: "reagenty", count: 4}],
-                            to:           [{identificator: "plast_izd", count: 1}],
-                            max_product:  [{identificator: "plast_izd", count: 110}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 4}, {'identificator' => "reagenty", 'count' => 4}],
+                            'to' =>           [{'identificator' => "plast_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "plast_izd", 'count' => 110}]}],
                   plant_type_id: uchastok_plastmassovyh.id)
 
 PlantLevel.create(level: "3", deposit: "12400", price: {"kauchuk" => 200, "odezhda" => 12, "kadry" => 4},
-                  formulas: [{from:         [{identificator: "polimery", count: 3}, {identificator: "reagenty", count: 3}],
-                            to:           [{identificator: "plast_izd", count: 1}],
-                            max_product:  [{identificator: "plast_izd", count: 330}]}],
+                  formulas: [{'from' =>         [{'identificator' => "polimery", 'count' => 3}, {'identificator' => "reagenty", 'count' => 3}],
+                            'to' =>           [{'identificator' => "plast_izd", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "plast_izd", 'count' => 330}]}],
                   plant_type_id: uchastok_plastmassovyh.id)
 
 
 
 # Химлаборатория (artel.xlsx: Ткань+Реагенты+Кадры → Реагенты → Фарм. преп, Округл 70/130/380)
 PlantLevel.create(level: "1", deposit: "800", price: {"tkan" => 20, "reagenty" => 50, "kadry" => 1},
-                  formulas: [{from:         [{identificator: "reagenty", count: 8}],
-                            to:           [{identificator: "farm_prep", count: 1}],
-                            max_product:  [{identificator: "farm_prep", count: 70}]},
-                          {from:         [{identificator: "farm_prep", count: 2}, {identificator: "plast_izd", count: 4}],
-                            to:           [{identificator: "stimulyatory", count: 1}],
-                            max_product:  [{identificator: "stimulyatory", count: 55}]}],
+                  formulas: [{'from' =>         [{'identificator' => "reagenty", 'count' => 8}],
+                            'to' =>           [{'identificator' => "farm_prep", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "farm_prep", 'count' => 70}]},
+                          {'from' =>         [{'identificator' => "farm_prep", 'count' => 2}, {'identificator' => "plast_izd", 'count' => 4}],
+                            'to' =>           [{'identificator' => "stimulyatory", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "stimulyatory", 'count' => 55}]}],
                   plant_type_id: himlaboratoriya.id)
 
 PlantLevel.create(level: "2", deposit: "3100", price: {"tkan" => 40, "reagenty" => 110, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "reagenty", count: 6}],
-                            to:           [{identificator: "farm_prep", count: 1}],
-                            max_product:  [{identificator: "farm_prep", count: 130}]},
-                          {from:         [{identificator: "farm_prep", count: 2}, {identificator: "plast_izd", count: 4}],
-                            to:           [{identificator: "stimulyatory", count: 1}],
-                            max_product:  [{identificator: "stimulyatory", count: 55}]}],
+                  formulas: [{'from' =>         [{'identificator' => "reagenty", 'count' => 6}],
+                            'to' =>           [{'identificator' => "farm_prep", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "farm_prep", 'count' => 130}]},
+                          {'from' =>         [{'identificator' => "farm_prep", 'count' => 2}, {'identificator' => "plast_izd", 'count' => 4}],
+                            'to' =>           [{'identificator' => "stimulyatory", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "stimulyatory", 'count' => 55}]}],
                   plant_type_id: himlaboratoriya.id)
 
 PlantLevel.create(level: "3", deposit: "7200", price: {"tkan" => 80, "reagenty" => 220, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "reagenty", count: 4}],
-                            to:           [{identificator: "farm_prep", count: 1}],
-                            max_product:  [{identificator: "farm_prep", count: 380}]},
-                          {from:         [{identificator: "farm_prep", count: 2}, {identificator: "plast_izd", count: 4}],
-                            to:           [{identificator: "stimulyatory", count: 1}],
-                            max_product:  [{identificator: "stimulyatory", count: 55}]}],
+                  formulas: [{'from' =>         [{'identificator' => "reagenty", 'count' => 4}],
+                            'to' =>           [{'identificator' => "farm_prep", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "farm_prep", 'count' => 380}]},
+                          {'from' =>         [{'identificator' => "farm_prep", 'count' => 2}, {'identificator' => "plast_izd", 'count' => 4}],
+                            'to' =>           [{'identificator' => "stimulyatory", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "stimulyatory", 'count' => 55}]}],
                   plant_type_id: himlaboratoriya.id)
 
 
 # Швейная (artel.xlsx: Ткань+Металл+Кадры → Ткань → Одежда, Округл 30/100/410)
 PlantLevel.create(level: "1", deposit: "900", price: {"tkan" => 15, "metall" => 10, "kadry" => 1},
-                  formulas: [{from:         [{identificator: "tkan", count: 4}],
-                            to:           [{identificator: "odezhda", count: 1}],
-                            max_product:  [{identificator: "odezhda", count: 30}]},
-                          {from:         [{identificator: "odezhda", count: 1}, {identificator: "plastiny", count: 2}],
-                            to:           [{identificator: "bronezhilety", count: 1}],
-                            max_product:  [{identificator: "bronezhilety", count: 60}]}],
+                  formulas: [{'from' =>         [{'identificator' => "tkan", 'count' => 4}],
+                            'to' =>           [{'identificator' => "odezhda", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "odezhda", 'count' => 30}]},
+                          {'from' =>         [{'identificator' => "odezhda", 'count' => 1}, {'identificator' => "plastiny", 'count' => 2}],
+                            'to' =>           [{'identificator' => "bronezhilety", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "bronezhilety", 'count' => 60}]}],
                   plant_type_id: shvejnaya.id)
 
 PlantLevel.create(level: "2", deposit: "3100", price: {"tkan" => 30, "metall" => 20, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "tkan", count: 4}],
-                            to:           [{identificator: "odezhda", count: 2}],
-                            max_product:  [{identificator: "odezhda", count: 100}]},
-                          {from:         [{identificator: "odezhda", count: 1}, {identificator: "plastiny", count: 2}],
-                            to:           [{identificator: "bronezhilety", count: 1}],
-                            max_product:  [{identificator: "bronezhilety", count: 60}]}],
+                  formulas: [{'from' =>         [{'identificator' => "tkan", 'count' => 4}],
+                            'to' =>           [{'identificator' => "odezhda", 'count' => 2}],
+                            'max_product' =>  [{'identificator' => "odezhda", 'count' => 100}]},
+                          {'from' =>         [{'identificator' => "odezhda", 'count' => 1}, {'identificator' => "plastiny", 'count' => 2}],
+                            'to' =>           [{'identificator' => "bronezhilety", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "bronezhilety", 'count' => 60}]}],
                   plant_type_id: shvejnaya.id)
 
 PlantLevel.create(level: "3", deposit: "6900", price: {"tkan" => 70, "metall" => 30, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "tkan", count: 4}],
-                            to:           [{identificator: "odezhda", count: 3}],
-                            max_product:  [{identificator: "odezhda", count: 410}]},
-                          {from:         [{identificator: "odezhda", count: 1}, {identificator: "plastiny", count: 2}],
-                            to:           [{identificator: "bronezhilety", count: 1}],
-                            max_product:  [{identificator: "bronezhilety", count: 60}]}],
+                  formulas: [{'from' =>         [{'identificator' => "tkan", 'count' => 4}],
+                            'to' =>           [{'identificator' => "odezhda", 'count' => 3}],
+                            'max_product' =>  [{'identificator' => "odezhda", 'count' => 410}]},
+                          {'from' =>         [{'identificator' => "odezhda", 'count' => 1}, {'identificator' => "plastiny", 'count' => 2}],
+                            'to' =>           [{'identificator' => "bronezhilety", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "bronezhilety", 'count' => 60}]}],
                   plant_type_id: shvejnaya.id)
 
 
@@ -225,48 +225,48 @@ PlantLevel.create(level: "3", deposit: "6900", price: {"tkan" => 70, "metall" =>
 
 # Радиоателье (artel.xlsx: Металл+Реагенты+Кадры → Металл → Эл. комп, Округл 70/210/930)
 PlantLevel.create(level: "1", deposit: "700", price: {"metall" => 9, "reagenty" => 15, "kadry" => 1},
-                  formulas: [{from:         [{identificator: "metall", count: 2}],
-                            to:           [{identificator: "el_komp", count: 4}],
-                            max_product:  [{identificator: "el_komp", count: 70}]},
-                          {from:         [{identificator: "el_komp", count: 3}, {identificator: "rez_teh_izd", count: 2}],
-                            to:           [{identificator: "ust_slezh", count: 1}],
-                            max_product:  [{identificator: "ust_slezh", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "metall", 'count' => 2}],
+                            'to' =>           [{'identificator' => "el_komp", 'count' => 4}],
+                            'max_product' =>  [{'identificator' => "el_komp", 'count' => 70}]},
+                          {'from' =>         [{'identificator' => "el_komp", 'count' => 3}, {'identificator' => "rez_teh_izd", 'count' => 2}],
+                            'to' =>           [{'identificator' => "ust_slezh", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "ust_slezh", 'count' => 50}]}],
                   plant_type_id: radioatele.id)
 
 PlantLevel.create(level: "2", deposit: "2600", price: {"metall" => 18, "reagenty" => 29, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "metall", count: 2}],
-                            to:           [{identificator: "el_komp", count: 6}],
-                            max_product:  [{identificator: "el_komp", count: 210}]},
-                          {from:         [{identificator: "el_komp", count: 3}, {identificator: "rez_teh_izd", count: 2}],
-                            to:           [{identificator: "ust_slezh", count: 1}],
-                            max_product:  [{identificator: "ust_slezh", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "metall", 'count' => 2}],
+                            'to' =>           [{'identificator' => "el_komp", 'count' => 6}],
+                            'max_product' =>  [{'identificator' => "el_komp", 'count' => 210}]},
+                          {'from' =>         [{'identificator' => "el_komp", 'count' => 3}, {'identificator' => "rez_teh_izd", 'count' => 2}],
+                            'to' =>           [{'identificator' => "ust_slezh", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "ust_slezh", 'count' => 50}]}],
                   plant_type_id: radioatele.id)
 
 PlantLevel.create(level: "3", deposit: "6000", price: {"metall" => 35, "reagenty" => 58, "kadry" => 2},
-                  formulas: [{from:         [{identificator: "metall", count: 2}],
-                            to:           [{identificator: "el_komp", count: 9}],
-                            max_product:  [{identificator: "el_komp", count: 930}]},
-                          {from:         [{identificator: "el_komp", count: 3}, {identificator: "rez_teh_izd", count: 2}],
-                            to:           [{identificator: "ust_slezh", count: 1}],
-                            max_product:  [{identificator: "ust_slezh", count: 50}]}],
+                  formulas: [{'from' =>         [{'identificator' => "metall", 'count' => 2}],
+                            'to' =>           [{'identificator' => "el_komp", 'count' => 9}],
+                            'max_product' =>  [{'identificator' => "el_komp", 'count' => 930}]},
+                          {'from' =>         [{'identificator' => "el_komp", 'count' => 3}, {'identificator' => "rez_teh_izd", 'count' => 2}],
+                            'to' =>           [{'identificator' => "ust_slezh", 'count' => 1}],
+                            'max_product' =>  [{'identificator' => "ust_slezh", 'count' => 50}]}],
                   plant_type_id: radioatele.id)
 
 
 PlantLevel.create(level: "1", deposit: "0", price: {},
-                  formulas: [{from:         [],
-                            to:           [{identificator: "kadry", count: 2}],
-                            max_product:  [{identificator: "kadry", count: 2}]}],
+                  formulas: [{'from' =>         [],
+                            'to' =>           [{'identificator' => "kadry", 'count' => 2}],
+                            'max_product' =>  [{'identificator' => "kadry", 'count' => 2}]}],
                   plant_type_id: universitet.id)
 PlantLevel.create(level: "2", deposit: "0", price: {"odezhda" => 5, "el_komp" => 12, "farm_prep" => 5},
-                  formulas: [{from:         [],
-                            to:           [{identificator: "kadry", count: 4}],
-                            max_product:  [{identificator: "kadry", count: 4}]}],
+                  formulas: [{'from' =>         [],
+                            'to' =>           [{'identificator' => "kadry", 'count' => 4}],
+                            'max_product' =>  [{'identificator' => "kadry", 'count' => 4}]}],
                   plant_type_id: universitet.id)
 
 PlantLevel.create(level: "3", deposit: "0", price: {"odezhda" => 10, "el_komp" => 25, "farm_prep" => 10},
-                  formulas: [{from:         [],
-                            to:           [{identificator: "kadry", count: 6}],
-                            max_product:  [{identificator: "kadry", count: 6}]}],
+                  formulas: [{'from' =>         [],
+                            'to' =>           [{'identificator' => "kadry", 'count' => 6}],
+                            'max_product' =>  [{'identificator' => "kadry", 'count' => 6}]}],
                   plant_type_id: universitet.id)
 
 

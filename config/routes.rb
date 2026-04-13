@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   resources :income_items
   
   # Кастомные маршруты для караванов должны быть ДО resources
+  get '/caravans/guild_status', to: 'caravans#guild_status'
   get '/caravans/check_robbery', to: 'caravans#check_robbery'
   get '/caravans/check_robbery_with_decide', to: 'caravans#check_robbery_with_decide'
   post '/caravans/register_caravan', to: 'caravans#register_caravan'
@@ -32,10 +33,13 @@ Rails.application.routes.draw do
 
 
   ### мобильная
-  get '/players/:id/show_players_resources', to: 'players#show_players_resources'
-  post '/players/:id/exchange_resources', to: 'players#exchange_resources'
-  post '/players/:id/receive_from_masters', to: 'players#receive_from_masters'
-  post '/players/:id/buy_and_sell_res', to: 'players#buy_and_sell_res'
+  get  '/players/:id/show_players_resources', to: 'players#show_players_resources'
+  get  '/players/:id/show_players_plants',    to: 'players#show_players_plants'
+  post '/players/:id/produce_at_plant',       to: 'players#produce_at_plant'
+  post '/players/:id/exchange_resources',     to: 'players#exchange_resources'
+  post '/players/:id/receive_from_masters',   to: 'players#receive_from_masters'
+  post '/players/:id/buy_and_sell_res',       to: 'players#buy_and_sell_res'
+  get  '/political_action_types/for_player',  to: 'political_action_types#for_player'
 
   ###
   patch '/players/:id/add_influence', to: 'players#add_influence'
@@ -125,8 +129,6 @@ Rails.application.routes.draw do
   patch '/buildings/:id/upgrade', to: 'buildings#upgrade'
   patch '/buildings/:id/pay_for_maintenance', to: 'buildings#pay_for_maintenance'
 
-  get '/plant_levels/prod_info', to: 'plant_levels#prod_info'
-  get '/plant_levels/prod_info_full', to: 'plant_levels#prod_info_full'
   post '/plant_levels/:id/feed_to_plant', to: 'plant_levels#feed_to_plant'
 
   get '/plant_places/available_places', to: 'plant_places#available_places'

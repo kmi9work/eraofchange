@@ -3,11 +3,13 @@ json.icon guild.respond_to?(:icon) ? guild.icon : nil
 json.icon_url "/images/guilds/#{guild.id}.png"
 json.player_ids guild.player_ids
 json.players guild.players.order(:name), partial: "players/player", as: :player
-json.plants guild.plants.includes(:plant_level => {:plant_type => :plant_category}) do |plant|
+json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_category}}, :plant_place) do |plant|
   json.id plant.id
+  json.params plant.params
   json.plant_level do
     json.id plant.plant_level&.id
     json.level plant.plant_level&.level
+    json.deposit plant.plant_level&.deposit
     json.formulas plant.plant_level&.formulas
     json.formula_conversion plant.plant_level&.formula_conversion
     json.plant_type do
@@ -32,6 +34,15 @@ json.plants guild.plants.includes(:plant_level => {:plant_type => :plant_categor
       else
         json.nil!
       end
+    end
+  end
+  json.plant_place do
+    pp = plant.plant_place
+    if pp
+      json.id pp.id
+      json.name pp.name
+    else
+      json.nil!
     end
   end
 end
