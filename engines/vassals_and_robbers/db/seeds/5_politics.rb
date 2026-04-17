@@ -1,6 +1,6 @@
 PoliticalActionType.destroy_all
 
-pat_path = './db/seeds/pat_nobles_vassals.csv'
+pat_path = './engines/vassals_and_robbers/db/seeds/pat_nobles_vassals.csv'
 
 
 f = File.open(pat_path, 'r+')
