@@ -11,7 +11,6 @@ json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_catego
     json.level plant.plant_level&.level
     json.deposit plant.plant_level&.deposit
     json.formulas plant.plant_level&.formulas
-    json.formula_conversion plant.plant_level&.formula_conversion
     json.plant_type do
       pt = plant.plant_level&.plant_type
       if pt

@@ -6,24 +6,9 @@ class PlantLevel < ApplicationRecord
 
   include Dictionary
 
-  def formula_conversion
-    to, from = [], []
-    # Для добывающих предприятий formulas может быть пустым или nil
-    return {'from' => [], 'to' => []} if self.formulas.nil? || self.formulas.empty?
-    
-    self.formulas.each do |res|
-      res["from"].each{|uu| from.push({name: look_up_res(uu["identificator"]), identificator: uu["identificator"], count: uu["count"]})} if res["from"]
-      res["to"].each{|ii|   to.push({name: look_up_res(ii["identificator"]), identificator:   ii["identificator"], count: ii["count"]})} if res["to"]
-    end
-    # Убираем дубликаты по identificator, оставляя первое вхождение
-    return {'from' => from.uniq { |item| item[:identificator] }, 'to' => to.uniq { |item| item[:identificator] }}
-  end
-
   def feed_to_plant!(request = [], way = 'from')
     Technology.find(Technology::TECH_SCHOOLS).is_open == 1 ? coof = 1.5 : coof = 1
 
-    #request = make_hash_with_indiff(request) TODO
-    request.map! {|req| req.transform_keys(&:to_s)}
     request.map do |req|
       req["count"] = req["count"].to_i
       (req["count"] /= coof).ceil if way == "to"
