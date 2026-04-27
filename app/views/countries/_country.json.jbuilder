@@ -45,4 +45,10 @@ else
   json.alliances []
 end
 
+json.resources country.resources do |resource|
+  json.identificator resource.identificator
+  json.name resource.name
+  json.icon resource.icon
+end
+
 json.url country_url(country, format: :json)

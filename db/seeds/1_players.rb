@@ -47,8 +47,44 @@ noble_names.each_with_index do |name, i|
   noble_family = @families.shuffle.first
   noble_identificator = Player.generate_identificator(name, noble_human.name, noble_family.name, @jobs[i].name, i)
   p = Player.create(name: name, identificator: noble_identificator, human: noble_human, player_type: @player_types[1], jobs: [@jobs[i]], family: noble_family, params: {"income_taken" => false})
-  @nobles.push 
+  @nobles.push
   InfluenceItem.add(0, "Ручная правка", p)
+end
+
+# ==========================================
+# ТЕСТОВЫЕ ДАННЫЕ ДЛЯ КУПЦОВ
+# ==========================================
+# Три гильдии создаются в 5_economics.rb: Забавники (1), Каменщики (2), Пивовары (3)
+# Купцы создаются здесь и привязываются к гильдиям после их создания — через after_seeds.
+# Чтобы не зависеть от порядка файлов, купцов создадим в отдельном файле.
+# Однако since seeds выполняются в порядке файлов (0_, 1_, 2_ ... 5_),
+# привязку к гильдиям и создание предприятий делаем в 6_merchants.rb.
+
+# Создаём игроков-купцов с заданными именами и идентификаторами
+guild_boss_job = @jobs.last # "Глава гульдии"
+
+merchant_defs = [
+  { name: "Забавник",  identificator: "КУПЕЦ-ЗАБАВНИК",  family: "Рюриковичи" },
+  { name: "Каменщик",  identificator: "КУПЕЦ-КАМЕНЩИК",  family: "Аксаковы"   },
+  { name: "Пивовар",   identificator: "КУПЕЦ-ПИВОВАР",   family: "Голицыны"   },
+  { name: "Вольный",   identificator: "КУПЕЦ-ВОЛЬНЫЙ",   family: "Волоцкие"   },
+  { name: "Странник",  identificator: "КУПЕЦ-СТРАННИК",  family: "Патрикеевы" },
+]
+
+@test_merchants = []
+merchant_defs.each do |md|
+  human = Human.create(name: md[:name])
+  family = Family.find_or_create_by(name: md[:family])
+  player = Player.create(
+    name:           md[:name],
+    identificator:  md[:identificator],
+    human:          human,
+    player_type:    @player_types[0], # Купец
+    family:         family,
+    jobs:           [guild_boss_job],
+    params:         { "contraband" => [] }
+  )
+  @test_merchants << player
 end
 
 

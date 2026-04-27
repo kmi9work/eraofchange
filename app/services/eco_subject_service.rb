@@ -1,17 +1,17 @@
 class EcoSubjectService
-  attr_accessor :id, :name, :category, :money
+  attr_accessor :id, :name, :category, :gold
   def self.all
     eco_subject = read_from_file
     #чтение всех элементов из файла
   end
 
-  def self.create(name, category, money)
+  def self.create(name, category, gold)
     f_max_id = File.open("db/my_db/eco_subject_max_id.csv", "r")
     new_id = f_max_id.gets.to_i + 1
     f_max_id.close
 
     f_es = File.open("db/my_db/eco_subject.csv", "a+")
-    str = "#{new_id};#{name};#{category};#{money}"
+    str = "#{new_id};#{name};#{category};#{gold}"
     f_es.puts str
     f_es.close
 
@@ -45,14 +45,14 @@ class EcoSubjectService
     eco_subject
   end
 
-  def update(new_name, new_category, new_money)
+  def update(new_name, new_category, new_gold)
     eco_subjects = EcoSubjectService.read_from_file
     #чтение всех элементов из файла
 
     eco_subject = eco_subjects.find{|eco_subject| eco_subject.id.to_i == @id}
     eco_subject.name = new_name
     eco_subject.category = new_category
-    eco_subject.money = new_money
+    eco_subject.gold = new_gold
 
     EcoSubjectService.write_to_file(eco_subjects)
     #запись всех элементов в файл
@@ -69,7 +69,7 @@ class EcoSubjectService
     eco_subject.id = str.split(";")[0].to_i
     eco_subject.name = str.split(";")[1]
     eco_subject.category = str.split(";")[2]
-    eco_subject.money = str.split(";")[3]
+    eco_subject.gold = str.split(";")[3]
     eco_subject
   end
 
@@ -87,7 +87,7 @@ class EcoSubjectService
   def self.write_to_file(eco_subjects)
     f = File.open("db/my_db/eco_subject.csv", "w")
     eco_subjects.each do |eco_subject|
-      str = "#{eco_subject.id};#{eco_subject.name};#{eco_subject.category};#{eco_subject.money}"
+      str = "#{eco_subject.id};#{eco_subject.name};#{eco_subject.category};#{eco_subject.gold}"
       f.puts str
     end
     f.close

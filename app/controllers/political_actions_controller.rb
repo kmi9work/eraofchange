@@ -6,6 +6,37 @@ class PoliticalActionsController < ApplicationController
     @political_actions = PoliticalAction.includes(:job, :political_action_type, :player)
   end
 
+  # GET /political_actions/merchant_actions or /political_actions/merchant_actions.json
+  def merchant_actions
+    # Находим все политические действия где job.name == 'Глава гульдии'
+    merchant_actions = PoliticalAction.includes(:job, :political_action_type, :player, :guild)
+      .joins(:job)
+      .where(jobs: { name: 'Глава гульдии' })
+      .order(year: :desc, created_at: :desc)
+    
+    respond_to do |format|
+      format.html { render 'merchant_actions' }
+      format.json { render json: merchant_actions.map { |pa| format_merchant_action(pa) } }
+    end
+  end
+
+  private
+    # Форматирует данные политического действия для JSON ответа
+    def format_merchant_action(action)
+      {
+        id: action.id,
+        year: action.year,
+        action_name: action.political_action_type&.name,
+        action_type: action.political_action_type&.action,
+        player_name: action.player&.name,
+        guild_name: action.guild&.name,
+        cost: action.political_action_type&.cost,
+        success: action.success,
+        created_at: action.created_at,
+        params: action.params
+      }
+    end
+
   # GET /political_actions/1 or /political_actions/1.json
   def show
   end

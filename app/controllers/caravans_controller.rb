@@ -1,6 +1,40 @@
 class CaravansController < ApplicationController
   before_action :set_caravan, only: %i[ show edit update destroy ]
 
+  # GET /caravans/guild_status.json?guild_id=X - статус гильдии: использованные/оставшиеся слоты каравана
+  def guild_status
+    guild_id = params[:guild_id].to_i
+    year = GameParameter.current_year
+
+    caravans_this_year = Caravan.includes(:country).where(guild_id: guild_id, year: year, is_robbed: false)
+    countries_used = caravans_this_year.map { |c| { country_id: c.country_id, country_name: c.country&.name } }
+
+    max_caravans = GameParameter.get_caravans_per_guild.to_i
+    guild = Guild.find_by(id: guild_id)
+    has_contraband = guild&.has_contraband_card?(year) || false
+
+    # Ресурсы гильдии из resource_items
+    guild_resources = {}
+    if guild
+      ResourceItem.where(economic_subject_type: 'Guild', economic_subject_id: guild_id).each do |item|
+        guild_resources[item.identificator] = item.count
+      end
+    end
+
+    render json: {
+      guild_id: guild_id,
+      year: year,
+      caravans_sent: caravans_this_year.count,
+      max_caravans: max_caravans,
+      caravans_remaining: [max_caravans - caravans_this_year.count, 0].max,
+      countries_used: countries_used,
+      has_contraband: has_contraband,
+      guild_resources: guild_resources
+    }
+  rescue => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   def check_robbery
     # Проверяем вероятность
     # result = Caravan.check_robbery(params[:guild_id])
@@ -534,9 +568,9 @@ class CaravansController < ApplicationController
         buy_cost = troop_type.params&.dig('buy_cost')
         next unless buy_cost && buy_cost.is_a?(Array)
         
-        # Ищем стоимость в money
-        money_cost = buy_cost.find { |item| item['identificator'] == 'money' || item[:identificator] == 'money' }
-        total_cost += money_cost['count'].to_i if money_cost
+        # Ищем стоимость в gold
+        gold_cost = buy_cost.find { |item| item['identificator'] == 'gold' || item[:identificator] == 'gold' }
+        total_cost += gold_cost['count'].to_i if gold_cost
       end
       
       total_cost
@@ -569,10 +603,10 @@ class CaravansController < ApplicationController
         buy_cost = troop_type.params&.dig('buy_cost')
         next unless buy_cost && buy_cost.is_a?(Array)
         
-        money_cost = buy_cost.find { |item| item['identificator'] == 'money' || item[:identificator] == 'money' }
-        next unless money_cost
+        gold_cost = buy_cost.find { |item| item['identificator'] == 'gold' || item[:identificator] == 'gold' }
+        next unless gold_cost
         
-        cost = money_cost['count'].to_i
+        cost = gold_cost['count'].to_i
         year = audit.year
         
         unless by_year.key?(year)

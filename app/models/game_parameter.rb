@@ -65,14 +65,14 @@ class GameParameter < ApplicationRecord
   end
 
   SCHEDULE = [
-            {id: 1, identificator: "Регистрация игроков", start: "10:30", finish: "11:00", type: "play"},
-            {id: 2, identificator: "Инструктаж", start: "11:00",  finish: "11:30", type: "pause"},
-            {id: 3, identificator: "Первый цикл", start: "11:30",  finish: "13:00", type: "play"},
-            {id: 4, identificator: "Второй цикл", start: "13:00",  finish: "14:00", type: "play"},
-            {id: 5, identificator: "Обед", start:"14:00",    finish: "14:30", type: "pause"},
-            {id: 6, identificator: "Третий цикл", start: "14:30",  finish: "15:30", type: "play"},              
-            {id: 7, identificator: "Четвертый цикл", start: "15:30",  finish: "16:30", type: "play"},
-            {id: 8, identificator: "Пятый цикл", start: "16:30",  finish: "17:30", type: "play"}
+            {'id' => 1, 'identificator' => "Регистрация игроков", 'start' => "10:30", 'finish' => "11:00", 'type' => "play"},
+            {'id' => 2, 'identificator' => "Инструктаж", 'start' => "11:00",  'finish' => "11:30", 'type' => "pause"},
+            {'id' => 3, 'identificator' => "Первый цикл", 'start' => "11:30",  'finish' => "13:00", 'type' => "play"},
+            {'id' => 4, 'identificator' => "Второй цикл", 'start' => "13:00",  'finish' => "14:00", 'type' => "play"},
+            {'id' => 5, 'identificator' => "Обед", 'start' =>"14:00",    'finish' => "14:30", 'type' => "pause"},
+            {'id' => 6, 'identificator' => "Третий цикл", 'start' => "14:30",  'finish' => "15:30", 'type' => "play"},              
+            {'id' => 7, 'identificator' => "Четвертый цикл", 'start' => "15:30",  'finish' => "16:30", 'type' => "play"},
+            {'id' => 8, 'identificator' => "Пятый цикл", 'start' => "16:30",  'finish' => "17:30", 'type' => "play"}
           ]
 
   # Метод для получения стандартного расписания (может быть переопределен в плагинах)
@@ -113,10 +113,10 @@ def self.get_active_lingering_effects(year = GameParameter.current_year)
       effects_array = entry["effects"] || []
       effects_array.each do |effect|
         active_effects << {
-          action: entry["name_of_action"],
-          effect: effect,
-          duration: entry["duration"],
-          targets: serialize_targets_for_response(entry["targets"])
+          'action' => entry["name_of_action"],
+          'effect' => effect,
+          'duration' => entry["duration"],
+          'targets' => serialize_targets_for_response(entry["targets"])
         }
       end
     end
@@ -319,7 +319,6 @@ end
 
     ###Результаты
   def self.show_noble_results
-    game_results = GameParameter.find_by(identificator: "results")
     players = Player.where(player_type_id: PlayerType::NOBLE)
     nobles_inf = []
     nobles_inf = players.map do |player|
@@ -406,21 +405,18 @@ end
     # Но оставим для обратной совместимости
     game_results = GameParameter.find_by(identificator: "results")
     game_results.params ||= {}
-    game_results.params.transform_keys!(&:to_sym)
     
     if result_hash
-      result_hash.transform_keys!(&:to_sym)
       guild_id = result_hash[:guild_id]
       
       if guild_id
         # Инициализируем хранилище для дополнительных данных гильдий
-        game_results.params[:guild_extra_data] ||= {}
-        game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+        game_results.params['guild_extra_data'] ||= {}
         
         guild_id_sym = guild_id.to_s.to_sym
-        game_results.params[:guild_extra_data][guild_id_sym] = {
-          money: result_hash[:money].to_i || 0,
-          boyar_favor: result_hash[:boyar_favor].to_i || 0
+        game_results.params['guild_extra_data'][guild_id_sym] = {
+          'gold' => result_hash['gold'].to_i || 0,
+          'boyar_favor' => result_hash['boyar_favor'].to_i || 0
         }
       end
     end
@@ -464,9 +460,7 @@ end
 
   def self.find_cap_per_pl(results)    
     per_pl_cap = []
-    results.map! {|par| par.transform_keys(&:to_sym)}
     results.each do |result|
-      result.transform_keys!(&:to_sym) if result.is_a?(Hash)
       num_of_players = result[:number_of_players].to_i > 0 ? result[:number_of_players].to_i : 1
       capital = result[:capital].to_i
       result[:cap_per_pl] = capital/num_of_players
@@ -478,14 +472,11 @@ end
   end
 
   def self.update_results(result_hash)   
-    result_hash.transform_keys!(&:to_sym) 
     game_results = GameParameter.find_by(identificator: "results")
     game_results.params ||= {}
-    game_results.params.transform_keys!(&:to_sym)
     
     # Инициализируем хранилище для дополнительных данных гильдий
-    game_results.params[:guild_extra_data] ||= {}
-    game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+    game_results.params['guild_extra_data'] ||= {}
     
     guild_id = result_hash[:guild_id].to_s.to_sym
     
@@ -493,10 +484,10 @@ end
     number_of_players = nil if number_of_players <= 0
 
     # Сохраняем деньги, боярскую милость и (опционально) количество игроков для гильдии
-    game_results.params[:guild_extra_data][guild_id] = {
-      money: result_hash[:money].to_i || 0,
-      boyar_favor: result_hash[:boyar_favor].to_i || 0,
-      number_of_players: number_of_players
+    game_results.params['guild_extra_data'][guild_id] = {
+      'gold' => result_hash['gold'].to_i || 0,
+      'boyar_favor' => result_hash[:boyar_favor].to_i || 0,
+      'number_of_players' => number_of_players
     }
     
     game_results.save
@@ -506,17 +497,14 @@ end
     # Удаление дополнительных данных для гильдии (обнуление денег и боярской милости)
     game_results = GameParameter.find_by(identificator: "results")
     game_results.params ||= {}
-    game_results.params.transform_keys!(&:to_sym)
-    result_hash.transform_keys!(&:to_sym)
     
-    guild_id = result_hash[:guild_id]
+    guild_id = result_hash['guild_id']
     if guild_id
-      game_results.params[:guild_extra_data] ||= {}
-      game_results.params[:guild_extra_data].transform_keys!(&:to_sym)
+      game_results.params['guild_extra_data'] ||= {}
       
       guild_id_sym = guild_id.to_s.to_sym
       # Удаляем данные гильдии (обнуляем)
-      game_results.params[:guild_extra_data].delete(guild_id_sym)
+      game_results.params['guild_extra_data'].delete(guild_id_sym)
     end
     
     game_results.save
@@ -525,11 +513,9 @@ end
   def self.show_sorted_results(sort_by: :capital)
     game_results = GameParameter.find_by(identificator: "results")
     game_results.params ||= {}
-    game_results.params.transform_keys!(&:to_sym)
     
     # Инициализируем хранилище для дополнительных данных гильдий (деньги и боярская милость)
-    guild_extra_data = game_results.params[:guild_extra_data] || {}
-    guild_extra_data.transform_keys!(&:to_sym) if guild_extra_data.is_a?(Hash)
+    guild_extra_data = game_results.params['guild_extra_data'] || {}
     
     # Собираем результаты по всем гильдиям
     results = []
@@ -542,24 +528,22 @@ end
       
     # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
     # Проверяем как символ строки и как число (для обратной совместимости)
-    guild_id_key = guild.id.to_s.to_sym
     guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
-    guild_data.transform_keys!(&:to_sym) if guild_data.is_a?(Hash)
       
-      money = guild_data[:money].to_i || 0
-      boyar_favor = guild_data[:boyar_favor].to_i || 0
-      manual_players = guild_data[:number_of_players].to_i
+      gold = guild_data['gold'].to_i || 0
+      boyar_favor = guild_data['boyar_favor'].to_i || 0
+      manual_players = guild_data['number_of_players'].to_i
       number_of_players = manual_players > 0 ? manual_players : base_number_of_players
       
       # Итоговый капитал = деньги + стоимость предприятий
-      capital = money + plants_value
+      capital = gold + plants_value
       
       results << {
         guild_id: guild.id,
         player: guild.name,
         capital: capital,
         plants_value: plants_value,
-        money: money,
+        gold: gold,
         number_of_players: number_of_players > 0 ? number_of_players : 1,
         boyar_favor: boyar_favor
       }
@@ -623,15 +607,14 @@ end
   end
 
   def self.add_schedule_item(schedule_item)
-    schedule_item.transform_keys(&:to_sym)
     timer = GameParameter.find_by(identificator: "schedule")
     params = timer.params
     last_id = params.present? ? params.last["id"]  : 0
-    new_item   = {id: last_id + 1,
-                  identificator: schedule_item[:identificator],
-                  start: schedule_item[:start],
-                  finish: schedule_item[:finish],
-                  type: schedule_item[:type] || "play"
+    new_item   = {'id': last_id + 1,
+                  'identificator': schedule_item[:identificator],
+                  'start' => schedule_item[:start],
+                  'finish' => schedule_item[:finish],
+                  'type' => schedule_item[:type] || "play"
                 }
     timer.params << new_item
     timer.save

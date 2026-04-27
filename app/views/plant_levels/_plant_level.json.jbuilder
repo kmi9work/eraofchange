@@ -1,5 +1,5 @@
-json.extract! plant_level, :id, :level, :deposit, :formulas, :price, :created_at, :updated_at
-json.formula_conversion plant_level.formula_conversion
+json.extract! plant_level, :id, :level, :deposit, :formulas, :price, :plant_type_id, :created_at, :updated_at
+json.tech_schools_open tech_schools_open
 json.plant_type do
   pt = plant_level.plant_type
   if pt

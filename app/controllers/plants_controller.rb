@@ -11,9 +11,11 @@ class PlantsController < ApplicationController
 
   def index
     @plants = Plant.all
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   def show
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   def new
@@ -27,23 +29,26 @@ class PlantsController < ApplicationController
     Rails.logger.info "=== PLANT CREATE DEBUG ==="
     Rails.logger.info "Raw params: #{params.inspect}"
     Rails.logger.info "Plant params: #{plant_params.inspect}"
-    
+
     @plant = Plant.new(plant_params)
-    
+
     Rails.logger.info "Plant before economic_subject: #{@plant.inspect}"
-    
+
     # Устанавливаем economic_subject после создания объекта
     # Поддерживаем оба формата: params[:plant][:economic_subject] и params[:economic_subject]
     economic_subject_value = params[:plant]&.dig(:economic_subject) || params[:economic_subject]
     write_economic_subject if economic_subject_value.present?
-    
+
     Rails.logger.info "Plant before save: #{@plant.inspect}"
-    
+
     respond_to do |format|
       if @plant.save
         Rails.logger.info "Plant after save - ID: #{@plant.id}"
         Rails.logger.info "Plant after save: #{@plant.inspect}"
-        
+
+        # Вычитаем стоимость из ресурсов гильдии
+        subtract_plant_cost_from_guild(@plant)
+
         format.html { redirect_to plant_url(@plant), notice: "Plant was successfully created." }
         format.json { render json: @plant, status: :created, location: @plant }
       else
@@ -67,6 +72,9 @@ class PlantsController < ApplicationController
   end
 
   def destroy
+    # Добавляем золото (deposit) владельцу перед удалением предприятия
+    add_plant_deposit_to_owner(@plant)
+
     @plant.destroy
 
     respond_to do |format|
@@ -108,12 +116,15 @@ class PlantsController < ApplicationController
       Rails.logger.info "Plant ID: #{@plant.id}"
       Rails.logger.info "Current plant_level_id: #{@plant.plant_level_id}"
       Rails.logger.info "Current level: #{@plant.plant_level&.level}"
-      
+
       result = @plant.upgrade!
-      
+
       Rails.logger.info "Upgrade result: #{result.inspect}"
-      
+
       if result[:plant_level].present?
+        # Вычитаем стоимость улучшения из ресурсов гильдии
+        subtract_plant_cost_from_guild(@plant)
+
         respond_to do |format|
           format.html { redirect_back(fallback_location: plant_path(@plant), notice: result[:msg]) }
           format.json { render json: { success: true, msg: result[:msg], plant: @plant }, status: :ok }
@@ -128,7 +139,7 @@ class PlantsController < ApplicationController
     rescue => e
       Rails.logger.error "Ошибка улучшения предприятия: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      
+
       respond_to do |format|
         format.html { redirect_back(fallback_location: plant_path(@plant), alert: "Ошибка: #{e.message}") }
         format.json { render json: { success: false, error: e.message }, status: :unprocessable_entity }
@@ -156,9 +167,9 @@ class PlantsController < ApplicationController
       # Поддерживаем оба формата: params[:plant][:economic_subject] и params[:economic_subject]
       economic_subject_value = params[:plant]&.dig(:economic_subject) || params[:economic_subject]
       return unless economic_subject_value.present?
-      
+
       es_id, es_type = economic_subject_value.split('_')
-      
+
       # Находим объект economic_subject
       if es_type == 'Guild'
         @plant.economic_subject = Guild.find(es_id.to_i)
@@ -167,6 +178,43 @@ class PlantsController < ApplicationController
         @plant.economic_subject = Player.find(es_id.to_i)
         Rails.logger.info "Set economic_subject to Player ID: #{es_id}"
       end
+    end
+
+    def subtract_plant_cost_from_guild(plant)
+      # Вычитаем стоимость строительства/улучшения предприятия из ресурсов гильдии
+      return unless plant.economic_subject_type == 'Guild'
+      return unless plant.plant_level&.price.present?
+
+      es = plant.economic_subject
+
+      plant.plant_level.price.each do |identificator, count|
+        next if count <= 0
+        resource_item = es.resource_items.find_by(identificator: identificator.to_s)
+        if resource_item
+          resource_item.count -= count
+          resource_item.save! if resource_item.count != 0
+          resource_item.destroy if resource_item.count <= 0
+        end
+      end
+    rescue => e
+      Rails.logger.error "Failed to subtract plant cost from es: #{e.message}"
+    end
+
+    def add_plant_deposit_to_owner(plant)
+      # Добавляем золото (deposit) владельцу при удалении предприятия
+      return unless plant.plant_level&.deposit.present?
+      return unless plant.economic_subject.present?
+
+      deposit_amount = plant.plant_level.deposit.to_i
+      return if deposit_amount <= 0
+
+      # Добавляем gold в resource_items гильдии или игрока
+      es = plant.economic_subject
+      resource_item = es.resource_items.find_or_initialize_by(identificator: 'gold')
+      resource_item.count = (resource_item.count || 0) + deposit_amount
+      resource_item.save!
+    rescue => e
+      Rails.logger.error "Failed to add plant deposit to owner: #{e.message}"
     end
 end
 

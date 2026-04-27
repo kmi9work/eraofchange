@@ -1,3 +1,4 @@
+puts 'Creating GameParameter\'s'
 GameParameter.create(name: "Текущий год", identificator: "current_year", value: "1", params:
 {"state_expenses" => false})
 
@@ -18,10 +19,10 @@ GameParameter.create(
   identificator: "caravan_robbery_settings",
   value: "0",
   params: {
-    robbery_by_year: {},
-    protected_guilds_by_year: {},
-    arrived_count_by_year: {},
-    robbed_count_by_year: {}
+    "robbery_by_year" => {},
+    "protected_guilds_by_year" => {},
+    "arrived_count_by_year" => {},
+    "robbed_count_by_year" => {}
   }
 )
 

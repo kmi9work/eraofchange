@@ -9,6 +9,7 @@ class Country < ApplicationRecord
   has_many :caravans
   has_many :alliances
   has_many :partner_alliances, class_name: 'Alliance', foreign_key: 'partner_country_id'
+  has_many :resources
 
   REL_RANGE = 2   # relations (interger) - уровень отношений с Русью от -2 до 2
   

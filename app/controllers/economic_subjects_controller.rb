@@ -13,7 +13,7 @@ class EconomicSubjectsController < ApplicationController
   end
 
   def create
-    EconomicSubject.create(name: params[:name], category: params[:category], money: params[:money])
+    EconomicSubject.create(name: params[:name], category: params[:category], gold: params[:gold])
     redirect_to('/economic_subjects')
   end
 
@@ -23,7 +23,7 @@ class EconomicSubjectsController < ApplicationController
 
   def update
     @economic_subject = EconomicSubject.find_by_id(params[:id])
-    @economic_subject.update(name: params[:name], category: params[:category], money: params[:money])
+    @economic_subject.update(name: params[:name], category: params[:category], gold: params[:gold])
     redirect_to(economic_subjects_path)
   end
 

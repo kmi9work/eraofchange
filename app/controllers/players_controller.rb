@@ -3,10 +3,37 @@ class PlayersController < ApplicationController
     show edit update destroy
     add_influence add_income income_breakdown
     show_players_resources receive_from_masters exchange_resources show_players_plants buy_and_sell_res
+    produce_at_plant
   ]
 
   def show_players_resources
-     render json: @player.resources || []
+    resources = {}
+    @player.resource_items.each do |item|
+      resources[item.identificator] = item.count
+    end
+    render json: resources
+  end
+
+  def show_players_plants
+    plants = @player.plants.includes(plant_level: :plant_type)
+    render json: plants.as_json(
+      include: {
+        plant_level: {
+          include: { plant_type: { only: %i[id name] } },
+          only: %i[id level deposit]
+        },
+        plant_place: { only: %i[id name] }
+      }
+    )
+  end
+
+  def produce_at_plant
+    plant_id        = params[:plant_id]
+    hashed_resources = params[:hashed_resources] || []
+    result = @player.produce_at_plant(plant_id, hashed_resources)
+    render json: { success: true, result: result }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
 
   def receive_from_masters
@@ -26,14 +53,6 @@ class PlayersController < ApplicationController
       Rails.logger.error "Failed to save: #{@player.errors.full_messages}"
       render json: { success: false, error: @player.errors.full_messages.join(', ') }, status: :unprocessable_entity
     end
-  end
-
-  def show_players_plants
-    render json: @player.plants || []
-  end
-
-  def produce_at_plant
-    @player.produce(params[:plant_id], params[:hashed_resources])
   end
 
   def exchange_resources

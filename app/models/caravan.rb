@@ -35,13 +35,36 @@ class Caravan < ApplicationRecord
   end
 
   def self.register_caravan(params)
-    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1    
+    via_vyatka = params[:via_vyatka] == true || params[:via_vyatka] == 'true' || params[:via_vyatka] == 1
     return send_caravan_via_vyatka(params) if via_vyatka
 
 
     force_protected = params[:is_protected] == true || params[:is_protected] == 'true' || params[:is_protected] == 1
     current_year = GameParameter.current_year
     guild_id =  params[:guild_id].to_i
+
+    # Проверяем эмбарго и карточку Контрабанда
+    country = Country.find_by(id: params[:country_id])
+    if country && country.params&.dig("embargo").to_i == 1
+      guild = Guild.find_by(id: guild_id)
+      unless guild&.has_contraband_card?(current_year)
+        return { success: false, error: "На эту страну наложено эмбарго. Для торговли необходима карточка Контрабанда." }
+      end
+    end
+
+    # Проверяем, не был ли уже отправлен караван в эту страну в этом году
+    if guild_id > 0 && Caravan.where(guild_id: guild_id, country_id: params[:country_id], year: current_year, is_robbed: false).exists?
+      return { success: false, error: "Гильдия уже отправляла караван в эту страну в этом году." }
+    end
+
+    # Проверяем лимит на количество каравнов в году
+    max_caravans = GameParameter.get_caravans_per_guild.to_i
+    if guild_id > 0 && max_caravans > 0
+      sent_this_year = Caravan.where(guild_id: guild_id, year: current_year, is_robbed: false).count
+      if sent_this_year >= max_caravans
+        return { success: false, error: "Гильдия исчерпала лимит каравнов на этот год (#{max_caravans})." }
+      end
+    end
     # Статус попытки ограбить караван
 
     robbery_status = RobberyService.attempt_robbery(
@@ -54,15 +77,13 @@ class Caravan < ApplicationRecord
       GameParameter.increment_arrived_count(current_year)
       GameParameter.increment_robbed_count(current_year)
       # Создаем караван с флагом is_robbed = true
-      country = Country.find(params[:country_id])
       result = create_caravan(params.merge(is_robbed: true))
-      return { success: false, 
-               robbed: true, 
+      return { success: false,
+               robbed: true,
                error: "Караван был ограблен",
                caravan: result[:caravan] }
     end
     # Создаем караван и проверяем результат
-    country = Country.find(params[:country_id])
     result = create_caravan(params)
     
     # Инкрементируем счетчик пришедших караванов (только если караван создан)
@@ -70,18 +91,21 @@ class Caravan < ApplicationRecord
       GameParameter.increment_arrived_count(current_year)
     end
     
-    return result unless result[:success] 
-    
+    return result unless result[:success]
+
     caravan = result[:caravan]
 
+    # Обновляем ресурсы игрока (если передан player_id)
+    update_player_resources(params) if params[:player_id].present?
+
     country.reload
-    caravan_result = { 
+    caravan_result = {
       success: true,
-      caravan: caravan, 
+      caravan: caravan,
       level_increased: false
     }
     if robbery_status == RobberyService::ROBBERY_FAILURE
-      caravan_result[:error] = "Неудачное ограбление, Караван отбит" 
+      caravan_result[:error] = "Неудачное ограбление, Караван отбит"
       caravan_result[:robbed] = false
     end
     caravan_result
@@ -188,6 +212,37 @@ class Caravan < ApplicationRecord
       result.merge(robbed: robbed, random_value: random_value)
     end
 
+    def update_player_resources(params)
+      player = Player.find_by(id: params[:player_id])
+      return unless player
+
+      # Что игрок отдал рынку (incoming) — вычитаем у игрока
+      incoming = Array(params[:incoming]).map { |r| { identificator: r[:identificator].to_s, name: r[:name].to_s, count: r[:count].to_i } }
+      incoming.reject { |r| r[:identificator] == 'gold' }.each do |res|
+        next unless res[:count] > 0
+        player.subtract_resources_from_sender([res])
+      end
+
+      # Что игрок получил с рынка (outcoming) — добавляем игроку
+      outcoming = Array(params[:outcoming]).map { |r| { identificator: r[:identificator].to_s, name: r[:name].to_s, count: r[:count].to_i } }
+      outcoming.reject { |r| r[:identificator] == 'gold' }.each do |res|
+        next unless res[:count] > 0
+        player.add_resources_to_recipient(player, [res])
+      end
+
+      # Изменение золота = выручка от продажи — стоимость покупки
+      gold_delta = params[:sale_income].to_i - params[:purchase_cost].to_i
+      if gold_delta > 0
+        player.add_resources_to_recipient(player, [{ identificator: 'gold', name: 'Золото', count: gold_delta }])
+      elsif gold_delta < 0
+        player.subtract_resources_from_sender([{ identificator: 'gold', name: 'Золото', count: gold_delta.abs }])
+      end
+
+      player.save!
+    rescue => e
+      Rails.logger.error "[Caravan] Failed to update player resources for player #{params[:player_id]}: #{e.message}"
+    end
+
     def create_caravan(params)
       caravan = Caravan.create!(
         country_id:        params[:country_id],
@@ -200,7 +255,49 @@ class Caravan < ApplicationRecord
         via_vyatka:        params[:via_vyatka] || false,
         is_robbed:         params[:is_robbed] || false
       )
-      
+
+      # Обновляем ресурсы гильдии (если караван отправлен от гильдии)
+      if params[:guild_id].present?
+        guild = Guild.find_by(id: params[:guild_id])
+        if guild
+          # Вычитаем отправленные ресурсы (incoming)
+          incoming_resources = Array(params[:incoming]).map { |r| { identificator: r[:identificator].to_s, count: r[:count].to_i } }
+          incoming_resources.each do |res|
+            next if res[:count] <= 0
+            resource_item = guild.resource_items.find_by(identificator: res[:identificator])
+            if resource_item
+              resource_item.count -= res[:count]
+              resource_item.save! if resource_item.count != 0
+              resource_item.destroy if resource_item.count <= 0
+            end
+          end
+
+          # Добавляем полученные ресурсы (outcoming)
+          outcoming_resources = Array(params[:outcoming]).map { |r| { identificator: r[:identificator].to_s, count: r[:count].to_i } }
+          outcoming_resources.each do |res|
+            next if res[:count] <= 0
+            resource_item = guild.resource_items.find_or_initialize_by(identificator: res[:identificator])
+            resource_item.count = (resource_item.count || 0) + res[:count]
+            resource_item.save!
+          end
+
+          # Обрабатываем gold: вычитаем purchase_cost, добавляем sale_income
+          purchase_cost = params[:purchase_cost].to_i
+          sale_income = params[:sale_income].to_i
+          gold_delta = sale_income - purchase_cost
+
+          if gold_delta != 0
+            gold_item = guild.resource_items.find_or_initialize_by(identificator: 'gold')
+            gold_item.count = (gold_item.count || 0) + gold_delta
+            if gold_item.count > 0
+              gold_item.save!
+            elsif gold_item.count <= 0
+              gold_item.destroy if gold_item.persisted?
+            end
+          end
+        end
+      end
+
       { success: true, caravan: caravan }
     rescue ActiveRecord::RecordInvalid => e
       { success: false, error: e.message }

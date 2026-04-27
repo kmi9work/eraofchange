@@ -10,7 +10,7 @@ class Troop < ApplicationRecord
   CANON_COST = [
     {identificator: "tools", count: 20}, 
     {identificator: "metal", count: 20}, 
-    {identificator: "money", count: 1000}
+    {identificator: "gold", count: 1000}
   ]
 
   def set_first_year

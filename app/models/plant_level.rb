@@ -6,69 +6,9 @@ class PlantLevel < ApplicationRecord
 
   include Dictionary
 
-  def self.show_pl_levels
-    pl_levels = []
-    formula_from = []
-    formula_to = []
-    PlantLevel.all.each do |p_l|
-      next if p_l.plant_type.plant_category.is_extractive
-      pl_levels.push({id: p_l.id,
-                      formula_from: p_l.formula_conversion[:from],
-                      formula_to:   p_l.formula_conversion[:to],
-                      name: p_l.plant_type.name,
-                      level: p_l.level
-                    })
-    end
-    return pl_levels
-  end
-
-  def self.show_pl_levels_full
-    pl_levels = []
-    tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
-    
-    PlantLevel.all.each do |p_l|
-      # Для добывающих предприятий используем только formula_to
-      if p_l.plant_type.plant_category.is_extractive
-        pl_levels.push({id: p_l.id,
-                        formula_from: [],
-                        formula_to:   p_l.formula_conversion[:to],
-                        formulas:     [],
-                        name: p_l.plant_type.name,
-                        level: p_l.level,
-                        tech_schools_open: tech_schools_open
-                      })
-      else
-        pl_levels.push({id: p_l.id,
-                        formula_from: p_l.formula_conversion[:from],
-                        formula_to:   p_l.formula_conversion[:to],
-                        formulas:     p_l.formulas,
-                        name: p_l.plant_type.name,
-                        level: p_l.level,
-                        tech_schools_open: tech_schools_open
-                      })
-      end
-    end
-    return pl_levels
-  end
-
-  def formula_conversion
-    to, from = [], []
-    # Для добывающих предприятий formulas может быть пустым или nil
-    return {from: [], to: []} if self.formulas.nil? || self.formulas.empty?
-    
-    self.formulas.each do |res|
-      res["from"].each{|uu| from.push({name: look_up_res(uu["identificator"]), identificator: uu["identificator"], count: uu["count"]})} if res["from"]
-      res["to"].each{|ii|   to.push({name: look_up_res(ii["identificator"]), identificator:   ii["identificator"], count: ii["count"]})} if res["to"]
-    end
-    # Убираем дубликаты по identificator, оставляя первое вхождение
-    return {from: from.uniq { |item| item[:identificator] }, to: to.uniq { |item| item[:identificator] }}
-  end
-
   def feed_to_plant!(request = [], way = 'from')
     Technology.find(Technology::TECH_SCHOOLS).is_open == 1 ? coof = 1.5 : coof = 1
 
-    #request = make_hash_with_indiff(request) TODO
-    request.map! {|req| req.transform_keys(&:to_s)}
     request.map do |req|
       req["count"] = req["count"].to_i
       (req["count"] /= coof).ceil if way == "to"
@@ -91,9 +31,9 @@ class PlantLevel < ApplicationRecord
     resulting_to.each{|res| res["count"] *= coof}
 
     return {
-        from: resulting_from,
-        to: resulting_to,
-        change: request
+        'from' => resulting_from,
+        'to' => resulting_to,
+        'change' => request
     }
    end
 

@@ -6,6 +6,18 @@ class PoliticalActionTypesController < ApplicationController
     @political_action_types = PoliticalActionType.all
   end
 
+  # GET /political_action_types/for_player?player_id=:id
+  # Возвращает только действия, доступные конкретному игроку (по его должностям)
+  def for_player
+    player = Player.find_by(id: params[:player_id])
+    if player.nil?
+      render json: [], status: :ok and return
+    end
+    job_ids = player.jobs.pluck(:id)
+    @political_action_types = PoliticalActionType.where(job_id: job_ids)
+    render json: @political_action_types
+  end
+
   # GET /political_action_types/1 or /political_action_types/1.json
   def show
   end
