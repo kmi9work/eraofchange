@@ -1,6 +1,6 @@
 json.extract! plant, :id, :comments, :name_of_plant, :economic_subject, :credit, :params, :plant_level_id, :plant_place_id, :economic_subject_id, :economic_subject_type, :created_at, :updated_at
 json.plant_level do
-  json.partial! "plant_levels/plant_level", plant_level: plant.plant_level
+  json.partial! "plant_levels/plant_level", plant_level: plant.plant_level, tech_schools_open: @tech_schools_open
 end
 if plant.plant_place
   json.plant_place do

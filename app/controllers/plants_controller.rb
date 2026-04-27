@@ -11,9 +11,11 @@ class PlantsController < ApplicationController
 
   def index
     @plants = Plant.all
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   def show
+    @tech_schools_open = Technology.find(Technology::TECH_SCHOOLS).is_open == 1
   end
 
   def new
