@@ -13,3 +13,6 @@ while str = f.gets
     description: desc, cost: cost, probability: prob, 
     success: success, failure: failure)
 end
+
+Job.find_by_name("Зодчий").destroy
+Player.find_by_name("Большой").destroy

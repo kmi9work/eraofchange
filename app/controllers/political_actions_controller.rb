@@ -20,23 +20,6 @@ class PoliticalActionsController < ApplicationController
     end
   end
 
-  private
-    # Форматирует данные политического действия для JSON ответа
-    def format_merchant_action(action)
-      {
-        id: action.id,
-        year: action.year,
-        action_name: action.political_action_type&.name,
-        action_type: action.political_action_type&.action,
-        player_name: action.player&.name,
-        guild_name: action.guild&.name,
-        cost: action.political_action_type&.cost,
-        success: action.success,
-        created_at: action.created_at,
-        params: action.params
-      }
-    end
-
   # GET /political_actions/1 or /political_actions/1.json
   def show
   end
@@ -131,6 +114,23 @@ class PoliticalActionsController < ApplicationController
   end
 
   private
+
+    # Форматирует данные политического действия для JSON ответа
+    def format_merchant_action(action)
+      {
+        id: action.id,
+        year: action.year,
+        action_name: action.political_action_type&.name,
+        action_type: action.political_action_type&.action,
+        player_name: action.player&.name,
+        guild_name: action.guild&.name,
+        cost: action.political_action_type&.cost,
+        success: action.success,
+        created_at: action.created_at,
+        params: action.params
+      }
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_political_action
       @political_action = PoliticalAction.find(params[:id])
