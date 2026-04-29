@@ -74,11 +74,11 @@ while str = f.gets
     country = Country.create(id: id, name: country_name, short_name: short_name, flag_image_name: flag_image_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "last_trade_turnover" => 0, "level_thresholds" =>  levels})
     RelationItem.add(relations.to_i, "Ручная правка", country)
   end
-  # region = Region.find_by_name(region_name)
-  # if region.blank?
-  #   region = Region.create(name: region_name, country: country, way: way)
-  #   PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
-  # end
+  region = Region.find_by_name(region_name)
+  if region.blank?
+    region = Region.create(name: region_name, country: country, way: way)
+    # PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
+  end
   city = Settlement.find_by_name(city_name)
   type = case cost_type.to_i
   when 1
