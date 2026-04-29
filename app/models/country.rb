@@ -111,6 +111,13 @@ class Country < ApplicationRecord
   end
 
   def calculate_trade_turnover
+    # Если установлен ручной товарооборот, используем его
+    manual_turnover = self.params&.dig('manual_trade_turnover')
+    if manual_turnover.present? && manual_turnover.to_i > 0
+      caravans = self.caravans || []
+      return {trade_turnover: manual_turnover.to_i, num_of_car: caravans.count}
+    end
+    
     caravans = self.caravans || []
     trade_turnover = 0
     # Исключаем караваны через Вятку и ограбленные караваны из расчета товарооборота

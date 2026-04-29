@@ -630,6 +630,10 @@ end
   def self.delete_schedule_item(schedule_item_id)
     timer = GameParameter.find_by(identificator: "schedule")
     timer.params.delete_if {|item| item["id"] == schedule_item_id["id"]}
+    # Пересчитываем ID по-порядку, чтобы не было пробелов
+    timer.params.each_with_index do |item, index|
+      item["id"] = index + 1
+    end
     timer.save
   end
 
