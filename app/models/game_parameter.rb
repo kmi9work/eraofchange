@@ -485,7 +485,7 @@ end
 
     # Сохраняем деньги, боярскую милость и (опционально) количество игроков для гильдии
     game_results.params['guild_extra_data'][guild_id] = {
-      'gold' => result_hash['gold'].to_i || 0,
+      'gold' => result_hash['money'].to_i || 0,
       'boyar_favor' => result_hash[:boyar_favor].to_i || 0,
       'number_of_players' => number_of_players
     }
@@ -526,9 +526,10 @@ end
       # Базовое количество игроков в гильдии (если не задано вручную)
       base_number_of_players = guild.players.count
       
-    # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
-    # Проверяем как символ строки и как число (для обратной совместимости)
-    guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
+      # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
+      # Проверяем как символ строки и как число (для обратной совместимости)
+      guild_id_key = guild.id.to_s
+      guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
       
       gold = guild_data['gold'].to_i || 0
       boyar_favor = guild_data['boyar_favor'].to_i || 0
