@@ -195,6 +195,7 @@ Rails.application.routes.draw do
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
+  patch '/plants/:id/downgrade', to: 'plants#downgrade', as: :downgrade_plant
 
   get '/login/:id', to: 'users#login'
   get '/current_user', to: 'users#current_user'

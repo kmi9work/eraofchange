@@ -53,18 +53,18 @@ class Caravan < ApplicationRecord
     end
 
     # Проверяем, не был ли уже отправлен караван в эту страну в этом году
-    if guild_id > 0 && Caravan.where(guild_id: guild_id, country_id: params[:country_id], year: current_year, is_robbed: false).exists?
-      return { success: false, error: "Гильдия уже отправляла караван в эту страну в этом году." }
-    end
+    # if guild_id > 0 && Caravan.where(guild_id: guild_id, country_id: params[:country_id], year: current_year, is_robbed: false).exists?
+    #   return { success: false, error: "Гильдия уже отправляла караван в эту страну в этом году." }
+    # end
 
-    # Проверяем лимит на количество каравнов в году
-    max_caravans = GameParameter.get_caravans_per_guild.to_i
-    if guild_id > 0 && max_caravans > 0
-      sent_this_year = Caravan.where(guild_id: guild_id, year: current_year, is_robbed: false).count
-      if sent_this_year >= max_caravans
-        return { success: false, error: "Гильдия исчерпала лимит каравнов на этот год (#{max_caravans})." }
-      end
-    end
+    # # Проверяем лимит на количество каравнов в году
+    # max_caravans = GameParameter.get_caravans_per_guild.to_i
+    # if guild_id > 0 && max_caravans > 0
+    #   sent_this_year = Caravan.where(guild_id: guild_id, year: current_year, is_robbed: false).count
+    #   if sent_this_year >= max_caravans
+    #     return { success: false, error: "Гильдия исчерпала лимит каравнов на этот год (#{max_caravans})." }
+    #   end
+    # end
     # Статус попытки ограбить караван
 
     robbery_status = RobberyService.attempt_robbery(

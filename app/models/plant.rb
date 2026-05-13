@@ -47,6 +47,21 @@ class Plant < ApplicationRecord
     return {plant_level: nil, msg: "Невозможно улучшить. Уровень предприятия максимальный"}
   end
 
+  def downgrade!
+    level = self.plant_level&.level
+    if level && level > 1
+      pl = PlantLevel.find_by(level: level - 1, plant_type_id: self.plant_level.plant_type_id)
+      old_price = self.plant_level.price
+      self.plant_level = pl
+      if pl && self.save
+        return {plant_level: pl, old_price: old_price, msg: "Уровень предприятия уменьшен"}
+      else
+        return {plant_level: nil, msg: "Внутренняя ошибка. #{pl}, #{self.errors.inspect}"}
+      end
+    end
+    return {plant_level: nil, msg: "Невозможно уменьшить. Уровень предприятия минимальный"}
+  end
+
   def has_produced!
     self.params["produced"].push(GameParameter.current_year)
     self.save
