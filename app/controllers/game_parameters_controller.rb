@@ -97,7 +97,39 @@ class GameParametersController < ApplicationController
     GameParameter.toggle_timer(params[:request])
   end
 
- def save_sorted_results
+  def show_sovereign_schedule
+    render json: GameParameter.show_sovereign_schedule
+  end
+
+  def create_sovereign_schedule
+    GameParameter.create_sovereign_schedule
+    render json: { success: true, message: "Расписание Государя создано" }
+  end
+
+  def update_sovereign_schedule_name
+    GameParameter.update_sovereign_schedule_name(params[:request])
+  end
+
+  def add_sovereign_schedule_item
+    GameParameter.add_sovereign_schedule_item(params[:request])
+  end
+
+  def update_sovereign_schedule_item
+    GameParameter.update_sovereign_schedule_item(params[:request])
+  end
+
+  def delete_sovereign_schedule_item
+    GameParameter.delete_sovereign_schedule_item(params[:request])
+  end
+
+  def shift_sovereign_schedule
+    result = GameParameter.shift_sovereign_schedule(params[:request])
+    render json: result
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def save_sorted_results
     GameParameter.sort_and_save_results(params[:request].to_unsafe_h)
   end
 

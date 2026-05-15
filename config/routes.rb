@@ -74,6 +74,15 @@ Rails.application.routes.draw do
   patch '/game_parameters/shift_schedule', to: 'game_parameters#shift_schedule'
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
+  ###Расписание Государя
+  get   '/game_parameters/show_sovereign_schedule', to: 'game_parameters#show_sovereign_schedule'
+  patch '/game_parameters/create_sovereign_schedule', to: 'game_parameters#create_sovereign_schedule'
+  patch '/game_parameters/update_sovereign_schedule_name', to: 'game_parameters#update_sovereign_schedule_name'
+  patch '/game_parameters/add_sovereign_schedule_item', to: 'game_parameters#add_sovereign_schedule_item'
+  patch '/game_parameters/update_sovereign_schedule_item', to: 'game_parameters#update_sovereign_schedule_item'
+  patch '/game_parameters/delete_sovereign_schedule_item', to: 'game_parameters#delete_sovereign_schedule_item'
+  patch '/game_parameters/shift_sovereign_schedule', to: 'game_parameters#shift_sovereign_schedule'
+
   ###Экран
   get   '/game_parameters/get_screen', to: 'game_parameters#get_screen'
   patch '/game_parameters/toggle_screen', to: 'game_parameters#toggle_screen'

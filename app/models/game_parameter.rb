@@ -726,6 +726,157 @@ end
     timer.save
   end
 
+  SOVEREIGN_SCHEDULE_IDENTIFICATOR = "sovereign_schedule"
+
+  SOVEREIGN_SCHEDULE = [
+    {
+      "id" => 1,
+      "name" => "Общее расписание",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Игра", "start" => "13:45", "finish" => "16:25", "type" => "play"},
+        {"id" => 3, "identificator" => "Обсуждение", "start" => "16:25", "finish" => "17:00", "type" => "play"}
+      ]
+    },
+    {
+      "id" => 2,
+      "name" => "Команда №1",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Год 1. Фаза Стратегии", "start" => "13:45", "finish" => "14:15", "type" => "play"},
+        {"id" => 3, "identificator" => "Год 1. Фаза Действия", "start" => "14:15", "finish" => "14:25", "type" => "play"},
+        {"id" => 4, "identificator" => "Год 1. Фаза Подготовки", "start" => "14:25", "finish" => "14:30", "type" => "play"},
+        {"id" => 5, "identificator" => "Год 2. Фаза Стратегии", "start" => "14:30", "finish" => "14:45", "type" => "play"},
+        {"id" => 6, "identificator" => "Год 2. Фаза Действия", "start" => "14:45", "finish" => "14:55", "type" => "play"},
+        {"id" => 7, "identificator" => "Год 2. Фаза Подготовки", "start" => "14:55", "finish" => "15:00", "type" => "play"},
+        {"id" => 8, "identificator" => "Год 3. Фаза Стратегии", "start" => "15:00", "finish" => "15:15", "type" => "play"},
+        {"id" => 9, "identificator" => "Год 3. Фаза Действия", "start" => "15:15", "finish" => "15:25", "type" => "play"},
+        {"id" => 10, "identificator" => "Год 3. Фаза Подготовки", "start" => "15:25", "finish" => "15:30", "type" => "play"},
+        {"id" => 11, "identificator" => "Год 4. Фаза Стратегии", "start" => "15:30", "finish" => "15:45", "type" => "play"},
+        {"id" => 12, "identificator" => "Год 4. Фаза Действия", "start" => "15:45", "finish" => "15:55", "type" => "play"},
+        {"id" => 13, "identificator" => "Год 4. Фаза Подготовки", "start" => "15:55", "finish" => "16:00", "type" => "play"},
+        {"id" => 14, "identificator" => "Год 5. Фаза Стратегии", "start" => "16:00", "finish" => "16:15", "type" => "play"},
+        {"id" => 15, "identificator" => "Год 5. Фаза Действия", "start" => "16:15", "finish" => "16:25", "type" => "play"}
+      ]
+    },
+    {
+      "id" => 3,
+      "name" => "Команда №2",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Год 1. Фаза Стратегии", "start" => "13:45", "finish" => "14:00", "type" => "play"},
+        {"id" => 3, "identificator" => "Год 1. Фаза Действия", "start" => "14:00", "finish" => "14:10", "type" => "play"},
+        {"id" => 4, "identificator" => "Год 1. Фаза Подготовки", "start" => "14:10", "finish" => "14:15", "type" => "play"},
+        {"id" => 5, "identificator" => "Год 2. Фаза Стратегии", "start" => "14:15", "finish" => "14:30", "type" => "play"},
+        {"id" => 6, "identificator" => "Год 2. Фаза Действия", "start" => "14:30", "finish" => "14:40", "type" => "play"},
+        {"id" => 7, "identificator" => "Год 2. Фаза Подготовки", "start" => "14:40", "finish" => "14:45", "type" => "play"},
+        {"id" => 8, "identificator" => "Год 3. Фаза Стратегии", "start" => "14:45", "finish" => "15:00", "type" => "play"},
+        {"id" => 9, "identificator" => "Год 3. Фаза Действия", "start" => "15:00", "finish" => "15:10", "type" => "play"},
+        {"id" => 10, "identificator" => "Год 3. Фаза Подготовки", "start" => "15:10", "finish" => "15:15", "type" => "play"},
+        {"id" => 11, "identificator" => "Год 4. Фаза Стратегии", "start" => "15:15", "finish" => "15:30", "type" => "play"},
+        {"id" => 12, "identificator" => "Год 4. Фаза Действия", "start" => "15:30", "finish" => "15:40", "type" => "play"},
+        {"id" => 13, "identificator" => "Год 4. Фаза Подготовки", "start" => "15:40", "finish" => "15:45", "type" => "play"},
+        {"id" => 14, "identificator" => "Год 5. Фаза Стратегии", "start" => "15:45", "finish" => "16:00", "type" => "play"},
+        {"id" => 15, "identificator" => "Год 5. Фаза Действия", "start" => "16:00", "finish" => "16:10", "type" => "play"},
+        {"id" => 16, "identificator" => "Год 5. Ожидание действия противников", "start" => "16:10", "finish" => "16:25", "type" => "play"}
+      ]
+    }
+  ]
+
+  ###Расписание Государя
+  def self.show_sovereign_schedule
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    return { schedules: gp&.params || [] }
+  end
+
+  def self.create_sovereign_schedule(schedule = nil)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    gp.params = schedule || SOVEREIGN_SCHEDULE.deep_dup
+    gp.save
+  end
+
+  def self.update_sovereign_schedule_name(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    gp.params.each do |s|
+      s["name"] = request[:name] if s["id"] == schedule_id
+    end
+    gp.save
+  end
+
+  def self.add_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      items = s["items"] || []
+      last_id = items.present? ? items.last["id"] : 0
+      items << {
+        "id" => last_id + 1,
+        "identificator" => request[:identificator],
+        "start" => request[:start],
+        "finish" => request[:finish],
+        "type" => request[:type] || "play"
+      }
+    end
+    gp.save
+  end
+
+  def self.update_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    item = request[:item]
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      s["items"] = s["items"].map { |i| i["id"] == item["id"] ? item : i }
+    end
+    gp.save
+  end
+
+  def self.delete_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    item_id = request[:id].to_i
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      s["items"].delete_if { |i| i["id"] == item_id }
+      s["items"].each_with_index { |i, idx| i["id"] = idx + 1 }
+    end
+    gp.save
+  end
+
+  def self.shift_sovereign_schedule(request)
+    minutes = (request || {})["minutes"] || (request || {})[:minutes]
+    minutes = minutes.to_i
+
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    raise "Расписание Государя не найдено" unless gp
+    gp.params ||= []
+    return { success: true, message: "Расписание пустое" } if gp.params.empty?
+
+    gp.params.each do |schedule|
+      next unless schedule["items"].is_a?(Array)
+      schedule["items"] = schedule["items"].map do |item|
+        next item unless item.is_a?(Hash)
+
+        start_str = item["start"]
+        finish_str = item["finish"]
+        next item unless start_str.present? && finish_str.present?
+
+        start_time = Time.strptime("#{Time.zone.today} #{start_str}", "%Y-%m-%d %H:%M")
+        finish_time = Time.strptime("#{Time.zone.today} #{finish_str}", "%Y-%m-%d %H:%M")
+
+        new_start = (start_time + minutes.minutes).strftime("%H:%M")
+        new_finish = (finish_time + minutes.minutes).strftime("%H:%M")
+
+        item.merge("start" => new_start, "finish" => new_finish)
+      end
+    end
+
+    gp.save!
+    { success: true, minutes: minutes, message: "Расписание Государя сдвинуто" }
+  end
+
   ############
 
   def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
