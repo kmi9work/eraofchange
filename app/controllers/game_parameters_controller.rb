@@ -39,10 +39,51 @@ class GameParametersController < ApplicationController
   end
   
   def create_schedule
-    # create_schedule автоматически использует default_schedule из ядра или плагина
+    # create_schedule автоматически использует default_schedule из ядра или плагина.
+    # Если передан preset — применяем сохранённый пресет вместо встроенного расписания.
+    preset = params.dig(:request, :preset) || params[:preset]
+    if preset.present? && preset.to_s != GameParameter::SCHEDULE_PRESET_DEFAULT
+      result = GameParameter.apply_schedule_preset(preset)
+      return render json: result.merge(message: "Расписание создано из пресета '#{result[:name]}'")
+    end
+
     GameParameter.create_schedule
     render json: { success: true, message: "Расписание создано" }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
+
+  def schedule_presets
+    render json: { success: true, presets: GameParameter.schedule_presets,
+                   dir: GameParameter.schedule_presets_dir.to_s }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def save_schedule_preset
+    name = params.dig(:request, :name) || params[:name]
+    result = GameParameter.save_schedule_preset(name)
+    render json: result.merge(message: "Пресет '#{result[:name]}' сохранён")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def apply_schedule_preset
+    slug = params.dig(:request, :slug) || params[:slug]
+    result = GameParameter.apply_schedule_preset(slug)
+    render json: result.merge(message: "Расписание создано из пресета '#{result[:name]}'")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def delete_schedule_preset
+    slug = params.dig(:request, :slug) || params[:slug]
+    result = GameParameter.delete_schedule_preset(slug)
+    render json: result.merge(message: "Пресет '#{result[:slug]}' удалён")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
   def show_schedule
     @time = GameParameter.show_schedule
   end

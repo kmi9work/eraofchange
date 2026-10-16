@@ -1,3 +1,6 @@
+require "fileutils"
+require "socket"
+
 class GameParameter < ApplicationRecord
   audited if: :should_audit?
 
@@ -724,6 +727,180 @@ end
     timer.params = schedule || default_schedule
     
     timer.save
+  end
+
+###Пресеты расписания (файлы storage/schedule_presets/*.json)
+  # Пресет — снимок текущего расписания, сохранённый в файл. Файлы переживают
+  # пересоздание базы (db:drop при rake game:*) и деплой, т.к. storage симлинкнут
+  # на shared/storage. Применение при сидировании: ENV['SCHEDULE_PRESET']=<slug>.
+
+  SCHEDULE_PRESETS_DIRNAME = "schedule_presets"
+  SCHEDULE_PRESET_DEFAULT = "default"
+  SCHEDULE_PRESET_TYPES = %w[play pause].freeze
+  SCHEDULE_PRESET_TRANSLIT = {
+    "а" => "a", "б" => "b", "в" => "v", "г" => "g", "д" => "d", "е" => "e", "ё" => "e",
+    "ж" => "zh", "з" => "z", "и" => "i", "й" => "y", "к" => "k", "л" => "l", "м" => "m",
+    "н" => "n", "о" => "o", "п" => "p", "р" => "r", "с" => "s", "т" => "t", "у" => "u",
+    "ф" => "f", "х" => "h", "ц" => "c", "ч" => "ch", "ш" => "sh", "щ" => "sch",
+    "ъ" => "", "ы" => "y", "ь" => "", "э" => "e", "ю" => "yu", "я" => "ya"
+  }.freeze
+
+  def self.schedule_presets_dir
+    dir = Rails.root.join("storage", SCHEDULE_PRESETS_DIRNAME)
+    FileUtils.mkdir_p(dir) unless File.directory?(dir)
+    dir
+  end
+
+  # Путь к файлу пресета. Защита от выхода за каталог: берём только basename.
+  def self.schedule_preset_path(slug)
+    safe_slug = File.basename(slug.to_s.strip, ".json")
+    raise "Не указан пресет" if safe_slug.empty? || safe_slug.start_with?(".")
+
+    schedule_presets_dir.join("#{safe_slug}.json")
+  end
+
+  def self.schedule_preset_slug(name)
+    slug = name.to_s.downcase.gsub(/[а-яё]/, SCHEDULE_PRESET_TRANSLIT)
+    slug = slug.gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
+    slug = "preset_#{Time.current.strftime('%Y%m%d_%H%M%S')}" if slug.empty?
+    slug
+  end
+
+  def self.normalize_schedule_time(value, label)
+    parts = value.to_s.strip.split(":")
+    hour, minute = parts[0], parts[1]
+    valid = parts.size == 2 && hour.to_s.match?(/\A\d{1,2}\z/) && minute.to_s.match?(/\A\d{1,2}\z/) &&
+            hour.to_i < 24 && minute.to_i < 60
+    raise "#{label}: неверное время '#{value}' (ожидается ЧЧ:ММ)" unless valid
+
+    format("%02d:%02d", hour.to_i, minute.to_i)
+  end
+
+  # Каноничный вид пунктов расписания: строковые ключи, id по порядку, время ЧЧ:ММ.
+  def self.normalize_schedule_items(items)
+    list = Array(items)
+    return [] if list.empty?
+
+    list.each_with_index.map do |raw, index|
+      item = raw.respond_to?(:to_unsafe_h) ? raw.to_unsafe_h : raw.to_h
+      item = item.transform_keys(&:to_s)
+
+      identificator = item["identificator"].to_s.strip
+      raise "Пункт #{index + 1}: не указано название цикла" if identificator.empty?
+
+      type = item["type"].to_s.strip.downcase
+      type = "play" unless SCHEDULE_PRESET_TYPES.include?(type)
+
+      {
+        "id" => index + 1,
+        "identificator" => identificator,
+        "start" => normalize_schedule_time(item["start"], "Пункт #{index + 1} (начало)"),
+        "finish" => normalize_schedule_time(item["finish"], "Пункт #{index + 1} (окончание)"),
+        "type" => type
+      }
+    end
+  end
+
+  def self.schedule_preset_source
+    Socket.gethostname
+  rescue StandardError
+    ENV["HOSTNAME"].to_s
+  end
+
+  def self.schedule_preset_meta(path)
+    slug = File.basename(path, ".json")
+    data = JSON.parse(File.read(path))
+    {
+      slug: slug,
+      name: data["name"].to_s.strip.presence || slug,
+      saved_at: data["saved_at"],
+      saved_on: data["source"],
+      items_count: Array(data["items"]).size,
+      size: File.size(path)
+    }
+  rescue JSON::ParserError => e
+    {
+      slug: slug, name: "#{slug} (повреждённый файл)", saved_at: nil,
+      saved_on: nil, items_count: 0, error: e.message
+    }
+  end
+
+  # Список сохранённых пресетов (файлов в storage/schedule_presets).
+  def self.schedule_presets
+    Dir[schedule_presets_dir.join("*.json")].sort.map { |path| schedule_preset_meta(path) }
+  end
+
+  # Сохраняет текущее расписание в файл-пресет.
+  def self.save_schedule_preset(name)
+    timer = GameParameter.find_by(identificator: "schedule")
+    raise "Расписание не найдено" unless timer
+
+    name = name.to_s.strip
+    raise "Укажите название расписания" if name.empty?
+
+    items = normalize_schedule_items(timer.params)
+    raise "Текущее расписание пустое — сохранять нечего" if items.empty?
+
+    slug = schedule_preset_slug(name)
+    payload = {
+      "name" => name,
+      "slug" => slug,
+      "saved_at" => Time.current.iso8601,
+      "source" => schedule_preset_source,
+      "items" => items
+    }
+    path = schedule_preset_path(slug)
+    File.write(path, JSON.pretty_generate(payload) + "\n")
+
+    { success: true, slug: slug, name: name, items_count: items.size, path: path.to_s }
+  end
+
+  # Применяет пресет: заменяет текущее расписание его пунктами.
+  def self.apply_schedule_preset(slug)
+    path = schedule_preset_path(slug)
+    raise "Пресет не найден: #{File.basename(path)}" unless File.exist?(path)
+
+    data = JSON.parse(File.read(path))
+    items = normalize_schedule_items(data["items"])
+    raise "Пресет пустой: #{File.basename(path)}" if items.empty?
+
+    create_schedule(items)
+
+    {
+      success: true,
+      slug: File.basename(path, ".json"),
+      name: data["name"].to_s.strip.presence || slug,
+      items_count: items.size
+    }
+  end
+
+  def self.delete_schedule_preset(slug)
+    path = schedule_preset_path(slug)
+    raise "Пресет не найден: #{File.basename(path)}" unless File.exist?(path)
+
+    File.delete(path)
+    { success: true, slug: File.basename(path, ".json") }
+  end
+
+  # Пункты расписания для сидирования: из пресета ENV['SCHEDULE_PRESET']
+  # либо встроенное расписание (default_schedule, может быть переопределено плагином).
+  def self.seed_schedule_items
+    slug = ENV["SCHEDULE_PRESET"].to_s.strip
+    return default_schedule if slug.empty? || slug == SCHEDULE_PRESET_DEFAULT
+
+    path = schedule_preset_path(slug)
+    unless File.exist?(path)
+      available = schedule_presets.map { |preset| preset[:slug] }
+      raise "SCHEDULE_PRESET=#{slug}: файл не найден (#{path}). " \
+            "Доступные пресеты: #{available.presence&.join(', ') || 'нет'}"
+    end
+
+    data = JSON.parse(File.read(path))
+    items = normalize_schedule_items(data["items"])
+    raise "SCHEDULE_PRESET=#{slug}: пресет пустой" if items.empty?
+
+    puts "[seed] Расписание из пресета '#{data['name'].to_s.strip.presence || slug}' (#{items.size} пунктов)"
+    items
   end
 
   SOVEREIGN_SCHEDULE_IDENTIFICATOR = "sovereign_schedule"

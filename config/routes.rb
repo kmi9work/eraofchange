@@ -74,6 +74,12 @@ Rails.application.routes.draw do
   patch '/game_parameters/shift_schedule', to: 'game_parameters#shift_schedule'
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
+  ###Пресеты расписания (файлы storage/schedule_presets)
+  get   '/game_parameters/schedule_presets',       to: 'game_parameters#schedule_presets'
+  patch '/game_parameters/save_schedule_preset',   to: 'game_parameters#save_schedule_preset'
+  patch '/game_parameters/apply_schedule_preset',  to: 'game_parameters#apply_schedule_preset'
+  patch '/game_parameters/delete_schedule_preset', to: 'game_parameters#delete_schedule_preset'
+
   ###Расписание Государя
   get   '/game_parameters/show_sovereign_schedule', to: 'game_parameters#show_sovereign_schedule'
   patch '/game_parameters/create_sovereign_schedule', to: 'game_parameters#create_sovereign_schedule'

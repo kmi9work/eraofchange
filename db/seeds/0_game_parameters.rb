@@ -5,7 +5,32 @@ GameParameter.create(name: "Текущий год", identificator: "current_year
 GameParameter.create(name: "Ставка кредита (%)", identificator: "credit_size", value: "20")
 GameParameter.create(name: "Срок кредита (лет)", identificator: "credit_term", value: "3")
 
-GameParameter.create(name: "Расписание", identificator: "schedule", value: "1", params: [])
+# Расписание. Пункты берутся из пресета: ENV['SCHEDULE_PRESET']=<slug> (файлы в
+# storage/schedule_presets/*.json), иначе — встроенное расписание (default_schedule,
+# может быть переопределено плагином). Пресеты переживают пересоздание базы.
+preset_requested = ENV['SCHEDULE_PRESET'].to_s.strip.present?
+preset_applied = false
+schedule_items =
+  begin
+    items = GameParameter.seed_schedule_items
+    preset_applied = preset_requested
+    items
+  rescue => e
+    puts "[seed] #{e.message}"
+    puts "[seed] Использую встроенное расписание"
+    GameParameter.default_schedule
+  end
+
+existing_schedule = GameParameter.find_by(identificator: "schedule")
+if existing_schedule.nil?
+  GameParameter.create!(name: "Расписание", identificator: "schedule", value: "1", params: schedule_items)
+elsif preset_applied
+  # Пресет запрошен явно (SCHEDULE_PRESET) — перезаписываем расписание
+  existing_schedule.update!(params: schedule_items)
+  puts "[seed] Расписание перезаписано пресетом (пунктов: #{schedule_items.size})"
+else
+  puts "[seed] Расписание уже существует (#{Array(existing_schedule.params).size} пунктов) — не трогаю"
+end
 
 GameParameter.create(name: "Экран", identificator: "screen", value: GameParameter::DEFAULT_SCREEN, params: [])
 
