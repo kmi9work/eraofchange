@@ -4,12 +4,12 @@
 
 | Поле | Значение |
 |---|---|
-| Версия | 2.0 (на согласование) |
+| Версия | 3.0 (на согласование) |
 | Дата | 2026-10-16 |
 | Ветка | `many_teams` в `eraofchange` и `era_front` |
-| Область этапа | `eraofchange`: схема БД, миграции, модели, JSON-контракт API, seeds, rake-задачи. `era_front`: только контракт API (изменения экранов — этап 2) |
+| Область этапа | `eraofchange`: схема БД, миграции, модели, движки `vassals_and_robbers` и `artel`, расходы государства, годовые результаты игры, JSON-контракт API, seeds, rake-задачи. `era_front`: только контракт API (изменения экранов — этап 2) |
 | Связанный документ | ТЗ № 2 «Функциональность»: `docs/many_teams/TZ-2-funkcionalnost.md` |
-| Источник требований | Постановка заказчика от 2026-10-16 (разделы «Дашборд», «Информация о стране», «Политика», «Сражения») |
+| Источник требований | Постановка заказчика от 2026-10-16 (разделы «Дашборд», «Информация о стране», «Политика», «Сражения») + уточнения того же дня: движки `vassals_and_robbers` и `artel` также дорабатываются; расходы государства подтверждаются для каждого государства; годовые результаты игры считаются для каждого государства |
 | Критерий готовности этапа | Приложение всегда работает «в разрезе государства» (текущее государство). Если играбельное государство одно (как сегодня — «Русь»), мастер ничего не выбирает и всё работает как прежде. Если играбельных государств несколько, данные государств разделены. Отдельного «режима на одну команду» в коде нет |
 
 ---
@@ -48,15 +48,17 @@
 - контракт API: новые поля и параметры запросов (без изменений UI);
 - seeds: список играбельных государств, создание раздельных данных;
 - rake-задача запуска игры с указанием команд;
-- миграция существующих данных, обратная совместимость, тест-план данных.
+- миграция существующих данных, обратная совместимость, тест-план данных;
+- движки `vassals_and_robbers` (вассалитет, чек-листы, доход от вассалов) и `artel` — перевод на текущее государство (Д14, § 15);
+- расходы государства: подтверждение оплаты по каждому государству (Д12, § 13);
+- годовые результаты игры: ранжирование знати и купцов по каждому государству (Д13, § 14).
 
 Не входит (отдельные этапы, согласуются отдельно):
 
 - эффекты технологий (что именно даёт открытая технология) — прямо исключено заказчиком;
 - эффекты политических действий — прямо исключено заказчиком;
 - экономика: предприятия, рынок, караваны, товарооборот как отдельный экран;
-- движки `vassals_and_robbers` и `artel` (они Русь-центричны: `engines/vassals_and_robbers/app/services/vassals_and_robbers/checklist_validator.rb:69`, `engines/artel/app/controllers/concerns/plant_places_controller_extensions.rb:15`);
-- расходы государства (`GameParameter#pay_state_expenses`), годовые результаты игры;
+- новые игровые механики движков (в объёме только перевод существующих механик на текущее государство);
 - мобильные приложения `era_native`, `era_players`;
 - интерфейс `era_front` — этап 2.
 
@@ -200,6 +202,97 @@
 
 ---
 
+## 5.1. Решения по расходам, годовым результатам и движкам
+
+### Д12. Расходы государства — флаг на государстве и год
+
+Сейчас: один флаг на всю игру — `GameParameter.find_by(identificator: "current_year").params["state_expenses"]` (`app/models/game_parameter.rb:1108-1121`), сбрасывается при смене года (`:1061-1080`), аудит — на `GameParameter` (`:5-40`), статистика — `audits_controller#get_state_expenses_stats` (`app/controllers/audits_controller.rb:350-388`), UI — кнопка в шапке (`era_front/src/layouts/components/DefaultLayoutWithVerticalNav.vue:20-70`), уведомления — `Notifications.vue:575-590`.
+
+Решение: флаг переезжает в `countries.params['state_expenses']` как хэш по году:
+
+```json
+"state_expenses": { "3": true, "4": false }
+```
+
+- `Country#state_expenses_paid?(year = GameParameter.current_year)`, `#pay_state_expenses(year)`, `#unpay_state_expenses(year)`;
+- `GameParameter.pay_state_expenses(country = Country.current)` / `unpay_state_expenses(country = Country.current)` — сигнатуры расширяются, текущие вызовы без аргумента сохраняются;
+- `GameParameter#increase_year`: цикл по `Country.playable` — неплатившему `PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil, country)` (в его регионы), платившему — бонус влияния Казначею **этого** государства; после цикла флаг нового года у каждого государства — `false`;
+- аудит: из `GameParameter#should_audit?` / `state_expenses_changed?` / `audit_comment` ветка расходов убирается (остаётся смена года). Аудит оплаты — на `Country` (он уже `audited`, `app/models/country.rb:2`): комментарии «Оплачены госрасходы за N год (государство X)» / «Отменена оплата госрасходов за N год (государство X)», `Country#should_audit?` — только когда менялся `params['state_expenses']` (иначе аудит по стране разрастётся от любых правок `params`);
+- статистика: `audits_controller#get_state_expenses_stats` читает аудиты `Country` (изменения `params['state_expenses']`) и группирует по государству; в `detailed_yearly_stats` добавляется разбивка `by_country`; аудиты `GameParameter` за прошедшие до перехода периоды читаются как раньше (иначе историческая статистика теряется);
+- бэкфилл: текущее значение переносится в `{ <current_year> => <значение> }` для «Руси».
+
+При одном играбельном государстве поведение совпадает с нынешним: одна кнопка, один флаг, те же уведомления; в статистике добавляется название государства.
+
+### Д13. Годовые результаты игры — по каждому государству
+
+Сейчас результаты считаются живьём и по всей базе:
+
+| Что | Где | Проблема при нескольких командах |
+|---|---|---|
+| Знать | `GameParameter.show_noble_results` (`app/models/game_parameter.rb:324-346`) — все `Player` типа «Знать», сортировка по `player.influence` | в таблицу попадает знать всех государств |
+| Купцы | `show_sorted_results` (`:516-570`) — все гильдии, капитал = деньги + стоимость предприятий | гильдии всех государств в одной таблице |
+| Экранный режим | `display_results` / `change_results_display` (`:348-356`) — один `params['display']` | у команд разные подэкраны, настройка одна |
+| Настройки показа | `get_merchant_results_settings` / `update_merchant_results_settings` (`:358-403`) | то же: одни настройки на всех |
+| API | `game_parameters#screen_bundle`, `#show_sorted_results`, `#show_noble_results`, `#change_results_display`, `#save_sorted_results`, `#update_results`, `#delete_result`, `#clear_results` (`config/routes.rb:55-66`) | нет параметра государства и года |
+
+Решение:
+
+1. **Ранжирование в разрезе государства:**
+   - `GameParameter.show_noble_results(country = Country.current)` — знать этого государства, влияние через `Player#influence(country)` (Д7);
+   - `GameParameter.show_sorted_results(sort_by: :capital, country = Country.current)` — гильдии этого государства (`guilds.country_id`, Д11); гильдии без страны (legacy, `country_id = nil`) попадают в выборку только при `country = nil`;
+   - сортировка/места — как сейчас (`sort_and_rank_results`, `find_cap_per_pl`), но по отфильтрованному списку.
+2. **Экранные настройки — по государству:** `GameParameter('results').params['display']` и хэш настроек показа становятся хэшами по `country_id`:
+   ```json
+   "display": { "1": "noblesResults" },
+   "merchant_settings": { "1": { "show_cap_per_player": true, "intelligence_data_status": {} } }
+   ```
+   Доступ — только через методы: `GameParameter.display_results(country = Country.current)`, `change_results_display(string, country = Country.current)`, `get_merchant_results_settings(country = Country.current)`, `update_merchant_results_settings(settings, country = Country.current)`.
+3. **Снимок года** (чтобы «годовые результаты» были годовыми, а не «переписывались» новым годом): при `increase_year` вызывается `GameParameter.snapshot_year_results(year = current_year)` **до** смены года и сохраняет срез по каждому играбельному государству:
+   ```json
+   "by_year": {
+     "3": {
+       "1": { "nobles": [ { "noble_name": "…", "noble_influence": 12, "place": 1 } ],
+              "merchants": [ { "player": "Гильдия…", "capital": 100000, "place": 1 } ],
+              "closed_at": "2026-10-16T18:00:00Z" }
+     }
+   }
+   ```
+   Чтение: `GameParameter.results_for_year(year, country)`, `GameParameter.results_years`. Текущий год показывается живым расчётом, прошедшие — снимком. Снимок идемпотентен: повторный вызов для того же года не перезаписывает непустой срез (кроме явного `force: true`).
+   Если заказчику нужны только текущие standings без истории — п. 3 вычёркивается без влияния на пп. 1–2 (вопрос Q7).
+4. Чтение/запись `params` записи `results` — только методами модели: прямой доступ `GameParameter.find_by(identificator: "results").params[...]` из кода убирается (сейчас есть в `game_parameter.rb` и в `game_parameters_controller.rb`).
+
+### Д14. Движки (`engines`) — перевод на текущее государство
+
+Оба движка «одногосударственные»: «Русь» — безусловный сюзерен в `vassals_and_robbers` и единственный субъект экономики в `artel`. Полный инвентарь — § 15.
+
+#### Д14.1. `vassals_and_robbers` (вассалитет, чек-листы, разбой)
+
+1. **Вассалитет становится своим у каждого государства**: новая колонка `vassals_and_robbers_checklists.sovereign_country_id` (миграция 8, бэкфилл = «Русь»). Уникальность сейчас — по `vassal_country_id` (`engines/vassals_and_robbers/app/models/vassals_and_robbers/checklist.rb:8`); становится составной `(sovereign_country_id, vassal_country_id)`: у каждого сюзерена свой список вассалов, при этом одно государство остаётся вассалом только одного сюзерена.
+2. **Флаг установленного вассалитета** в `checklist.params` ключуется парой вместо одиночного ключа:
+   ```json
+   "vassalage": { "1": { "5": true } }
+   ```
+   (было `"vassal_5_established": true`). Старые ключи мигрируются в пару с «Русью» (бэкфилл).
+3. **Проверки условий чек-листа — в разрезе сюзерена чек-листа** (`checklist_validator.rb`): армии — знать сюзерена; отношения — `relations_with(сюзерен)`; союз — `Alliance.where(country_id: сюзерен)`; технологии — `Technology#is_open(сюзерен)`; товарооборот — пара (сюзерен ↔ проверяемая страна); предприятия — построенные игроками/гильдиями сюзерена; общественный порядок и строения — в регионах сюзерена.
+4. **Политдействия движка** (`political_action_extensions.rb:41, 54, 121, 144, 175`): `Country::RUS` → `Country.current`; союз заключается текущим государством, регионы для эффектов — регионы текущего государства, совет — `Country.current.council_players(...)`.
+5. **Доход от вассалов** (`player_extensions.rb:17`): Казначей получает доход от вассалов **своего** государства: `PlayerExtensions.calculate_vassal_income(country)` — по вассальным чек-листам этого сюзерена. Настройка `GameParameter('vassalage_settings').params['vassal_incomes']` из `{вассал => сумма}` становится `{сюзерен => {вассал => сумма}}` (бэкфилл: всё «Руси»).
+6. **Доступные места строительства** (`plant_places_controller_extensions.rb:16`): `allowed_country_ids = [Country.current.id] + вассалы текущего государства`; технология — `is_open(Country.current)`.
+7. **Контроллер чек-листов** (`checklists_controller.rb`): выборка по сюзерену = `Country.current` (явный `?country_id=`), в ответе — `sovereign_country`, отношения — с текущим государством.
+8. **Seeds движка:** `0_vassalage_settings.rb` — суммы по сюзеренам; `2_vassal_checklists.rb` — `sovereign_country_id = Country::RUS`; `5_politics.rb`, `3_guilds_and_plants.rb`, `4_example_seed.rb` — данные «за Русь», как сейчас (для остальных государств чек-листы создаются только если играбельных государств несколько — по списку `TEAMS`).
+
+#### Д14.2. `artel` (игра «Артель»: гильдии, предприятия без регионов, ресурсы без страны)
+
+Особенность движка: включается переменной `ENV['ACTIVE_GAME'] == 'artel'`, ресурсы хранятся с `country_id = nil`, цены берутся по уровню отношений `0`, предприятия принадлежат только гильдии и не привязаны к региону.
+
+1. `Technology.is_open` → `is_open(Country.current)` (`engines/artel/app/controllers/concerns/plant_places_controller_extensions.rb:14`).
+2. Ресурсы: номенклатура остаётся общей (одна строка на ресурс, `country_id = nil` — как сейчас), но все методы работают в контексте текущего государства: `Resource.country_filter(Country.current.id, resources)`, `Resource.send_caravan(Country.current.id, ...)`, `calculate_cost`, `show_prices`. Караван отправляется от текущего государства, товарооборот и торговые очки (Д10) начисляются паре «текущее государство ↔ страна-партнёр»; ключ уровня отношений — `0` при отсутствии пары (как сейчас), значение пары — при её наличии.
+3. Гильдии: владение предприятиями ограничивается гильдией текущего государства (`plants_controller_extensions#write_economic_subject`: `Guild.where(country_id: Country.current.id)`), `PlantExtensions#artel_plant_belongs_to_guild` — валидация «предприятие принадлежит гильдии этого государства».
+4. Доступные места строительства (`plant_places_controller_extensions`): механика прежняя (гильдия, без региона), государство и технология — из контекста.
+5. Seeds движка (`engines/artel/db/seeds/0_economics.rb`): ресурсы и цены — общие; гильдия — на играбельное государство (совместно с Д11).
+6. Совместимость: при одном играбельном государстве (`ACTIVE_GAME=artel`) цены, караваны и предприятия работают как прежде.
+
+---
+
 ## 6. Изменения схемы БД
 
 Порядок миграций и состав:
@@ -213,6 +306,7 @@
 | 5 | `add_country_to_technology_items` | `technology_items` | `country_id` (integer) | да | уникальный `technology_items(technology_id, country_id)` | `country_id = 1` (по одной строке на технологию) |
 | 6 | `add_country_to_political_actions` | `political_actions` | `country_id` (integer) | да | `political_actions(country_id)` | `country_id = 1` |
 | 7 | (без миграции) `armies` | — | принадлежность выводится из владельца (Д8) | — | — | — |
+| 8 | `add_sovereign_country_to_vassals_and_robbers_checklists` (движок) | `vassals_and_robbers_checklists` | `sovereign_country_id` (integer) + уникальный составной индекс `(sovereign_country_id, vassal_country_id)` вместо уникального `(vassal_country_id)` | да | уникальный составной | `sovereign_country_id = 1` («Русь») |
 
 Пояснения и требования к миграциям:
 
@@ -221,6 +315,7 @@
 3. Уникальный индекс `(technology_id, country_id)` до наката проверить на дубликаты (сейчас по одной строке на технологию, `db/seeds/2_politics.rb:146-152`, но ручные правки через `technology_items#create` могли создать лишние). Pre-check-запрос — § 12, п. 1.
 4. Колонка `armies.country_id` не вводится (Д8). Если в ходе реализации выяснится, что выборка «армии государства» слишком тяжёлая, колонка добавляется отдельной миграцией вместе с кэш-синхронизацией.
 5. Индексы по `partner_country_id` — составной `(country_id, partner_country_id)`: чтение пары всегда идёт по обоим концам.
+6. Миграция 8 лежит в движке (`engines/vassals_and_robbers/db/migrate/`) и накатывается общей задачей `db:migrate`. Перед накатом проверить, что нет двух чек-листов с одинаковым `vassal_country_id` (движок делал `find_or_create_by`), и что ни один `vassal_country_id` не равен `sovereign_country_id`.
 
 Итоговый состав новых/изменённых полей:
 
@@ -231,7 +326,10 @@ guilds               + country_id integer null
 relation_items       + partner_country_id integer null
 technology_items     + country_id integer null
 political_actions    + country_id integer null
+vassals_and_robbers_checklists + sovereign_country_id integer null (движок)
 ```
+
+Схемных изменений для расходов государства и годовых результатов нет: оба хранятся в `params` (см. § 7).
 
 ---
 
@@ -243,6 +341,12 @@ political_actions    + country_id integer null
 | `countries.params['last_trade_turnover']` | `45000` | `{"1" => 45000}` | то же |
 | `countries.params['embargo']` | `0/1` | без изменений | эмбарго — свойство государства, не пары |
 | `players.params['income_taken']` | `true/false` | без изменений | флаг получения дохода на игроке (Д6, требование 7) |
+| `countries.params['state_expenses']` | — (флаг жил в `GameParameter('current_year').params['state_expenses']`) | `{"3" => true}` — по году (Д12) | подтверждение расходов у каждого государства своё |
+| `GameParameter('results').params['display']` | `"noblesResults"` (скаляр) | `{"1" => "noblesResults"}` по `country_id` (Д13) | у каждой команды свой подэкран результатов |
+| `GameParameter('results').params` (настройки показа) | скаляры (`show_cap_per_player` и др.) | хэш `merchant_settings` по `country_id` (Д13) | настройки экрана результатов у каждой команды свои |
+| `GameParameter('results').params['by_year']` | — | новый: снимки результатов по годам и государствам (Д13 п. 3) | «годовые результаты» должны быть годовыми |
+| `GameParameter('vassalage_settings').params['vassal_incomes']` | `{вассал => сумма}` | `{сюзерен => {вассал => сумма}}` (Д14.1) | доход от вассалов у каждого сюзерена свой |
+| `vassals_and_robbers_checklists.params` | `{"vassal_5_established" => true}` | `{"vassalage" => {"1" => {"5" => true}}}` (Д14.1) | флаг вассалитета — по паре государств |
 
 Новых `GameParameter` этот этап не вводит: единственное, что определяет состав команд, — данные (`countries.playable`), а не настройка режима.
 
@@ -354,6 +458,11 @@ political_actions    + country_id integer null
 | `PATCH /technology_items/:id.json` | `{value}`, `?okolnichy_bonus=1` | без изменения сигнатуры; бонус Окольничего — совету государства элемента (Д5, § 8.3) |
 | `GET /armies.json` | все активные армии | добавить `?country_id=<id>`, `?foreign=0|1` (относительно текущего государства); в ответе армии — `country_id`, `country` |
 | `GET /political_actions.json` | все действия | `?country_id=<id>`, `?year=<год>`; в ответе `country_id` |
+| `PATCH /game_parameters/pay_state_expenses.json`, `.../unpay_state_expenses.json` | без параметров (флаг на всю игру) | опциональный `?country_id=<id>` (по умолчанию текущее государство); в ответе `country_id`, `year` (Д12) |
+| `GET /game_parameters/show_noble_results`, `.../show_sorted_results`, `.../screen_bundle`, `.../display_results` | без параметров | `?country_id=<id>`, `?year=<год>`; по умолчанию — текущее государство и текущий год; в ответе `country_id` (и `year` для снимков) (Д13) |
+| `PATCH /game_parameters/change_results_display`, `.../update_merchant_results_settings`, `.../clear_results`, `.../update_results`, `.../delete_result` | без параметров | принимают `country_id` (по умолчанию текущее); `clear_results` без `country_id` = очистка всех государств (только для главного мастера) |
+| `GET /vassals_and_robbers/checklists.json` | все чек-листы, сюзерен = «Русь» | только чек-листы текущего сюзерена (`?country_id=<id>`), в ответе `sovereign_country` (Д14.1) |
+| `GET /plant_places/available_places.json` | доступные страны = «Русь» + её вассалы | текущее государство + его вассалы (Д14.1) |
 | `GET /jobs.json?nobles=1` | 10 должностей, в каждой `player_ids` — держатели по всей базе, `political_actions` — по всей базе | `?country_id=<id>` (по умолчанию текущее): `player_ids` — держатели **этого государства**, `political_actions` — действия этого государства |
 | `PATCH /jobs/:id.json ?job[player_ids][]=X` | полная замена списка держателей должности | замена только в пределах текущего государства: держатели других государств сохраняются (иначе назначение в одном государстве стирает совет другого) |
 | `GET /current_country.json`, `GET /login_country/:id.json` | — | новые: прочитать/выбрать текущее государство (`session[:country_id]`, § 4). Аналог `users#current_user` / `users#login` (`config/routes.rb:215-216`) |
@@ -400,7 +509,7 @@ rake game:teams TEAMS="Русь,Литва,Казань"
 
 = `db:drop` + `db:create` + `db:migrate` + `db:seed:all` (то же, что `game:core`, `:44-56`), с проброшенным `TEAMS`. `game:core` остаётся рабочим и без `TEAMS` даёт игру за «Русь» — то есть прежний результат.
 
-Важно (проверено): `rake game:*` пересоздаёт базу, поэтому список команд на игру задаётся seeds/`TEAMS`. Правка `countries.playable` «на живую» возможна (см. ТЗ № 2, § 7), но при следующем старте игры список перезапишется из `TEAMS`.
+Важно (проверено): `rake game:*` пересоздаёт базу, поэтому список команд на игру задаётся seeds/`TEAMS`. Правка `countries.playable` «на живую» возможна (см. ТЗ № 2, § 10), но при следующем старте игры список перезапишется из `TEAMS`.
 
 ---
 
@@ -519,6 +628,44 @@ Country.find(Country::RUS).relations_with(c) == c.relations_with(Country.find(Co
 Army.for_country(Country.find(Country::RUS)).map(&:id).sort == ...  # сверка с ручным списком
 ```
 
+7. Расходы государства (Д12):
+
+```ruby
+Country.current = Country.find(Country::RUS)
+county = Country.find(Country::LITHUANIA)
+GameParameter.pay_state_expenses(Country.current)
+Country.find(Country::RUS).state_expenses_paid?(GameParameter.current_year)  # true
+county.state_expenses_paid?(GameParameter.current_year)                      # false
+GameParameter.increase_year(Job::KAZNACHEI_BONUS)                            # не оплатившему — «Не оплачены расходы» в его регионах
+CustomAudit.where(auditable_type: 'Country').where("comment LIKE '%госрасходы%'").count # >= 1
+```
+
+Аудит оплаты содержит год и название государства; статистика `audits#detailed_yearly_stats` отдаёт разбивку `state_expenses.by_country`.
+
+8. Годовые результаты (Д13):
+
+```ruby
+GameParameter.show_noble_results(Country.find(Country::RUS))
+  .map { |r| Player.find_by(name: r[:noble_name]).country_id }.uniq  # [Country::RUS]
+GameParameter.show_sorted_results(country: Country.find(Country::RUS))
+  .map { |r| Guild.find(r[:guild_id]).country_id }.uniq              # [Country::RUS]
+GameParameter.snapshot_year_results(GameParameter.current_year)
+GameParameter.results_for_year(1, Country.find(Country::RUS))        # снимок года и государства
+```
+
+9. Движки (Д14):
+
+```ruby
+VassalsAndRobbers::Checklist.where(sovereign_country_id: Country::RUS).count # как до миграции
+VassalsAndRobbers::Checklist.where(sovereign_country_id: Country::RUS)
+  .all? { |cl| cl.params.dig('vassalage', Country::RUS.to_s).present? || cl.completion_percentage >= 0 } # ключ мигрирован
+Country.current = Country.find(Country::LITHUANIA)
+VassalsAndRobbers::Checklist.where(sovereign_country_id: Country::LITHUANIA).count # 0 при одном играбельном государстве-«Руси»
+ENV['ACTIVE_GAME'] = 'artel'; Resource.send_caravan(Country.current.id, [], [])    # караван от текущего государства
+```
+
+10. Паритет по расходам, результатам и движкам: до и после миграции при одном играбельном государстве совпадают значение флага расходов, таблицы знати/купцов (состав, места, суммы), список чек-листов с процентами выполнения, доступные места строительства.
+
 Критерии приёмки (DoD) этапа 1:
 
 - [ ] Все 6 миграций накатываются на копию текущей базы без потерь и откатываются (`db:rollback`).
@@ -529,23 +676,98 @@ Army.for_country(Country.find(Country::RUS)).map(&:id).sort == ...  # сверк
 - [ ] Ни один существующий эндпоинт не удалён и не изменил формат существующих полей.
 - [ ] Модельные валидации (игрок без страны, армия со «незнатным» владельцем-игроком, самопара отношений, дубль `technology_item`) покрыты тестами.
 - [ ] Тест-план § 12 выполнен на копии боевой базы, отчёт о паритете приложен.
+- [ ] Расходы государства подтверждаются по каждому государству: флаги независимы, общественный порядок и бонус Казначея начисляются тому государству, которого касаются; аудит содержит государство и год.
+- [ ] Годовые результаты считаются по каждому государству (знать и купцы), снимок года сохраняется по каждому играбельному государству.
+- [ ] Движки `vassals_and_robbers` и `artel` работают в разрезе текущего государства; при одном играбельном государстве поведение не изменилось.
 
 ---
 
-## 13. Риски и ограничения
+## 13. Расходы государства (Д12): состав работ
+
+| № | Что | Файл |
+|---|---|---|
+| 1 | Хэш `params['state_expenses']` по годам, методы `state_expenses_paid?` / `pay_state_expenses` / `unpay_state_expenses` | `app/models/country.rb` |
+| 2 | `audited`-хук: `should_audit?` (только смена `state_expenses`) и `audit_comment` с годом и названием государства | `app/models/country.rb` |
+| 3 | `pay_state_expenses(country)`, `unpay_state_expenses(country)`; из `increase_year` убрать общий флаг, добавить цикл по `Country.playable` (общественный порядок + бонус Казначею); ветка `state_expenses` из `should_audit?` / `audit_comment` убирается | `app/models/game_parameter.rb:5-40, 1059-1121` |
+| 4 | Прокидывание `country_id` в действия оплаты; отдача состояния в `game_parameters.json` | `app/controllers/game_parameters_controller.rb:5-20`, `app/views/game_parameters/_game_parameter.json.jbuilder` |
+| 5 | Статистика госрасходов по государству (`Country`-аудиты + исторические `GameParameter`-аудиты), разбивка `by_country` | `app/controllers/audits_controller.rb:350-388`, `:108-187` |
+| 6 | Бэкфилл флага в `{ <current_year> => <значение> }` для «Руси» | `lib/tasks/many_teams.rake` (задача `many_teams:backfill`) |
+
+Проверки — § 12 п. 7 и 10.
+
+---
+
+## 14. Годовые результаты игры (Д13): состав работ
+
+| № | Что | Файл |
+|---|---|---|
+| 1 | `show_noble_results(country)`, `show_sorted_results(sort_by:, country:)`, `results_for_year(year, country)`, `results_years`, `snapshot_year_results(year, force: false)` | `app/models/game_parameter.rb:324-346, 516-575` |
+| 2 | `display_results(country)`, `change_results_display(string, country)`, `get_merchant_results_settings(country)`, `update_merchant_results_settings(settings, country)` — хэши по `country_id` | `app/models/game_parameter.rb:348-403` |
+| 3 | Вызов `snapshot_year_results` в `increase_year` до смены года | `app/models/game_parameter.rb:1059-1080` |
+| 4 | Параметры `country_id`, `year` во всех действиях результатов; `country_id` в ответах | `app/controllers/game_parameters_controller.rb:173-260`, `config/routes.rb:55-66` |
+| 5 | Фильтрация гильдий по стране при ранжировании купцов (требует `guilds.country_id`, Д11) | `app/models/game_parameter.rb:516-570` |
+| 6 | Бэкфилл: скаляры `display` и настроек → хэши с ключом «Руси»; снимок текущего года выполняется один раз при выкатке | `lib/tasks/many_teams.rake` |
+
+Проверки — § 12 п. 8 и 10.
+
+---
+
+## 15. Движки (Д14): состав работ и инвентарь Русь-центричных мест
+
+### 15.1. Порядок работ
+
+1. Миграция 8 (`engines/vassals_and_robbers/db/migrate/`): `sovereign_country_id` + составная уникальность; бэкфилл флагов вассалитета в новый ключ.
+2. `checklist.rb` — ассоциация `belongs_to :sovereign_country`, `Checklist.for_sovereign(c)`, чтение/запись флага по паре (`params['vassalage'][sov][vassal]`), `vassal_country_ids(sovereign = Country.current)`.
+3. `checklist_validator.rb` — все проверки через сюзерена чек-листа (Д14.1 п. 3).
+4. `checklists_controller.rb` — выборка по сюзерену, `sovereign_country` в ответе.
+5. `political_action_extensions.rb`, `player_extensions.rb`, `plant_places_controller_extensions.rb` — `Country::RUS` → `Country.current` (Д14.1 пп. 4–7).
+6. Seeds движка — `sovereign_country_id`, суммы вассальных доходов по сюзеренам, чек-листы для каждого играбельного государства.
+7. `engines/artel/**` — контекст текущего государства (Д14.2), включая `Resource`.
+
+### 15.2. Инвентарь (файл:строка → как должно быть)
+
+| Файл:строка | Сейчас | Стало |
+|---|---|---|
+| `vassals_and_robbers/app/services/.../checklist_validator.rb:69` | `rus = Country.find_by(id: Country::RUS)` для проверки союза | союз с сюзереном чек-листа |
+| `.../checklist_validator.rb:40-56` | мощь армии — все игроки типа «Знать» | знать сюзерена чек-листа |
+| `.../checklist_validator.rb:36-57, 99-130` | отношения/товарооборот — `target_country.relations` / `show_current_trade_level` (неявно с «Русью») | с сюзереном чек-листа |
+| `.../checklist_validator.rb:132-150` | технологии — `tech.is_open != 1` (глобальный флаг) | `is_open(сюзерен)` |
+| `.../checklist_validator.rb:152-200` | предприятия/строения/общественный порядок — по всей базе/по региону | по владениям и регионам сюзерена |
+| `.../checklist.rb:8, 22-33, 41-48` | уникальность по `vassal_country_id`, флаг `vassal_<id>_established` | составная уникальность, флаг по паре |
+| `.../concerns/political_action_extensions.rb:121, 144, 175` | регионы и союз «Руси» | текущее государство |
+| `.../concerns/player_extensions.rb:17-45` | доход от вассалов у любого Казначея | у Казначея своего государства |
+| `.../controllers/concerns/plant_places_controller_extensions.rb:15-16, 44` | `[Country::RUS] + вассалы`, `is_open` глобально | текущее государство + его вассалы, `is_open(Country.current)` |
+| `.../checklists_controller.rb:6-45, 60-95` | все чек-листы, флаг по одиночному ключу | чек-листы текущего сюзерена, флаг по паре |
+| `.../db/seeds/0_vassalage_settings.rb` | `vassal_incomes` — плоский хэш | по сюзеренам |
+| `.../db/seeds/2_vassal_checklists.rb` | чек-листы без сюзерена | `sovereign_country_id` = играбельные государства |
+| `artel/app/controllers/concerns/plant_places_controller_extensions.rb:14` | `Technology.find_by(id: Technology::CRAFTSMEN).is_open` | `is_open(Country.current)` |
+| `artel/app/controllers/concerns/plants_controller_extensions.rb:12-20` | владелец — любая гильдия | гильдия текущего государства |
+| `artel/app/models/artel/concerns/plant_extensions.rb:12-20` | проверка только типа владельца | то же + проверка государства гильдии |
+| `artel/app/models/artel/concerns/resource_extensions.rb:20-95` | `country_id = nil` / `ENV['ACTIVE_GAME']`-ветки, ключ уровня `0` | контекст текущего государства, уровень — по паре отношений |
+| `app/controllers/plant_places_controller.rb:57` | `belongs_to_rus = region&.country_id == Country::RUS` | `== Country.current.id` |
+
+Проверки — § 12 п. 9 и 10.
+
+---
+
+## 16. Риски и ограничения
 
 | Риск | Оценка | Что делаем |
 |---|---|---|
 | Смена семантики `relations` (одна величина «страна → Русь» → пара) задевает читателей: цены ресурсов (`app/models/resource.rb:92-112, 145-152`), союзы (`app/views/countries/_country.json.jbuilder:18-38`), бонус «Третий Рим» | Высокий | Читатели остаются на алиасе `relations` с дефолтным партнёром = текущее государство; переход на `relations_with(partner)` — этап 2, по списку мест (приложение А, п. 5) |
 | Уникальный индекс `technology_items(technology_id, country_id)` не накатится из-за дублей | Средний | Pre-check § 12 п. 1, дубли разбираются вручную/склейкой значений |
 | Seeds не идемпотентны (повторный `db:seed:all` без drop дублирует записи) | Средний | В новых seed-файлах только `find_or_create_by`; список команд меняется через `rake game:teams` (пересоздание), а не повторным сидированием |
-| Движки `vassals_and_robbers` / `artel` Русь-центричны | Средний | Явно вне объёма; используются с государством «Русь»; список мест — приложение А, п. 6 |
+| Миграция движка (8) в `engines/vassals_and_robbers/db/migrate` идёт общей задачей: при неверном порядке наката чек-листы останутся без сюзерена | Средний | Сюзерен nullable + бэкфилл «Русь» сразу после миграции; pre-check дублей и самопар (§ 15.1 п. 1) |
+| Аудит оплаты расходов переезжает с `GameParameter` на `Country`: историческая статистика может «потеряться» | Средний | `get_state_expenses_stats` читает оба источника + разбивка по государству |
+| Снимок годовых результатов растёт в `params` записи `results` | Низкий | Компактные срезы на государство, ограничение по числу лет игры; при необходимости выносится в отдельную таблицу (вопрос Q7) |
+| `ACTIVE_GAME=artel` — отдельный режим игры, легко забыть в проверках | Средний | Тест-план § 12 пп. 9–10 выполняется в обоих режимах |
+| Смешение «снимка» и «живого» расчёта результатов в интерфейсе | Низкий | В API явно отдаётся `year` и признак источника (`live` / `snapshot`) |
 | Мастер по привычке работает «за Русь», когда команд несколько | Низкий | Текущее государство всегда видно в шапке; переключатель рядом с выбором мастера |
 | Долгий бэкфилл на большой базе (12 стран/игроки — тысячи строк) | Низкий | `update_all` + `find_each`, офлайн-окно перед игрой |
 
 ---
 
-## 14. Открытые вопросы (нужны решения заказчика)
+## 17. Открытые вопросы (нужны решения заказчика)
 
 - **Q1 (Д3, ключевой).** Знатный совет: подтверждаем вариант A — справочник 10 должностей общий, «свой совет» = свои игроки государства на этих должностях? Или нужны отдельные строки должностей на государство (вариант B) со своим набором политдействий на каждое государство? Рекомендация — A.
 - **Q2 (Д4).** Отношения — одна величина на пару государств (не направленная)? Рекомендация — да.
@@ -553,6 +775,9 @@ Army.for_country(Country.find(Country::RUS)).map(&:id).sort == ...  # сверк
 - **Q4 (Д6).** Флаг получения дохода `players.params['income_taken']` оставляем один на игрока (даже если у него владения в двух государствах)? Рекомендация — да, один на игрока, как сейчас.
 - **Q5.** Нужна ли мастерам «страна по умолчанию» в профиле (`users.default_country_id`), чтобы при входе сразу поднималось своё государство, или достаточно выбора в сессии?
 - **Q6.** Список играбельных государств: задавать только в seeds (`TEAMS`) или дополнительно дать редактор списка в интерфейсе («Служебное → Настройки»)? Речи о «переключателе режима» нет ни в том, ни в другом случае — только состав списка.
+- **Q7 (Д13).** Нужны ли снимки годовых результатов по годам (`params['by_year'][год][государство]`) или достаточно текущего ранжирования в разрезе государства? Рекомендация — снимки нужны: иначе результаты прошлого года перезаписываются текущими, и «годовые результаты» перестают быть годовыми.
+- **Q8 (Д14.1).** Вассалитет: подтверждаем, что одно государство может быть вассалом только одного сюзерена (уникальность по паре `(сюзерен, вассал)`)? Рекомендация — да, как сейчас.
+- **Q9 (Д13).** Результаты купцов: капитал считается по гильдиям государства (требует `guilds.country_id`, Д11) — подтверждаем? Если нет, потребуется иной признак «своей» гильдии (например, гильдия гильд-босса совета государства).
 
 ---
 
@@ -570,9 +795,9 @@ Army.for_country(Country.find(Country::RUS)).map(&:id).sort == ...  # сверк
 | `app/controllers/regions_controller.rb:7, 8, 14` | фильтры «свой/зарубеж», бонус князя | текущее государство |
 | `app/controllers/countries_controller.rb:7` | `foreign=1` | всё, кроме текущего государства |
 | `app/controllers/settlements_controller.rb:8` | поселения Руси | поселения текущего государства |
-| `engines/vassals_and_robbers/...political_action_extensions.rb:121, 144, 175` | эффекты плагина, союз с Русью | вне объёма (движок Русь-центричен) |
-| `engines/vassals_and_robbers/...checklist_validator.rb:69` | сюзерен — Русь | вне объёма |
-| `engines/artel/...plant_places_controller_extensions.rb:16` | доступные страны = Русь + вассалы | вне объёма |
+| `engines/vassals_and_robbers/...political_action_extensions.rb:121, 144, 175` | эффекты плагина, союз с Русью | текущее государство (Д14.1 п. 4, § 15.2) |
+| `engines/vassals_and_robbers/...checklist_validator.rb:69` | сюзерен — Русь | сюзерен чек-листа (Д14.1 п. 3, § 15.2) |
+| `engines/artel/...plant_places_controller_extensions.rb:16` | доступные страны = Русь + вассалы | текущее государство + его вассалы (Д14.1 п. 6, § 15.2) |
 
 2. Константы должностей и выдачи «по должности»: `app/models/job.rb:14-30` (`Job::GRAND_PRINCE = 1` … `Job::METROPOLITAN_PINE`), перечень мест — § 8.3.
 
@@ -582,4 +807,8 @@ Army.for_country(Country.find(Country::RUS)).map(&:id).sort == ...  # сверк
 
 5. Читатели отношений: `app/models/resource.rb:92-93, 110-112, 145-152` (цены по уровню отношений), `app/views/countries/_country.json.jbuilder:6-38` (значение, элементы, союзы «Руси»), `era_front/src/views/dashboard/Relations.vue:12-120` (правки и очки), `app/models/country.rb:184-290` (начисление очков по товарообороту), `db/seeds/3_resources_and_countries.rb` (базовые отношения стран).
 
-6. Русь-центричные места, остающиеся вне объёма: `engines/vassals_and_robbers/**`, `engines/artel/**`, `GameParameter#pay_state_expenses` / `unpay_state_expenses` (`app/models/game_parameter.rb:1108-1123`), годовые результаты (`sort_and_save_results` и далее, `:405-577`), мобильные эндпоинты (`config/routes.rb:36-52`).
+6. Расходы, результаты и движки (в объёме этого ТЗ — детальный инвентарь в § 15.2 и § 13–14):
+   - расходы государства: `GameParameter#pay_state_expenses` / `unpay_state_expenses` (`app/models/game_parameter.rb:1108-1123`), `increase_year` (`:1059-1080`), аудит (`:5-40`), статистика (`app/controllers/audits_controller.rb:350-388`);
+   - годовые результаты: `app/models/game_parameter.rb:324-346, 348-403, 405-577` (знать, настройки экрана, купцы), `app/controllers/game_parameters_controller.rb:173-260`, `config/routes.rb:55-66`;
+   - движки: `engines/vassals_and_robbers/**` (чек-листы, валидатор, союзы, доход вассалов, доступные места строительства), `engines/artel/**` (технологии, ресурсы, предприятия гильдий).
+7. Остаётся вне объёма: мобильные эндпоинты (`config/routes.rb:36-52`) и мобильные экраны движков.
