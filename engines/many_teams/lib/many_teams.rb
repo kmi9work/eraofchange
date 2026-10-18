@@ -13,8 +13,4 @@ module ManyTeams
     ENV["ACTIVE_GAME"].to_s == ACTIVE_GAME
   end
 
-  # Активна ли игра движка «много команд» (алиас для читаемости в коде)
-  def self.two_teams?
-    active?
-  end
 end

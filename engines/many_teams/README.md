@@ -1,6 +1,6 @@
 # Движок many_teams
 
-Игровой режим «много команд» (игра `two_teams`). Вся логика режима живёт здесь,
+Игровой режим «много команд» (игра `many-teams`). Вся логика режима живёт здесь,
 ядро правится только точками расширения (см. «Что изменено в ядре»).
 
 ## Включение
@@ -15,8 +15,9 @@ ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
 все переопределения возвращают `super`, а проверки моделей не срабатывают —
 базовая игра (`vassals-and-robbers`) работает как раньше.
 
-Клиенты: `VITE_ACTIVE_GAME=two_teams` (era_front), `ACTIVE_GAME=two_teams`
-(era_native).
+Клиенты: `VITE_ACTIVE_GAME=many-teams` (era_front), `ACTIVE_GAME=many-teams`
+(era_native); написание через подчёркивание (`many_teams`) плагины тоже
+принимают.
 
 ## Пункты ТЗ и где они реализованы
 
