@@ -56,41 +56,8 @@ end
 # ==========================================
 # ЗНАТЬ ВЕЛИКОГО НОВГОРОДА
 # ==========================================
-# Отдельный совет Новгорода: справочник должностей общий (id 1..8 не трогаем),
-# а «свой совет» государства — это его игроки на этих должностях (Job#council_players).
-# Фамилии — боярские роды Новгородской земли XIII–XV вв.: Борецкие (посадники
-# Дмитрий и Марфа Борецкие), Мишиничи, Онцифоровичи, Прокшиничи, Своеземцевы,
-# Есиповы, Лошинские, Овиновы.
-novgorod_nobles = [
-  { name: "Борецкий",    family: "Борецкие" },
-  { name: "Мишинич",     family: "Мишиничи" },
-  { name: "Онцифорович", family: "Онцифоровичи" },
-  { name: "Прокшинич",   family: "Прокшиничи" },
-  { name: "Своеземцев",  family: "Своеземцевы" },
-  { name: "Есипов",      family: "Есиповы" },
-  { name: "Лошинский",   family: "Лошинские" },
-  { name: "Овинов",      family: "Овиновы" },
-]
-
-novgorod_nobles.each_with_index do |noble, i|
-  noble_human = @humans.shuffle.first
-  noble_family = Family.find_or_create_by(name: noble[:family])
-  # Идентификатор считается без случайного человека (@humans.shuffle): иначе повторный
-  # db:seed:all создал бы дубли — find_or_create_by ниже должен находить ту же запись
-  noble_identificator = Player.generate_identificator(
-    noble[:name], nil, noble_family.name, @jobs[i].name, "NOVGOROD_#{i}"
-  )
-  p = Player.find_or_create_by(identificator: noble_identificator) do |player|
-    player.name = noble[:name]
-    player.human = noble_human
-    player.player_type = @player_types[1] # Знать
-    player.jobs = [@jobs[i]]
-    player.family = noble_family
-    player.country_id = Country::NOVGOROD
-    player.params = { "income_taken" => false }
-  end
-  InfluenceItem.add(0, "Ручная правка", p) if p.influence_items.empty?
-end
+# Знать Новгорода в ядро не входит: состав совета и его города создаёт игровой
+# движок (engines/many_teams, п. 1 и п. 2). В базовой игре их нет.
 
 
 # ==========================================

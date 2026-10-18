@@ -1,0 +1,90 @@
+# Движок many_teams
+
+Игровой режим «много команд» (игра `two_teams`). Вся логика режима живёт здесь,
+ядро правится только точками расширения (см. «Что изменено в ядре»).
+
+## Включение
+
+```bash
+ACTIVE_GAME=many-teams bin/rails db:migrate
+ACTIVE_GAME=many-teams bin/rails db:seed:all
+ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
+```
+
+`ACTIVE_GAME=many-teams` включает `ManyTeams.active?`. Когда движок выключен,
+все переопределения возвращают `super`, а проверки моделей не срабатывают —
+базовая игра (`vassals-and-robbers`) работает как раньше.
+
+Клиенты: `VITE_ACTIVE_GAME=two_teams` (era_front), `ACTIVE_GAME=two_teams`
+(era_native).
+
+## Пункты ТЗ и где они реализованы
+
+| Пункт | Где |
+|---|---|
+| 1. Знать Новгорода только в движке | `db/seeds/1_novgorod_nobles_and_cities.rb`; из `db/seeds/1_players.rb` блок удалён |
+| 2. Города Новгорода, равный доход | там же, блок «состав совета и раскладка городов» |
+| 3. Цены не зависят от отношений | `app/models/many_teams/concerns/resource_extensions.rb` (`Resource.show_prices`, `Resource.calculate_cost`, уровень `"0"`) |
+| 4. Флаг «добыча возможна» для страны × гильдии | `app/models/many_teams/guild_extraction_permission.rb` |
+| 5. Действие Казначея | `PoliticalActionExtensions#set_guild_extraction`, тип действия — `db/seeds/0_political_action_types.rb` |
+| 6. Данные для отметки в era_native | `Plant#many_teams_extraction_forbidden?`, `GET /many_teams/guilds/:id/workshop` |
+| 7. Строительство только в странах игроков | `app/models/many_teams/player_country.rb`, `PlantExtensions` (валидация модели) |
+| 8. Надпись мастерам | отдаётся в `GET .../workshop` полем `notice`, рисует плагин era_native |
+| 9. Эмбарго страна → гильдия | `app/models/many_teams/guild_embargo.rb`, `GuildEmbargoesController` |
+| 10. «Заморская торговля» снимает эмбарго | `PoliticalActionExtensions#lift_guild_embargoes` (проверяет `Technology::OVERSEAS_TRADE`) |
+| 11. Действия Тайного советника | `app/services/many_teams/intelligence_service.rb`, `PoliticalActionExtensions#conduct_intelligence`/`undermine_stability`/`undermine_relations` |
+
+## Сиды
+
+`db/seeds/1_novgorod_nobles_and_cities.rb`:
+
+* 8 знатных Новгорода — Борецкий, Мишинич, Онцифорович, Прокшинич, Своеземцев,
+  Есипов, Лошинский, Овинов (по одной должности совета на каждого);
+* города Водская земля — Ладога, Обонежье — Кемь, Обонежье — Каргополь,
+  Подвинье — Орлец, Канинская земля — Изьма (все типа 1, «Город», доход 5 000);
+* раскладка городов по знати: 15 000 / 10 000 ×6 / 5 000 — 80 000 дохода на
+  восемь должностей. Точное равенство невозможно: Великий Новгород (15 000)
+  неделим, поэтому один советник неизбежно получает 5 000.
+
+Сид идемпотентен: игрок ищется по идентификатору, город — по имени и региону.
+Строки, созданные прежними сидами ядра, при первом запуске удаляются.
+
+## API
+
+Все маршруты монтируются под `/many_teams`.
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| GET/PATCH | `/player_countries` | государства игроков («Дашборд», п. 7) |
+| GET | `/extraction_permissions?country_id=` | матрица «гильдия × страна» (п. 4) |
+| POST | `/extraction_permissions` | действие Казначея (п. 5) |
+| GET | `/guild_embargoes?country_id=` | эмбарго страны на гильдии (п. 9) |
+| POST/DELETE | `/guild_embargoes` | наложить/снять одно эмбарго |
+| POST | `/guild_embargoes/impose_all` | эмбарго на все гильдии выбранной страны |
+| POST | `/guild_embargoes/lift_all` | снять все эмбарго (п. 10) |
+| GET | `/guilds/:guild_id/workshop` | данные для era_native (п. 6, п. 8) |
+| GET | `/intelligence/targets` | пункты разведки, цели, регионы (п. 11) |
+
+Политдействия (`conduct_intelligence`, `undermine_stability`,
+`undermine_relations`, `set_guild_extraction`, `lift_guild_embargoes`)
+выполняются штатным `POST /political_actions` ядра: `PoliticalAction#execute`
+вызывает метод по имени действия, а методы добавляет
+`ManyTeams::Concerns::PoliticalActionExtensions`.
+
+## Проверка
+
+```bash
+ACTIVE_GAME=many-teams bin/rails runner engines/many_teams/script/mt_verify.rb
+```
+
+Скрипт проверяет все пункты ТЗ на рабочей базе: сиды, цены, умолчание и
+переопределение добычи, валидацию строительства, эмбарго, снятие по технологии,
+отчёты разведки, подрыв стабильности (-3) и отношений (-1).
+
+## Что изменено в ядре
+
+* `Gemfile` — подключён `gem 'many_teams', path: 'engines/many_teams'`;
+* `db/seeds/1_players.rb` — удалён блок знати Новгорода (п. 1 требует, чтобы её
+  не было в ядре);
+* больше ничего: остальное — `prepend` concern-модулей из
+  `lib/many_teams/extensions.rb` при старте движка.
