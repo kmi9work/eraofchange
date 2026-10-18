@@ -8,10 +8,12 @@ module ManyTeams
       return render_error("Государство не найдено", :not_found) if country.nil?
 
       render json: {
-        country: { id: country.id, name: country.name },
-        player_country_ids: ManyTeams::PlayerCountry.ids,
-        guilds: ManyTeams::GuildExtractionPermission.matrix_for(country),
-        countries: Country.order(:id).map { |item| { id: item.id, name: item.name, short_name: item.short_name } }
+        country: {
+          id: country.id,
+          name: country.name,
+          trades_on_market: country.trades_on_market?
+        },
+        guilds: ManyTeams::GuildExtractionPermission.matrix_for(country)
       }
     end
 

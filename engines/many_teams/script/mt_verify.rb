@@ -14,18 +14,21 @@ end
 
 puts "=== 0. окружение"
 puts "ACTIVE_GAME=#{ENV['ACTIVE_GAME'].inspect} ManyTeams.active?=#{ManyTeams.active?}"
-puts "стран: #{Country.count}, гильдий: #{Guild.count}, знати Новгорода: #{Player.where(country_id: Country::NOVGOROD).count}"
+puts "стран: #{Country.count}, гильдий: #{Guild.count}, игроков Новгорода: #{Player.where(country_id: Country::NOVGOROD).count}"
 
 novgorod = Country.find(Country::NOVGOROD)
 guild = Guild.order(:id).first
 own_country = Country.find(guild.country_id)
 
 puts "\n=== п.1 знать Новгорода только в движке"
+# Купцы Новгорода создаются отдельным сидом движка (гильдии, п. 4 ТЗ этапа 2),
+# поэтому считаем только знать: у Новгорода их 8, купцов — 6.
+novgorod_nobles = Player.where(country_id: novgorod.id, player_type_id: PlayerType.find_by(name: "Знать")&.id)
 check("ядро не создаёт знати Новгорода (8 человек из сида движка)") do
-  Player.where(country_id: novgorod.id).count == 8
+  novgorod_nobles.count == 8
 end
 check("все знатные Новгорода — типа «Знать»") do
-  Player.where(country_id: novgorod.id).all? { |p| p.player_type&.name == "Знать" }
+  novgorod_nobles.all? { |p| p.player_type&.name == "Знать" }
 end
 
 puts "\n=== п.2 города Новгорода"
@@ -42,12 +45,48 @@ mapping.each do |region_name, cities|
     end
   end
 end
-check("доход по знати Новгорода в пределах 5 000…15 000") do
-  incomes = Player.where(country_id: novgorod.id).map do |p|
+check("столицы Новгорода — тип 2 («Столица»)") do
+  names = ["Псков", "Великий Новгород", "Нюхча", "Холмогоры", "Усогорск"]
+  names.all? { |name| Settlement.find_by(name: name)&.settlement_type&.name == "Столица" }
+end
+check("остальные поселения Новгорода — тип 1 («Город»)") do
+  others = Settlement.joins(:region).where(regions: { country_id: novgorod.id }).to_a
+                     .reject { |s| s.settlement_type_id == 2 }
+  others.any? && others.all? { |s| s.settlement_type&.name == "Город" }
+end
+check("доход по знати Новгорода 5 000…10 000") do
+  incomes = novgorod_nobles.map do |p|
     Settlement.where(player_id: p.id).sum { |s| s.income }
   end
   puts "      доходы: #{incomes.sort.inspect}"
-  incomes.min >= 5_000 && incomes.max <= 15_000
+  incomes.min >= 5_000 && incomes.max <= 10_000
+end
+
+puts "\n=== сиды: гильдии, купцы и предприятия Новгорода"
+novgorod_guilds = Guild.where(country_id: novgorod.id).order(:id)
+check("у Новгорода 3 гильдии (сид движка)") { novgorod_guilds.count == 3 }
+check("каждая гильдия Новгорода с двумя купцами типа «Купец»") do
+  novgorod_guilds.all? do |g|
+    g.players.count == 2 && g.players.all? { |p| p.player_type&.name == "Купец" && p.country_id == novgorod.id }
+  end
+end
+check("у каждой гильдии добывающее и перерабатывающее предприятие в землях Новгорода") do
+  novgorod_guilds.all? do |g|
+    plants = g.plants.to_a
+    plants.size == 2 &&
+      plants.any? { |p| p.plant_level&.plant_type&.plant_category&.is_extractive } &&
+      plants.any? { |p| !p.plant_level&.plant_type&.plant_category&.is_extractive } &&
+      plants.all? { |p| p.plant_place&.region&.country_id == novgorod.id }
+  end
+end
+check("у каждой гильдии есть склад ресурсов (включая деньги)") do
+  novgorod_guilds.all? do |g|
+    items = g.resource_items
+    items.exists?(identificator: "gold") && items.sum(:count).positive?
+  end
+end
+check("добыча гильдиям Новгорода по умолчанию открыта в своей стране") do
+  novgorod_guilds.all? { |g| ManyTeams::GuildExtractionPermission.allowed?(g, novgorod) }
 end
 
 puts "\n=== п.3 цены не зависят от отношений"
@@ -71,6 +110,16 @@ check("по умолчанию добыча открыта в своей стр�
 end
 check("по умолчанию добыча закрыта в чужой стране") do
   !ManyTeams::GuildExtractionPermission.allowed?(guild, novgorod)
+end
+check("таблица добычи — все гильдии игры, а не только гильдии страны") do
+  rows = ManyTeams::GuildExtractionPermission.matrix_for(own_country)
+  rows.size == Guild.count && rows.map { |row| row[:guild_id] }.sort == Guild.order(:id).pluck(:id)
+end
+check("в строке таблицы — разрешение только для запрошенной страны") do
+  row = ManyTeams::GuildExtractionPermission.matrix_for(own_country).find { |item| item[:guild_id] == guild.id }
+  row.present? &&
+    row[:allowed] == ManyTeams::GuildExtractionPermission.allowed?(guild, own_country) &&
+    row[:guild_country_name].present?
 end
 check("переопределение закрывает добычу в своей стране") do
   ManyTeams::GuildExtractionPermission.set!(guild, own_country, false)
@@ -156,9 +205,40 @@ check("эмбарго на все гильдии выбранной страны
   ManyTeams::GuildEmbargo.where(country_id: novgorod.id).delete_all
   ok
 end
+check("эмбарго накладывает только страна, торгующая на рынке") do
+  livonia = Country.find_by(name: "Ливонский орден")
+  livonia.present? && livonia.trades_on_market? &&
+    !novgorod.trades_on_market? && !own_country.trades_on_market?
+end
+check("караван гильдии под эмбарго не регистрируется без «Контрабанды»") do
+  livonia = Country.find_by(name: "Ливонский орден")
+  target_guild = Guild.where(country_id: own_country.id).first
+  ManyTeams::GuildEmbargo.impose!(livonia, target_guild)
+  result = Caravan.register_caravan({ country_id: livonia.id, guild_id: target_guild.id, is_protected: false })
+  ManyTeams::GuildEmbargo.lift!(livonia, target_guild)
+  puts "      ответ каравана: #{result[:success] ? 'успех' : result[:error]}"
+  result[:success] == false && result[:error].to_s.include?("эмбарго")
+end
+check("рынок: эмбарго подсвечивается по выбранной гильдии, а не по стране") do
+  imposer = Country.order(:id).select(&:trades_on_market?)
+                    .find { |country| ManyTeams::GuildEmbargo.where(country_id: country.id).none? }
+  if imposer.nil?
+    puts "      пропуск: у всех торговых государств уже есть эмбарго"
+    next true
+  end
+  first, second = ::Guild.order(:id).limit(2).to_a
+  ManyTeams::GuildEmbargo.impose!(imposer, first)
+  ok = ManyTeams::GuildEmbargo.for_guild(first).pluck(:country_id).include?(imposer.id) &&
+       !ManyTeams::GuildEmbargo.for_guild(second).pluck(:country_id).include?(imposer.id)
+  ManyTeams::GuildEmbargo.lift!(imposer, first)
+  ok
+end
 
-puts "\n=== п.10 «Заморская торговля» снимает все эмбарго"
-check("без технологии действие запрещено") do
+puts "\n=== п.10 «Заморская торговля» и снятие всех эмбарго"
+# Решение заказчика: технология — условие правил, а не блокировка. Клиент
+# предупреждает, действие выполняется всегда, факт закрытой технологии
+# остаётся в params политдействия.
+check("без технологии действие выполняется и помечается в params") do
   tech = Technology.find(Technology::OVERSEAS_TRADE)
   tech.technology_items.where(country_id: own_country.id).update_all(value: 0)
   ManyTeams::GuildEmbargo.impose!(novgorod, guild)
@@ -168,12 +248,11 @@ check("без технологии действие запрещено") do
                                country: own_country, year: GameParameter.current_year, success: 1,
                                params: { "guild_id" => guild.id })
   action.save!
-  begin
-    action.lift_guild_embargoes
-    false
-  rescue ManyTeams::Error
-    true
-  end
+  result = action.lift_guild_embargoes
+  lifted = Array(result[:lifted_country_ids]).include?(novgorod.id)
+  marked = action.reload.params["overseas_trade_open"] == false
+  no_rows_left = ManyTeams::GuildEmbargo.where(guild_id: guild.id).count.zero?
+  lifted && marked && no_rows_left
 end
 check("с технологией эмбарго снимаются со всех стран") do
   tech = Technology.find(Technology::OVERSEAS_TRADE)
@@ -187,7 +266,8 @@ check("с технологией эмбарго снимаются со всех
                                params: { "guild_id" => guild.id })
   action.save!
   action.lift_guild_embargoes
-  ManyTeams::GuildEmbargo.where(guild_id: guild.id).count.zero?
+  ManyTeams::GuildEmbargo.where(guild_id: guild.id).count.zero? &&
+    action.reload.params["overseas_trade_open"] == true
 end
 
 puts "\n=== п.11 Тайный советник"

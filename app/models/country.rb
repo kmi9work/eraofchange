@@ -417,6 +417,14 @@ class Country < ApplicationRecord
     params['embargo']
   end
 
+  # Торгует ли государство на рынке: у него есть хотя бы один товар с ценой.
+  # Такие товары видны на вкладке «Рынок» (Resource.show_prices), поэтому признак
+  # совпадает с тем, что видит мастер: у Руси и русских княжеств своих товаров нет,
+  # торгуют только Орда, Ливония, Швеция, Литва, Казань и Крым.
+  def trades_on_market?
+    resources.any? { |resource| Resource.priced?(resource) }
+  end
+
   def set_embargo
     return false if params['embargo'].nil?
     self.params['embargo'] = params['embargo'] == 0 ? 1 : 0

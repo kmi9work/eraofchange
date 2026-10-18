@@ -47,6 +47,24 @@ module ManyTeams
         where(guild_id: guild.id)
       end
 
+      # ---- п. 10: технология «Заморская торговля» как условие политдействия ----
+      #
+      # Условие проверяют двое: сам политдействие (запрет на выполнение) и экран
+      # клиента (предупреждение «действие запрещено»). Проверка живёт здесь,
+      # чтобы оба читали одно правило и одно название технологии.
+      def overseas_trade_technology
+        ::Technology.find_by(id: ::Technology::OVERSEAS_TRADE)
+      end
+
+      def overseas_trade_open?(country = ::Country.current)
+        technology = overseas_trade_technology
+        !technology.nil? && technology.is_open(country).to_i == 1
+      end
+
+      def overseas_trade_name
+        overseas_trade_technology&.name || "Заморская торговля"
+      end
+
       def by_imposer(country)
         where(country_id: country.id)
       end

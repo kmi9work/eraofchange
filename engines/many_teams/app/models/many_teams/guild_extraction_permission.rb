@@ -48,27 +48,26 @@ module ManyTeams
         find_by(guild_id: guild.id, country_id: country.id)&.destroy
       end
 
-      # Матрица для экрана мастеров: все государства × гильдии государства.
+      # Таблица для экрана мастеров: ВСЕ гильдии игры и разрешение для одной
+      # страны — той, на территории которой решают. Переключатель в строке значит
+      # «добыча разрешена на территории этой страны»; чужие территории отсюда не
+      # правятся (решение заказчика: одна страна — одна колонка).
       def matrix_for(country)
-        guilds = ::Guild.where(country_id: country&.id).order(:name).to_a
-        countries = ::Country.order(:id).to_a
-        rows = where(guild_id: guilds.map(&:id)).index_by { |row| [row.guild_id, row.country_id] }
+        guilds = ::Guild.includes(:country).order(:name).to_a
+        return [] if country.nil?
+
+        rows = where(country_id: country.id, guild_id: guilds.map(&:id)).index_by(&:guild_id)
 
         guilds.map do |guild|
+          row = rows[guild.id]
           {
             guild_id: guild.id,
             guild_name: guild.name,
-            permissions: countries.map do |item|
-              row = rows[[guild.id, item.id]]
-              {
-                country_id: item.id,
-                country_name: item.name,
-                country_short_name: item.short_name,
-                allowed: row ? row.allowed? : default_allowed?(guild, item),
-                overridden: !row.nil?,
-                own: guild.country_id.to_i == item.id
-              }
-            end
+            guild_country_id: guild.country_id,
+            guild_country_name: guild.country&.name,
+            own: guild.country_id.to_i == country.id.to_i,
+            allowed: row ? row.allowed? : default_allowed?(guild, country),
+            overridden: !row.nil?
           }
         end
       end

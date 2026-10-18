@@ -48,10 +48,33 @@ else
     city.save!
   end
 
+  # --- типы поселений: столицы земель и города ---
+  # В каждом из пяти регионов Новгорода одно поселение — столица (тип 2,
+  # «Столица», доход 10 000): Псков, Великий Новгород, Нюхча, Холмогоры,
+  # Усогорск. Остальные поселения государства — города (тип 1, «Город»,
+  # доход 5 000). В ядре у этих пяти другой тип: четыре «Земля» (3) и один
+  # «Столичная земля» (4) — там на регион приходился ровно один город и
+  # отдельной столичной сетки не было. Приводим типы к режиму многих команд:
+  # у каждого региона своя столица, а всё остальное — города.
+  capital_type = SettlementType.find_by(id: 2) || SettlementType.find_by(name: "Столица")
+  capital_names = ["Псков", "Великий Новгород", "Нюхча", "Холмогоры", "Усогорск"]
+
+  novgorod_settlements = Settlement.joins(:region).where(regions: { country_id: novgorod.id })
+  novgorod_settlements.each do |settlement|
+    type = capital_names.include?(settlement.name) ? capital_type : town_type
+    next if type.nil? || settlement.settlement_type_id == type.id
+
+    settlement.update!(settlement_type: type)
+  end
+
+  puts "  столицы (тип 2): #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: capital_type&.id).order(:name).pluck(:name).join(', ')}"
+  puts "  города (тип 1): #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: town_type&.id).order(:name).pluck(:name).join(', ')}"
+
   # --- состав совета и раскладка городов ---
-  # Доход городов: Великий Новгород (Столичная земля) 15 000; Усогорск, Нюхча,
-  # Холмогоры, Псков (Земля) по 10 000; пять новых городов по 5 000. Итого 80 000
-  # на восемь должностей совета — отсюда раскладка 15 000 / 10 000 ×6 / 5 000.
+  # Доход городов после раскладки типов: пять столиц по 10 000 (Столица) и пять
+  # новых городов по 5 000 — 75 000 на восемь должностей совета. Отсюда раскладка
+  # 10 000 ×7 / 5 000: у Мишинича и Прокшинича по два города вместо столицы,
+  # Овинову достаётся один город.
   council = [
     { name: "Борецкий",    family: "Борецкие",    jobs: [1], cities: ["Великий Новгород"] },
     { name: "Мишинич",     family: "Мишиничи",    jobs: [2], cities: ["Ладога", "Кемь"] },

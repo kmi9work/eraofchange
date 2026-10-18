@@ -33,11 +33,12 @@ module ManyTeams
       end
 
       # ---- п. 10: Великий князь снимает все эмбарго с гильдии ----
+      # Технология «Заморская торговля» — условие правил, но не блокировка
+      # (решение заказчика): экран предупреждает, действие выполняется всегда.
+      # Факт закрытой технологии сохраняем в params — по записи политдействия
+      # видно, что правило было нарушено.
       def lift_guild_embargoes
-        technology = ::Technology.find_by(id: 8) # Technology::OVERSEAS_TRADE
-        unless technology && technology.is_open(Country.current) == 1
-          raise ManyTeams::Error, "Действие доступно только при открытой технологии «#{technology&.name || 'Заморская торговля'}»"
-        end
+        overseas_trade_open = ManyTeams::GuildEmbargo.overseas_trade_open?(Country.current)
 
         guild = ::Guild.find_by(id: action_param(:guild_id))
         raise ManyTeams::Error, "Гильдия не найдена" if guild.nil?
@@ -48,10 +49,11 @@ module ManyTeams
         self.params = (params || {}).merge(
           "guild_id" => guild.id,
           "guild_name" => guild.name,
-          "lifted_country_ids" => lifted
+          "lifted_country_ids" => lifted,
+          "overseas_trade_open" => overseas_trade_open
         )
         save!
-        { guild_id: guild.id, lifted_country_ids: lifted }
+        { guild_id: guild.id, lifted_country_ids: lifted, overseas_trade_open: overseas_trade_open }
       end
 
       # ---- п. 11: Тайный советник — разведка ----

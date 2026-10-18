@@ -1,4 +1,7 @@
 json.extract! country, :id, :name, :short_name, :flag_image_name, :embargo, :params, :created_at, :updated_at
+# Торгует ли государство на рынке (есть товары с ценами) — по этому признаку
+# эмбарго на гильдии доступно только торгующим странам.
+json.trades_on_market country.trades_on_market?
 json.owner_type 'Country'
 
 # Отношения показываются в паре с текущим государством (прежний смысл «со своей страной»).
