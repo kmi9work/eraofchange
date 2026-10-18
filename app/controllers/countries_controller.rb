@@ -4,11 +4,50 @@ class CountriesController < ApplicationController
   # GET /countries or /countries.json
   def index
     @countries = Country.all
-    @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
+    @countries = Country.except_country(current_country) if params[:foreign].to_i == 1
     @countries = Country.russian_countries if params[:russian].to_i == 1
     @countries = Country.vyatka_free_countries if params[:vyatka_free].to_i == 1
     @countries = Country.foreign_countries if params[:only_foreign].to_i == 1
     @countries = @countries.order(:name)
+  end
+
+  # GET /countries/relations_matrix.json?country_ids=1,2 — таблица отношений выбранных
+  # государств со всеми остальными (раздел «Дашборд», ТЗ № 2, § 2.3). Пары, где оба
+  # государства выбраны, в ответ не попадают — иначе одна пара дублировалась бы с двух сторон.
+  def relations_matrix
+    selected_ids = params[:country_ids].to_s.split(',').map(&:to_i).reject(&:zero?).uniq
+    selected_ids = [current_country.id] if selected_ids.empty? && current_country
+
+    @countries = Country.where(id: selected_ids).order(:name)
+    @others = Country.where.not(id: @countries.map(&:id)).order(:name)
+    @rows = @countries.flat_map { |a| @others.map { |b| { a: a, b: b } } }
+  end
+
+  # GET /current_country.json — текущее государство сессии.
+  # ВНИМАНИЕ: метод называется show_current_country, а не current_country, потому что
+  # имя current_country уже занято одноимённым помощником ApplicationController
+  # (текущее государство). Действие с тем же именем перекрыло бы помощника внутри
+  # этого контроллера и вместо государства возвращало бы отрендеренный ответ.
+  def show_current_country
+    @country = Country.current
+    if @country
+      render :show
+    else
+      render json: {}
+    end
+  end
+
+  # GET /login_country/:id.json — выбрать текущее государство (аналог users#login)
+  def login_country
+    country = Country.find_by(id: params[:id])
+    if country
+      session[:country_id] = country.id
+      Country.current = country
+      @country = country
+      render :show
+    else
+      render json: { error: 'Государство не найдено' }, status: :not_found
+    end
   end
 
   def foreign_countries
@@ -22,7 +61,7 @@ class CountriesController < ApplicationController
   end
 
   def join_peace
-    @country.join_peace
+    @country.join_peace(Country.current)
   end
 
   def embargo
@@ -155,7 +194,8 @@ class CountriesController < ApplicationController
   def add_relation_item
     value = params[:value].to_i
     comment = params[:comment].presence || "Ручная правка"
-    result = @country.change_relations(value, @country, comment, force: true)
+    partner = params[:partner_country_id].present? ? Country.find_by(id: params[:partner_country_id]) : current_country
+    result = @country.change_relations(value, @country, comment, partner: partner, force: true)
     
     if result.is_a?(Hash) && result[:warning]
       render json: { success: true, warning: result[:warning] }
@@ -165,8 +205,9 @@ class CountriesController < ApplicationController
   end
 
   def improve_relations_via_trade
-    # Используем force: true для мастера, чтобы разрешить улучшение, но получить предупреждение
-    result = @country.improve_relations_via_trade(force: true)
+    # Используем force: true для мастера, чтобы разрешить улучшение, но получить предупреждение.
+    # Партнёр пары — текущее государство (при игре за одну страну это прежнее поведение).
+    result = @country.improve_relations_via_trade(force: true, partner: current_country)
     
     if result[:success]
       response = { 
@@ -244,10 +285,10 @@ class CountriesController < ApplicationController
       next if country.id == Country::VYATKA
       
       # Calculate current turnover and award points
-      current_trade_turnover = country.calculate_trade_turnover[:trade_turnover] || 0
-      previous_turnover = country.params&.dig('last_trade_turnover')
+      current_trade_turnover = country.calculate_trade_turnover(current_country)[:trade_turnover] || 0
+      previous_turnover = country.last_trade_turnover_for(current_country)
       
-      result = country.check_and_award_trade_level_points(previous_trade_turnover: previous_turnover)
+      result = country.check_and_award_trade_level_points(previous_trade_turnover: previous_turnover, partner: current_country)
       
       if result[:success] || result[:current_level]
         awarded_countries.push({
@@ -273,7 +314,8 @@ class CountriesController < ApplicationController
   def award_trade_level_points
     previous_turnover = params[:previous_trade_turnover]
     result = @country.check_and_award_trade_level_points(
-      previous_trade_turnover: previous_turnover&.to_i
+      previous_trade_turnover: previous_turnover&.to_i,
+      partner: current_country
     )
     
     if result[:success]

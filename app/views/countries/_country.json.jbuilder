@@ -1,33 +1,57 @@
-json.extract! country, :id, :name, :short_name, :flag_image_name, :embargo, :params, :relations, :created_at, :updated_at
+json.extract! country, :id, :name, :short_name, :flag_image_name, :embargo, :params, :created_at, :updated_at
 json.owner_type 'Country'
-json.relation_points (country.params&.dig('relation_points') || 0)
+
+# Отношения показываются в паре с текущим государством (прежний смысл «со своей страной»).
+# Для самой текущей страны пара не определена — остаётся сумма её собственных элементов.
+# Партнёра можно передать явно (партиал используется Дашбордом для пары «A ↔ B», ТЗ № 2, § 2.3).
+partner = local_assigns.key?(:partner_country) ? local_assigns[:partner_country] : Country.current
+pair_partner = partner && partner.id == country.id ? nil : partner
+
+json.relations country.relations(partner)
+# Значения отношений со всеми остальными государствами: { "<id>" => значение }
+json.relations_by_country Country.where.not(id: country.id).order(:id).map { |other|
+  [other.id.to_s, country.relations_with(other)]
+}.to_h
+json.current_country_id partner&.id
+json.relation_partner_id partner&.id
+# Партнёр пары (для Дашборда): государство A строки таблицы отношений
+json.relation_partner do
+  if partner
+    json.extract! partner, :id, :name, :short_name, :flag_image_name
+  end
+end
+json.relation_points country.relation_points_for(partner)
 json.alliances_enabled Country.alliances_enabled
 
 relation_items = []
-if Technology.find(Technology::MOSCOW_THIRD_ROME).is_open == 1 && 
-  [Country::PERMIAN, Country::VYATKA, Country::RYAZAN, Country::TVER, Country::NOVGOROD].include?(country.id)
+if Technology.find(Technology::MOSCOW_THIRD_ROME).is_open(Country.rus_country) == 1 &&
+  Country::THIRD_ROME_BONUS_COUNTRIES.include?(country.id)
   relation_items << RelationItem.new(
     id: 0,
     value: country.class.moscow_third_rome_bonus,
     comment: 'Технология помазанник божий',
-    country: country
+    country: country,
+    partner_country: partner
   )
 end
 
-relation_items += country.relation_items
+# Элементы пары «текущее государство ↔ эта страна»; для текущей страны — её собственные
+relation_items += pair_partner.nil? ? country.relation_items : country.relation_items_with(pair_partner)
 
 json.relation_items relation_items.reverse, partial: "relation_items/relation_item", as: :relation_item
 
 if Country.alliances_enabled
-  # Для иностранных стран показываем союзы Руси (id=1) с этой страной
-  # Для Руси показываем все её союзы
-  if country.id == Country::RUS
+  # Союзы текущего государства с этой страной (союз считается парой стран)
+  if pair_partner.nil?
     alliances_list = country.alliances.includes(:partner_country, :alliance_type)
   else
-    rus_alliances = Country.find_by_id(Country::RUS)&.alliances&.includes(:partner_country, :alliance_type) || []
-    alliances_list = rus_alliances.select { |a| a.partner_country_id == country.id }
+    own = country.alliances.includes(:partner_country, :alliance_type)
+                 .select { |a| a.partner_country_id == pair_partner.id }
+    reverse = pair_partner.alliances.includes(:partner_country, :alliance_type)
+                          .select { |a| a.partner_country_id == country.id }
+    alliances_list = own + reverse
   end
-  
+
   json.alliances alliances_list do |alliance|
     json.id alliance.id
     json.partner_country do

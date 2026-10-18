@@ -1,7 +1,9 @@
 
 guild_names = ["Забавники", "Каменщики","Пивовары"]
 
-guild_names.each {|name| Guild.create(name: name, params: {caravan_protected: []})} 
+# Гильдии seeds относятся к «Руси»: при игре за одну страну это прежнее поведение,
+# при нескольких — гильдии текущего государства считаются своими (Д11)
+guild_names.each {|name| Guild.create(name: name, country_id: Country::RUS, params: {caravan_protected: []})} 
   
 
 

@@ -26,6 +26,13 @@ class ArmiesController < ApplicationController
 
   def index
     @armies = Army.active.order(:name)
+    if params[:country_id].present?
+      @armies = @armies.where(id: Army.for_country(Country.find_by(id: params[:country_id])).select(:id))
+    elsif params[:foreign].to_s == '1'
+      @armies = @armies.where(id: Army.foreign_to(current_country).select(:id))
+    elsif params[:foreign].to_s == '0'
+      @armies = @armies.where(id: Army.for_country(current_country).select(:id))
+    end
   end
 
   def show
@@ -65,8 +72,9 @@ class ArmiesController < ApplicationController
     respond_to do |format|
       if @army.update(army_params)
         if params[:tainiy_bonus]
-          Job.find_by_id(Job::TAINIY).players.each do |player|
-            player.modify_influence(Job::TAINIY_BONUS, "Бонус за разведку", @building) 
+          # Бонус Тайного советника — совету текущего государства
+          current_country&.council_players(Job::TAINIY)&.each do |player|
+            player.modify_influence(Job::TAINIY_BONUS, "Бонус за разведку", @army) 
           end
         end
         format.html { redirect_to army_url(@army), notice: "Army was successfully updated." }

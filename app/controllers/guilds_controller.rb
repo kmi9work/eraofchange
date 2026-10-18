@@ -2,7 +2,7 @@ class GuildsController < ApplicationController
   before_action :set_guild, only: %i[ show edit update destroy assign_players ]
 
   def index
-    @guilds = Guild.all
+    @guilds = guilds_scope
   end
 
   def show
@@ -59,8 +59,28 @@ class GuildsController < ApplicationController
   end
 
   def list
-    @guilds = Guild.all
+    @guilds = guilds_scope
     render :index
+  end
+
+  # GET /guilds/dashboard.json?country_id=1
+  # Сводка по гильдиям государства для вкладки «Экономика → Дашборд».
+  def dashboard
+    country = if params[:country_id].present?
+                Country.find_by(id: params[:country_id])
+              else
+                Country.current
+              end
+
+    if country.nil?
+      render json: { error: 'Государство не найдено' }, status: :not_found
+      return
+    end
+
+    render json: GuildDashboardService.new(country).as_json
+  rescue => e
+    Rails.logger.error "[GuildDashboard] #{e.class}: #{e.message}\n#{e.backtrace.first(10).join("\n")}"
+    render json: { error: e.message }, status: :internal_server_error
   end
 
   # PATCH /guilds/:id/assign_players
@@ -76,9 +96,18 @@ class GuildsController < ApplicationController
       @guild = Guild.find(params[:id])
     end
 
+    # Гильдии можно запросить по государству: ?country_id=1.
+    # Без параметра поведение прежнее — все гильдии (клиенты, которые ещё не
+    # передают государство, продолжают работать).
+    def guilds_scope
+      scope = Guild.order(:name)
+      scope = scope.where(country_id: params[:country_id]) if params[:country_id].present?
+      scope
+    end
+
     # Only allow a list of trusted parameters through.
     def guild_params
-      params.require(:guild).permit(:name, :player_ids => [], :plant_ids => [])
+      params.require(:guild).permit(:name, :country_id, :player_ids => [], :plant_ids => [])
     end
 
     def assign_players_to_guild(guild, player_ids)

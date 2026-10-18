@@ -1,4 +1,10 @@
-json.extract! region, :id, :name, :params, :country, :player, :inf_buildings_on_po, :show_overall_po, :created_at, :updated_at
+# Регион в разрезе государства (@regions_country — государство запроса, иначе текущее):
+# общественный порядок и бонус технологии «Помазанник божий» считаются для него.
+country = @regions_country || Country.current
+
+json.extract! region, :id, :name, :params, :country, :player, :inf_buildings_on_po, :created_at, :updated_at
+json.country_id region.country_id
+json.show_overall_po region.show_overall_po(country)
 json.capital do
   if region.capital.present?
     json.partial! "settlements/settlement", settlement: region.capital
@@ -14,7 +20,7 @@ public_order_items = [
   ),
   PublicOrderItem.new(
     id: 0,
-    value: (Technology.find(Technology::GODS_ANOITED).is_open == 1 ? 5 : 0),
+    value: (Technology.find(Technology::GODS_ANOITED).is_open(region.country || country) == 1 ? 5 : 0),
     comment: 'Технология помазанник божий',
     region: region
   ),

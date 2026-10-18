@@ -11,8 +11,10 @@ module Artel
 
       module InstanceMethods
         def available_places
+          # Статус технологии — в разрезе текущего государства (Д14.2)
+          sovereign = Country.current
           craftsmen_technology = Technology.find_by(id: Technology::CRAFTSMEN)
-          craftsmen_open = craftsmen_technology&.is_open == 1
+          craftsmen_open = craftsmen_technology&.is_open(sovereign) == 1
           craftsmen_tech_name = craftsmen_technology&.name || "Ремесловые люди"
           craftsmen_required_names = ["Кузница", "Ювелирная мастерская"]
 

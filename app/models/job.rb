@@ -26,4 +26,20 @@ class Job < ApplicationRecord
   POSOL_BONUS = 4
 
   METROPOLITAN_PINE = -1
+
+  # Игроки указанного государства на этой должности: справочник должностей общий,
+  # «свой совет» = свои игроки этого государства на тех же должностях.
+  def council_players(country = Country.current)
+    return players.none if country.nil?
+
+    players.where(country_id: country.id)
+  end
+
+  def council_player_ids(country = Country.current)
+    council_players(country).pluck(:id)
+  end
+
+  def holders_names(country = Country.current)
+    council_players(country).pluck(:name)
+  end
 end

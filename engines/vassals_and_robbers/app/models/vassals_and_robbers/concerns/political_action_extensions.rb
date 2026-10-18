@@ -38,7 +38,7 @@ module VassalsAndRobbers
 
       def make_a_trip
         effects = [NO_ARMY_MOVEMENT]
-        target = Job.find_by_id(Job::GRAND_PRINCE).players.first
+        target = Country.current&.council_players(Job::GRAND_PRINCE)&.first
         country = Country.find_by_id(params['country_id'])
         country.change_relations(2, self, "Личный визит")
         GameParameter.register_lingering_effects("make_a_trip", effects, GameParameter.current_year, target.name)
@@ -51,7 +51,7 @@ module VassalsAndRobbers
       
       def transfere_army #Передача армии
         effects = []
-        target = Job.find_by_id(Job::GRAND_PRINCE).players.first
+        target = Country.current&.council_players(Job::GRAND_PRINCE)&.first
         return {error: "Великий князь не найден"} unless target
       
         # Проверяем, что армия принадлежит Великому князю
@@ -117,8 +117,8 @@ module VassalsAndRobbers
         #Покровительство иноверцам
       def patronage_of_infidel_vassals #Покровительство иноверцам
         it = Technology.find_by_id(params['technology_id'])
-        it.open_it
-        regions = Country.find_by_id(Country::RUS).regions
+        it&.open_it(Country.current)
+        regions = Country.current&.regions || Region.none
         regions.each {|r| PublicOrderItem.add(-1, "Покровительство иноверцам", r, self)}
       end
 
@@ -141,7 +141,7 @@ module VassalsAndRobbers
         #нужны ли тут проверки? Или проверки лучше на фронте?
       def make_alliance
         al_type = AllianceType.find_by(name: params['alliance_type'])
-        Alliance.add(country_id: Country::RUS, 
+        Alliance.add(country_id: Country.current&.id, 
                      partner_country_id: params["country_id"], 
                      alliance_type_id: al_type.id)
       end
@@ -172,7 +172,7 @@ module VassalsAndRobbers
 
         #Набрать рекрутов
       def recruiting_vassals        
-        regions = Country.find_by_id(Country::RUS).regions
+        regions = Country.current&.regions || Region.none
         regions.each {|r| PublicOrderItem.add(-1, "Набрать рекрутов", r, self)}
       end
 
@@ -186,7 +186,7 @@ module VassalsAndRobbers
         return {error: "Гильдия не найдена"} unless guild
         
         # Проверяем наличие воеводы
-        target = Job.find_by_id(Job::VOEVODA)&.players&.first
+        target = Country.current&.council_players(Job::VOEVODA)&.first
         return {error: "Воевода не найден"} unless target
         
         # Обновляем params гильдии (для исторических данных)
@@ -212,7 +212,7 @@ module VassalsAndRobbers
       def spy_away_mutiny
         #на фронте будет выбор: убираем армию или повышаем. Если повышаем, то тогда изменения происходят на сервере
         region = Region.find_by_id(params["region_id"])
-        if region.show_overall_po < 0
+        if region.show_overall_po(Country.current) < 0
          PublicOrderItem.add(5, "Контрразведка", region, self)
         else
           return {msg: "Нельзя поднять общественный порядок"}

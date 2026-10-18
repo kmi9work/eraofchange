@@ -6,6 +6,22 @@ class Army < ApplicationRecord
   # Soft delete
   scope :active, -> { where(deleted_at: nil) }
   scope :deleted, -> { where.not(deleted_at: nil) }
+
+  # Армии государства: армии, принадлежащие самому государству, и армии его знати.
+  # Новой колонки country_id нет — принадлежность выводится из владельца.
+  scope :for_country, ->(country) do
+    next none if country.nil?
+
+    noble_ids = Player.where(country_id: country.id, player_type_id: PlayerType::NOBLE).select(:id)
+    where(owner_type: 'Country', owner_id: country.id).or(where(owner_type: 'Player', owner_id: noble_ids))
+  end
+
+  # Армии всех прочих государств (в том числе без владельца)
+  scope :foreign_to, ->(country) do
+    next all if country.nil?
+
+    where.not(id: for_country(country).select(:id))
+  end
   
   has_many   :troops, dependent: :destroy
   has_many   :attacker_battles, class_name: 'Battle', foreign_key: 'attacker_army_id'
@@ -15,8 +31,22 @@ class Army < ApplicationRecord
   belongs_to :owner, polymorphic: true, optional: true
   
   validates :name, presence: true, uniqueness: { scope: :deleted_at, conditions: -> { where(deleted_at: nil) } }
+  validate :owner_is_country_or_noble
 
   NUMBER_OF_SLOTS = 3
+
+  # Государство армии выводится из владельца: страна — сама эта страна,
+  # игрок — государство игрока (в БД владеть армией может только знать).
+  def country
+    case owner_type
+    when 'Country' then owner
+    when 'Player' then owner&.country
+    end
+  end
+
+  def country_id
+    country&.id
+  end
 
   def has_empty_slots?
     number_of_slots = NUMBER_OF_SLOTS
@@ -155,13 +185,35 @@ class Army < ApplicationRecord
       end
       looser.soft_delete!
       if winner.owner.try(:job_ids)&.include?(Job::VOEVODA) or winner.owner.try(:job_ids)&.include?(Job::GRAND_PRINCE)
-        Job.find_by_id(Job::VOEVODA).players.each do |player|
+        bonus_country = winner.country || Country.current
+        bonus_country&.council_players(Job::VOEVODA)&.each do |player|
           player.modify_influence(Job::VOEVODA_BONUS, "Бонус за победу", winner) 
         end
       end
       winner
     else
       false
+    end
+  end
+
+  private
+
+  # Владеть армией может государство или игрок-знать (до перехода ограничение
+  # держал только интерфейс, в БД его не было)
+  def owner_is_country_or_noble
+    return if owner_type.blank? && owner_id.blank?
+
+    unless %w[Player Country].include?(owner_type.to_s)
+      errors.add(:owner_type, "должен быть Player или Country")
+      return
+    end
+
+    return unless owner_type.to_s == 'Player'
+
+    if owner.nil?
+      errors.add(:owner, "не найден")
+    elsif owner.player_type_id != PlayerType::NOBLE
+      errors.add(:owner, "владельцем армии игрока может быть только знать")
     end
   end
 end

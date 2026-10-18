@@ -10,13 +10,14 @@ module VassalsAndRobbers
 
       module InstanceMethods
         def available_places
-          # Получаем список ID вассальных стран
-          vassal_country_ids = VassalsAndRobbers::Checklist.vassal_country_ids
-          # Добавляем Русь к списку доступных стран для строительства
-          allowed_country_ids = [Country::RUS] + vassal_country_ids
+          # Сюзерен — текущее государство: его регионы и регионы его вассалов
+          # доступны для строительства (Д14.1 п. 6)
+          sovereign = Country.current
+          vassal_country_ids = VassalsAndRobbers::Checklist.vassal_country_ids(sovereign)
+          allowed_country_ids = [sovereign&.id].compact + vassal_country_ids
           
           craftsmen_technology = Technology.find_by(id: Technology::CRAFTSMEN)
-          craftsmen_open = craftsmen_technology&.is_open == 1
+          craftsmen_open = craftsmen_technology&.is_open(sovereign) == 1
           craftsmen_tech_name = craftsmen_technology&.name || "Ремесловые люди"
           craftsmen_required_names = ["Кузница", "Ювелирная мастерская"]
 

@@ -6,39 +6,19 @@ class GameParameter < ApplicationRecord
 
   private
 
+  # Аудит только для смены года. Оплата госрасходов переехала в
+  # countries.params['state_expenses'] и аудируется на Country (Д12).
   def should_audit?
-    # Аудит только для current_year (изменение года и оплата госрасходов)
     return false unless identificator == "current_year"
-    
-    # Проверяем, что изменились нужные поля
-    value_changed? || (params_changed? && state_expenses_changed?)
-  end
 
-  def state_expenses_changed?
-    return false unless params_changed?
-    
-    old_params = params_was || {}
-    new_params = params || {}
-    
-    old_params['state_expenses'] != new_params['state_expenses']
+    value_changed?
   end
 
   def audit_comment
-    case identificator
-    when "current_year"
-      if params_changed? && params_change[1]
-        new_params = params_change[1]
-        old_params = params_change[0] || {}
-        
-        if new_params["state_expenses"] == true && old_params["state_expenses"] == false
-          "Оплачены госрасходы за #{value} год"
-        elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
-          "Отменена оплата госрасходов за #{value} год"
-        end
-      elsif value_changed?
-        "Год изменен с #{value_change[0]} на #{value_change[1]}"
-      end
-    end
+    return nil unless identificator == "current_year"
+    return nil unless value_changed?
+
+    "Год изменен с #{value_change[0]} на #{value_change[1]}"
   end
 
 
@@ -321,12 +301,42 @@ def self.serialize_targets_for_response(targets)
 end
 
     ###Результаты
-  def self.show_noble_results
-    players = Player.where(player_type_id: PlayerType::NOBLE)
+  RESULTS_IDENTIFICATOR = "results"
+  RESULTS_DEFAULT_DISPLAY = "merchPlaceholder"
+
+  def self.results_parameter
+    GameParameter.find_by(identificator: RESULTS_IDENTIFICATOR)
+  end
+
+  def self.results_parameter_for_write
+    game_results = GameParameter.find_or_initialize_by(identificator: RESULTS_IDENTIFICATOR)
+    game_results.name ||= "Результаты купцов"
+    game_results.value ||= "0"
+    game_results.params = {} unless game_results.params.is_a?(Hash)
+    game_results
+  end
+
+  # Ключ государства в хэшах params записи results
+  def self.results_country_key(country)
+    Country.partner_key(country) || Country::RUS.to_s
+  end
+
+  # Значение настройки в разрезе государства; поддерживает скалярный (до перехода) формат
+  def self.results_scoped_value(stored, country)
+    return stored unless stored.is_a?(Hash)
+
+    stored[results_country_key(country)]
+  end
+
+  # Ранжирование знати государства (по умолчанию — текущего):
+  # в таблицу попадает только знать этого государства, влияние считается в его разрезе.
+  def self.show_noble_results(country = Country.current)
+    players = Player.nobles
+    players = players.where(country_id: country.id) if country
     nobles_inf = []
     nobles_inf = players.map do |player|
       {noble_name: player.name,
-      noble_influence: player.influence}
+      noble_influence: player.influence(country)}
     end
     sorted_nobles =  nobles_inf.sort_by { |hash| -hash[:noble_influence].to_i }
 
@@ -345,31 +355,65 @@ end
     return sorted_nobles
   end
 
-  def self.display_results
-   return GameParameter.find_by(identificator: "results").params["display"]
+  # Экран результатов — свой у каждого государства
+  def self.display_results(country = Country.current)
+    stored = results_parameter&.params&.dig("display")
+    return RESULTS_DEFAULT_DISPLAY if stored.nil?
+    return stored unless stored.is_a?(Hash)
+
+    results_scoped_value(stored, country) || RESULTS_DEFAULT_DISPLAY
   end
 
-  def self.change_results_display(string)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params["display"] = string 
+  def self.change_results_display(string, country = Country.current)
+    game_results = results_parameter_for_write
+    stored = game_results.params["display"]
+    key = results_country_key(country)
+
+    if stored.is_a?(Hash)
+      game_results.params["display"] = stored.merge(key => string)
+    else
+      # Первая запись после перехода: скалярное значение сохраняем для «Руси»,
+      # иначе оно потерялось бы вместе с форматом
+      migrated = {}
+      migrated[Country::RUS.to_s] = stored unless stored.nil?
+      migrated[key] = string
+      game_results.params["display"] = migrated
+    end
     game_results.save
   end
 
-  def self.get_merchant_results_settings
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
-    intelligence_data = get_artel_intelligence_status
+  def self.get_merchant_results_settings(country = Country.current)
+    params = results_parameter&.params || {}
+    merchant_settings = params["merchant_settings"]
+    scoped =
+      if merchant_settings.is_a?(Hash)
+        results_scoped_value(merchant_settings, country) || {}
+      else
+        # Скалярный (до перехода) формат: настройки лежали прямо в params
+        params["show_cap_per_player"].nil? ? {} : { "show_cap_per_player" => params["show_cap_per_player"] }
+      end
 
     {
-      show_cap_per_player: game_results.params["show_cap_per_player"] != false, # По умолчанию true
-      intelligence_data_status: intelligence_data
+      show_cap_per_player: scoped["show_cap_per_player"] != false, # По умолчанию true
+      intelligence_data_status: get_artel_intelligence_status
     }
   end
 
-  def self.update_merchant_results_settings(settings)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
-    game_results.params["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
+  def self.update_merchant_results_settings(settings, country = Country.current)
+    game_results = results_parameter_for_write
+    merchant_settings = game_results.params["merchant_settings"]
+    merchant_settings = {} unless merchant_settings.is_a?(Hash)
+    key = results_country_key(country)
+    current = merchant_settings[key]
+    current = {} unless current.is_a?(Hash)
+
+    # Перенос скалярной (до перехода) настройки в разрез государства
+    if current["show_cap_per_player"].nil? && !game_results.params["show_cap_per_player"].nil?
+      current["show_cap_per_player"] = game_results.params["show_cap_per_player"]
+    end
+    current["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
+    merchant_settings[key] = current
+    game_results.params["merchant_settings"] = merchant_settings
     game_results.save
 
     return if settings[:intelligence_data_status].nil?
@@ -513,16 +557,20 @@ end
     game_results.save
   end
 
-  def self.show_sorted_results(sort_by: :capital)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
+  # Ранжирование купцов в разрезе государства (по умолчанию — текущего).
+  # country = nil — без фильтра по стране (включая legacy-гильдии без государства).
+  def self.show_sorted_results(sort_by: :capital, country: Country.current)
+    game_results = results_parameter
+    game_results ||= GameParameter.new(identificator: RESULTS_IDENTIFICATOR, params: {})
+    game_results.params = {} unless game_results.params.is_a?(Hash)
     
     # Инициализируем хранилище для дополнительных данных гильдий (деньги и боярская милость)
     guild_extra_data = game_results.params['guild_extra_data'] || {}
     
-    # Собираем результаты по всем гильдиям
+    # Собираем результаты по гильдиям государства
     results = []
-    Guild.all.each do |guild|
+    guilds = country ? Guild.where(country_id: country.id) : Guild.all
+    guilds.each do |guild|
       # Считаем стоимость предприятий (сумма deposit)
       plants_value = guild.plants.sum { |plant| plant.plant_level&.deposit.to_i || 0 }
       
@@ -545,6 +593,7 @@ end
       results << {
         guild_id: guild.id,
         player: guild.name,
+        country_id: guild.country_id,
         capital: capital,
         plants_value: plants_value,
         gold: gold,
@@ -568,9 +617,60 @@ end
     sorted_results
   end  
 
-  def self.clear_results
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params = []
+  # Снимок годовых результатов: при смене года сохраняется срез по каждому государству,
+  # иначе результаты прошлого года перезаписываются текущими и перестают быть годовыми.
+  # Идемпотентен: непустой срез для года не перезаписывается без force: true.
+  def self.snapshot_year_results(year = current_year, force: false)
+    game_results = results_parameter_for_write
+    by_year = game_results.params['by_year']
+    by_year = {} unless by_year.is_a?(Hash)
+    year_key = year.to_s
+    by_year[year_key] = {} unless by_year[year_key].is_a?(Hash)
+
+    Country.find_each do |country|
+      country_key = country.id.to_s
+      existing = by_year[year_key][country_key]
+      next if !force && existing.is_a?(Hash) && existing.present?
+
+      by_year[year_key][country_key] = {
+        "nobles" => show_noble_results(country),
+        "merchants" => show_sorted_results(country: country),
+        "closed_at" => Time.current.utc.iso8601
+      }
+    end
+
+    game_results.params['by_year'] = by_year
+    game_results.save
+    by_year[year_key]
+  end
+
+  # Снимок результатов года по государству (nil — если снимка нет)
+  def self.results_for_year(year, country = Country.current)
+    country_key = results_country_key(country)
+    results_parameter&.params&.dig('by_year', year.to_s, country_key)
+  end
+
+  # Годы, по которым есть снимки результатов
+  def self.results_years
+    (results_parameter&.params&.dig('by_year') || {}).keys.sort_by(&:to_i)
+  end
+
+  # Очистка результатов купцов: по государству, без аргумента — по всем государствам
+  def self.clear_results(country = nil)
+    game_results = results_parameter_for_write
+    guild_extra_data = game_results.params['guild_extra_data']
+    guild_extra_data = {} unless guild_extra_data.is_a?(Hash)
+
+    if country.nil?
+      guild_extra_data = {}
+    else
+      Guild.where(country_id: country.id).pluck(:id).each do |guild_id|
+        guild_extra_data.delete(guild_id.to_s)
+        guild_extra_data.delete(guild_id.to_s.to_sym)
+      end
+    end
+
+    game_results.params['guild_extra_data'] = guild_extra_data
     game_results.save
   end
 
@@ -1058,15 +1158,26 @@ end
 
   def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
     current_year = GameParameter.find_by(identificator: "current_year")
-    if current_year.params["state_expenses"] == false
-      PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil)
-    else
-      if kaznachei_bonus
-        Job.find_by_id(Job::KAZNACHEI).players.each do |player|
-          player.modify_influence(Job::KAZNACHEI_BONUS, "Бонус за оплату государства", current_year) 
+    year_before = self.current_year
+
+    # Снимок результатов года делается ДО смены года: иначе «годовые результаты»
+    # перезаписываются текущими (Д13 п. 3)
+    snapshot_year_results(year_before)
+
+    # Расходы подтверждаются каждым государством отдельно (Д12):
+    # неплатившему — общественный порядок в его регионах, платившему — бонус Казначею
+    Country.find_each do |country|
+      if country.state_expenses_paid?(year_before)
+        if kaznachei_bonus
+          country.council_players(Job::KAZNACHEI).each do |player|
+            player.modify_influence(Job::KAZNACHEI_BONUS, "Бонус за оплату государства", country)
+          end
         end
+      else
+        PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil, country)
       end
     end
+
     Building.joins(:building_level).where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).each do |building|
       if !building.is_paid and !building.fined
         building.fine
@@ -1076,9 +1187,14 @@ end
     # Сбрасываем счетчики ограблений караванов при смене года
     reset_caravan_robbery_counters(self.current_year + 1)
 
-    current_year.value = (self.current_year  + 1).to_s
-    current_year.params["state_expenses"] = false
+    next_year = year_before + 1
+    current_year.value = next_year.to_s
     current_year.save
+
+    # Флаг расходов нового года у каждого государства — «не оплачено»
+    Country.find_each do |country|
+      country.set_state_expenses(next_year, false)
+    end
 
     Player.all.each do |player|
       if player.params['income_taken']
@@ -1105,18 +1221,20 @@ end
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
   end
 
-  def self.pay_state_expenses
-    st_exp = self.find_by(identificator: "current_year")
-    st_exp.params["state_expenses"] = true #Делает отметку о том, что в текущем году расходы оплачены
-    st_exp.save
+  def self.pay_state_expenses(country = Country.current)
+    country ||= Country.current
+    return { success: false, msg: "Государство не найдено" } if country.nil?
 
-    return {msg: "Расходы за государство оплачены"}
+    country.pay_state_expenses(self.current_year) #Делает отметку о том, что в текущем году расходы оплачены
+
+    return {success: true, msg: "Расходы за государство оплачены", country_id: country.id, country_name: country.name, year: self.current_year}
   end
 
-  def self.unpay_state_expenses
-    st_exp = self.find_by(identificator: "current_year")
-    st_exp.params["state_expenses"] = false #Делает отметку о том, что в текущем году расходы НЕ оплачены
-    st_exp.save
+  def self.unpay_state_expenses(country = Country.current)
+    country ||= Country.current
+    return { success: false, msg: "Государство не найдено" } if country.nil?
+
+    country.unpay_state_expenses(self.current_year) #Делает отметку о том, что в текущем году расходы НЕ оплачены
 
     return {msg: "Расходы за государство оплачены"}
   end

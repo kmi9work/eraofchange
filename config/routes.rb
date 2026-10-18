@@ -131,6 +131,7 @@ Rails.application.routes.draw do
   patch '/countries/:id/award_trade_level_points', to: 'countries#award_trade_level_points'
   patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
+  get '/countries/relations_matrix', to: 'countries#relations_matrix'
   get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'
   get '/countries/:id/calculate_trade_turnover', to: 'countries#calculate_trade_turnover'
   get '/countries/:id/show_current_trade_level', to: 'countries#show_current_trade_level'
@@ -215,6 +216,12 @@ Rails.application.routes.draw do
   get '/login/:id', to: 'users#login'
   get '/current_user', to: 'users#current_user'
 
+  # Текущее государство: чтение и выбор (аналог users#current_user / users#login).
+  # Действие вынесено под именем show_current_country, чтобы метод контроллера не
+  # перекрывал одноимённого помощника current_country (текущее государство).
+  get '/current_country' => 'countries#show_current_country'
+  get '/login_country/:id', to: 'countries#login_country'
+
   get '/audits', to: 'audits#index'
   get '/audits/plants', to: 'audits#plants'
   post '/audits/mark_as_viewed', to: 'audits#mark_as_viewed'
@@ -233,6 +240,7 @@ Rails.application.routes.draw do
   resources :settlement_types
   # Специальный список гильдий должен идти раньше resources, чтобы не совпадать с :id
   get '/guilds/list', to: 'guilds#list'
+  get '/guilds/dashboard', to: 'guilds#dashboard'
   patch '/guilds/:id/assign_players', to: 'guilds#assign_players'
   resources :guilds
   resources :merchants

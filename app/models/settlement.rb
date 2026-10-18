@@ -10,6 +10,23 @@ class Settlement < ApplicationRecord
   has_many :armies
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
 
+  # Поселения государства (страна поселения — страна его региона)
+  scope :for_country, ->(country) do
+    country.nil? ? all : joins(:region).where(regions: { country_id: country.id })
+  end
+  scope :foreign_to, ->(country) do
+    country.nil? ? all : joins(:region).where.not(regions: { country_id: country.id })
+  end
+
+  # Страна поселения — страна региона
+  def country
+    region&.country
+  end
+
+  def country_id
+    region&.country_id
+  end
+
   def income
     self.settlement_type&.params["income"].to_i + self.buildings.sum{|b| b.income}
   end

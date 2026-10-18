@@ -10,14 +10,20 @@ class Caravan < ApplicationRecord
    GRAND_PRINCE_SHARE = 0.10
   # Подсчет, сколько надо досыпать золота Великому Князю.
   # Считается как 10% от товарооборота (gold_export + gold_import) за предыдущий год.
-  def self.count_caravan_revenue
+  # country — государство, чьи гильдии торговали (по умолчанию текущее), чтобы в
+  # игре за несколько команд каждое государство считало свой товарооборот.
+  def self.count_caravan_revenue(country = nil)
+    country ||= Country.current if defined?(Country)
     prev_year = GameParameter.current_year - 1
     return 0 if Caravan.all.empty? or prev_year < 0
 
     # Исключаем ограбленные караваны и караваны через Вятку из расчета товарооборота
-    turnover = Caravan
+    scope = Caravan
       .where(year: prev_year, is_robbed: false)
       .where.not(via_vyatka: true)
+    scope = scope.where(guild_id: Guild.where(country_id: country.id).select(:id)) if country
+
+    turnover = scope
       .sum("ABS(COALESCE(gold_import, 0)) + ABS(COALESCE(gold_export, 0))")
       .to_i
 

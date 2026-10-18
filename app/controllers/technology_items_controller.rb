@@ -39,8 +39,10 @@ class TechnologyItemsController < ApplicationController
     respond_to do |format|
       if @technology_item.update(technology_item_params)
         if params[:okolnichy_bonus] && technology_item_params[:value].to_i == 1
-          Job.find_by_id(Job::OKOLNICHY).players.each do |player|
-            player.modify_influence(Job::OKOLNICHY_BONUS, "Бонус за открытие технологии", @region) 
+          # Бонус — совету государства, чья технология открыта
+          bonus_country = @technology_item.country || current_country
+          bonus_country&.council_players(Job::OKOLNICHY)&.each do |player|
+            player.modify_influence(Job::OKOLNICHY_BONUS, "Бонус за открытие технологии", @technology_item) 
           end
         end
         format.html { redirect_to technology_item_url(@technology_item), notice: "Technology item was successfully updated." }
@@ -70,6 +72,6 @@ class TechnologyItemsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def technology_item_params
-      params.require(:technology_item).permit(:value, :technology_id, :entity_id, :entity_type, :comment, :year)
+      params.require(:technology_item).permit(:value, :technology_id, :country_id, :entity_id, :entity_type, :comment, :year)
     end
 end

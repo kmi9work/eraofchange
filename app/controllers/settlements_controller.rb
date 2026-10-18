@@ -4,8 +4,10 @@ class SettlementsController < ApplicationController
   def index
     if params[:all]
       @settlements = Settlement.all.order(:name)
+    elsif params[:country_id].present?
+      @settlements = Settlement.for_country(Country.find_by(id: params[:country_id])).order(:name)
     else
-      @settlements = Settlement.joins(:region).where(regions: {country_id: Country::RUS}).order(:name)
+      @settlements = Settlement.for_country(current_country).order(:name)
     end
   end
 

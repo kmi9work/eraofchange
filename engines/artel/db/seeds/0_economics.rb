@@ -48,7 +48,9 @@ end
 
 guild_names = ["А", "Б", "В", "Г", "Д", "Е"]
 
-guild_names.each {|name| Guild.create(name: name, params: {caravan_protected: []})} 
+# Гильдии сидов принадлежат «Руси» (Д11): иначе они не видны ни в одном
+# государстве, а движок artel не пускает их к торговле и строениям
+guild_names.each {|name| Guild.create(name: name, country_id: Country::RUS, params: {caravan_protected: []})} 
   
 
 

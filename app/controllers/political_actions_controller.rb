@@ -2,8 +2,12 @@ class PoliticalActionsController < ApplicationController
   before_action :set_political_action, only: %i[ show edit update destroy ]
 
   # GET /political_actions or /political_actions.json
+  # ?country_id=<id> — действия указанного государства, по умолчанию — текущего;
+  # ?year=<год> — только за указанный год
   def index
     @political_actions = PoliticalAction.includes(:job, :political_action_type, :player)
+    @political_actions = @political_actions.for_country(requested_country)
+    @political_actions = @political_actions.for_year(params[:year]) if params[:year].present?
   end
 
   # GET /political_actions/merchant_actions or /political_actions/merchant_actions.json
@@ -12,6 +16,7 @@ class PoliticalActionsController < ApplicationController
     merchant_actions = PoliticalAction.includes(:job, :political_action_type, :player, :guild)
       .joins(:job)
       .where(jobs: { name: 'Глава гульдии' })
+      .where(country_id: requested_country&.id)
       .order(year: :desc, created_at: :desc)
     
     respond_to do |format|
@@ -41,7 +46,10 @@ class PoliticalActionsController < ApplicationController
     political_action_type = PoliticalActionType.find_by_id(political_action_params[:political_action_type_id])
     if political_action_type
       @political_action.job_id = political_action_type.job_id
-      @political_action.player_id = political_action_type.job&.players&.first&.id
+      # Действие выполняет своё государство: держатель должности берётся из совета
+      # текущего государства, а не из всей базы (Д3)
+      @political_action.player_id = political_action_type.job&.council_players(Country.current)&.first&.id
+      @political_action.country_id ||= Country.current&.id
       
       # Для действий купцов - получаем гильдию игрока
       if political_action_type.job&.name == 'Глава гульдии'
@@ -115,6 +123,13 @@ class PoliticalActionsController < ApplicationController
 
   private
 
+    # Действие без явно указанного государства попадает в текущее государство
+    def requested_country
+      return Country.current if params[:country_id].blank?
+
+      Country.find_by(id: params[:country_id]) || Country.current
+    end
+
     # Форматирует данные политического действия для JSON ответа
     def format_merchant_action(action)
       {
@@ -138,7 +153,7 @@ class PoliticalActionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def political_action_params
-      params.require(:political_action).permit(:year, :success, :player_id, :job_id, :political_action_type_id, params: {})
+      params.require(:political_action).permit(:year, :success, :player_id, :job_id, :country_id, :political_action_type_id, params: {})
     end
 
     # Проверяет, использует ли метод старую систему с success

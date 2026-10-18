@@ -16,9 +16,17 @@ module Artel
           return unless economic_subject_value.present?
 
           es_id, es_type = economic_subject_value.split('_')
-          # В Artel только гильдия может быть владельцем предприятия
+          # В Artel только гильдия может быть владельцем предприятия,
+          # причём гильдия текущего государства (Д14.2)
           if es_type == 'Guild'
-            @plant.economic_subject = Guild.find(es_id.to_i)
+            guild = Guild.find_by(id: es_id.to_i)
+            current_country = Country.current
+            @plant.economic_subject =
+              if guild.nil?
+                nil
+              elsif current_country.nil? || guild.country_id.nil? || guild.country_id == current_country.id
+                guild
+              end
           else
             # Игроки не могут владеть предприятиями — сбрасываем или не устанавливаем
             @plant.economic_subject = nil

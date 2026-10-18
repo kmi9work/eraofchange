@@ -22,6 +22,10 @@ class Player < ApplicationRecord
   belongs_to :family, optional: true
   has_and_belongs_to_many :jobs
   belongs_to :guild, optional: true
+  # Опорная связь модели «несколько команд»: игрок принадлежит государству.
+  # Обязательность обеспечивается значением по умолчанию (без NOT NULL в схеме),
+  # чтобы старый код и движки, создающие игроков без страны, не падали.
+  belongs_to :country, optional: true
 
   has_many :plants, :as => :economic_subject,
            :inverse_of => :economic_subject
@@ -37,9 +41,15 @@ class Player < ApplicationRecord
   has_many :income_items
 
   before_validation :generate_identificator_if_blank
+  before_validation :assign_default_country
 
   validates :name, presence: { message: "Поле Имя должно быть заполнено" }
   validates :identificator, presence: true, uniqueness: true
+
+  # Игроки государства
+  scope :for_country, ->(country) { country.nil? ? all : where(country_id: country.id) }
+  # Знать (вместо повторяющегося фильтра по player_type_id == 2 во фронте и коде)
+  scope :nobles, -> { where(player_type_id: PlayerType::NOBLE) }
   
   # Получение текущего игрока из сессии
   def self.current
@@ -285,19 +295,20 @@ class Player < ApplicationRecord
     end
   end
 
-  def income
-    base = income_base
+  def income(country = Country.current)
+    base = income_base(country)
     (base + income_items.sum(:value).to_i)
   end
 
-  def income_base
+  def income_base(country = Country.current)
+    country ||= Country.current
     year = GameParameter.current_year
 
     # Проверяем эффект увеличенного дохода от торговли для текущего года
     added_income =
       if self.job_ids.include?(Job::GRAND_PRINCE) &&
          GameParameter.any_lingering_effects?("increased_trade_revenue", year - 1)
-        Caravan.count_caravan_revenue
+        Caravan.count_caravan_revenue(country)
       else
         0
       end
@@ -308,20 +319,29 @@ class Player < ApplicationRecord
     if job_ids.include?(Job::METROPOLITAN)
       church_params = Building.joins({ settlement: :region }, :building_level)
                              .where(building_levels: { building_type_id: BuildingType::RELIGIOUS })
-                             .where(regions: { country_id: Country::RUS })
+                             .where(regions: { country_id: country.id })
                              .select('building_levels.params')
       sum += church_params.map { |p| p.params['metropolitan_income'].to_i }.sum
     end
 
-    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0
-    sum + self.settlements.sum { |s| s.income + st_george_bonus }
+    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open(country) == 1 ? 1000 : 0
+    sum + settlements_for_country(country).sum { |s| s.income + st_george_bonus }
   end
 
-  def income_breakdown
-    year = GameParameter.current_year
-    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open == 1 ? 1000 : 0
+  # Владения игрока в разрезе государства: поселение принадлежит стране своего региона
+  def settlements_for_country(country = Country.current)
+    country ||= Country.current
+    return settlements if country.nil?
 
-    settlements_data = self.settlements.includes(:settlement_type, buildings: { building_level: :building_type }).map do |s|
+    settlements.joins(:region).where(regions: { country_id: country.id })
+  end
+
+  def income_breakdown(country = Country.current)
+    country ||= Country.current
+    year = GameParameter.current_year
+    st_george_bonus = Technology.find(Technology::ST_GEORGE_DAY).is_open(country) == 1 ? 1000 : 0
+
+    settlements_data = settlements_for_country(country).includes(:settlement_type, buildings: { building_level: :building_type }).map do |s|
       type_income = s.settlement_type&.params&.dig("income").to_i
 
       buildings = s.buildings.map do |b|
@@ -341,6 +361,8 @@ class Player < ApplicationRecord
       {
         settlement_id: s.id,
         name: s.name,
+        region_id: s.region_id,
+        country_id: s.region&.country_id,
         type_income: type_income,
         markets_income: markets_income,
         buildings_sum: buildings_sum,
@@ -355,7 +377,7 @@ class Player < ApplicationRecord
     trade_bonus =
       if self.job_ids.include?(Job::GRAND_PRINCE) &&
          GameParameter.any_lingering_effects?("increased_trade_revenue", year - 1)
-        Caravan.count_caravan_revenue
+        Caravan.count_caravan_revenue(country)
       else
         0
       end
@@ -364,7 +386,7 @@ class Player < ApplicationRecord
     if job_ids.include?(Job::METROPOLITAN)
       church_params = Building.joins({ settlement: :region }, :building_level)
                              .where(building_levels: { building_type_id: BuildingType::RELIGIOUS })
-                             .where(regions: { country_id: Country::RUS })
+                             .where(regions: { country_id: country.id })
                              .select('building_levels.params')
       metropolitan_bonus = church_params.map { |p| p.params['metropolitan_income'].to_i }.sum
     end
@@ -386,6 +408,8 @@ class Player < ApplicationRecord
     {
       player_id: id,
       player_name: name,
+      country_id: country_id,
+      country: (country ? { id: country.id, name: country.name } : nil),
       year: year,
       base_total: base_total,
       manual_sum: manual_sum,
@@ -412,7 +436,8 @@ class Player < ApplicationRecord
     cost
   end
 
-  def influence_buildings
+  def influence_buildings(country = Country.current)
+    country ||= Country.current
     sum = 0
     if job_ids.include?(Job::METROPOLITAN)
       # Получаем церкви, которые были оплачены в предыдущем году ИЛИ созданы в текущем году
@@ -421,7 +446,7 @@ class Player < ApplicationRecord
       
       church_buildings = Building.joins({settlement: :region}, :building_level).
         where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).
-        where(regions: {country_id: Country::RUS}).
+        where(regions: {country_id: country.id}).
         where("buildings.params::jsonb->'paid' @> ?::jsonb OR buildings.params::jsonb->'first_year' = ?::jsonb", 
               [previous_year].to_json, current_year.to_json)
       
@@ -431,14 +456,14 @@ class Player < ApplicationRecord
     end
     def_params = Building.joins({settlement: :region}, :building_level).
       where(building_levels: {building_type_id: BuildingType::DEFENCE}).
-      where(regions: {country_id: Country::RUS}).
+      where(regions: {country_id: country.id}).
       where(settlements: {player_id: self.id}).
       select('building_levels.params')
     sum + def_params.map{|p| p.params['influence'].to_i}.sum
   end
 
-  def influence
-    influence_buildings + influence_items.sum{|ii| ii.value.to_i}
+  def influence(country = Country.current)
+    influence_buildings(country) + influence_items.sum{|ii| ii.value.to_i}
   end
 
   def give_credit(plant_ids)
@@ -503,6 +528,15 @@ class Player < ApplicationRecord
   end
 
   private
+
+  # Игрок без явно указанной страны попадает в текущее государство
+  # (как сегодня, когда все игроки были «руськими»)
+  def assign_default_country
+    return if country_id.present?
+
+    default_country = Country.current || Country.find_by(id: Country::RUS)
+    self.country_id = default_country&.id
+  end
 
   # Генерация identificator, если он не заполнен
   def generate_identificator_if_blank
