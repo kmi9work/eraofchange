@@ -40,24 +40,27 @@ class Region < ApplicationRecord
     self.inf_buildings_on_po + self.count_items + (Technology.find(Technology::GODS_ANOITED).is_open(country) == 1 ? 5 : 0)
   end
 
-  def captured_by(who_id, how) #1 - войной, 0 - миром
+  # Передать регион государству-получателю (how: 1 — войной, 0 — миром).
+  #
+  # Событие общественного порядка — для игроков государства-получателя: если за
+  # страну никто не играет, отыгрывать изменение порядка некому, запись не
+  # создаётся. Владения прежних владельцев сохраняются при передаче текущему
+  # государству; регион, ушедший чужому государству, оставляет свои поселения
+  # без владельцев.
+  def captured_by(who_id, how)
     receiver = Country.find_by(id: who_id.to_i)
     return {result: false, msg: "Государство не найдено"} if receiver.nil?
 
     if self.country_id != receiver.id
       self.country_id = receiver.id
-      # Правки общественного порядка и обнуление владельцев — относительно
-      # государства-получателя: если регион перешёл текущему государству, порядок
-      # правится, если чужому — прежние владельцы теряют владения.
-      if receiver.id == Country.current&.id
-        if how.to_i == 1
+      if receiver.players.exists?
+        if how.to_i == Country::BY_WAR
           self.public_order_items << PublicOrderItem.add(Country::MILITARILY, "Регион присоединен войной", self)
         else
           self.public_order_items << PublicOrderItem.add(Country::PEACEFULLY, "Регион присоединен миром", self)
         end
-      else
-        self.settlements.update_all(player_id: nil)
       end
+      self.settlements.update_all(player_id: nil) if receiver.id != Country.current&.id
       self.save
     end
 
