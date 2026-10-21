@@ -4,16 +4,23 @@ class RegionsController < ApplicationController
   # GET /regions or /regions.json
   def index
     @regions = Region.all
-    @regions = @regions.where.not(country_id: Country::RUS) if params[:foreign].to_i == 1
-    @regions = @regions.where(country_id: Country::RUS) if params[:foreign].to_i == 0
+    if params[:country_id].present?
+      # Явная страна (для Дашборда) имеет приоритет над «свой/зарубеж»
+      @regions = @regions.where(country_id: params[:country_id])
+      @regions_country = Country.find_by(id: params[:country_id]) || current_country
+    else
+      @regions = @regions.foreign_to(current_country) if params[:foreign].to_i == 1
+      @regions = @regions.for_country(current_country) if params[:foreign].to_i == 0
+      @regions_country = current_country
+    end
   end
 
   def captured_by
     @region.captured_by(params[:country_id], params[:how])
-    if params[:grand_prince_bonus] && 
-          params[:country_id].to_i == Country::RUS && 
+    if params[:grand_prince_bonus] &&
+          params[:country_id].to_i == current_country&.id &&
           @region.way == 'rus'
-      Job.find_by_id(Job::GRAND_PRINCE)&.players&.each do |player|
+      current_country.council_players(Job::GRAND_PRINCE).each do |player|
         player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение земли", @region) 
       end
     end

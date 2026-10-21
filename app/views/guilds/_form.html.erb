@@ -13,6 +13,8 @@
   <div>
     <p>Название: <%= form.text_field :name %></p>
 
+    <p>Государство: <%= form.select :country_id, options_for_select(Country.order(:name).collect { |c| [c.name, c.id] }, guild.country_id), { include_blank: 'Не задано' } %></p>
+
     <p>Игровые персонажи:  <%= form.select :player_ids, options_for_select(@guildless_players.collect{ |p| [p.name, p.id] }, guild.player_ids), {include_blank: true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>
 
     <p>Предприятия: <%= form.select :plant_ids, options_for_select(@ownerless_plants.collect{ |p| [p.comments, p.id] }, guild.plant_ids), {:include_blank => true}, {multiple: true, class: 'form-select', style: "width: 200px"} %></p>

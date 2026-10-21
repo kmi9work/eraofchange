@@ -1,7 +1,9 @@
 
 guild_names = ["Забавники", "Каменщики","Пивовары"]
 
-guild_names.each {|name| Guild.create(name: name, params: {caravan_protected: []})} 
+# Гильдии seeds относятся к «Руси»: при игре за одну страну это прежнее поведение,
+# при нескольких — гильдии текущего государства считаются своими (Д11)
+guild_names.each {|name| Guild.create(name: name, country_id: Country::RUS, params: {caravan_protected: []})} 
   
 
 
@@ -410,7 +412,8 @@ end
 end
 
 # Железный рудник
-["Малая Пермь", "Великая Пермь", "Вятская земля", "Рязанское княжество", "Смоленское княжество", "Верховское княжество", "Торопецкое княжество"].each do |region_name|
+# ["Малая Пермь", "Великая Пермь", "Вятская земля", "Рязанское княжество", "Смоленское княжество", "Верховское княжество", "Торопецкое княжество"].each do |region_name|
+["Великое Московское княжество", "Вологодская земля", "Нижегородская земля", "Ярославское княжество"].each do |region_name|
   region = Region.find_by(name: region_name)
   if region
     pp = PlantPlace.create(name: "Место для добывающих предприятий в #{region_name}", plant_category: dob, region: region)

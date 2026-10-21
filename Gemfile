@@ -88,3 +88,4 @@ gem "concurrent-ruby", "= 1.3.4"
 gem 'vassals_and_robbers', path: 'engines/vassals_and_robbers'
 gem 'artel', path: 'engines/artel'
 gem 'era_great', path: 'engines/era_great'
+gem 'many_teams', path: 'engines/many_teams'

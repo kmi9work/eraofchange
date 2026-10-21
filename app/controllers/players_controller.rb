@@ -89,11 +89,15 @@ class PlayersController < ApplicationController
     if params[:player_type_id].present?
       scope = scope.where(player_type_id: params[:player_type_id])
     end
+    # Явное государство (Дашборд) или все игроки, если параметр не задан
+    scope = scope.where(country_id: params[:country_id]) if params[:country_id].present?
     @players = scope
+    @players_country = country_for_params
   end
 
   # GET /players/1 or /players/1.json
   def show
+    @players_country = country_for_params
   end
 
   # GET /players/new
@@ -158,10 +162,17 @@ class PlayersController < ApplicationController
   end
 
   def income_breakdown
-    render json: @player.income_breakdown
+    render json: @player.income_breakdown(country_for_params)
   end
 
   private
+
+    # Государство запроса: ?country_id=<id> или текущее государство
+    def country_for_params
+      return Country.current if params[:country_id].blank?
+
+      Country.find_by(id: params[:country_id]) || Country.current
+    end
     # Use callbacks to share common setup or constraints between actions.
     def set_player
       @player = Player.find(params[:id])
@@ -169,6 +180,6 @@ class PlayersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def player_params
-      params.require(:player).permit(:name, :family_id, :guild_id, :player_type_id, :job_ids => [], :credit_ids => [], :political_action_ids => [], :plant_ids => [], :params => {})
+      params.require(:player).permit(:name, :family_id, :guild_id, :player_type_id, :country_id, :job_ids => [], :credit_ids => [], :political_action_ids => [], :plant_ids => [], :params => {})
     end
 end

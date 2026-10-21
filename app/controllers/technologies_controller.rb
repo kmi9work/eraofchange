@@ -4,10 +4,21 @@ class TechnologiesController < ApplicationController
   # GET /technologies or /technologies.json
   def index
     @technologies = Technology.all
+    # Статус открытия — в разрезе государства: ?country_id=<id> или текущее государство
+    @technologies_country = requested_country
   end
 
   # GET /technologies/1 or /technologies/1.json
   def show
+    @technologies_country = requested_country
+  end
+
+  private
+
+  def requested_country
+    return Country.current if params[:country_id].blank?
+
+    Country.find_by(id: params[:country_id]) || Country.current
   end
 
   # GET /technologies/new

@@ -56,16 +56,23 @@ module Artel
             return artel_original_show_prices
           end
 
-          resources = Resource.where(country_id: nil)
+          # Контекст текущего государства: если у него есть свои ресурсы — берём их,
+          # иначе остаёмся на общих ресурсах Артели (country_id: nil), как было
+          current_country = Country.current
+          resources = current_country ? Resource.where(country_id: current_country.id) : Resource.none
+          resources = Resource.where(country_id: nil) if resources.empty?
           off_market = []
           to_market = []
-          rel_key = 0
 
           resources.each do |res|
+            # Уровень цены — по паре отношений страны ресурса с текущим государством
+            rel_key = res.country_id.nil? ? 0 : res.country.relations(current_country).to_s
             not_for_sale = res.params["sale_price"]&.[](rel_key).nil?
 
-            to_prices = { name: res.name, identificator: res.identificator, sell_price: res.params["buy_price"]&.[](rel_key), embargo: false, country: nil }
-            off_prices = { name: res.name, identificator: res.identificator, buy_price: res.params["sale_price"]&.[](rel_key), embargo: false, country: nil }
+            country_payload = res.country_id ? { id: res.country_id, name: res.country&.name } : nil
+
+            to_prices = { name: res.name, identificator: res.identificator, sell_price: res.params["buy_price"]&.[](rel_key), embargo: false, country: country_payload, country_id: res.country_id }
+            off_prices = { name: res.name, identificator: res.identificator, buy_price: res.params["sale_price"]&.[](rel_key), embargo: false, country: country_payload, country_id: res.country_id }
 
             to_market.push(to_prices)
             off_market.push(off_prices) unless not_for_sale

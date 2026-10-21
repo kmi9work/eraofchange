@@ -1,4 +1,12 @@
-json.extract! player, :id, :name, :identificator, :guild_id, :family_id, :human, :own_count, :my_buildings, :player_type, :family, :guild, :params, :income, :influence, :player_military_outlays
+# Игрок в разрезе государства (@players_country — государство запроса, иначе текущее):
+# доход и влияние считаются по владениям этого государства (Д7).
+country = @players_country || Country.current
+
+json.extract! player, :id, :name, :identificator, :guild_id, :family_id, :human, :own_count, :my_buildings, :player_type, :family, :guild, :params, :player_military_outlays
+json.country_id player.country_id
+json.country player.country && { id: player.country.id, name: player.country.name, short_name: player.country.short_name, flag_image_name: player.country.flag_image_name }
+json.income player.income(country)
+json.influence player.influence(country)
 
 json.owner_type 'Player'
 json.jobs player.jobs do |job|
@@ -10,7 +18,7 @@ end
 influence_items = [
   InfluenceItem.new(
     id: 0,
-    value: player.influence_buildings,
+    value: player.influence_buildings(country),
     comment: 'Влияние от зданий',
     player: player
   ),

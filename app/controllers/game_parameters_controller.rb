@@ -7,12 +7,12 @@ class GameParametersController < ApplicationController
   end
 
   def pay_state_expenses
-    result = GameParameter.pay_state_expenses
+    result = GameParameter.pay_state_expenses(results_country)
     render json: result
   end
 
   def unpay_state_expenses
-    result = GameParameter.unpay_state_expenses
+    result = GameParameter.unpay_state_expenses(results_country)
     render json: result
   end
 
@@ -39,10 +39,51 @@ class GameParametersController < ApplicationController
   end
   
   def create_schedule
-    # create_schedule автоматически использует default_schedule из ядра или плагина
+    # create_schedule автоматически использует default_schedule из ядра или плагина.
+    # Если передан preset — применяем сохранённый пресет вместо встроенного расписания.
+    preset = params.dig(:request, :preset) || params[:preset]
+    if preset.present? && preset.to_s != GameParameter::SCHEDULE_PRESET_DEFAULT
+      result = GameParameter.apply_schedule_preset(preset)
+      return render json: result.merge(message: "Расписание создано из пресета '#{result[:name]}'")
+    end
+
     GameParameter.create_schedule
     render json: { success: true, message: "Расписание создано" }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
+
+  def schedule_presets
+    render json: { success: true, presets: GameParameter.schedule_presets,
+                   dir: GameParameter.schedule_presets_dir.to_s }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def save_schedule_preset
+    name = params.dig(:request, :name) || params[:name]
+    result = GameParameter.save_schedule_preset(name)
+    render json: result.merge(message: "Пресет '#{result[:name]}' сохранён")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def apply_schedule_preset
+    slug = params.dig(:request, :slug) || params[:slug]
+    result = GameParameter.apply_schedule_preset(slug)
+    render json: result.merge(message: "Расписание создано из пресета '#{result[:name]}'")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def delete_schedule_preset
+    slug = params.dig(:request, :slug) || params[:slug]
+    result = GameParameter.delete_schedule_preset(slug)
+    render json: result.merge(message: "Пресет '#{result[:slug]}' удалён")
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
   def show_schedule
     @time = GameParameter.show_schedule
   end
@@ -97,7 +138,39 @@ class GameParametersController < ApplicationController
     GameParameter.toggle_timer(params[:request])
   end
 
- def save_sorted_results
+  def show_sovereign_schedule
+    render json: GameParameter.show_sovereign_schedule
+  end
+
+  def create_sovereign_schedule
+    GameParameter.create_sovereign_schedule
+    render json: { success: true, message: "Расписание Государя создано" }
+  end
+
+  def update_sovereign_schedule_name
+    GameParameter.update_sovereign_schedule_name(params[:request])
+  end
+
+  def add_sovereign_schedule_item
+    GameParameter.add_sovereign_schedule_item(params[:request])
+  end
+
+  def update_sovereign_schedule_item
+    GameParameter.update_sovereign_schedule_item(params[:request])
+  end
+
+  def delete_sovereign_schedule_item
+    GameParameter.delete_sovereign_schedule_item(params[:request])
+  end
+
+  def shift_sovereign_schedule
+    result = GameParameter.shift_sovereign_schedule(params[:request])
+    render json: result
+  rescue => e
+    render json: { success: false, error: e.message }, status: :unprocessable_entity
+  end
+
+  def save_sorted_results
     GameParameter.sort_and_save_results(params[:request].to_unsafe_h)
   end
 
@@ -109,27 +182,62 @@ class GameParametersController < ApplicationController
     GameParameter.delete_result(params[:request].to_unsafe_h)
   end
 
+  # PATCH /game_parameters/clear_results — без country_id чистит все государства
+  # (для главного мастера), с country_id — только указанное
+  def clear_results
+    country = params[:country_id].present? ? Country.find_by(id: params[:country_id]) : nil
+    GameParameter.clear_results(country)
+    render json: { success: true, country_id: country&.id }
+  end
+
   def show_sorted_results
+   country = results_country
+   if snapshot_requested?
+     snapshot = snapshot_payload
+     return render json: snapshot if snapshot
+   end
+
    sort_by = params[:sort_by] || :capital
-   @game_results = GameParameter.show_sorted_results(sort_by: sort_by)
-   render json: @game_results
+   @game_results = GameParameter.show_sorted_results(sort_by: sort_by, country: country)
+   render json: {
+     country_id: country&.id,
+     year: GameParameter.current_year,
+     source: 'live',
+     results: @game_results
+   }
   end  
 
   def show_noble_results
-   @noble_results = GameParameter.show_noble_results
-   render json: @noble_results
+   country = results_country
+   if snapshot_requested?
+     snapshot = snapshot_payload
+     return render json: snapshot.slice(:year, :country_id, :source, :nobles, :closed_at).merge(results: snapshot[:nobles]) if snapshot
+   end
 
+   @noble_results = GameParameter.show_noble_results(country)
+   render json: {
+     country_id: country&.id,
+     year: GameParameter.current_year,
+     source: 'live',
+     results: @noble_results
+   }
   end
 
   def display_results
-   @current_display = GameParameter.display_results
+   @current_display = GameParameter.display_results(results_country)
    render json: @current_display
   end
 
   # Объединённый ответ для экрана: текущий подэкран, результаты купцов и знати
   def screen_bundle
+    country = results_country
+    if snapshot_requested?
+      snapshot = snapshot_payload
+      return render json: snapshot if snapshot
+    end
+
     # Определяем тип сортировки из display параметра
-    display = GameParameter.display_results.to_s
+    display = GameParameter.display_results(country).to_s
     sort_by = :capital # По умолчанию по капиталу
     
     # Если экран связан с боярскими милостями, используем соответствующую сортировку
@@ -141,12 +249,15 @@ class GameParametersController < ApplicationController
       end
     end
     
-    merchants = GameParameter.show_sorted_results(sort_by: sort_by)
-    nobles   = GameParameter.show_noble_results
-    settings = GameParameter.get_merchant_results_settings
+    merchants = GameParameter.show_sorted_results(sort_by: sort_by, country: country)
+    nobles   = GameParameter.show_noble_results(country)
+    settings = GameParameter.get_merchant_results_settings(country)
 
     render json: {
       display: display,
+      country_id: country&.id,
+      year: GameParameter.current_year,
+      source: 'live',
       merchants: merchants,
       nobles: nobles,
       show_cap_per_player: settings[:show_cap_per_player],
@@ -158,11 +269,11 @@ class GameParametersController < ApplicationController
 
 
   def change_results_display
-    GameParameter.change_results_display(params[:request])
+    GameParameter.change_results_display(params[:request], results_country)
   end
 
   def get_merchant_results_settings
-    settings = GameParameter.get_merchant_results_settings
+    settings = GameParameter.get_merchant_results_settings(results_country)
     render json: settings
   end
 
@@ -175,7 +286,7 @@ class GameParametersController < ApplicationController
         :teaching_staff_recruitment
       ]
     ).to_h
-    GameParameter.update_merchant_results_settings(payload.deep_symbolize_keys)
+    GameParameter.update_merchant_results_settings(payload.deep_symbolize_keys, results_country)
     render json: { success: true, message: "Настройки обновлены" }
   rescue => e
     render json: { error: e.message }, status: :internal_server_error
@@ -240,29 +351,75 @@ class GameParametersController < ApplicationController
   end
 
   # GET /game_parameters/get_vassalage_settings
+  # ?country_id=<id> — суммы вассалов указанного сюзерена (по умолчанию — текущего).
+  # Ответ содержит и плоский срез сюзерена (vassal_incomes), и полную карту по
+  # сюзеренам (by_sovereign), чтобы экран не смешивал настройки команд (ТЗ № 2, § 7.2).
   def get_vassalage_settings
     vassalage_settings = GameParameter.find_by(identificator: "vassalage_settings")
-    if vassalage_settings && vassalage_settings.params
-      render json: vassalage_settings.params
-    else
-      render json: { vassal_incomes: {} }
-    end
+    stored = vassalage_settings&.params&.dig("vassal_incomes") || {}
+    sovereign = results_country
+    scoped = vassalage_incomes_for(stored, sovereign)
+
+    render json: {
+      country_id: sovereign&.id,
+      country: sovereign&.name,
+      vassal_incomes: scoped,
+      by_sovereign: stored.is_a?(Hash) ? stored : {}
+    }
   end
 
   # PATCH /game_parameters/update_vassalage_settings
+  # ?country_id=<id> — записывает суммы только этого сюзерена, настройки остальных
+  # государств сохраняются (иначе правка одной команды стирала бы чужую).
   def update_vassalage_settings
     vassalage_settings = GameParameter.find_or_create_by(identificator: "vassalage_settings") do |gp|
       gp.name = "Настройки вассалитета"
       gp.value = "1"
     end
-    
+
     vassalage_settings.params ||= {}
-    vassalage_settings.params['vassal_incomes'] = params[:vassal_incomes] || {}
+    sovereign = results_country
+    stored = vassalage_settings.params['vassal_incomes'] || {}
+    incoming = params[:vassal_incomes] || {}
+
+    # Полная карта по сюзеренам: пишем только срез запрошенного государства
+    if params[:by_sovereign].present?
+      vassalage_settings.params['vassal_incomes'] = params[:by_sovereign].to_unsafe_h
+    else
+      vassalage_settings.params['vassal_incomes'] = store_vassalage_incomes(stored, sovereign, incoming)
+    end
+
     vassalage_settings.save!
-    
-    render json: { success: true, message: "Настройки вассалитета обновлены" }
+
+    render json: { success: true, message: "Настройки вассалитета обновлены", country_id: sovereign&.id }
   rescue => e
     render json: { error: e.message }, status: :internal_server_error
+  end
+
+  # Срез сумм вассалов сюзерена с поддержкой обоих форматов params['vassal_incomes']
+  # (плоский — «до перехода», относился к «Руси»; вложенный — по сюзеренам)
+  def vassalage_incomes_for(stored, sovereign)
+    stored = {} unless stored.is_a?(Hash)
+    if defined?(VassalsAndRobbers::VassalageSettings)
+      VassalsAndRobbers::VassalageSettings.incomes_for(stored, sovereign)
+    else
+      scoped = stored[sovereign&.id.to_s]
+      scoped.is_a?(Hash) ? scoped : {}
+    end
+  end
+
+  # Запись сумм сюзерена с сохранением настроек остальных государств
+  def store_vassalage_incomes(stored, sovereign, incomes)
+    stored = {} unless stored.is_a?(Hash)
+    return stored if sovereign.nil?
+
+    if defined?(VassalsAndRobbers::VassalageSettings)
+      VassalsAndRobbers::VassalageSettings.store_incomes(stored, sovereign, incomes)
+    else
+      base = stored.dup
+      base[sovereign.id.to_s] = incomes || {}
+      base
+    end
   end
 
   # GET /game_parameters/new
@@ -313,6 +470,35 @@ class GameParametersController < ApplicationController
   end
 
   private
+
+    # Сквозные параметры результатов: государство (?country_id=) и год (?year=).
+    # Снимок года отдаётся, если для этого года и государства он есть (source: snapshot).
+    def snapshot_requested?
+      params[:year].present?
+    end
+
+    def results_country
+      return Country.current if params[:country_id].blank?
+
+      Country.find_by(id: params[:country_id]) || Country.current
+    end
+
+    def snapshot_payload
+      country = results_country
+      snapshot = GameParameter.results_for_year(params[:year], country)
+      return nil if snapshot.nil?
+
+      {
+        year: params[:year].to_i,
+        country_id: country&.id,
+        source: 'snapshot',
+        display: GameParameter.display_results(country),
+        nobles: snapshot['nobles'] || [],
+        merchants: snapshot['merchants'] || [],
+        closed_at: snapshot['closed_at']
+      }
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_game_parameter
       @game_parameter = GameParameter.find(params[:id])

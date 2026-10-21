@@ -5,6 +5,13 @@ class PoliticalAction < ApplicationRecord
   belongs_to :job
   belongs_to :political_action_type
   belongs_to :guild, optional: true
+  # Действия считаются в разрезе государства (каталог типов действий общий)
+  belongs_to :country, optional: true
+
+  before_validation :assign_default_country
+
+  scope :for_country, ->(country) { country.nil? ? all : where(country_id: country.id) }
+  scope :for_year, ->(year) { year.nil? ? all : where(year: year) }
 
   def execute
     action_name = self.political_action_type&.action
@@ -53,14 +60,14 @@ class PoliticalAction < ApplicationRecord
       modify_influence(2)
     else 
       modify_influence(-2)
-      regions = Country.find_by_id(Country::RUS).regions
+      regions = Country.current.regions
       regions.each {|r| PublicOrderItem.add(-1, self.political_action_type.name, r, self)}
     end
   end
 
   def call_a_meeting #Созвать вече
     if success.to_i == 1
-      regions = Country.find_by_id(Country::RUS).regions
+      regions = Country.current.regions
       modify_influence(3)
       regions.each {|r| PublicOrderItem.add(5, self.political_action_type.name, r, self)}
     else 
@@ -115,7 +122,7 @@ class PoliticalAction < ApplicationRecord
       modify_influence(3)
     else
       modify_influence(-3)
-      regions = Country.find_by_id(Country::RUS).regions
+      regions = Country.current.regions
       regions.each {|r| PublicOrderItem.add(-5, self.political_action_type.name, r, self)}
     end 
   end
@@ -131,7 +138,7 @@ class PoliticalAction < ApplicationRecord
       modify_influence(1)
     else
       modify_influence(-2)
-      princes = Job.find_by_id(Job::GRAND_PRINCE).players
+      princes = Country.current.council_players(Job::GRAND_PRINCE)
       princes.each{|p| InfluenceItem.add(-2, self.political_action_type.name, p, self)}
     end
   end
@@ -141,7 +148,7 @@ class PoliticalAction < ApplicationRecord
       modify_influence(3)
     else 
       modify_influence(-3)
-      prince_ids = Job.find_by_id(Job::GRAND_PRINCE).player_ids
+      prince_ids = Country.current.council_players(Job::GRAND_PRINCE).pluck(:id)
       regions = Region.joins(settlements: :player).where(settlements: {player_id: prince_ids}).distinct
       regions.each{|r| PublicOrderItem.add(-5, self.political_action_type.name, r, self)}
     end
@@ -241,15 +248,24 @@ class PoliticalAction < ApplicationRecord
     if success.to_i == 1
       modify_influence(3)
       it = Technology.find_by_id(params['technology_id'])
-      it.open_it
+      it&.open_it(Country.current)
     else 
-      regions = Country.find_by_id(Country::RUS).regions
+      regions = Country.current.regions
       modify_influence(-3)
       regions.each {|r| PublicOrderItem.add(-3, self.political_action_type.name, r, self)}
     end
   end
 
   private
+
+    # Действие без явно указанного государства попадает в текущее государство
+    def assign_default_country
+      return if country_id.present?
+
+      default_country = Country.current || Country.find_by(id: Country::RUS)
+      self.country_id = default_country&.id
+    end
+
     def modify_influence value
       InfluenceItem.add(value, self.political_action_type.name, player, self)
     end

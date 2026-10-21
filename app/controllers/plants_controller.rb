@@ -1,5 +1,5 @@
 class PlantsController < ApplicationController
-  before_action :set_plant, only: %i[ show edit update destroy name_of_plant upgrade has_produced ]
+  before_action :set_plant, only: %i[ show edit update destroy name_of_plant upgrade downgrade has_produced ]
 
   def name_of_plant
     @plant.name_of_plant
@@ -147,6 +147,43 @@ class PlantsController < ApplicationController
     end
   end
 
+  def downgrade
+    begin
+      Rails.logger.info "=== DOWNGRADE DEBUG ==="
+      Rails.logger.info "Plant ID: #{@plant.id}"
+      Rails.logger.info "Current plant_level_id: #{@plant.plant_level_id}"
+      Rails.logger.info "Current level: #{@plant.plant_level&.level}"
+
+      result = @plant.downgrade!
+
+      Rails.logger.info "Downgrade result: #{result.inspect}"
+
+      if result[:plant_level].present?
+        # Возвращаем стоимость текущего уровня (до понижения) обратно гильдии
+        add_plant_cost_to_guild(@plant, result[:old_price])
+
+        respond_to do |format|
+          format.html { redirect_back(fallback_location: plant_path(@plant), notice: result[:msg]) }
+          format.json { render json: { success: true, msg: result[:msg], plant: @plant }, status: :ok }
+        end
+      else
+        Rails.logger.warn "Downgrade failed: #{result[:msg]}"
+        respond_to do |format|
+          format.html { redirect_back(fallback_location: plant_path(@plant), alert: result[:msg]) }
+          format.json { render json: { success: false, error: result[:msg] }, status: :unprocessable_entity }
+        end
+      end
+    rescue => e
+      Rails.logger.error "Ошибка уменьшения уровня предприятия: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: plant_path(@plant), alert: "Ошибка: #{e.message}") }
+        format.json { render json: { success: false, error: e.message }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_plant
@@ -215,6 +252,23 @@ class PlantsController < ApplicationController
       resource_item.save!
     rescue => e
       Rails.logger.error "Failed to add plant deposit to owner: #{e.message}"
+    end
+
+    def add_plant_cost_to_guild(plant, price)
+      # Возвращаем стоимость уровня гильдии при понижении уровня предприятия
+      return unless plant.economic_subject_type == 'Guild'
+      return unless price.present?
+
+      es = plant.economic_subject
+      price.each do |identificator, count|
+        next if count <= 0
+        resource_item = es.resource_items.find_or_initialize_by(identificator: identificator.to_s)
+        resource_item.count = (resource_item.count || 0) + count
+        resource_item.save! if resource_item.count != 0
+        resource_item.destroy if resource_item.count <= 0
+      end
+    rescue => e
+      Rails.logger.error "Failed to add plant cost to guild: #{e.message}"
     end
 end
 

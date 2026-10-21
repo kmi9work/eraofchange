@@ -4,11 +4,50 @@ class CountriesController < ApplicationController
   # GET /countries or /countries.json
   def index
     @countries = Country.all
-    @countries = Country.where.not(id: Country::RUS) if params[:foreign].to_i == 1
+    @countries = Country.except_country(current_country) if params[:foreign].to_i == 1
     @countries = Country.russian_countries if params[:russian].to_i == 1
     @countries = Country.vyatka_free_countries if params[:vyatka_free].to_i == 1
     @countries = Country.foreign_countries if params[:only_foreign].to_i == 1
     @countries = @countries.order(:name)
+  end
+
+  # GET /countries/relations_matrix.json?country_ids=1,2 — таблица отношений выбранных
+  # государств со всеми остальными (раздел «Дашборд», ТЗ № 2, § 2.3). Пары, где оба
+  # государства выбраны, в ответ не попадают — иначе одна пара дублировалась бы с двух сторон.
+  def relations_matrix
+    selected_ids = params[:country_ids].to_s.split(',').map(&:to_i).reject(&:zero?).uniq
+    selected_ids = [current_country.id] if selected_ids.empty? && current_country
+
+    @countries = Country.where(id: selected_ids).order(:name)
+    @others = Country.where.not(id: @countries.map(&:id)).order(:name)
+    @rows = @countries.flat_map { |a| @others.map { |b| { a: a, b: b } } }
+  end
+
+  # GET /current_country.json — текущее государство сессии.
+  # ВНИМАНИЕ: метод называется show_current_country, а не current_country, потому что
+  # имя current_country уже занято одноимённым помощником ApplicationController
+  # (текущее государство). Действие с тем же именем перекрыло бы помощника внутри
+  # этого контроллера и вместо государства возвращало бы отрендеренный ответ.
+  def show_current_country
+    @country = Country.current
+    if @country
+      render :show
+    else
+      render json: {}
+    end
+  end
+
+  # GET /login_country/:id.json — выбрать текущее государство (аналог users#login)
+  def login_country
+    country = Country.find_by(id: params[:id])
+    if country
+      session[:country_id] = country.id
+      Country.current = country
+      @country = country
+      render :show
+    else
+      render json: { error: 'Государство не найдено' }, status: :not_found
+    end
   end
 
   def foreign_countries
@@ -22,7 +61,7 @@ class CountriesController < ApplicationController
   end
 
   def join_peace
-    @country.join_peace
+    @country.join_peace(Country.current)
   end
 
   def embargo
@@ -155,7 +194,8 @@ class CountriesController < ApplicationController
   def add_relation_item
     value = params[:value].to_i
     comment = params[:comment].presence || "Ручная правка"
-    result = @country.change_relations(value, @country, comment, force: true)
+    partner = params[:partner_country_id].present? ? Country.find_by(id: params[:partner_country_id]) : current_country
+    result = @country.change_relations(value, @country, comment, partner: partner, force: true)
     
     if result.is_a?(Hash) && result[:warning]
       render json: { success: true, warning: result[:warning] }
@@ -165,8 +205,9 @@ class CountriesController < ApplicationController
   end
 
   def improve_relations_via_trade
-    # Используем force: true для мастера, чтобы разрешить улучшение, но получить предупреждение
-    result = @country.improve_relations_via_trade(force: true)
+    # Используем force: true для мастера, чтобы разрешить улучшение, но получить предупреждение.
+    # Партнёр пары — текущее государство (при игре за одну страну это прежнее поведение).
+    result = @country.improve_relations_via_trade(force: true, partner: current_country)
     
     if result[:success]
       response = { 
@@ -184,16 +225,147 @@ class CountriesController < ApplicationController
     render json: { success: false, error: e.message }, status: :internal_server_error
   end
 
+  # Bulk update trade turnover for all countries except Vyatka
+  def bulk_update_trade_turnover
+    turnover_value = params[:turnover].to_i
+    country_ids = params[:country_ids]
+    
+    if turnover_value < 0
+      render json: { success: false, error: 'Turnover value must be non-negative' }, status: :bad_request
+      return
+    end
+    
+    if country_ids.nil? || !country_ids.is_a?(Array)
+      # Default: update all countries except Vyatka (id: 9)
+      country_ids = Country.foreign_countries.pluck(:id)
+    end
+    
+    updated_countries = []
+    country_ids.each do |country_id|
+      country = Country.find(country_id)
+      # Skip Vyatka
+      next if country.id == Country::VYATKA
+      
+      # Store manual turnover adjustment in params
+      current_params = country.params || {}
+      current_params['manual_trade_turnover'] = turnover_value
+      country.params = current_params
+      country.save!
+      
+      updated_countries.push({
+        country_id: country.id,
+        country_name: country.name,
+        short_name: country.short_name || country.name,
+        manual_turnover: turnover_value
+      })
+    end
+    
+    render json: {
+      success: true,
+      message: "Trade turnover updated for #{updated_countries.count} countries",
+      countries: updated_countries
+    }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :internal_server_error
+  end
+
+  # Bulk award trade level points for all countries except Vyatka
+  def bulk_award_trade_level_points
+    country_ids = params[:country_ids]
+    
+    if country_ids.nil? || !country_ids.is_a?(Array)
+      # Default: all countries except Vyatka (id: 9)
+      country_ids = Country.foreign_countries.pluck(:id)
+    end
+    
+    awarded_countries = []
+    country_ids.each do |country_id|
+      country = Country.find(country_id)
+      # Skip Vyatka
+      next if country.id == Country::VYATKA
+      
+      # Calculate current turnover and award points
+      current_trade_turnover = country.calculate_trade_turnover(current_country)[:trade_turnover] || 0
+      previous_turnover = country.last_trade_turnover_for(current_country)
+      
+      result = country.check_and_award_trade_level_points(previous_trade_turnover: previous_turnover, partner: current_country)
+      
+      if result[:success] || result[:current_level]
+        awarded_countries.push({
+          country_id: country.id,
+          country_name: country.name,
+          short_name: country.short_name || country.name,
+          current_level: result[:current_level] || 0,
+          points_awarded: result[:points_awarded] || 0,
+          message: result[:message] || 'No points awarded'
+        })
+      end
+    end
+    
+    render json: {
+      success: true,
+      message: "Trade levels processed for #{awarded_countries.count} countries",
+      countries: awarded_countries
+    }
+  rescue => e
+    render json: { success: false, error: e.message }, status: :internal_server_error
+  end
+
   def award_trade_level_points
     previous_turnover = params[:previous_trade_turnover]
     result = @country.check_and_award_trade_level_points(
-      previous_trade_turnover: previous_turnover&.to_i
+      previous_trade_turnover: previous_turnover&.to_i,
+      partner: current_country
     )
     
     if result[:success]
       render json: result
     else
       render json: result, status: :ok
+    end
+  rescue => e
+    render json: { success: false, error: e.message }, status: :internal_server_error
+  end
+
+  # Bulk update trade thresholds for all countries except Vyatka
+  def bulk_update_trade_thresholds
+    new_thresholds = params[:thresholds]
+    
+    if new_thresholds.present? && new_thresholds.is_a?(Array)
+      country_ids = params[:country_ids]
+      
+      if country_ids.nil? || !country_ids.is_a?(Array)
+        # Default: all countries except Vyatka (id: 9)
+        country_ids = Country.foreign_countries.pluck(:id)
+      end
+      
+      updated_countries = []
+      country_ids.each do |country_id|
+        country = Country.find(country_id)
+        # Skip Vyatka
+        next if country.id == Country::VYATKA
+        
+        # Update thresholds
+        current_params = country.params || {}
+        current_params["level_thresholds"] = new_thresholds
+        country.params = current_params
+        
+        if country.save
+          updated_countries.push({
+            country_id: country.id,
+            country_name: country.name,
+            short_name: country.short_name || country.name
+          })
+        end
+      end
+      
+      render json: {
+        success: true,
+        message: "Trade thresholds updated for #{updated_countries.count} countries",
+        countries: updated_countries
+      }
+    else
+      render json: { error: 'Thresholds parameter is required and must be an array' }, status: :bad_request
     end
   rescue => e
     render json: { success: false, error: e.message }, status: :internal_server_error

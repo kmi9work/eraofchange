@@ -1,41 +1,24 @@
+require "fileutils"
+require "socket"
+
 class GameParameter < ApplicationRecord
   audited if: :should_audit?
 
   private
 
+  # Аудит только для смены года. Оплата госрасходов переехала в
+  # countries.params['state_expenses'] и аудируется на Country (Д12).
   def should_audit?
-    # Аудит только для current_year (изменение года и оплата госрасходов)
     return false unless identificator == "current_year"
-    
-    # Проверяем, что изменились нужные поля
-    value_changed? || (params_changed? && state_expenses_changed?)
-  end
 
-  def state_expenses_changed?
-    return false unless params_changed?
-    
-    old_params = params_was || {}
-    new_params = params || {}
-    
-    old_params['state_expenses'] != new_params['state_expenses']
+    value_changed?
   end
 
   def audit_comment
-    case identificator
-    when "current_year"
-      if params_changed? && params_change[1]
-        new_params = params_change[1]
-        old_params = params_change[0] || {}
-        
-        if new_params["state_expenses"] == true && old_params["state_expenses"] == false
-          "Оплачены госрасходы за #{value} год"
-        elsif new_params["state_expenses"] == false && old_params["state_expenses"] == true
-          "Отменена оплата госрасходов за #{value} год"
-        end
-      elsif value_changed?
-        "Год изменен с #{value_change[0]} на #{value_change[1]}"
-      end
-    end
+    return nil unless identificator == "current_year"
+    return nil unless value_changed?
+
+    "Год изменен с #{value_change[0]} на #{value_change[1]}"
   end
 
 
@@ -318,12 +301,42 @@ def self.serialize_targets_for_response(targets)
 end
 
     ###Результаты
-  def self.show_noble_results
-    players = Player.where(player_type_id: PlayerType::NOBLE)
+  RESULTS_IDENTIFICATOR = "results"
+  RESULTS_DEFAULT_DISPLAY = "merchPlaceholder"
+
+  def self.results_parameter
+    GameParameter.find_by(identificator: RESULTS_IDENTIFICATOR)
+  end
+
+  def self.results_parameter_for_write
+    game_results = GameParameter.find_or_initialize_by(identificator: RESULTS_IDENTIFICATOR)
+    game_results.name ||= "Результаты купцов"
+    game_results.value ||= "0"
+    game_results.params = {} unless game_results.params.is_a?(Hash)
+    game_results
+  end
+
+  # Ключ государства в хэшах params записи results
+  def self.results_country_key(country)
+    Country.partner_key(country) || Country::RUS.to_s
+  end
+
+  # Значение настройки в разрезе государства; поддерживает скалярный (до перехода) формат
+  def self.results_scoped_value(stored, country)
+    return stored unless stored.is_a?(Hash)
+
+    stored[results_country_key(country)]
+  end
+
+  # Ранжирование знати государства (по умолчанию — текущего):
+  # в таблицу попадает только знать этого государства, влияние считается в его разрезе.
+  def self.show_noble_results(country = Country.current)
+    players = Player.nobles
+    players = players.where(country_id: country.id) if country
     nobles_inf = []
     nobles_inf = players.map do |player|
       {noble_name: player.name,
-      noble_influence: player.influence}
+      noble_influence: player.influence(country)}
     end
     sorted_nobles =  nobles_inf.sort_by { |hash| -hash[:noble_influence].to_i }
 
@@ -342,31 +355,65 @@ end
     return sorted_nobles
   end
 
-  def self.display_results
-   return GameParameter.find_by(identificator: "results").params["display"]
+  # Экран результатов — свой у каждого государства
+  def self.display_results(country = Country.current)
+    stored = results_parameter&.params&.dig("display")
+    return RESULTS_DEFAULT_DISPLAY if stored.nil?
+    return stored unless stored.is_a?(Hash)
+
+    results_scoped_value(stored, country) || RESULTS_DEFAULT_DISPLAY
   end
 
-  def self.change_results_display(string)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params["display"] = string 
+  def self.change_results_display(string, country = Country.current)
+    game_results = results_parameter_for_write
+    stored = game_results.params["display"]
+    key = results_country_key(country)
+
+    if stored.is_a?(Hash)
+      game_results.params["display"] = stored.merge(key => string)
+    else
+      # Первая запись после перехода: скалярное значение сохраняем для «Руси»,
+      # иначе оно потерялось бы вместе с форматом
+      migrated = {}
+      migrated[Country::RUS.to_s] = stored unless stored.nil?
+      migrated[key] = string
+      game_results.params["display"] = migrated
+    end
     game_results.save
   end
 
-  def self.get_merchant_results_settings
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
-    intelligence_data = get_artel_intelligence_status
+  def self.get_merchant_results_settings(country = Country.current)
+    params = results_parameter&.params || {}
+    merchant_settings = params["merchant_settings"]
+    scoped =
+      if merchant_settings.is_a?(Hash)
+        results_scoped_value(merchant_settings, country) || {}
+      else
+        # Скалярный (до перехода) формат: настройки лежали прямо в params
+        params["show_cap_per_player"].nil? ? {} : { "show_cap_per_player" => params["show_cap_per_player"] }
+      end
 
     {
-      show_cap_per_player: game_results.params["show_cap_per_player"] != false, # По умолчанию true
-      intelligence_data_status: intelligence_data
+      show_cap_per_player: scoped["show_cap_per_player"] != false, # По умолчанию true
+      intelligence_data_status: get_artel_intelligence_status
     }
   end
 
-  def self.update_merchant_results_settings(settings)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
-    game_results.params["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
+  def self.update_merchant_results_settings(settings, country = Country.current)
+    game_results = results_parameter_for_write
+    merchant_settings = game_results.params["merchant_settings"]
+    merchant_settings = {} unless merchant_settings.is_a?(Hash)
+    key = results_country_key(country)
+    current = merchant_settings[key]
+    current = {} unless current.is_a?(Hash)
+
+    # Перенос скалярной (до перехода) настройки в разрез государства
+    if current["show_cap_per_player"].nil? && !game_results.params["show_cap_per_player"].nil?
+      current["show_cap_per_player"] = game_results.params["show_cap_per_player"]
+    end
+    current["show_cap_per_player"] = settings[:show_cap_per_player] unless settings[:show_cap_per_player].nil?
+    merchant_settings[key] = current
+    game_results.params["merchant_settings"] = merchant_settings
     game_results.save
 
     return if settings[:intelligence_data_status].nil?
@@ -485,7 +532,7 @@ end
 
     # Сохраняем деньги, боярскую милость и (опционально) количество игроков для гильдии
     game_results.params['guild_extra_data'][guild_id] = {
-      'gold' => result_hash['gold'].to_i || 0,
+      'gold' => result_hash['money'].to_i || 0,
       'boyar_favor' => result_hash[:boyar_favor].to_i || 0,
       'number_of_players' => number_of_players
     }
@@ -510,25 +557,30 @@ end
     game_results.save
   end
 
-  def self.show_sorted_results(sort_by: :capital)
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params ||= {}
+  # Ранжирование купцов в разрезе государства (по умолчанию — текущего).
+  # country = nil — без фильтра по стране (включая legacy-гильдии без государства).
+  def self.show_sorted_results(sort_by: :capital, country: Country.current)
+    game_results = results_parameter
+    game_results ||= GameParameter.new(identificator: RESULTS_IDENTIFICATOR, params: {})
+    game_results.params = {} unless game_results.params.is_a?(Hash)
     
     # Инициализируем хранилище для дополнительных данных гильдий (деньги и боярская милость)
     guild_extra_data = game_results.params['guild_extra_data'] || {}
     
-    # Собираем результаты по всем гильдиям
+    # Собираем результаты по гильдиям государства
     results = []
-    Guild.all.each do |guild|
+    guilds = country ? Guild.where(country_id: country.id) : Guild.all
+    guilds.each do |guild|
       # Считаем стоимость предприятий (сумма deposit)
       plants_value = guild.plants.sum { |plant| plant.plant_level&.deposit.to_i || 0 }
       
       # Базовое количество игроков в гильдии (если не задано вручную)
       base_number_of_players = guild.players.count
       
-    # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
-    # Проверяем как символ строки и как число (для обратной совместимости)
-    guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
+      # Получаем дополнительные данные (деньги, боярская милость, количество игроков)
+      # Проверяем как символ строки и как число (для обратной совместимости)
+      guild_id_key = guild.id.to_s
+      guild_data = guild_extra_data[guild_id_key] || guild_extra_data[guild.id] || {}
       
       gold = guild_data['gold'].to_i || 0
       boyar_favor = guild_data['boyar_favor'].to_i || 0
@@ -541,6 +593,7 @@ end
       results << {
         guild_id: guild.id,
         player: guild.name,
+        country_id: guild.country_id,
         capital: capital,
         plants_value: plants_value,
         gold: gold,
@@ -564,9 +617,60 @@ end
     sorted_results
   end  
 
-  def self.clear_results
-    game_results = GameParameter.find_by(identificator: "results")
-    game_results.params = []
+  # Снимок годовых результатов: при смене года сохраняется срез по каждому государству,
+  # иначе результаты прошлого года перезаписываются текущими и перестают быть годовыми.
+  # Идемпотентен: непустой срез для года не перезаписывается без force: true.
+  def self.snapshot_year_results(year = current_year, force: false)
+    game_results = results_parameter_for_write
+    by_year = game_results.params['by_year']
+    by_year = {} unless by_year.is_a?(Hash)
+    year_key = year.to_s
+    by_year[year_key] = {} unless by_year[year_key].is_a?(Hash)
+
+    Country.find_each do |country|
+      country_key = country.id.to_s
+      existing = by_year[year_key][country_key]
+      next if !force && existing.is_a?(Hash) && existing.present?
+
+      by_year[year_key][country_key] = {
+        "nobles" => show_noble_results(country),
+        "merchants" => show_sorted_results(country: country),
+        "closed_at" => Time.current.utc.iso8601
+      }
+    end
+
+    game_results.params['by_year'] = by_year
+    game_results.save
+    by_year[year_key]
+  end
+
+  # Снимок результатов года по государству (nil — если снимка нет)
+  def self.results_for_year(year, country = Country.current)
+    country_key = results_country_key(country)
+    results_parameter&.params&.dig('by_year', year.to_s, country_key)
+  end
+
+  # Годы, по которым есть снимки результатов
+  def self.results_years
+    (results_parameter&.params&.dig('by_year') || {}).keys.sort_by(&:to_i)
+  end
+
+  # Очистка результатов купцов: по государству, без аргумента — по всем государствам
+  def self.clear_results(country = nil)
+    game_results = results_parameter_for_write
+    guild_extra_data = game_results.params['guild_extra_data']
+    guild_extra_data = {} unless guild_extra_data.is_a?(Hash)
+
+    if country.nil?
+      guild_extra_data = {}
+    else
+      Guild.where(country_id: country.id).pluck(:id).each do |guild_id|
+        guild_extra_data.delete(guild_id.to_s)
+        guild_extra_data.delete(guild_id.to_s.to_sym)
+      end
+    end
+
+    game_results.params['guild_extra_data'] = guild_extra_data
     game_results.save
   end
 
@@ -630,6 +734,10 @@ end
   def self.delete_schedule_item(schedule_item_id)
     timer = GameParameter.find_by(identificator: "schedule")
     timer.params.delete_if {|item| item["id"] == schedule_item_id["id"]}
+    # Пересчитываем ID по-порядку, чтобы не было пробелов
+    timer.params.each_with_index do |item, index|
+      item["id"] = index + 1
+    end
     timer.save
   end
 
@@ -721,19 +829,355 @@ end
     timer.save
   end
 
+###Пресеты расписания (файлы storage/schedule_presets/*.json)
+  # Пресет — снимок текущего расписания, сохранённый в файл. Файлы переживают
+  # пересоздание базы (db:drop при rake game:*) и деплой, т.к. storage симлинкнут
+  # на shared/storage. Применение при сидировании: ENV['SCHEDULE_PRESET']=<slug>.
+
+  SCHEDULE_PRESETS_DIRNAME = "schedule_presets"
+  SCHEDULE_PRESET_DEFAULT = "default"
+  SCHEDULE_PRESET_TYPES = %w[play pause].freeze
+  SCHEDULE_PRESET_TRANSLIT = {
+    "а" => "a", "б" => "b", "в" => "v", "г" => "g", "д" => "d", "е" => "e", "ё" => "e",
+    "ж" => "zh", "з" => "z", "и" => "i", "й" => "y", "к" => "k", "л" => "l", "м" => "m",
+    "н" => "n", "о" => "o", "п" => "p", "р" => "r", "с" => "s", "т" => "t", "у" => "u",
+    "ф" => "f", "х" => "h", "ц" => "c", "ч" => "ch", "ш" => "sh", "щ" => "sch",
+    "ъ" => "", "ы" => "y", "ь" => "", "э" => "e", "ю" => "yu", "я" => "ya"
+  }.freeze
+
+  def self.schedule_presets_dir
+    dir = Rails.root.join("storage", SCHEDULE_PRESETS_DIRNAME)
+    FileUtils.mkdir_p(dir) unless File.directory?(dir)
+    dir
+  end
+
+  # Путь к файлу пресета. Защита от выхода за каталог: берём только basename.
+  def self.schedule_preset_path(slug)
+    safe_slug = File.basename(slug.to_s.strip, ".json")
+    raise "Не указан пресет" if safe_slug.empty? || safe_slug.start_with?(".")
+
+    schedule_presets_dir.join("#{safe_slug}.json")
+  end
+
+  def self.schedule_preset_slug(name)
+    slug = name.to_s.downcase.gsub(/[а-яё]/, SCHEDULE_PRESET_TRANSLIT)
+    slug = slug.gsub(/[^a-z0-9]+/, "_").gsub(/\A_+|_+\z/, "")
+    slug = "preset_#{Time.current.strftime('%Y%m%d_%H%M%S')}" if slug.empty?
+    slug
+  end
+
+  def self.normalize_schedule_time(value, label)
+    parts = value.to_s.strip.split(":")
+    hour, minute = parts[0], parts[1]
+    valid = parts.size == 2 && hour.to_s.match?(/\A\d{1,2}\z/) && minute.to_s.match?(/\A\d{1,2}\z/) &&
+            hour.to_i < 24 && minute.to_i < 60
+    raise "#{label}: неверное время '#{value}' (ожидается ЧЧ:ММ)" unless valid
+
+    format("%02d:%02d", hour.to_i, minute.to_i)
+  end
+
+  # Каноничный вид пунктов расписания: строковые ключи, id по порядку, время ЧЧ:ММ.
+  def self.normalize_schedule_items(items)
+    list = Array(items)
+    return [] if list.empty?
+
+    list.each_with_index.map do |raw, index|
+      item = raw.respond_to?(:to_unsafe_h) ? raw.to_unsafe_h : raw.to_h
+      item = item.transform_keys(&:to_s)
+
+      identificator = item["identificator"].to_s.strip
+      raise "Пункт #{index + 1}: не указано название цикла" if identificator.empty?
+
+      type = item["type"].to_s.strip.downcase
+      type = "play" unless SCHEDULE_PRESET_TYPES.include?(type)
+
+      {
+        "id" => index + 1,
+        "identificator" => identificator,
+        "start" => normalize_schedule_time(item["start"], "Пункт #{index + 1} (начало)"),
+        "finish" => normalize_schedule_time(item["finish"], "Пункт #{index + 1} (окончание)"),
+        "type" => type
+      }
+    end
+  end
+
+  def self.schedule_preset_source
+    Socket.gethostname
+  rescue StandardError
+    ENV["HOSTNAME"].to_s
+  end
+
+  def self.schedule_preset_meta(path)
+    slug = File.basename(path, ".json")
+    data = JSON.parse(File.read(path))
+    {
+      slug: slug,
+      name: data["name"].to_s.strip.presence || slug,
+      saved_at: data["saved_at"],
+      saved_on: data["source"],
+      items_count: Array(data["items"]).size,
+      size: File.size(path)
+    }
+  rescue JSON::ParserError => e
+    {
+      slug: slug, name: "#{slug} (повреждённый файл)", saved_at: nil,
+      saved_on: nil, items_count: 0, error: e.message
+    }
+  end
+
+  # Список сохранённых пресетов (файлов в storage/schedule_presets).
+  def self.schedule_presets
+    Dir[schedule_presets_dir.join("*.json")].sort.map { |path| schedule_preset_meta(path) }
+  end
+
+  # Сохраняет текущее расписание в файл-пресет.
+  def self.save_schedule_preset(name)
+    timer = GameParameter.find_by(identificator: "schedule")
+    raise "Расписание не найдено" unless timer
+
+    name = name.to_s.strip
+    raise "Укажите название расписания" if name.empty?
+
+    items = normalize_schedule_items(timer.params)
+    raise "Текущее расписание пустое — сохранять нечего" if items.empty?
+
+    slug = schedule_preset_slug(name)
+    payload = {
+      "name" => name,
+      "slug" => slug,
+      "saved_at" => Time.current.iso8601,
+      "source" => schedule_preset_source,
+      "items" => items
+    }
+    path = schedule_preset_path(slug)
+    File.write(path, JSON.pretty_generate(payload) + "\n")
+
+    { success: true, slug: slug, name: name, items_count: items.size, path: path.to_s }
+  end
+
+  # Применяет пресет: заменяет текущее расписание его пунктами.
+  def self.apply_schedule_preset(slug)
+    path = schedule_preset_path(slug)
+    raise "Пресет не найден: #{File.basename(path)}" unless File.exist?(path)
+
+    data = JSON.parse(File.read(path))
+    items = normalize_schedule_items(data["items"])
+    raise "Пресет пустой: #{File.basename(path)}" if items.empty?
+
+    create_schedule(items)
+
+    {
+      success: true,
+      slug: File.basename(path, ".json"),
+      name: data["name"].to_s.strip.presence || slug,
+      items_count: items.size
+    }
+  end
+
+  def self.delete_schedule_preset(slug)
+    path = schedule_preset_path(slug)
+    raise "Пресет не найден: #{File.basename(path)}" unless File.exist?(path)
+
+    File.delete(path)
+    { success: true, slug: File.basename(path, ".json") }
+  end
+
+  # Пункты расписания для сидирования: из пресета ENV['SCHEDULE_PRESET']
+  # либо встроенное расписание (default_schedule, может быть переопределено плагином).
+  def self.seed_schedule_items
+    slug = ENV["SCHEDULE_PRESET"].to_s.strip
+    return default_schedule if slug.empty? || slug == SCHEDULE_PRESET_DEFAULT
+
+    path = schedule_preset_path(slug)
+    unless File.exist?(path)
+      available = schedule_presets.map { |preset| preset[:slug] }
+      raise "SCHEDULE_PRESET=#{slug}: файл не найден (#{path}). " \
+            "Доступные пресеты: #{available.presence&.join(', ') || 'нет'}"
+    end
+
+    data = JSON.parse(File.read(path))
+    items = normalize_schedule_items(data["items"])
+    raise "SCHEDULE_PRESET=#{slug}: пресет пустой" if items.empty?
+
+    puts "[seed] Расписание из пресета '#{data['name'].to_s.strip.presence || slug}' (#{items.size} пунктов)"
+    items
+  end
+
+  SOVEREIGN_SCHEDULE_IDENTIFICATOR = "sovereign_schedule"
+
+  SOVEREIGN_SCHEDULE = [
+    {
+      "id" => 1,
+      "name" => "Общее расписание",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Игра", "start" => "13:45", "finish" => "16:25", "type" => "play"},
+        {"id" => 3, "identificator" => "Обсуждение", "start" => "16:25", "finish" => "17:00", "type" => "play"}
+      ]
+    },
+    {
+      "id" => 2,
+      "name" => "Команда №1",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Год 1. Фаза Стратегии", "start" => "13:45", "finish" => "14:00", "type" => "play"},
+        {"id" => 3, "identificator" => "Год 1. Фаза Действия", "start" => "14:00", "finish" => "14:10", "type" => "play"},
+        {"id" => 4, "identificator" => "Год 1. Фаза Подготовки", "start" => "14:10", "finish" => "14:15", "type" => "play"},
+        {"id" => 5, "identificator" => "Год 2. Фаза Стратегии", "start" => "14:15", "finish" => "14:30", "type" => "play"},
+        {"id" => 6, "identificator" => "Год 2. Фаза Действия", "start" => "14:30", "finish" => "14:40", "type" => "play"},
+        {"id" => 7, "identificator" => "Год 2. Фаза Подготовки", "start" => "14:40", "finish" => "14:45", "type" => "play"},
+        {"id" => 8, "identificator" => "Год 3. Фаза Стратегии", "start" => "14:45", "finish" => "15:00", "type" => "play"},
+        {"id" => 9, "identificator" => "Год 3. Фаза Действия", "start" => "15:00", "finish" => "15:10", "type" => "play"},
+        {"id" => 10, "identificator" => "Год 3. Фаза Подготовки", "start" => "15:10", "finish" => "15:15", "type" => "play"},
+        {"id" => 11, "identificator" => "Год 4. Фаза Стратегии", "start" => "15:15", "finish" => "15:30", "type" => "play"},
+        {"id" => 12, "identificator" => "Год 4. Фаза Действия", "start" => "15:30", "finish" => "15:40", "type" => "play"},
+        {"id" => 13, "identificator" => "Год 4. Фаза Подготовки", "start" => "15:40", "finish" => "15:45", "type" => "play"},
+        {"id" => 14, "identificator" => "Год 5. Фаза Стратегии", "start" => "15:45", "finish" => "16:00", "type" => "play"},
+        {"id" => 15, "identificator" => "Год 5. Фаза Действия", "start" => "16:00", "finish" => "16:10", "type" => "play"},
+        {"id" => 16, "identificator" => "Год 5. Ожидание действия противников", "start" => "16:10", "finish" => "16:25", "type" => "play"}
+      ]
+    },
+    {
+      "id" => 3,
+      "name" => "Команда №2",
+      "items" => [
+        {"id" => 1, "identificator" => "Инструтаж", "start" => "13:00", "finish" => "13:45", "type" => "play"},
+        {"id" => 2, "identificator" => "Год 1. Фаза Стратегии", "start" => "13:45", "finish" => "14:15", "type" => "play"},
+        {"id" => 3, "identificator" => "Год 1. Фаза Действия", "start" => "14:15", "finish" => "14:25", "type" => "play"},
+        {"id" => 4, "identificator" => "Год 1. Фаза Подготовки", "start" => "14:25", "finish" => "14:30", "type" => "play"},
+        {"id" => 5, "identificator" => "Год 2. Фаза Стратегии", "start" => "14:30", "finish" => "14:45", "type" => "play"},
+        {"id" => 6, "identificator" => "Год 2. Фаза Действия", "start" => "14:45", "finish" => "14:55", "type" => "play"},
+        {"id" => 7, "identificator" => "Год 2. Фаза Подготовки", "start" => "14:55", "finish" => "15:00", "type" => "play"},
+        {"id" => 8, "identificator" => "Год 3. Фаза Стратегии", "start" => "15:00", "finish" => "15:15", "type" => "play"},
+        {"id" => 9, "identificator" => "Год 3. Фаза Действия", "start" => "15:15", "finish" => "15:25", "type" => "play"},
+        {"id" => 10, "identificator" => "Год 3. Фаза Подготовки", "start" => "15:25", "finish" => "15:30", "type" => "play"},
+        {"id" => 11, "identificator" => "Год 4. Фаза Стратегии", "start" => "15:30", "finish" => "15:45", "type" => "play"},
+        {"id" => 12, "identificator" => "Год 4. Фаза Действия", "start" => "15:45", "finish" => "15:55", "type" => "play"},
+        {"id" => 13, "identificator" => "Год 4. Фаза Подготовки", "start" => "15:55", "finish" => "16:00", "type" => "play"},
+        {"id" => 14, "identificator" => "Год 5. Фаза Стратегии", "start" => "16:00", "finish" => "16:15", "type" => "play"},
+        {"id" => 15, "identificator" => "Год 5. Фаза Действия", "start" => "16:15", "finish" => "16:25", "type" => "play"}
+      ]
+    }
+  ]
+
+  ###Расписание Государя
+  def self.show_sovereign_schedule
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    return { schedules: gp&.params || [] }
+  end
+
+  def self.create_sovereign_schedule(schedule = nil)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    gp.params = schedule || SOVEREIGN_SCHEDULE.deep_dup
+    gp.save
+  end
+
+  def self.update_sovereign_schedule_name(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    gp.params.each do |s|
+      s["name"] = request[:name] if s["id"] == schedule_id
+    end
+    gp.save
+  end
+
+  def self.add_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      items = s["items"] || []
+      last_id = items.present? ? items.last["id"] : 0
+      items << {
+        "id" => last_id + 1,
+        "identificator" => request[:identificator],
+        "start" => request[:start],
+        "finish" => request[:finish],
+        "type" => request[:type] || "play"
+      }
+    end
+    gp.save
+  end
+
+  def self.update_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    item = request[:item]
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      s["items"] = s["items"].map { |i| i["id"] == item["id"] ? item : i }
+    end
+    gp.save
+  end
+
+  def self.delete_sovereign_schedule_item(request)
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    schedule_id = request[:schedule_id].to_i
+    item_id = request[:id].to_i
+    gp.params.each do |s|
+      next unless s["id"] == schedule_id
+      s["items"].delete_if { |i| i["id"] == item_id }
+      s["items"].each_with_index { |i, idx| i["id"] = idx + 1 }
+    end
+    gp.save
+  end
+
+  def self.shift_sovereign_schedule(request)
+    minutes = (request || {})["minutes"] || (request || {})[:minutes]
+    minutes = minutes.to_i
+
+    gp = GameParameter.find_by(identificator: SOVEREIGN_SCHEDULE_IDENTIFICATOR)
+    raise "Расписание Государя не найдено" unless gp
+    gp.params ||= []
+    return { success: true, message: "Расписание пустое" } if gp.params.empty?
+
+    gp.params.each do |schedule|
+      next unless schedule["items"].is_a?(Array)
+      schedule["items"] = schedule["items"].map do |item|
+        next item unless item.is_a?(Hash)
+
+        start_str = item["start"]
+        finish_str = item["finish"]
+        next item unless start_str.present? && finish_str.present?
+
+        start_time = Time.strptime("#{Time.zone.today} #{start_str}", "%Y-%m-%d %H:%M")
+        finish_time = Time.strptime("#{Time.zone.today} #{finish_str}", "%Y-%m-%d %H:%M")
+
+        new_start = (start_time + minutes.minutes).strftime("%H:%M")
+        new_finish = (finish_time + minutes.minutes).strftime("%H:%M")
+
+        item.merge("start" => new_start, "finish" => new_finish)
+      end
+    end
+
+    gp.save!
+    { success: true, minutes: minutes, message: "Расписание Государя сдвинуто" }
+  end
+
   ############
 
   def self.increase_year(kaznachei_bonus = 0) #Переводит в следующий год
     current_year = GameParameter.find_by(identificator: "current_year")
-    if current_year.params["state_expenses"] == false
-      PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil)
-    else
-      if kaznachei_bonus
-        Job.find_by_id(Job::KAZNACHEI).players.each do |player|
-          player.modify_influence(Job::KAZNACHEI_BONUS, "Бонус за оплату государства", current_year) 
+    year_before = self.current_year
+
+    # Снимок результатов года делается ДО смены года: иначе «годовые результаты»
+    # перезаписываются текущими (Д13 п. 3)
+    snapshot_year_results(year_before)
+
+    # Расходы подтверждаются каждым государством отдельно (Д12):
+    # неплатившему — общественный порядок в его регионах, платившему — бонус Казначею
+    Country.find_each do |country|
+      if country.state_expenses_paid?(year_before)
+        if kaznachei_bonus
+          country.council_players(Job::KAZNACHEI).each do |player|
+            player.modify_influence(Job::KAZNACHEI_BONUS, "Бонус за оплату государства", country)
+          end
         end
+      else
+        PublicOrderItem.add(NO_STATE_EXPENSES, "Не оплачены расходы", nil, nil, country)
       end
     end
+
     Building.joins(:building_level).where(building_levels: {building_type_id: BuildingType::RELIGIOUS}).each do |building|
       if !building.is_paid and !building.fined
         building.fine
@@ -743,9 +1187,14 @@ end
     # Сбрасываем счетчики ограблений караванов при смене года
     reset_caravan_robbery_counters(self.current_year + 1)
 
-    current_year.value = (self.current_year  + 1).to_s
-    current_year.params["state_expenses"] = false
+    next_year = year_before + 1
+    current_year.value = next_year.to_s
     current_year.save
+
+    # Флаг расходов нового года у каждого государства — «не оплачено»
+    Country.find_each do |country|
+      country.set_state_expenses(next_year, false)
+    end
 
     Player.all.each do |player|
       if player.params['income_taken']
@@ -772,18 +1221,20 @@ end
     GameParameter.find_by(identificator: "current_year")&.value&.to_i
   end
 
-  def self.pay_state_expenses
-    st_exp = self.find_by(identificator: "current_year")
-    st_exp.params["state_expenses"] = true #Делает отметку о том, что в текущем году расходы оплачены
-    st_exp.save
+  def self.pay_state_expenses(country = Country.current)
+    country ||= Country.current
+    return { success: false, msg: "Государство не найдено" } if country.nil?
 
-    return {msg: "Расходы за государство оплачены"}
+    country.pay_state_expenses(self.current_year) #Делает отметку о том, что в текущем году расходы оплачены
+
+    return {success: true, msg: "Расходы за государство оплачены", country_id: country.id, country_name: country.name, year: self.current_year}
   end
 
-  def self.unpay_state_expenses
-    st_exp = self.find_by(identificator: "current_year")
-    st_exp.params["state_expenses"] = false #Делает отметку о том, что в текущем году расходы НЕ оплачены
-    st_exp.save
+  def self.unpay_state_expenses(country = Country.current)
+    country ||= Country.current
+    return { success: false, msg: "Государство не найдено" } if country.nil?
+
+    country.unpay_state_expenses(self.current_year) #Делает отметку о том, что в текущем году расходы НЕ оплачены
 
     return {msg: "Расходы за государство оплачены"}
   end

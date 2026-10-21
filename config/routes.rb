@@ -74,6 +74,21 @@ Rails.application.routes.draw do
   patch '/game_parameters/shift_schedule', to: 'game_parameters#shift_schedule'
   patch   '/game_parameters/toggle_timer', to: 'game_parameters#toggle_timer'
 
+  ###Пресеты расписания (файлы storage/schedule_presets)
+  get   '/game_parameters/schedule_presets',       to: 'game_parameters#schedule_presets'
+  patch '/game_parameters/save_schedule_preset',   to: 'game_parameters#save_schedule_preset'
+  patch '/game_parameters/apply_schedule_preset',  to: 'game_parameters#apply_schedule_preset'
+  patch '/game_parameters/delete_schedule_preset', to: 'game_parameters#delete_schedule_preset'
+
+  ###Расписание Государя
+  get   '/game_parameters/show_sovereign_schedule', to: 'game_parameters#show_sovereign_schedule'
+  patch '/game_parameters/create_sovereign_schedule', to: 'game_parameters#create_sovereign_schedule'
+  patch '/game_parameters/update_sovereign_schedule_name', to: 'game_parameters#update_sovereign_schedule_name'
+  patch '/game_parameters/add_sovereign_schedule_item', to: 'game_parameters#add_sovereign_schedule_item'
+  patch '/game_parameters/update_sovereign_schedule_item', to: 'game_parameters#update_sovereign_schedule_item'
+  patch '/game_parameters/delete_sovereign_schedule_item', to: 'game_parameters#delete_sovereign_schedule_item'
+  patch '/game_parameters/shift_sovereign_schedule', to: 'game_parameters#shift_sovereign_schedule'
+
   ###Экран
   get   '/game_parameters/get_screen', to: 'game_parameters#get_screen'
   patch '/game_parameters/toggle_screen', to: 'game_parameters#toggle_screen'
@@ -116,12 +131,16 @@ Rails.application.routes.draw do
   patch '/countries/:id/award_trade_level_points', to: 'countries#award_trade_level_points'
   patch '/countries/:id/join_peace',   to: 'countries#join_peace'
   get '/countries/foreign_countries', to: 'countries#foreign_countries'
+  get '/countries/relations_matrix', to: 'countries#relations_matrix'
   get '/countries/show_trade_turnover', to: 'countries#show_trade_turnover'
   get '/countries/:id/calculate_trade_turnover', to: 'countries#calculate_trade_turnover'
   get '/countries/:id/show_current_trade_level', to: 'countries#show_current_trade_level'
   get '/countries/:id/show_trade_thresholds', to: 'countries#show_trade_thresholds'
   get '/countries/trade_levels_and_thresholds', to: 'countries#trade_levels_and_thresholds'
   patch '/countries/:id/update_trade_thresholds', to: 'countries#update_trade_thresholds'
+  patch '/countries/bulk_update_trade_turnover', to: 'countries#bulk_update_trade_turnover'
+  patch '/countries/bulk_award_trade_level_points', to: 'countries#bulk_award_trade_level_points'
+  patch '/countries/bulk_update_trade_thresholds', to: 'countries#bulk_update_trade_thresholds'
   get '/countries/:country_id/alliances', to: 'alliances#index'
   post '/alliances', to: 'alliances#create'
   delete '/alliances/:id', to: 'alliances#destroy'
@@ -192,9 +211,16 @@ Rails.application.routes.draw do
   patch '/plants/:id', to: 'plants#update'
   delete '/plants/:id', to: 'plants#destroy', as: :destroy_plant
   patch '/plants/:id/upgrade', to: 'plants#upgrade', as: :upgrade_plant
+  patch '/plants/:id/downgrade', to: 'plants#downgrade', as: :downgrade_plant
 
   get '/login/:id', to: 'users#login'
   get '/current_user', to: 'users#current_user'
+
+  # Текущее государство: чтение и выбор (аналог users#current_user / users#login).
+  # Действие вынесено под именем show_current_country, чтобы метод контроллера не
+  # перекрывал одноимённого помощника current_country (текущее государство).
+  get '/current_country' => 'countries#show_current_country'
+  get '/login_country/:id', to: 'countries#login_country'
 
   get '/audits', to: 'audits#index'
   get '/audits/plants', to: 'audits#plants'
@@ -214,6 +240,7 @@ Rails.application.routes.draw do
   resources :settlement_types
   # Специальный список гильдий должен идти раньше resources, чтобы не совпадать с :id
   get '/guilds/list', to: 'guilds#list'
+  get '/guilds/dashboard', to: 'guilds#dashboard'
   patch '/guilds/:id/assign_players', to: 'guilds#assign_players'
   resources :guilds
   resources :merchants

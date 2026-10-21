@@ -72,12 +72,16 @@ while str = f.gets
     short_name = short_names_map[country_name] || country_name
     flag_image_name = flag_image_map[id.to_i]
     country = Country.create(id: id, name: country_name, short_name: short_name, flag_image_name: flag_image_name, params: {"embargo" => embargo.presence&.to_i, "relation_points" => 0, "last_trade_turnover" => 0, "level_thresholds" =>  levels})
-    RelationItem.add(relations.to_i, "Ручная правка", country)
+    # Второй конец пары отношений указывается явно: до перехода он подразумевался
+    # «Русью» (Д4). Для самой «Руси» пара не имеет смысла — партнёр остаётся пустым.
+    rus = Country.resolve(Country::RUS) || Country.current
+    partner = (rus && country.id == rus.id) ? nil : rus
+    RelationItem.add(relations.to_i, "Ручная правка", country, nil, partner)
   end
   region = Region.find_by_name(region_name)
   if region.blank?
     region = Region.create(name: region_name, country: country, way: way)
-    PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
+    # PublicOrderItem.add(po_values[region.id - 1], "Ручная правка", region)
   end
   city = Settlement.find_by_name(city_name)
   type = case cost_type.to_i
@@ -146,10 +150,18 @@ end
 
 f = File.open('./db/seeds/technologies.csv', 'r+')
 f.gets #headers
+technologies = []
 while str = f.gets
   name, description = str.split(";").map{|i| i.strip}
-  t = Technology.create(name: name, description: description, params: {'opened' => 0})
-  TechnologyItem.add(0, "Изменить значение", t)
+  technologies << Technology.create(name: name, description: description, params: {'opened' => 0})
+end
+
+# Факт открытия технологии хранится на пару «технология × государство» (Д5):
+# одна строка technology_items на каждое государство, значение 0 — «не открыта»
+Country.order(:id).each do |country|
+  technologies.each do |technology|
+    TechnologyItem.add(0, "Изменить значение", technology, nil, country)
+  end
 end
 
 

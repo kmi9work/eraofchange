@@ -6,6 +6,7 @@
   <thead>
     <tr>
       <th>Название</th>
+      <th>Государство</th>
       <th>Игровые персонажи в гильдии</th>
       <th>Предприятия у гильдии</th>
       <th>Действия</th>
@@ -15,6 +16,7 @@
     <% @guilds.each do |guild| %>
       <tr>
         <td><%= link_to guild.name, guild %></td>
+        <td><%= guild.country&.name || '—' %></td>
         <td> 
           <% if guild.player_ids.blank? %>
             Не выбраны

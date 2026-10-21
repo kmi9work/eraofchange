@@ -18,7 +18,7 @@ class Building < ApplicationRecord
       self.building_level = BuildingLevel.find_by(level: next_level, building_type: required_building_type)
       if self.building_level && self.save
         if zodchiy_bonus && next_level == 3
-          Job.find_by_id(Job::ZODCHIY).players.each do |player|
+          (country || Country.current)&.council_players(Job::ZODCHIY)&.each do |player|
             player.modify_influence(Job::ZODCHIY_BONUS, "Бонус за постройки", @building) 
           end
         end
@@ -29,6 +29,12 @@ class Building < ApplicationRecord
     end
     return {building_level: nil, msg: "Уровень максимальный. Улучшить невозможно."}
   end
+
+  # Государство постройки — государство региона её поселения
+  def country
+    settlement&.region&.country
+  end
+
 
   def income
     self.building_level&.params&.dig("income").to_i
@@ -53,7 +59,7 @@ class Building < ApplicationRecord
   end
 
   def fine
-    Job.find_by_id(Job::METROPOLITAN).players.each do |player|
+    Country.current&.council_players(Job::METROPOLITAN)&.each do |player|
       player.modify_influence(Job::METROPOLITAN_PINE, "Штраф за неоплаченную церковь", self) 
     end
     self.params['fined'] = true

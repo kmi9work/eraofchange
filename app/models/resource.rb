@@ -98,6 +98,19 @@ class Resource < ApplicationRecord
     end
   end
 
+  # Есть ли у товара цена хотя бы на одном уровне отношений. Товар без цены на
+  # рынок не попадает (show_prices), поэтому по этому признаку и определяется,
+  # торгует ли страна на рынке (Country#trades_on_market?).
+  def self.priced?(resource)
+    params = resource.params
+    return false unless params.is_a?(Hash)
+
+    %w[buy_price sale_price].any? do |key|
+      table = params[key] || params[key.to_sym]
+      table.is_a?(Hash) && table.values.compact.any?
+    end
+  end
+
   def self.show_prices
     resources = Resource.all
 

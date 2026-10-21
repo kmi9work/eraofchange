@@ -14,7 +14,7 @@ class PlantPlacesController < ApplicationController
   # API метод для получения доступных мест строительства для каждого типа предприятия
   def available_places
     craftsmen_technology = Technology.find_by(id: Technology::CRAFTSMEN)
-    craftsmen_open = craftsmen_technology&.is_open == 1
+    craftsmen_open = craftsmen_technology&.is_open(Country.current) == 1
     craftsmen_tech_name = craftsmen_technology&.name || "Ремесловые люди"
     craftsmen_required_names = ["Кузница", "Ювелирная мастерская"]
 
@@ -54,7 +54,8 @@ class PlantPlacesController < ApplicationController
         technology_requirements: technology_requirements,
         available_places: available_places.map do |place|
           region = place.region
-          belongs_to_rus = region&.country_id == Country::RUS
+          # Место предприятия «у своего государства» — текущее государство
+          belongs_to_current_country = region&.country_id == Country.current&.id
 
           {
             id: place.id,
@@ -62,7 +63,7 @@ class PlantPlacesController < ApplicationController
             region_id: place.region_id,
             region_name: region&.name,
             region_country_id: region&.country_id,
-            allowed: belongs_to_rus
+            allowed: belongs_to_current_country
           }
         end
       }

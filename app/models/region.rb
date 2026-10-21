@@ -17,6 +17,10 @@ class Region < ApplicationRecord
   has_many :plant_places
   has_many :public_order_items
 
+  # Регионы государства и всё остальное
+  scope :for_country, ->(country) { country.nil? ? all : where(country_id: country.id) }
+  scope :foreign_to, ->(country) { country.nil? ? all : where.not(country_id: country.id) }
+
   has_one :capital, -> { where(settlement_type_id: [SettlementType::CAPITAL, SettlementType::TYPE_REGION, SettlementType::CAP_REGION]) }, class_name: 'Settlement'
 
   def inf_buildings_on_po #Влияние зданий на общественный порядок
@@ -32,22 +36,31 @@ class Region < ApplicationRecord
     public_order_items.sum(&:value)
   end
 
-  def show_overall_po
-    self.inf_buildings_on_po + self.count_items + (Technology.find(Technology::GODS_ANOITED).is_open == 1 ? 5 : 0)
+  def show_overall_po(country = Country.current)
+    self.inf_buildings_on_po + self.count_items + (Technology.find(Technology::GODS_ANOITED).is_open(country) == 1 ? 5 : 0)
   end
 
-  def captured_by(who_id, how) #1 - войной, 0 - миром
-    if self.country_id != who_id.to_i
-      self.country_id = who_id.to_i
-      if who_id.to_i == Country::RUS
-        if how.to_i == 1
+  # Передать регион государству-получателю (how: 1 — войной, 0 — миром).
+  #
+  # Событие общественного порядка — для игроков государства-получателя: если за
+  # страну никто не играет, отыгрывать изменение порядка некому, запись не
+  # создаётся. Владения прежних владельцев сохраняются при передаче текущему
+  # государству; регион, ушедший чужому государству, оставляет свои поселения
+  # без владельцев.
+  def captured_by(who_id, how)
+    receiver = Country.find_by(id: who_id.to_i)
+    return {result: false, msg: "Государство не найдено"} if receiver.nil?
+
+    if self.country_id != receiver.id
+      self.country_id = receiver.id
+      if receiver.players.exists?
+        if how.to_i == Country::BY_WAR
           self.public_order_items << PublicOrderItem.add(Country::MILITARILY, "Регион присоединен войной", self)
         else
           self.public_order_items << PublicOrderItem.add(Country::PEACEFULLY, "Регион присоединен миром", self)
         end
-      else
-        self.settlements.update_all(player_id: nil)
       end
+      self.settlements.update_all(player_id: nil) if receiver.id != Country.current&.id
       self.save
     end
 

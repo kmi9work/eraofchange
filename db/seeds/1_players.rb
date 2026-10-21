@@ -40,16 +40,25 @@ noble_names = ["Рюрикович", "Геронтий", "Аксаков", "Па
 merchant_human = @humans.shuffle.first
 merchant_family = @families.shuffle.first
 merchant_identificator = Player.generate_identificator("КУПЕЦ", merchant_human.name, merchant_family.name, @jobs.last.name)
-Player.create(name: "КУПЕЦ", identificator: merchant_identificator, human: merchant_human, player_type: @player_types[0], family: merchant_family, jobs: [@jobs.last], params: {"contraband" => []})
+Player.create(name: "КУПЕЦ", identificator: merchant_identificator, human: merchant_human, player_type: @player_types[0], family: merchant_family, jobs: [@jobs.last], country_id: Country::RUS, params: {"contraband" => []})
 
 noble_names.each_with_index do |name, i|
   noble_human = @humans.shuffle.first
   noble_family = @families.shuffle.first
   noble_identificator = Player.generate_identificator(name, noble_human.name, noble_family.name, @jobs[i].name, i)
-  p = Player.create(name: name, identificator: noble_identificator, human: noble_human, player_type: @player_types[1], jobs: [@jobs[i]], family: noble_family, params: {"income_taken" => false})
+  # Знать seeds относится к «Руси»: при игре за одну страну поведение прежнее,
+  # при нескольких — совет «Руси» (Д2, § 8.2)
+  p = Player.create(name: name, identificator: noble_identificator, human: noble_human, player_type: @player_types[1], jobs: [@jobs[i]], family: noble_family, country_id: Country::RUS, params: {"income_taken" => false})
   @nobles.push
   InfluenceItem.add(0, "Ручная правка", p)
 end
+
+# ==========================================
+# ЗНАТЬ ВЕЛИКОГО НОВГОРОДА
+# ==========================================
+# Знать Новгорода в ядро не входит: состав совета и его города создаёт игровой
+# движок (engines/many_teams, п. 1 и п. 2). В базовой игре их нет.
+
 
 # ==========================================
 # ТЕСТОВЫЕ ДАННЫЕ ДЛЯ КУПЦОВ
@@ -82,6 +91,7 @@ merchant_defs.each do |md|
     player_type:    @player_types[0], # Купец
     family:         family,
     jobs:           [guild_boss_job],
+    country_id:     Country::RUS,
     params:         { "contraband" => [] }
   )
   @test_merchants << player

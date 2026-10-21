@@ -1,7 +1,10 @@
 class JobsController < ApplicationController
   before_action :set_job, only: %i[ show edit update destroy ]
+  before_action :set_jobs_country, only: %i[ index show edit update ]
 
   # GET /jobs or /jobs.json
+  # Справочник должностей общий (Д3): в каждой должности отдаются держатели
+  # и политические действия указанного государства (?country_id=, по умолчанию — текущего)
   def index
     @jobs = Job.all
     @jobs = @jobs.where(id: 1..8) if params[:nobles].to_i == 1 #TODO: CONSTANTS
@@ -36,11 +39,14 @@ class JobsController < ApplicationController
   end
 
   # PATCH/PUT /jobs/1 or /jobs/1.json
+  # Замена держателей идёт только в пределах государства (@jobs_country): держатели
+  # других государств сохраняются, иначе назначение в одной стране стирает совет другой
   def update
+    country = @jobs_country
     old_player_ids = @job.player_ids.dup
     
     respond_to do |format|
-      if @job.update(job_params)
+      if @job.update(job_params_for_country(country))
         # Создаем аудит для смены должности
         if old_player_ids != @job.player_ids
           old_players = Player.where(id: old_player_ids).pluck(:name)
@@ -59,7 +65,6 @@ class JobsController < ApplicationController
           @job.audits.create!(
             action: 'update',
             auditable: @job,
-            user: current_user,
             audited_changes: { 'player_ids' => [old_player_ids, @job.player_ids] },
             comment: comment
           )
@@ -85,6 +90,27 @@ class JobsController < ApplicationController
   end
 
   private
+    # Государство должности: ?country_id=<id> или текущее государство
+    def set_jobs_country
+      @jobs_country = if params[:country_id].present?
+                        Country.find_by(id: params[:country_id]) || Country.current
+                      else
+                        Country.current
+                      end
+    end
+
+    # Параметры обновления должности в пределах государства
+    def job_params_for_country(country)
+      permitted = job_params
+      return permitted if country.nil? || permitted[:player_ids].nil?
+
+      # Держатели других государств остаются в должности
+      foreign_ids = Player.where(id: @job.player_ids).where.not(country_id: country.id).pluck(:id)
+      incoming_ids = Array(permitted[:player_ids]).map(&:to_i)
+
+      permitted.merge(player_ids: (foreign_ids + incoming_ids).uniq)
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_job
       @job = Job.find(params[:id])

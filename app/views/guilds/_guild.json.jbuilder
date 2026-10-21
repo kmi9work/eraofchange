@@ -1,6 +1,14 @@
 json.extract! guild, :id, :name, :created_at, :updated_at
 json.icon guild.respond_to?(:icon) ? guild.icon : nil
 json.icon_url "/images/guilds/#{guild.id}.png"
+json.country_id guild.country_id
+json.country do
+  if guild.country
+    json.extract! guild.country, :id, :name, :short_name, :flag_image_name
+  else
+    json.nil!
+  end
+end
 json.player_ids guild.player_ids
 json.players guild.players.order(:name), partial: "players/player", as: :player
 json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_category}}, :plant_place) do |plant|

@@ -148,7 +148,7 @@ class AuditsController < ApplicationController
     detailed_stats[:army_payments] = army_payments if army_payments[:paid_count] > 0
     
     state_expenses = get_state_expenses_stats(audits)
-    detailed_stats[:state_expenses] = state_expenses if state_expenses[:paid] || state_expenses[:unpaid]
+    detailed_stats[:state_expenses] = state_expenses if state_expenses[:paid] || state_expenses[:unpaid] || state_expenses[:by_country].present?
     
     region_annexations = get_region_annexation_stats(audits)
     detailed_stats[:region_annexations] = region_annexations if region_annexations[:total_annexations] > 0
@@ -301,6 +301,8 @@ class AuditsController < ApplicationController
       'Должности'
     when 'GameParameter'
       'Игра'
+    when 'Country'
+      'Государство'
     else
       'Прочее'
     end
@@ -348,43 +350,102 @@ class AuditsController < ApplicationController
   end
 
   def get_state_expenses_stats(audits)
+    by_country = state_expenses_stats_by_country(audits)
+
+    # Исторические аудиты GameParameter (флаг был общим на игру) — читаем оба источника,
+    # иначе статистика оплаты за прошлые игры «потеряется»
+    legacy = legacy_state_expenses_state(audits)
+
+    current_id = Country.current&.id
+    current = by_country[current_id.to_s]
+    final_state = current ? current[:final_state] : legacy[:final_state]
+
+    {
+      final_state: final_state,
+      paid: final_state == 'paid',
+      unpaid: final_state == 'unpaid',
+      country_id: current_id,
+      country: Country.current&.name,
+      year: GameParameter.current_year,
+      by_country: by_country,
+      legacy: legacy
+    }
+  end
+
+  # Статистика оплаты госрасходов в разрезе государств по аудитам Country (Д12)
+  def state_expenses_stats_by_country(audits)
+    changes = {}
+    audits.select { |a| a.auditable_type == 'Country' && a.action == 'update' }.each do |audit|
+      audit_changes = audit.audited_changes
+      next unless audit_changes&.dig('params')
+
+      old_params, new_params = audit_changes['params']
+      old_expenses = old_params&.dig('state_expenses') || {}
+      new_expenses = new_params&.dig('state_expenses') || {}
+      next unless old_expenses.is_a?(Hash) && new_expenses.is_a?(Hash)
+
+      changed_years = (old_expenses.keys | new_expenses.keys).select { |year| old_expenses[year] != new_expenses[year] }
+      next if changed_years.empty?
+
+      country_id = audit.auditable_id
+      changes[country_id] ||= {}
+      changed_years.each do |year|
+        value = new_expenses[year]
+        next if value.nil?
+
+        existed = changes[country_id][year]
+        next if existed && existed[:at] && audit.created_at && existed[:at] > audit.created_at
+
+        changes[country_id][year] = { paid: value == true, at: audit.created_at }
+      end
+    end
+
+    changes.map do |country_id, years|
+      country = Country.find_by(id: country_id)
+      states = years.transform_values { |info| info[:paid] ? 'paid' : 'unpaid' }
+      latest_year = states.keys.max_by(&:to_i)
+
+      [country_id.to_s, {
+        id: country_id,
+        name: country&.name || "Государство ##{country_id}",
+        year: latest_year&.to_i,
+        final_state: states[latest_year],
+        paid: states[latest_year] == 'paid',
+        unpaid: states[latest_year] == 'unpaid',
+        years: states
+      }]
+    end.to_h
+  end
+
+  # Прежний источник: аудиты GameParameter с изменением params['state_expenses']
+  def legacy_state_expenses_state(audits)
     game_param_audits = audits.select { |a| a.auditable_type == 'GameParameter' }
-    
-    # Фильтруем аудиты с изменениями госрасходов
+
     expense_changes = game_param_audits.select do |audit|
       changes = audit.audited_changes
       if changes&.dig('params') && changes['params'].is_a?(Array) && changes['params'].length == 2
         old_params, new_params = changes['params']
         old_paid = old_params&.dig('state_expenses')
         new_paid = new_params&.dig('state_expenses')
-        # Проверяем, что изменилось состояние оплаты
         old_paid != new_paid
       else
         false
       end
     end
-    
-    # Находим последнее изменение госрасходов за год
+
     last_expense_change = expense_changes.max_by(&:created_at)
-    
-    if last_expense_change
-      changes = last_expense_change.audited_changes
-      old_params, new_params = changes['params']
-      old_paid = old_params&.dig('state_expenses')
-      new_paid = new_params&.dig('state_expenses')
-      
-      {
-        final_state: new_paid ? 'paid' : 'unpaid',
-        paid: new_paid == true,
-        unpaid: new_paid == false
-      }
-    else
-      {
-        final_state: 'unknown',
-        paid: false,
-        unpaid: false
-      }
-    end
+
+    return { final_state: 'unknown', paid: false, unpaid: false } if last_expense_change.nil?
+
+    changes = last_expense_change.audited_changes
+    _old_params, new_params = changes['params']
+    new_paid = new_params&.dig('state_expenses')
+
+    {
+      final_state: new_paid ? 'paid' : 'unpaid',
+      paid: new_paid == true,
+      unpaid: new_paid == false
+    }
   end
 
   def get_region_annexation_stats(audits)
