@@ -66,7 +66,10 @@ flag_image_map = {
 
 po_values = [1, 0, -1, -1, *Array.new(100, 0)] #Общественный порядок в начале
 while str = f.gets
-  id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = str.split(';').map(&:strip)
+  # Файл правят в Excel: сохранение то с запятыми, то с точкой с запятой.
+  # Разделитель определяем по строке, иначе поля уезжают в id и сид падает.
+  fields = (str.include?(';') ? str.split(';') : str.split(',')).map(&:strip)
+  id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = fields
   country = Country.find_by_name(country_name)
   if country.blank?
     short_name = short_names_map[country_name] || country_name
@@ -98,13 +101,13 @@ while str = f.gets
   end
   player = Player.find_by_name(player_name)
   city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
-  if def_level.strip.present?
+  if def_level.to_s.strip.present?
     Building.create(building_level: defs[def_level.to_i - 1], settlement: city)
   end
-  if tra_level.strip.present?
+  if tra_level.to_s.strip.present?
     Building.create(building_level: tras[tra_level.to_i - 1], settlement: city)
   end
-  if rel_level.strip.present?
+  if rel_level.to_s.strip.present?
     Building.create(building_level: rels[rel_level.to_i - 1], settlement: city)
   end
 end
