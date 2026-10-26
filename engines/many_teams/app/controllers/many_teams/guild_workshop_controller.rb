@@ -1,6 +1,6 @@
 module ManyTeams
-  # Данные для экранов предприятий в era_native (п. 6): где гильдии можно
-  # добывать, где нельзя, и какие эмбарго на неё наложены.
+  # Данные для экранов предприятий в era_native (п. 0-2, 6): где гильдии можно
+  # строить и работать, где запрещено, и какие эмбарго на неё наложены.
   class GuildWorkshopController < BaseController
     NOTICE = "Обработка добычи и переработки предприятий ТОЛЬКО в программе".freeze
 
@@ -14,9 +14,8 @@ module ManyTeams
           country_id: country.id,
           country_name: country.name,
           short_name: country.short_name,
-          player_country: ManyTeams::PlayerCountry.buildable?(country),
-          extraction_allowed: ManyTeams::GuildExtractionPermission.allowed?(guild, country),
-          overridden: ManyTeams::GuildExtractionPermission.overridden?(guild, country),
+          allowed: ManyTeams::GuildCountryPermission.allowed?(guild, country),
+          overridden: ManyTeams::GuildCountryPermission.overridden?(guild, country),
           own: guild.country_id.to_i == country.id
         }
       end
@@ -29,7 +28,7 @@ module ManyTeams
           region_name: plant.plant_place&.region&.name,
           country_id: plant.plant_place&.region&.country_id,
           country_name: plant.plant_place&.region&.country&.name,
-          extraction_forbidden: plant.many_teams_extraction_forbidden?
+          work_forbidden: plant.many_teams_work_forbidden?
         }
       end
 
@@ -39,7 +38,7 @@ module ManyTeams
         year: GameParameter.current_year,
         countries: countries,
         plants: plants,
-        forbidden_plant_ids: plants.select { |plant| plant[:extraction_forbidden] }.map { |plant| plant[:plant_id] },
+        forbidden_plant_ids: plants.select { |plant| plant[:work_forbidden] }.map { |plant| plant[:plant_id] },
         embargoes: ManyTeams::GuildEmbargo.for_guild(guild).includes(:country).map do |row|
           { country_id: row.country_id, country_name: row.country&.name, year: row.year }
         end

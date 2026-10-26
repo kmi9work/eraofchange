@@ -26,12 +26,12 @@ ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
 | 1. Знать Новгорода только в движке | `db/seeds/1_novgorod_nobles_and_cities.rb`; из `db/seeds/1_players.rb` блок удалён |
 | 2. Города Новгорода, равный доход | там же, блок «состав совета и раскладка городов» |
 | 3. Цены не зависят от отношений | `app/models/many_teams/concerns/resource_extensions.rb` (`Resource.show_prices`, `Resource.calculate_cost`, уровень `"0"`) |
-| 4. Флаг «добыча возможна» для страны × гильдии | `app/models/many_teams/guild_extraction_permission.rb` (`matrix_for` — все гильдии игры × одна страна) |
-| 5. Действие Казначея | `PoliticalActionExtensions#set_guild_extraction`, тип действия — `db/seeds/0_political_action_types.rb` |
-| 6. Данные для отметки в era_native | `Plant#many_teams_extraction_forbidden?`, `GET /many_teams/guilds/:id/workshop` |
-| 7. Строительство только в странах игроков | `app/models/many_teams/player_country.rb`, `PlantExtensions` (валидация модели) |
+| 4. Разрешение «гильдия × государство» (строительство и работа предприятий — один запрет) | `app/models/many_teams/guild_country_permission.rb` (`matrix_for` — все гильдии игры × одна страна) |
+| 5. Действие Казначея | `PoliticalActionExtensions#set_guild_permission`, тип действия — `db/seeds/0_political_action_types.rb` |
+| 6. Данные для отметки в era_native | `Plant#many_teams_work_forbidden?`, `GET /many_teams/guilds/:id/workshop`, `/plant_places/available_places?guild_id=` |
+| 7. Государства игроков («Дашборд») | `app/models/many_teams/player_country.rb` — только блок «Дашборда» и разведка; **на предприятия больше не влияет** (правило «строить только в странах игроков» убрано решением заказчика) |
 | 8. Надпись мастерам | отдаётся в `GET .../workshop` полем `notice`, рисует плагин era_native |
-| 9. Эмбарго страна → гильдия | `app/models/many_teams/guild_embargo.rb`, `GuildEmbargoesController`, `CaravanClassExtensions` (караван блокируется без «Контрабанды») |
+| 9. Эмбарго страна → гильдия | `app/models/many_teams/guild_embargo.rb`, `GuildEmbargoesController`; регистрацию каравана сервер НЕ блокирует — карточку «Контрабанда» проверяет мастер на «Рынке» |
 | 10. «Заморская торговля» снимает эмбарго | `PoliticalActionExtensions#lift_guild_embargoes` (технологию проверяет `GuildEmbargo.overseas_trade_open?`, но НЕ блокирует действие — только пишет флаг `overseas_trade_open` в `params`); `GET /many_teams/guild_embargoes/lift_all_availability` отдаёт статус клиенту для предупреждения |
 | 11. Действия Тайного советника | `app/services/many_teams/intelligence_service.rb`, `PoliticalActionExtensions#conduct_intelligence`/`undermine_stability`/`undermine_relations` |
 
@@ -69,7 +69,7 @@ ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
 Водская земля, железная руда — Обонежье. Без этого добывающее предприятие нельзя
 выбрать в клиентах (`PlantPlacesController#available_places` фильтрует места по
 `fossil_type`). Права добычи отдельными строками не задаются: умолчание
-`GuildExtractionPermission` открывает гильдии добычу в своей стране.
+`GuildCountryPermission` открывает гильдии строительство и работу в своей стране.
 
 ## API
 
@@ -78,8 +78,8 @@ ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
 | Метод | Путь | Назначение |
 |---|---|---|
 | GET/PATCH | `/player_countries` | государства игроков («Дашборд», п. 7) |
-| GET | `/extraction_permissions?country_id=` | все гильдии игры + разрешение для этой страны (п. 4) |
-| POST | `/extraction_permissions` | действие Казначея (п. 5) |
+| GET | `/guild_permissions?country_id=` | все гильдии игры + разрешение для этой страны (п. 4) |
+| POST | `/guild_permissions` | действие Казначея (п. 5) |
 | GET | `/guild_embargoes?country_id=&target_country_id=` | эмбарго страны на гильдии; `target_country_id` — чьи гильдии (п. 9) |
 | GET | `/guild_embargoes/market?guild_id=` | состояние «Рынка»: `countries[].embargoed` для выбранной гильдии |
 | POST/DELETE | `/guild_embargoes` | наложить/снять одно эмбарго |
@@ -90,7 +90,7 @@ ACTIVE_GAME=many-teams bin/rails db:seed:many_teams
 | GET | `/intelligence/targets` | пункты разведки, цели, регионы (п. 11) |
 
 Политдействия (`conduct_intelligence`, `undermine_stability`,
-`undermine_relations`, `set_guild_extraction`, `lift_guild_embargoes`)
+`undermine_relations`, `set_guild_permission`, `lift_guild_embargoes`)
 выполняются штатным `POST /political_actions` ядра: `PoliticalAction#execute`
 вызывает метод по имени действия, а методы добавляет
 `ManyTeams::Concerns::PoliticalActionExtensions`.
@@ -102,8 +102,9 @@ ACTIVE_GAME=many-teams bin/rails runner engines/many_teams/script/mt_verify.rb
 ```
 
 Скрипт проверяет все пункты ТЗ на рабочей базе: сиды, цены, умолчание и
-переопределение добычи, валидацию строительства, эмбарго, снятие по технологии,
-отчёты разведки, подрыв стабильности (-3) и отношений (-1).
+переопределение разрешения гильдии, отсутствие серверных запретов на предприятие,
+эмбарго, снятие по технологии, отчёты разведки, подрыв стабильности (-3) и
+отношений (-1).
 
 ## Эмбарго и добыча: правила
 
@@ -112,16 +113,21 @@ ACTIVE_GAME=many-teams bin/rails runner engines/many_teams/script/mt_verify.rb
   `Country#trades_on_market?` (товары с ценами, то есть видимые на «Рынке»): Орда,
   Ливония, Швеция, Литва, Казань, Крым. Остальным `POST /guild_embargoes` и
   `impose_all` отвечают ошибкой; снимать эмбарго можно всегда.
-* Караван гильдии под эмбарго в это государство не регистрируется без карточки
-  «Контрабанда» за текущий год (`CaravanClassExtensions`). Маршрут через Вятку —
-  прежний обход, как и для странового флага `Country#params["embargo"]`.
+* Караван гильдии под эмбарго сервер регистрирует: карточку «Контрабанда» за
+  текущий год проверяет мастер кнопкой «Есть карточка контрабанды!» в своём окне
+  на «Рынке» (движковых переопределений `Caravan` больше нет). Маршрут через
+  Вятку — прежний обход, как и для странового флага `Country#params["embargo"]`.
 * «Рынок» (`GET /guild_embargoes/market`): подсветка и диалог «Контрабанда» считаются
   по выбранной гильдии, а не по страновому флагу — эмбарго наложено на гильдию,
   поэтому у одной гильдии торговля с государством заблокирована, у другой открыта.
   Плагин передаёт карту в ядро пропсом `embargoCountries`.
-* Добыча: разрешение «гильдия × страна» меняется действием Казначея; экран мастеров
-  показывает **все гильдии игры** и переключатель только для текущей страны — страна
-  решает за свою территорию, чужие отсюда не правятся.
+* Разрешение «гильдия × страна» (строительство и работа предприятий, п. 0-2):
+  по умолчанию открыто в стране гильдии и закрыто в остальных; меняется действием
+  Казначея или мастером на «Экономика → Дашборд». Экран мастеров показывает
+  **все гильдии игры** и переключатель только для текущей страны — страна решает
+  за свою территорию, чужие отсюда не правятся.
+* Запрет — только предупреждение: сервер не отклоняет создание предприятия
+  (п. 4: «Построить всё равно можно»), клиент рисует плашку и не блокирует кнопки.
 
 ## Что изменено в ядре
 

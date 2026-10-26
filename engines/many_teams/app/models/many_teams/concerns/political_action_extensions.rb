@@ -6,8 +6,8 @@
 module ManyTeams
   module Concerns
     module PoliticalActionExtensions
-      # ---- п. 5: Казначей разрешает/запрещает добычу гильдии ----
-      def set_guild_extraction
+      # ---- п. 2: Казначей разрешает/запрещает гильдии строительство и работу ----
+      def set_guild_permission
         guild = ::Guild.find_by(id: action_param(:guild_id))
         raise ManyTeams::Error, "Гильдия не найдена" if guild.nil?
 
@@ -15,7 +15,7 @@ module ManyTeams
         raise ManyTeams::Error, "Государство не найдено" if country.nil?
 
         allowed = ActiveModel::Type::Boolean.new.cast(action_param(:allowed))
-        ManyTeams::GuildExtractionPermission.set!(
+        ManyTeams::GuildCountryPermission.set!(
           guild, country, allowed,
           comment: political_action_type&.name,
           year: year

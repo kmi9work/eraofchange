@@ -53,8 +53,18 @@ class PoliticalActionsController < ApplicationController
       
       # Для действий купцов - получаем гильдию игрока
       if political_action_type.job&.name == 'Глава гульдии'
-        player = Player.find_by_id(@political_action.player_id)
-        @political_action.guild_id = player&.guild_id if player
+        # Гильдию выбирает мастер в диалоге действия (guild_id): от неё зависит,
+        # кому достанется карточка «Контрабанда» (Guild#grant_contraband_card).
+        # Раньше параметр не входил в permit и терялся, а гильдия бралась у
+        # первого купца совета — у «КУПЕЦ» её нет, поэтому карточка не выдавалась
+        # никому и караван под эмбарго так и не проходил.
+        chosen_guild = Guild.find_by(id: @political_action.guild_id) if @political_action.guild_id.present?
+        chosen_guild ||= Player.find_by_id(@political_action.player_id)&.guild
+        if chosen_guild
+          @political_action.guild_id = chosen_guild.id
+          # Держатель должности — глава выбранной гильдии, а не первый в совете
+          @political_action.player_id = chosen_guild.players.first&.id || @political_action.player_id
+        end
       end
     end
 
@@ -153,7 +163,7 @@ class PoliticalActionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def political_action_params
-      params.require(:political_action).permit(:year, :success, :player_id, :job_id, :country_id, :political_action_type_id, params: {})
+      params.require(:political_action).permit(:year, :success, :player_id, :job_id, :country_id, :guild_id, :political_action_type_id, params: {})
     end
 
     # Проверяет, использует ли метод старую систему с success

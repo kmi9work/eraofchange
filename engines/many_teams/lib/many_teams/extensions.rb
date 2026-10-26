@@ -17,7 +17,6 @@ module ManyTeams
       prepend_to(::PoliticalAction, ManyTeams::Concerns::PoliticalActionExtensions)
       prepend_to(::PoliticalActionType, ManyTeams::Concerns::PoliticalActionTypeExtensions)
       prepend_to(::PlantPlacesController, ManyTeams::Concerns::PlantPlacesControllerExtensions)
-      prepend_to(::Caravan, ManyTeams::Concerns::CaravanClassExtensions, singleton: true)
 
       true
     rescue StandardError => e

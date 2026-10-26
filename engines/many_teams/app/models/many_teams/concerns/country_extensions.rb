@@ -12,8 +12,8 @@ module ManyTeams
         ::Guild.where(id: many_teams_guild_embargoes.select(:guild_id))
       end
 
-      def many_teams_extraction_permissions
-        ManyTeams::GuildExtractionPermission.where(country_id: id)
+      def many_teams_guild_permissions
+        ManyTeams::GuildCountryPermission.where(country_id: id)
       end
 
       def many_teams_player_country?

@@ -49,14 +49,9 @@ class Caravan < ApplicationRecord
     current_year = GameParameter.current_year
     guild_id =  params[:guild_id].to_i
 
-    # Проверяем эмбарго и карточку Контрабанда
+    # Эмбарго и карточку «Контрабанда» проверяет мастер в своём окне на «Рынке»
+    # (кнопка «Есть карточка контрабанды!»): сервер регистрацию не блокирует.
     country = Country.find_by(id: params[:country_id])
-    if country && country.params&.dig("embargo").to_i == 1
-      guild = Guild.find_by(id: guild_id)
-      unless guild&.has_contraband_card?(current_year)
-        return { success: false, error: "На эту страну наложено эмбарго. Для торговли необходима карточка Контрабанда." }
-      end
-    end
 
     # Проверяем, не был ли уже отправлен караван в эту страну в этом году
     # if guild_id > 0 && Caravan.where(guild_id: guild_id, country_id: params[:country_id], year: current_year, is_robbed: false).exists?

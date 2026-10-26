@@ -86,7 +86,7 @@ check("у каждой гильдии есть склад ресурсов (вк
   end
 end
 check("добыча гильдиям Новгорода по умолчанию открыта в своей стране") do
-  novgorod_guilds.all? { |g| ManyTeams::GuildExtractionPermission.allowed?(g, novgorod) }
+  novgorod_guilds.all? { |g| ManyTeams::GuildCountryPermission.allowed?(g, novgorod) }
 end
 
 puts "\n=== п.3 цены не зависят от отношений"
@@ -104,34 +104,34 @@ check("ZERO_RELATIONS = '0' и метод берёт этот уровень") d
   ManyTeams::Concerns::ResourceClassExtensions::ZERO_RELATIONS == "0"
 end
 
-puts "\n=== п.4/5 добыча: умолчание и переопределение"
-check("по умолчанию добыча открыта в своей стране") do
-  ManyTeams::GuildExtractionPermission.allowed?(guild, own_country)
+puts "\n=== п.4/5 разрешение гильдии: умолчание и переопределение"
+check("по умолчанию строительство и работа открыты в своей стране") do
+  ManyTeams::GuildCountryPermission.allowed?(guild, own_country)
 end
-check("по умолчанию добыча закрыта в чужой стране") do
-  !ManyTeams::GuildExtractionPermission.allowed?(guild, novgorod)
+check("по умолчанию строительство и работа закрыты в чужой стране") do
+  !ManyTeams::GuildCountryPermission.allowed?(guild, novgorod)
 end
-check("таблица добычи — все гильдии игры, а не только гильдии страны") do
-  rows = ManyTeams::GuildExtractionPermission.matrix_for(own_country)
+check("таблица разрешений — все гильдии игры, а не только гильдии страны") do
+  rows = ManyTeams::GuildCountryPermission.matrix_for(own_country)
   rows.size == Guild.count && rows.map { |row| row[:guild_id] }.sort == Guild.order(:id).pluck(:id)
 end
 check("в строке таблицы — разрешение только для запрошенной страны") do
-  row = ManyTeams::GuildExtractionPermission.matrix_for(own_country).find { |item| item[:guild_id] == guild.id }
+  row = ManyTeams::GuildCountryPermission.matrix_for(own_country).find { |item| item[:guild_id] == guild.id }
   row.present? &&
-    row[:allowed] == ManyTeams::GuildExtractionPermission.allowed?(guild, own_country) &&
+    row[:allowed] == ManyTeams::GuildCountryPermission.allowed?(guild, own_country) &&
     row[:guild_country_name].present?
 end
-check("переопределение закрывает добычу в своей стране") do
-  ManyTeams::GuildExtractionPermission.set!(guild, own_country, false)
-  ManyTeams::GuildExtractionPermission.allowed?(guild, own_country) == false &&
-    ManyTeams::GuildExtractionPermission.overridden?(guild, own_country)
+check("переопределение закрывает строительство и работу в своей стране") do
+  ManyTeams::GuildCountryPermission.set!(guild, own_country, false)
+  ManyTeams::GuildCountryPermission.allowed?(guild, own_country) == false &&
+    ManyTeams::GuildCountryPermission.overridden?(guild, own_country)
 end
 check("сброс возвращает умолчание") do
-  ManyTeams::GuildExtractionPermission.reset!(guild, own_country)
-  ManyTeams::GuildExtractionPermission.allowed?(guild, own_country)
+  ManyTeams::GuildCountryPermission.reset!(guild, own_country)
+  ManyTeams::GuildCountryPermission.allowed?(guild, own_country)
 end
-check("действие «Казначей» set_guild_extraction меняет показатель") do
-  type = PoliticalActionType.find_by(action: "set_guild_extraction")
+check("действие «Казначей» set_guild_permission меняет показатель") do
+  type = PoliticalActionType.find_by(action: "set_guild_permission")
   job = type&.job
   player = job&.council_players(own_country)&.first
   unless player
@@ -145,50 +145,68 @@ check("действие «Казначей» set_guild_extraction меняет �
                                country: own_country, year: GameParameter.current_year, success: 1,
                                params: { "country_id" => own_country.id, "guild_id" => guild.id, "allowed" => false })
   action.save!
-  action.set_guild_extraction
-  ManyTeams::GuildExtractionPermission.allowed?(guild, own_country) == false
+  action.set_guild_permission
+  ManyTeams::GuildCountryPermission.allowed?(guild, own_country) == false
 ensure
-  ManyTeams::GuildExtractionPermission.reset!(guild, own_country)
+  ManyTeams::GuildCountryPermission.reset!(guild, own_country)
 end
 
 puts "\n=== п.6 данные для отметки в era_native"
-check("Plant#many_teams_extraction_forbidden? читает состояние базы") do
-  plant = Plant.where(economic_subject_type: "Guild", economic_subject_id: guild.id).first
-  if plant.nil?
+check("Plant#many_teams_work_forbidden? действует на предприятия любой категории") do
+  plants = Plant.where(economic_subject_type: "Guild", economic_subject_id: guild.id).to_a
+  if plants.empty?
     puts "      у гильдии нет предприятий — проверка по модели пропущена"
     true
   else
-    country = plant.plant_place&.region&.country
-    ManyTeams::GuildExtractionPermission.set!(guild, country, false)
-    forbidden = plant.many_teams_extraction_forbidden?
-    ManyTeams::GuildExtractionPermission.reset!(guild, country)
-    forbidden == plant.many_teams_extractive?
+    results = plants.map do |plant|
+      country = plant.plant_place&.region&.country
+      next nil if country.nil?
+
+      ManyTeams::GuildCountryPermission.set!(guild, country, false)
+      forbidden = plant.many_teams_work_forbidden?
+      ManyTeams::GuildCountryPermission.reset!(guild, country)
+      puts "      #{plant.plant_level&.plant_type&.name} (extractive=#{plant.many_teams_extractive?}): #{forbidden}"
+      forbidden
+    end.compact
+    results.any? && results.all?
   end
 end
+check("проверка мест строительства расширена движком") do
+  PlantPlacesController.ancestors.include?(ManyTeams::Concerns::PlantPlacesControllerExtensions)
+end
 
-puts "\n=== п.7 строительство только в странах игроков"
-ManyTeams::PlayerCountry.replace!([own_country.id])
-check("строить можно в подтверждённой стране") { ManyTeams::PlayerCountry.buildable?(own_country) }
-check("строить нельзя в неподтверждённой стране") { !ManyTeams::PlayerCountry.buildable?(novgorod) }
-check("модель Plant отклоняет стройку в чужой стране") do
+puts "\n=== п.4 предупреждение, а не запрет: сервер предприятие не блокирует"
+check("Plant валиден в чужой стране без разрешения гильдии") do
   template = Plant.where(economic_subject_type: "Guild", economic_subject_id: guild.id).first
-  place = PlantPlace.where.not(id: Plant.where(plant_place_id: nil).select(:plant_place_id)).first
   foreign_place = PlantPlace.all.find { |pp| pp.region&.country_id == novgorod.id }
   if template.nil? || foreign_place.nil?
     puts "      нет шаблона предприятия или места в Новгороде — пропущено"
     true
   else
+    country = foreign_place.region&.country
+    ManyTeams::GuildCountryPermission.set!(guild, country, false)
     plant = Plant.new(plant_level: template.plant_level, plant_place: foreign_place,
                       economic_subject: guild)
-    invalid = !plant.valid?
-    puts "      ошибки: #{plant.errors.full_messages.inspect}" unless invalid == false
-    puts "      #{plant.errors[:plant_place].inspect}" if invalid
-    invalid
+    valid = plant.valid?
+    puts "      ошибки: #{plant.errors.full_messages.inspect}" unless valid
+    ManyTeams::GuildCountryPermission.reset!(guild, country)
+    valid
   end
 end
-check("пустой набор стран игроков снимает ограничение") do
+check("правило «строить только в странах игроков» к предприятиям не применяется") do
+  # Набор «государства игроков» остаётся для «Дашборда» и разведки, но на
+  # строительство не влияет (решение заказчика: единственный запрет — от гильдии).
+  ManyTeams::PlayerCountry.replace!([own_country.id])
+  template = Plant.where(economic_subject_type: "Guild", economic_subject_id: guild.id).first
+  foreign_place = PlantPlace.all.find { |pp| pp.region&.country_id == novgorod.id }
+  ok = if template.nil? || foreign_place.nil?
+         true
+       else
+         Plant.new(plant_level: template.plant_level, plant_place: foreign_place,
+                   economic_subject: guild).valid?
+       end
   ManyTeams::PlayerCountry.replace!([])
-  ManyTeams::PlayerCountry.buildable?(novgorod)
+  ok
 end
 
 puts "\n=== п.9 эмбарго страна → гильдия"
@@ -210,14 +228,14 @@ check("эмбарго накладывает только страна, торг
   livonia.present? && livonia.trades_on_market? &&
     !novgorod.trades_on_market? && !own_country.trades_on_market?
 end
-check("караван гильдии под эмбарго не регистрируется без «Контрабанды»") do
+check("караван гильдии под эмбарго регистрируется: карточку проверяет мастер в клиенте") do
   livonia = Country.find_by(name: "Ливонский орден")
   target_guild = Guild.where(country_id: own_country.id).first
   ManyTeams::GuildEmbargo.impose!(livonia, target_guild)
-  result = Caravan.register_caravan({ country_id: livonia.id, guild_id: target_guild.id, is_protected: false })
+  result = Caravan.register_caravan({ country_id: livonia.id, guild_id: target_guild.id, is_protected: true })
   ManyTeams::GuildEmbargo.lift!(livonia, target_guild)
   puts "      ответ каравана: #{result[:success] ? 'успех' : result[:error]}"
-  result[:success] == false && result[:error].to_s.include?("эмбарго")
+  result[:success] == true
 end
 check("рынок: эмбарго подсвечивается по выбранной гильдии, а не по стране") do
   imposer = Country.order(:id).select(&:trades_on_market?)

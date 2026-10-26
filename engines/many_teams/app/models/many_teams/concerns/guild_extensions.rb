@@ -1,4 +1,4 @@
-# Гильдия в режиме many_teams: эмбарго и разрешения на добычу.
+# Гильдия в режиме many_teams: эмбарго и разрешения на строительство и работу.
 module ManyTeams
   module Concerns
     module GuildExtensions
@@ -12,17 +12,17 @@ module ManyTeams
         ManyTeams::GuildEmbargo.for_guild(self)
       end
 
-      def many_teams_extraction_allowed_in?(country)
+      def many_teams_build_allowed_in?(country)
         return false unless ManyTeams.active?
 
-        ManyTeams::GuildExtractionPermission.allowed?(self, country)
+        ManyTeams::GuildCountryPermission.allowed?(self, country)
       end
 
-      # Страны, в которых гильдии разрешена добыча (с учётом умолчания).
-      def many_teams_extraction_countries
+      # Страны, в которых гильдии разрешены строительство и работа (с умолчанием).
+      def many_teams_build_countries
         return [] unless ManyTeams.active?
 
-        ::Country.order(:id).select { |country| ManyTeams::GuildExtractionPermission.allowed?(self, country) }
+        ::Country.order(:id).select { |country| ManyTeams::GuildCountryPermission.allowed?(self, country) }
       end
     end
   end

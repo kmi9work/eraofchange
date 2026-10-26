@@ -1,8 +1,8 @@
 module ManyTeams
-  # Разрешения на добычу «государство × гильдия» (п. 4) и действие Казначея,
-  # которым они меняются (п. 5).
-  class ExtractionPermissionsController < BaseController
-    # GET /many_teams/extraction_permissions?country_id=12
+  # Разрешения гильдии в государстве: можно ли строить предприятия и работать
+  # на них (п. 0-4) и действие Казначея, которым они меняются (п. 2).
+  class GuildPermissionsController < BaseController
+    # GET /many_teams/guild_permissions?country_id=12
     def index
       country = requested_country
       return render_error("Государство не найдено", :not_found) if country.nil?
@@ -13,11 +13,11 @@ module ManyTeams
           name: country.name,
           trades_on_market: country.trades_on_market?
         },
-        guilds: ManyTeams::GuildExtractionPermission.matrix_for(country)
+        guilds: ManyTeams::GuildCountryPermission.matrix_for(country)
       }
     end
 
-    # POST /many_teams/extraction_permissions
+    # POST /many_teams/guild_permissions
     # { guild_id, country_id, allowed } — выполняется действием Казначея.
     def update
       guild = Guild.find_by(id: params[:guild_id])
@@ -27,7 +27,7 @@ module ManyTeams
       return render_error("Государство не найдено", :not_found) if country.nil?
 
       action, result = perform_action(
-        "set_guild_extraction",
+        "set_guild_permission",
         { "guild_id" => guild.id, "country_id" => country.id, "allowed" => !!ActiveModel::Type::Boolean.new.cast(params[:allowed]) }
       )
 
@@ -35,7 +35,7 @@ module ManyTeams
         action_id: action.id,
         guild_id: guild.id,
         country_id: country.id,
-        allowed: ManyTeams::GuildExtractionPermission.allowed?(guild, country),
+        allowed: ManyTeams::GuildCountryPermission.allowed?(guild, country),
         result: result
       }
     rescue ManyTeams::Error => e
