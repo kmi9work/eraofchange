@@ -116,8 +116,9 @@ class Player < ApplicationRecord
       subtract_resource_amount(res["identificator"], res["count"].to_i)
     end
 
-    # Производим на предприятии
-    result = plant.plant_level.feed_to_plant!(normalized_res, 'from')
+    # Производим на предприятии. «Технические училища» считаются по государству
+    # земель предприятия, а не по текущему государству.
+    result = plant.plant_level.feed_to_plant!(normalized_res, 'from', plant.tech_schools_country)
 
     # Добавляем произведенные ресурсы гильдии (если предприятие её) или игроку
     es = plant.economic_subject

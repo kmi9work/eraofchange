@@ -11,14 +11,17 @@ json.country do
 end
 json.player_ids guild.player_ids
 json.players guild.players.order(:name), partial: "players/player", as: :player
-json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_category}}, :plant_place) do |plant|
+json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_category}}, {:plant_place => {:region => :country}}) do |plant|
   json.id plant.id
   json.params plant.params
+  # «Технические училища» — по государству земель предприятия (см. plants/_plant).
+  json.tech_schools_open plant.tech_schools_open?
   json.plant_level do
     json.id plant.plant_level&.id
     json.level plant.plant_level&.level
     json.deposit plant.plant_level&.deposit
     json.formulas plant.plant_level&.formulas
+    json.tech_schools_open plant.tech_schools_open?
     json.plant_type do
       pt = plant.plant_level&.plant_type
       if pt
@@ -48,6 +51,13 @@ json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_catego
     if pp
       json.id pp.id
       json.name pp.name
+      region = pp.region
+      if region
+        json.region_id region.id
+        json.region_name region.name
+        json.region_country_id region.country_id
+        json.region_country_name region.country&.name
+      end
     else
       json.nil!
     end

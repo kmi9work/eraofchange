@@ -6,8 +6,12 @@ class PlantLevel < ApplicationRecord
 
   include Dictionary
 
-  def feed_to_plant!(request = [], way = 'from')
-    Technology.find(Technology::TECH_SCHOOLS).is_open == 1 ? coof = 1.5 : coof = 1
+  # coof «Технических училищ» считается по государству предприятия: открыта в
+  # Москве — бонус только на московских землях. Аргумент country не передан —
+  # прежнее поведение (текущее государство), это путь ручной ручки
+  # POST /plant_levels/:id/feed_to_plant.
+  def feed_to_plant!(request = [], way = 'from', country = nil)
+    Technology.find(Technology::TECH_SCHOOLS).is_open(country || Country.current) == 1 ? coof = 1.5 : coof = 1
 
     request.map do |req|
       req["count"] = req["count"].to_i

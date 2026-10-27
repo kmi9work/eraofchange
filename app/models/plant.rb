@@ -66,4 +66,24 @@ class Plant < ApplicationRecord
     self.params["produced"].push(GameParameter.current_year)
     self.save
   end
+
+  # Земля предприятия через место строительства: государство, на землях которого
+  # оно построено (nil — предприятия без места: artel и старые записи).
+  def build_country
+    plant_place&.region&.country
+  end
+
+  # Государство, по которому считается технология «Технические училища»:
+  # земли предприятия, а без места — текущее государство (прежнее поведение).
+  def tech_schools_country
+    build_country || Country.current
+  end
+
+  # «Технические училища» действуют только на предприятиях, построенных на землях
+  # государства, где технология открыта (решение заказчика): открыта в Москве —
+  # бонус получают предприятия на московских землях, и только перерабатывающие.
+  def tech_schools_open?
+    technology = Technology.find_by(id: Technology::TECH_SCHOOLS)
+    technology.present? && technology.is_open(tech_schools_country).to_i == 1
+  end
 end

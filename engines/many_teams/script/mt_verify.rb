@@ -174,6 +174,119 @@ end
 check("проверка мест строительства расширена движком") do
   PlantPlacesController.ancestors.include?(ManyTeams::Concerns::PlantPlacesControllerExtensions)
 end
+# Технология «Ремесловые люди» (кузница/ювелирная мастерская) в многострановом
+# режиме считается ПО ГОСУДАРСТВУ ЗЕМЛИ, а запрет на экране выбора типа — по
+# странам гильдии: гильдии Москвы можно строить в Орде, и открытая там
+# технология снимает запрет.
+check("технология «Ремесловые люди»: статус по государству земли и по странам гильдии") do
+  technology = Technology.find_by(id: Technology::CRAFTSMEN)
+  guild_with_country = Guild.where.not(country_id: nil).order(:id).first
+  if technology.nil? || guild_with_country.nil?
+    puts "      технологии или гильдии с государством нет — пропущено"
+    true
+  else
+    original = technology.technology_items.pluck(:country_id, :value).to_h
+    allowed = guild_with_country.many_teams_build_countries
+
+    session = ActionDispatch::Integration::Session.new(Rails.application)
+    session.host! "localhost" # иначе ActionDispatch режет запрос как Blocked host
+
+    fetch_places = lambda do
+      session.get "/plant_places/available_places", params: { guild_id: guild_with_country.id }
+      raise "HTTP #{session.response.status}" unless session.response.status == 200
+
+      JSON.parse(session.response.body)
+    end
+
+    begin
+      # 1. Технология открыта в одной из разрешённых стран — для гильдии запрета нет.
+      technology.technology_items.update_all(value: 0)
+      technology.technology_items.where(country_id: allowed.first.id).update_all(value: 1)
+
+      type = fetch_places.call.find { |item| Array(item["technology_requirements"]).any? }
+      raise "нет типа предприятия с технологическим требованием" if type.nil?
+
+      requirement = type["technology_requirements"].first
+      place_in_allowed = Array(type["available_places"]).find do |place|
+        place["region_country_id"] == allowed.first.id
+      end
+      puts "      открыта в «#{allowed.first.name}»: open=#{requirement['open'].inspect} " \
+           "open_anywhere=#{requirement['open_anywhere'].inspect}"
+      raise "open_anywhere должен быть true" unless requirement["open_anywhere"] == true
+      raise "нет места в разрешённой стране" if place_in_allowed.nil?
+      unless Array(place_in_allowed["technology_requirements"]).first&.dig("open") == true
+        raise "статус технологии у места в разрешённой стране должен быть открыт"
+      end
+
+      # 2. Технология открыта только в стране, где гильдии строить нельзя, но где
+      #    есть земля этого типа: для гильдии запрет остаётся, а у места статус
+      #    открыт — он считается по государству земли, а не по текущему.
+      technology.technology_items.update_all(value: 0)
+      allowed_ids = allowed.map(&:id)
+      foreign_place = Array(type["available_places"]).find do |place|
+        !allowed_ids.include?(place["region_country_id"])
+      end
+
+      if foreign_place.nil?
+        puts "      места вне разрешённых стран нет — шаг «статус по земле» пропущен"
+        true
+      else
+        technology.technology_items
+                  .where(country_id: foreign_place["region_country_id"])
+                  .update_all(value: 1)
+
+        data = fetch_places.call
+        type_again = data.find { |item| item["plant_type_id"] == type["plant_type_id"] }
+        requirement = type_again["technology_requirements"].first
+        place_again = Array(type_again["available_places"]).find { |place| place["id"] == foreign_place["id"] }
+        place_status = Array(place_again["technology_requirements"]).first&.dig("open")
+        puts "      открыта только в «#{place_again['country_name']}», где гильдии строить нельзя: " \
+             "open_anywhere=#{requirement['open_anywhere'].inspect}, статус места=#{place_status.inspect}"
+
+        requirement["open_anywhere"] == false && place_status == true
+      end
+    ensure
+      original.each do |country_id, value|
+        technology.technology_items.where(country_id: country_id).update_all(value: value)
+      end
+    end
+  end
+end
+
+check("«Технические училища» действуют только на землях государства, где открыты") do
+  technology = Technology.find_by(id: Technology::TECH_SCHOOLS)
+  own_plant = Plant.joins(plant_place: :region).where(regions: { country_id: own_country.id })
+                   .where.not(plant_level_id: nil).first
+  foreign_plant = Plant.joins(plant_place: :region).where(regions: { country_id: novgorod.id })
+                       .where.not(plant_level_id: nil).first
+  if technology.nil? || own_plant.nil? || foreign_plant.nil?
+    puts "      нет технологии или предприятий в обоих государствах — пропущено"
+    true
+  else
+    original = technology.technology_items.pluck(:country_id, :value).to_h
+    begin
+      technology.technology_items.update_all(value: 0)
+      technology.technology_items.where(country_id: own_country.id).update_all(value: 1)
+
+      level = own_plant.plant_level
+      request = [{ "identificator" => "boards", "count" => 100 }]
+      own_out = level.feed_to_plant!(request.deep_dup, "from", own_country)["to"].first&.dig("count")
+      foreign_out = level.feed_to_plant!(request.deep_dup, "from", novgorod)["to"].first&.dig("count")
+      default_out = level.feed_to_plant!(request.deep_dup, "from")["to"].first&.dig("count")
+
+      puts "      открыты в «#{own_country.name}»: предприятие на своих землях #{own_plant.tech_schools_open?}, " \
+           "на новгородских #{foreign_plant.tech_schools_open?}; выход 100 → #{own_out} / #{foreign_out} " \
+           "(без аргумента — #{default_out})"
+
+      own_plant.tech_schools_open? &&
+        !foreign_plant.tech_schools_open? &&
+        own_out == foreign_out * 1.5 &&
+        default_out == own_out   # без аргумента — текущее государство (прежнее поведение)
+    ensure
+      original.each { |country_id, value| technology.technology_items.where(country_id: country_id).update_all(value: value) }
+    end
+  end
+end
 
 puts "\n=== п.4 предупреждение, а не запрет: сервер предприятие не блокирует"
 check("Plant валиден в чужой стране без разрешения гильдии") do
