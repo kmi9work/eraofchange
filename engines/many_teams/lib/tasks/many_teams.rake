@@ -15,6 +15,9 @@ namespace :game do
   task many_teams: :environment do
     ENV["APP_VERSION"] = "many_teams"
     ENV["ACTIVE_GAME"] = ManyTeams::ACTIVE_GAME
+    # Сиды движка грузятся в конце db:seed:all (как и раньше — после ядра);
+    # без переменной db:seed:all загрузил бы только ядро.
+    ENV["ERA_ENGINE_SEEDS"] = "many_teams"
 
     original_check = ENV["DISABLE_DATABASE_ENVIRONMENT_CHECK"]
     ENV["DISABLE_DATABASE_ENVIRONMENT_CHECK"] = "1"
@@ -23,7 +26,5 @@ namespace :game do
 
     puts "Сидирую основное"
     Rake::Task["db:seed:all"].invoke
-    puts "Сидирую many_teams"
-    Rake::Task["db:seed:many_teams"].invoke
   end
 end
