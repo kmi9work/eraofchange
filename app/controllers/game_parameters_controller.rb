@@ -350,6 +350,19 @@ class GameParametersController < ApplicationController
     render json: result
   end
 
+  # GET /game_parameters/get_max_plants_per_guild
+  def get_max_plants_per_guild
+    max_plants_per_guild = GameParameter.get_max_plants_per_guild
+    render json: { max_plants_per_guild: max_plants_per_guild }
+  end
+
+  # PATCH /game_parameters/update_max_plants_per_guild
+  def update_max_plants_per_guild
+    value = params[:max_plants_per_guild].to_i
+    result = GameParameter.update_max_plants_per_guild(value)
+    render json: result
+  end
+
   # GET /game_parameters/get_vassalage_settings
   # ?country_id=<id> — суммы вассалов указанного сюзерена (по умолчанию — текущего).
   # Ответ содержит и плоский срез сюзерена (vassal_incomes), и полную карту по

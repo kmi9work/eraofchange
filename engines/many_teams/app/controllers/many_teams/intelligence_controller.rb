@@ -2,8 +2,12 @@ module ManyTeams
   # Справочник пунктов разведки для экрана Тайного советника (п. 11).
   class IntelligenceController < BaseController
     # GET /many_teams/intelligence/targets
+    #
+    # Регионы отдаются только по странам-соперникам (государства игроков,
+    # подтверждённые на «Дашборде», кроме текущего): и «Общественный порядок»,
+    # и «Подорвать стабильность» бьют по чужой земле.
     def targets
-      rival_ids = ManyTeams::PlayerCountry.ids.reject { |id| id == Country.current&.id }
+      rival_ids = ManyTeams::IntelligenceService.rival_country_ids
 
       render json: {
         intel_kinds: ManyTeams::IntelligenceService.kinds,
@@ -12,8 +16,14 @@ module ManyTeams
           { id: country.id, name: country.name, short_name: country.short_name }
         end,
         countries: Country.order(:id).map { |country| { id: country.id, name: country.name, short_name: country.short_name } },
-        regions: Region.where(country_id: Country.current&.id).order(:name).map do |region|
-          { id: region.id, name: region.name, country_id: region.country_id }
+        regions: ManyTeams::IntelligenceService.rival_regions.map do |region|
+          {
+            id: region.id,
+            name: region.name,
+            country_id: region.country_id,
+            country_name: region.country&.name,
+            country_short_name: region.country&.short_name
+          }
         end,
         guilds: Guild.order(:name).map do |guild|
           { id: guild.id, name: guild.name, country_id: guild.country_id, country_name: guild.country&.name }

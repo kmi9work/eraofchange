@@ -63,4 +63,8 @@ json.plants guild.plants.includes({:plant_level => {:plant_type => :plant_catego
     end
   end
 end
+# Предприятия гильдии: сколько построено и максимум по настройке игры
+# («Служебное → Настройки»). Правило мягкое — сервер строительство не блокирует.
+json.plants_count guild.plants.size
+json.plants_limit GameParameter.get_max_plants_per_guild
 json.url guild_url(guild, format: :json)

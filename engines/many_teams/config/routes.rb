@@ -17,5 +17,6 @@ ManyTeams::Engine.routes.draw do
 
   get "guilds/:guild_id/workshop", to: "guild_workshop#show"
   get "guilds_overview",           to: "guilds_overview#index"
+  get "all_teams_results",         to: "all_teams_results#index"
   get "intelligence/targets",      to: "intelligence#targets"
 end

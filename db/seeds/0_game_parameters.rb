@@ -55,6 +55,8 @@ GameParameter.create(name: "Количество караванов в гиль�
 
 GameParameter.create(name: "Максимальные отношения для торговых очков", identificator: "max_relations_for_trade_points", value: "2", params: {})
 
+GameParameter.create(name: "Максимальное количество предприятий у гильдии", identificator: "max_plants_per_guild", value: "5", params: {})
+
 GameParameter.create(name: "Длительные эффекты", identificator: "lingering_effects", value: 0, params: [])
 
 GameParameter.create(name: "Мобильный помощник", identificator: "mobile_helper", value: 0, params: [])

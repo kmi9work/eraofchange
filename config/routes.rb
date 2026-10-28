@@ -112,6 +112,8 @@ Rails.application.routes.draw do
   get '/game_parameters/get_active_lingering_effects', to: 'game_parameters#get_active_lingering_effects'
   get '/game_parameters/get_max_relations_for_trade_points', to: 'game_parameters#get_max_relations_for_trade_points'
   patch '/game_parameters/update_max_relations_for_trade_points', to: 'game_parameters#update_max_relations_for_trade_points'
+  get '/game_parameters/get_max_plants_per_guild', to: 'game_parameters#get_max_plants_per_guild'
+  patch '/game_parameters/update_max_plants_per_guild', to: 'game_parameters#update_max_plants_per_guild'
 
 
 

@@ -1419,4 +1419,26 @@ end
 
     return {msg: "Установлен лимит отношений для получения торговых очков: #{value}", max_relations: value}
   end
+
+  # Максимальное количество предприятий у одной гильдии. Правило мягкое: сервер
+  # строительство не блокирует, клиенты показывают «предприятий N из M» и
+  # предупреждают, что сверх лимита строить можно только с согласования мастера.
+  def self.get_max_plants_per_guild
+    setting = GameParameter.find_by(identificator: "max_plants_per_guild")
+    if setting && setting.value.present?
+      setting.value.to_i
+    else
+      5 # Значение по умолчанию
+    end
+  end
+
+  def self.update_max_plants_per_guild(value)
+    setting = GameParameter.find_or_initialize_by(identificator: "max_plants_per_guild")
+    setting.name = "Максимальное количество предприятий у гильдии"
+    setting.value = value.to_i.to_s
+    setting.save
+
+    { msg: "Установлено максимальное количество предприятий у гильдии: #{value.to_i}",
+      max_plants_per_guild: value.to_i }
+  end
 end

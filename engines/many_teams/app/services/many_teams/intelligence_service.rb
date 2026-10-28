@@ -12,8 +12,41 @@ module ManyTeams
       "technologies" => { price: 3000, title: "Открытые технологии команды-соперника" }
     }.freeze
 
+    # Влияние Тайного советника за удачное действие (п. 11): дешёвая разведка
+    # даёт +1, дорогая — +2, подрыв (стабильность/отношения) — +3.
+    INFLUENCE = {
+      "public_order" => 1,
+      "rival_relations" => 1,
+      "noble_income" => 2,
+      "technologies" => 2
+    }.freeze
+
+    INFLUENCE_UNDERMINE = 3
+
     def self.kinds
-      KINDS.map { |key, value| value.merge(intel_type: key) }
+      KINDS.map { |key, value| value.merge(intel_type: key, influence: influence_for(key)) }
+    end
+
+    # Влияние за пункт разведки; неизвестный пункт — 0 (боунс не начисляем).
+    def self.influence_for(kind)
+      INFLUENCE[kind.to_s].to_i
+    end
+
+    # Соперники — государства игроков, подтверждённые на «Дашборде», кроме
+    # текущего. Пустой набор (мастера ещё не подтвердили выбор) — все
+    # государства, кроме текущего: иначе список целей разведки остаётся пустым
+    # и экран Тайного советника нечем заполнить.
+    def self.rival_country_ids(current = Country.current)
+      ids = ManyTeams::PlayerCountry.ids.reject { |id| id == current&.id }
+      return ids if ids.any?
+
+      ::Country.where.not(id: current&.id).order(:id).pluck(:id)
+    end
+
+    # Регионы стран-соперников: по ним выбирают цель и «Общественный порядок»,
+    # и «Подорвать стабильность» — действовать по своей земле нельзя.
+    def self.rival_regions(current = Country.current)
+      ::Region.where(country_id: rival_country_ids(current)).order(:name)
     end
 
     def self.price_for(kind)
@@ -65,9 +98,7 @@ module ManyTeams
     def rival_country
       @rival_country ||= begin
         explicit = ::Country.find_by(id: param(:rival_country_id))
-        explicit || ManyTeams::PlayerCountry.ids
-                                       .reject { |id| id == Country.current&.id }
-                                       .map { |id| ::Country.find_by(id: id) }
+        explicit || self.class.rival_country_ids.map { |id| ::Country.find_by(id: id) }
                                        .compact
                                        .first ||
           ::Country.except_country(Country.current).order(:id).first
@@ -81,10 +112,10 @@ module ManyTeams
     end
 
     def report_public_order
-      # Регион выбирает игрок; если не выбрал — берём первый регион текущего
-      # государства, чтобы отчёт строился и при вызове из API без параметра.
+      # Регион выбирает игрок; если не выбрал — берём первый регион
+      # страны-соперника, чтобы отчёт строился и при вызове из API без параметра.
       region = ::Region.find_by(id: param(:region_id)) ||
-               ::Region.where(country_id: Country.current&.id).order(:id).first ||
+               self.class.rival_regions.first ||
                ::Region.order(:id).first
       raise ManyTeams::Error, "Регион не найден" if region.nil?
 
@@ -120,17 +151,20 @@ module ManyTeams
     def report_noble_income
       rival = require_rival!
       year = GameParameter.current_year
-      noble_type = ::PlayerType.find_by(name: "Знать")
-      nobles = rival.players
-      nobles = nobles.where(player_type_id: noble_type.id) if noble_type
-      nobles = nobles.order(:name).to_a
+      # Тип «Знать» ищем по названию: id типа в базе игры может отличаться от
+      # константы ядра PlayerType::NOBLE (в сидах движка тип ищется так же).
+      noble_type_id = ::PlayerType.find_by(name: "Знать")&.id || ::PlayerType::NOBLE
+      nobles = rival.players.where(player_type_id: noble_type_id).order(:name).to_a
 
       rows = nobles.map do |noble|
-        income = ::IncomeItem.where(player_id: noble.id, year: year).sum(:value)
         {
           "player_id" => noble.id,
           "name" => noble.name,
-          "income" => income
+          # Доход считается формулой ядра по государству знати: поселения,
+          # постройки, надбавки (Св. Георгий, митрополит, торговля) плюс ручные
+          # income_items. Отчёт только по income_items давал нули: у знати
+          # ручных записей обычно нет.
+          "income" => noble.income(rival)
         }
       end
 

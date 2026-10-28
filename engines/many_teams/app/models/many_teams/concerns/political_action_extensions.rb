@@ -57,10 +57,14 @@ module ManyTeams
       end
 
       # ---- п. 11: Тайный советник — разведка ----
+      # Влияние зависит от пункта разведки (1/1/2/2) и начисляется при успехе.
       def conduct_intelligence
         report = ManyTeams::IntelligenceService.new(self).report
-        self.params = (params || {}).merge("report" => report)
+        influence = success.to_i == 1 ? ManyTeams::IntelligenceService.influence_for(report["intel_type"]) : 0
+
+        self.params = (params || {}).merge("report" => report, "influence_delta" => influence)
         save!
+        modify_influence(influence) unless influence.zero?
         report
       end
 
@@ -69,14 +73,18 @@ module ManyTeams
         region = ::Region.find_by(id: action_param(:region_id))
         raise ManyTeams::Error, "Регион не найден" if region.nil?
 
+        influence = success.to_i == 1 ? ManyTeams::IntelligenceService::INFLUENCE_UNDERMINE : 0
+
         ::PublicOrderItem.add(-3, political_action_type&.name, region, self)
         self.params = (params || {}).merge(
           "region_id" => region.id,
           "region_name" => region.name,
-          "public_order_delta" => -3
+          "public_order_delta" => -3,
+          "influence_delta" => influence
         )
         save!
-        { region_id: region.id, public_order_delta: -3 }
+        modify_influence(influence) unless influence.zero?
+        { region_id: region.id, public_order_delta: -3, influence_delta: influence }
       end
 
       # ---- п. 11: подорвать отношения двух стран (-1) ----
@@ -84,14 +92,18 @@ module ManyTeams
         pair = ManyTeams::IntelligenceService.new(self).relation_pair
         first, second = pair
 
+        influence = success.to_i == 1 ? ManyTeams::IntelligenceService::INFLUENCE_UNDERMINE : 0
+
         first.change_relations(-1, self, partner: second)
         self.params = (params || {}).merge(
           "country_a_id" => first.id,
           "country_b_id" => second.id,
-          "relations_delta" => -1
+          "relations_delta" => -1,
+          "influence_delta" => influence
         )
         save!
-        { country_a_id: first.id, country_b_id: second.id, relations_delta: -1 }
+        modify_influence(influence) unless influence.zero?
+        { country_a_id: first.id, country_b_id: second.id, relations_delta: -1, influence_delta: influence }
       end
 
       private
