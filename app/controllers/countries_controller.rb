@@ -60,8 +60,14 @@ class CountriesController < ApplicationController
     render json: { success: true, embargo: @country.embargo }
   end
 
+  # PATCH /countries/:id/join_peace.json — страна присоединяется к текущему
+  # государству миром. Влияние за землю (Посольский дьяк +7, Великий князь +5)
+  # начисляется за КАЖДУЮ землю и только по решению мастера — те же флаги, что у
+  # передачи региона (`regions#captured_by`): posol_bonus, grand_prince_bonus,
+  # remove_posol_bonus, remove_grand_prince_bonus.
   def join_peace
-    @country.join_peace(Country.current)
+    result = @country.join_peace(Country.current, land_bonus_params)
+    render json: result
   end
 
   def embargo
@@ -70,7 +76,7 @@ class CountriesController < ApplicationController
 
   def capture
     region = Region.find(params[:region_id])
-    @country.capture(region, params[:how])
+    render json: @country.capture(region, params[:how], land_bonus_params)
   end
 
   # GET /countries/1 or /countries/1.json
@@ -380,5 +386,16 @@ class CountriesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def country_params
       params.require(:country).permit(:name, :params)
+    end
+
+    # Решение мастера по влиянию за землю (то же, что в RegionsController):
+    # отсутствие параметра = «мастерское действие», влияние не меняется.
+    def land_bonus_params
+      {
+        posol: params[:posol_bonus].to_i == 1,
+        grand_prince: params[:grand_prince_bonus].to_i == 1,
+        remove_posol: params[:remove_posol_bonus].to_i == 1,
+        remove_grand_prince: params[:remove_grand_prince_bonus].to_i == 1
+      }
     end
 end

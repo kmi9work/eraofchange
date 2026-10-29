@@ -33,7 +33,8 @@ class Army < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :deleted_at, conditions: -> { where(deleted_at: nil) } }
   validate :owner_is_country_or_noble
 
-  NUMBER_OF_SLOTS = 3
+  NUMBER_OF_SLOTS = 3   # обычные отряды (пехота, тяжёлая пехота, кавалерия)
+  CANNON_SLOTS = 1      # пушка — сверх трёх отрядов, не больше одной
 
   # Государство армии выводится из владельца: страна — сама эта страна,
   # игрок — государство игрока (в БД владеть армией может только знать).
@@ -48,19 +49,40 @@ class Army < ApplicationRecord
     country&.id
   end
 
-  def has_empty_slots?
-    number_of_slots = NUMBER_OF_SLOTS
-    hired_troops = self.troops.count
-    hired_troops < number_of_slots
+  # Отряды без пушки: именно они ограничены тремя слотами.
+  def regular_troops
+    troops.where.not(troop_type_id: TroopType::CANNON)
+  end
+
+  def cannons
+    troops.where(troop_type_id: TroopType::CANNON)
+  end
+
+  # Есть ли место под отряд этого типа. Без аргумента — есть ли место хоть под
+  # какой-нибудь отряд (пушка занимает свой отдельный слот).
+  def has_empty_slots?(troop_type_id = nil)
+    return regular_troops.count < NUMBER_OF_SLOTS if troop_type_id.nil?
+    return cannons.count < CANNON_SLOTS if troop_type_id.to_i == TroopType::CANNON
+
+    regular_troops.count < NUMBER_OF_SLOTS
   end
 
   def add_troop(troop_type_id)
-    if has_empty_slots?
-      troop = self.troops.create(troop_type_id: troop_type_id, params: {'paid' => []})
-      {troop: troop, msg: "Отряд успешно добавлен в армию"}
-    else
-      {troop: nil, msg: "В армии превышено число отрядов"}
+    unless has_empty_slots?(troop_type_id)
+      msg = if troop_type_id.to_i == TroopType::CANNON
+              "В армии уже есть пушка: больше одной пушки в армию не ставится"
+            else
+              "В армии уже #{NUMBER_OF_SLOTS} отряда: сначала освободите место"
+            end
+      return { troop: nil, msg: msg }
     end
+
+    troop = self.troops.create(troop_type_id: troop_type_id, params: {'paid' => []})
+    unless troop.persisted?
+      return { troop: nil, msg: "Отряд не создан: #{troop.errors.full_messages.join(', ')}" }
+    end
+
+    { troop: troop, msg: "Отряд успешно добавлен в армию" }
   end
 
   def lease_to(country)
@@ -184,16 +206,71 @@ class Army < ApplicationRecord
         break if damage <= 0
       end
       looser.soft_delete!
-      if winner.owner.try(:job_ids)&.include?(Job::VOEVODA) or winner.owner.try(:job_ids)&.include?(Job::GRAND_PRINCE)
-        bonus_country = winner.country || Country.current
-        bonus_country&.council_players(Job::VOEVODA)&.each do |player|
-          player.modify_influence(Job::VOEVODA_BONUS, "Бонус за победу", winner) 
-        end
-      end
+      self.class.award_victory_influence([winner], [looser])
       winner
     else
       false
     end
+  end
+
+  # Влияние Воеводе за сражение (решение заказчика).
+  #
+  # Бонус даётся за КАЖДУЮ разбитую армию противника: `Job::VOEVODA_BONUS` (+4) —
+  # совету Воеводы государства-победителя. Гарнизон города армией на сервере не
+  # является и бонуса не даёт. Должность командующего роли не играет: победа любой
+  # армии государства приносит бонус его Воеводе.
+  #
+  # За каждую разбитую армию игрока проигравшее государство получает
+  # `Job::VOEVODA_PENALTY` (−1) совету Воеводы — симметрично бонусу.
+  #
+  # Вызывается из `Army#attack` (веб-админка, бой 1×1) и
+  # `ArmiesController#award_battle_victory` (era_native, где бой считается на
+  # клиенте). Возвращает список награждённых и оштрафованных — клиенту он нужен,
+  # чтобы показать мастерам результат.
+  def self.award_victory_influence(armies, defeated_armies = [])
+    winners = Array(armies).compact
+    defeated = Array(defeated_armies).compact
+    return [] if winners.empty? || defeated.empty?
+
+    awarded = []
+    winner_countries = winners.map(&:country).compact.uniq
+    losers = defeated.group_by(&:country).reject { |country, _| country.nil? }
+
+    # +4 за каждую разбитую армию противника
+    winner_countries.each do |country|
+      count = losers.sum { |loser_country, list| loser_country.id == country.id ? 0 : list.size }
+      next if count.zero?
+
+      country.council_players(Job::VOEVODA).each do |player|
+        value = Job::VOEVODA_BONUS * count
+        player.modify_influence(value, "Бонус за победу (разбито армий: #{count})", winners.first)
+        awarded << award_row(player, country, value, 'bonus')
+      end
+    end
+
+    # −1 за каждую разбитую армию своего государства
+    losers.each do |country, list|
+      next if winner_countries.any? { |winner| winner.id == country.id }
+
+      country.council_players(Job::VOEVODA).each do |player|
+        value = Job::VOEVODA_PENALTY * list.size
+        player.modify_influence(value, "Поражение в сражении (потеряно армий: #{list.size})", list.first)
+        awarded << award_row(player, country, value, 'penalty')
+      end
+    end
+
+    awarded
+  end
+
+  def self.award_row(player, country, value, role)
+    {
+      id: player.id,
+      name: player.name,
+      country_id: country.id,
+      country_name: country.name,
+      value: value,
+      role: role
+    }
   end
 
   private

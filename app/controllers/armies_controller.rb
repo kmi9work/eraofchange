@@ -50,8 +50,37 @@ class ArmiesController < ApplicationController
   end
 
   def add_troop
-    @army.add_troop(params[:troop_type_id])
-    render :show, status: :created, location: @army
+    result = @army.add_troop(params[:troop_type_id])
+    if result[:troop]
+      render :show, status: :created, location: @army
+    else
+      # Отказ по лимиту состава (три отряда + одна пушка) отдаём ошибкой, чтобы
+      # клиент показал причину, а не «что-то пошло не так».
+      render json: { success: false, error: result[:msg] }, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH /armies/award_battle_victory.json?army_ids[]=1&army_ids[]=2
+  #   &defeated_army_ids[]=3&defeated_army_ids[]=4
+  #
+  # Влияние Воеводе за сражение из клиента мастеров (era_native): бой там считается
+  # на клиенте, поэтому `Army#attack` не вызывается и без этого действия Воевода
+  # оставался без бонуса. Бонус (+4) — за КАЖДУЮ разбитую армию противника,
+  # штраф (−1) — за каждую разбитую армию своего государства. Гарнизон города
+  # армией на сервере не является и в списки не попадает.
+  def award_battle_victory
+    winner_ids = Array(params[:army_ids]).map(&:to_i).reject(&:zero?)
+    defeated_ids = Array(params[:defeated_army_ids]).map(&:to_i).reject(&:zero?)
+    awarded = Army.award_victory_influence(
+      Army.active.where(id: winner_ids).to_a,
+      Army.where(id: defeated_ids).to_a
+    )
+    render json: {
+      success: true,
+      bonus: Job::VOEVODA_BONUS,
+      penalty: Job::VOEVODA_PENALTY,
+      awarded: awarded
+    }
   end
 
   def create

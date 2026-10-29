@@ -3,6 +3,10 @@ class Building < ApplicationRecord
 
   belongs_to :building_level
   belongs_to :settlement
+  # Начисления влияния, привязанные к постройке (штраф за неоплаченную церковь:
+  # entity — эта постройка). Нужны, чтобы при удалении церкви мастер мог решить,
+  # удалять ли начисленное влияние (см. BuildingsController#destroy).
+  has_many :influence_items, as: :entity
 
   before_create :set_first_year
 
@@ -58,8 +62,22 @@ class Building < ApplicationRecord
     self.params['fined']
   end
 
+  # Церковь, построенную в текущем году, не штрафуют за неоплату этого года:
+  # оплата поддержания начинается со следующего года — так же, как влияние за
+  # новую церковь начисляется сразу (Player#influence_buildings считает
+  # first_year == current_year эквивалентом оплаты).
+  def built_this_year?
+    params['first_year'].to_i == GameParameter.current_year
+  end
+
+  # Штраф получает митрополит ГОСУДАРСТВА, в котором стоит церковь (регион её
+  # поселения), а не «текущее государство» сессии: при смене года цикл идёт по
+  # церквям всех государств, и штраф чужой церкви доставался митрополиту того,
+  # кто менял год.
   def fine
-    Country.current&.council_players(Job::METROPOLITAN)&.each do |player|
+    return if built_this_year?
+
+    country&.council_players(Job::METROPOLITAN)&.each do |player|
       player.modify_influence(Job::METROPOLITAN_PINE, "Штраф за неоплаченную церковь", self) 
     end
     self.params['fined'] = true

@@ -101,4 +101,68 @@ class RegionCaptureTest < ActiveSupport::TestCase
 
     assert_equal 1, @region.reload.public_order_items.count
   end
+
+  # ---- Влияние за землю: Посольский дьяк +7, Князь +5 за КАЖДУЮ землю ----
+
+  test "бонус за землю начисляется Посольскому дьяку и Князю получателя" do
+    posol = council_member(@played, Job::POSOL, "Посол")
+    knyaz = council_member(@played, Job::GRAND_PRINCE, "Князь")
+
+    result = @region.captured_by(@played.id, 1, posol: true, grand_prince: true)
+
+    assert_equal [Job::POSOL_BONUS, Job::GRAND_PRINCE_BONUS], result[:awarded].map { |row| row[:value] }
+    assert_equal Job::POSOL_BONUS, Player.find(posol.id).influence(@played)
+    assert_equal Job::GRAND_PRINCE_BONUS, Player.find(knyaz.id).influence(@played)
+  end
+
+  test "без флагов мастера влияние за землю не начисляется" do
+    posol = council_member(@played, Job::POSOL, "Посол")
+
+    result = @region.captured_by(@played.id, 1)
+
+    assert_empty result[:awarded]
+    assert_equal 0, Player.find(posol.id).influence(@played)
+  end
+
+  test "земля ушла другим игрокам: у прежнего государства бонус снимается" do
+    old_posol = council_member(@empty, Job::POSOL, "Посол-прежний")
+    old_knyaz = council_member(@empty, Job::GRAND_PRINCE, "Князь-прежний")
+
+    result = @region.captured_by(@played.id, 1, remove_posol: true, remove_grand_prince: true)
+
+    assert_equal [-Job::POSOL_BONUS, -Job::GRAND_PRINCE_BONUS], result[:awarded].map { |row| row[:value] }
+    assert_equal(-Job::POSOL_BONUS, Player.find(old_posol.id).influence(@empty))
+    assert_equal(-Job::GRAND_PRINCE_BONUS, Player.find(old_knyaz.id).influence(@empty))
+  end
+
+  test "присоединение страны миром: бонус за каждую землю, а не за государство" do
+    2.times do |i|
+      Region.create!(name: "Тест-земля-#{i}-#{SecureRandom.hex(3)}", country: @empty)
+    end
+    posol = council_member(@played, Job::POSOL, "Посол")
+    lands = @empty.regions.count
+
+    result = @empty.join_peace(@played, posol: true)
+
+    assert result[:result]
+    assert_equal lands, result[:regions_count]
+    assert_equal Array.new(lands, Job::POSOL_BONUS), result[:awarded].map { |row| row[:value] }
+    assert_equal lands * Job::POSOL_BONUS, Player.find(posol.id).influence(@played)
+  end
+
+  private
+
+  # Игрок государства на должности (должность создаётся, если её нет)
+  def council_member(country, job_id, name)
+    job = Job.find_or_create_by(id: job_id) do |record|
+      record.name = "Должность #{job_id}"
+    end
+    player = Player.create!(
+      name: "#{name}-#{SecureRandom.hex(3)}",
+      player_type: @player_type,
+      country: country
+    )
+    player.jobs << job
+    player
+  end
 end

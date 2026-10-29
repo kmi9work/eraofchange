@@ -617,36 +617,36 @@ class Country < ApplicationRecord
     value.abs > REL_RANGE ? (value / value.abs) * [value.abs, REL_RANGE].min : value
   end
 
-  def capture(region, how) #1 - войной, 0 - миром
-    if region.country_id != self.id
-     region.country_id = self.id
-      if how.to_i == BY_WAR
-        PublicOrderItem.add(MILITARILY, "Присоединение войной #{region.name}", region, nil)
-      elsif how.to_i == BY_DIPLOMACY
-        PublicOrderItem.add(PEACEFULLY, "Присоединение миром #{region.name}", region, nil)
-      end
-
-      council_players(Job::GRAND_PRINCE).each do |player|
-        player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение миром #{region.name}", self)
-      end
-
-      region.save
-    end
+  # Присоединить регион к этому государству (how: 1 — войной, 0 — миром).
+  # Влияние за землю начисляет/снимает `Region#captured_by` — только по флагам
+  # мастера, переданным в `bonuses`.
+  def capture(region, how, bonuses = {}) #1 - войной, 0 - миром
+    region.captured_by(id, how, bonuses)
   end
 
   # Страна присоединяется к текущему государству миром: регионы переходят текущему
-  # государству, бонус получает совет текущего государства.
-  def join_peace(receiver = Country.current)
+  # государству, бонус за КАЖДУЮ землю получает совет текущего государства, а у
+  # прежнего государства бонус снимается — по флагам мастера (`bonuses`, см.
+  # `Region#captured_by`). Вопросы мастеру задаёт клиент один раз на операцию:
+  # начисление идёт за каждую землю, а не за страну.
+  def join_peace(receiver = Country.current, bonuses = {})
     receiver ||= Country.current
     return { result: false, msg: 'Текущее государство не определено' } if receiver.nil?
 
-    if regions.any? { |r| r.country_id != receiver.id }
-      regions.each { |r| receiver.capture(r, BY_DIPLOMACY) }
-      receiver.council_players(Job::POSOL).each do |player|
-        player.modify_influence(Job::POSOL_BONUS, "Бонус за присоединение миром #{self.name}", self)
-      end
+    moving = regions.where.not(country_id: receiver.id).to_a
+    return { result: false, msg: 'Страна уже присоединена', awarded: [] } if moving.empty?
+
+    awarded = []
+    moving.each do |region|
+      result = region.captured_by(receiver.id, BY_DIPLOMACY, bonuses)
+      awarded += Array(result[:awarded])
     end
 
-    { result: true, msg: 'Страна присоединена' }
+    {
+      result: true,
+      msg: 'Страна присоединена',
+      regions_count: moving.size,
+      awarded: awarded
+    }
   end
 end

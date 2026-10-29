@@ -48,16 +48,15 @@ else
     city.save!
   end
 
-  # --- типы поселений: столицы земель и города ---
-  # В каждом из пяти регионов Новгорода одно поселение — столица (тип 2,
-  # «Столица», доход 10 000): Псков, Великий Новгород, Нюхча, Холмогоры,
-  # Усогорск. Остальные поселения государства — города (тип 1, «Город»,
-  # доход 5 000). В ядре у этих пяти другой тип: четыре «Земля» (3) и один
-  # «Столичная земля» (4) — там на регион приходился ровно один город и
-  # отдельной столичной сетки не было. Приводим типы к режиму многих команд:
-  # у каждого региона своя столица, а всё остальное — города.
+  # --- типы поселений: столица государства и города ---
+  # Столица Новгорода — только Великий Новгород (тип 2, «Столица», доход
+  # 10 000). Все прочие поселения государства — города (тип 1, «Город»,
+  # доход 5 000), в том числе прежние региональные центры Псков, Нюхча,
+  # Холмогоры и Усогорск. В ядре у этих поселений другой тип: четыре «Земля»
+  # (3) и один «Столичная земля» (4) — на регион приходился ровно один город
+  # и отдельной столичной сетки не было.
   capital_type = SettlementType.find_by(id: 2) || SettlementType.find_by(name: "Столица")
-  capital_names = ["Псков", "Великий Новгород", "Нюхча", "Холмогоры", "Усогорск"]
+  capital_names = ["Великий Новгород"]
 
   novgorod_settlements = Settlement.joins(:region).where(regions: { country_id: novgorod.id })
   novgorod_settlements.each do |settlement|
@@ -67,24 +66,68 @@ else
     settlement.update!(settlement_type: type)
   end
 
-  puts "  столицы (тип 2): #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: capital_type&.id).order(:name).pluck(:name).join(', ')}"
+  puts "  столица (тип 2): #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: capital_type&.id).order(:name).pluck(:name).join(', ')}"
   puts "  города (тип 1): #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: town_type&.id).order(:name).pluck(:name).join(', ')}"
 
+  # --- крепости: только Псков 2 уровня и Великий Новгород 1 уровня ---
+  # Ядро ставит оборонительные постройки по колонке «Крепость» из
+  # countries.csv, и у Новгорода их пять: Великий Новгород 2, Псков 2,
+  # Нюхча 1, Холмогоры 1, Усогорск 1. По правилам игры за Новгород остаются
+  # только две: Псков — 2 уровень («Крепость»), Великий Новгород — 1 уровень
+  # («Форт»). Общий countries.csv не правим: он раскатывается всем играм
+  # (ядро, artel, vassals), поэтому раскладку приводим сидом движка.
+  kremlin_type = BuildingType.find_by(name: "Кремль")
+  if kremlin_type
+    keep_keeps = { "Псков" => 2, "Великий Новгород" => 1 }
+
+    novgorod_settlements.to_a.each do |settlement|
+      settlement.buildings.select { |building| building.building_level&.building_type_id == kremlin_type.id }.each(&:destroy)
+    end
+
+    keep_keeps.each do |city_name, level|
+      city = Settlement.find_by(name: city_name)
+      if city.nil?
+        puts "  ! город «#{city_name}» не найден — крепость пропущена"
+        next
+      end
+
+      building_level = BuildingLevel.find_by(building_type_id: kremlin_type.id, level: level)
+      if building_level.nil?
+        puts "  ! уровень #{level} типа «Кремль» не найден — крепость в «#{city_name}» пропущена"
+        next
+      end
+
+      Building.create(building_level: building_level, settlement: city)
+    end
+
+    keeps = Settlement.joins(:region).where(regions: { country_id: novgorod.id }).to_a.flat_map do |settlement|
+      settlement.buildings.select { |building| building.building_level&.building_type_id == kremlin_type.id }
+                .map { |building| "#{settlement.name} #{building.building_level.level}" }
+    end
+    puts "  крепости: #{keeps.join(', ')}"
+  else
+    puts "  ! тип построек «Кремль» не найден — крепости не тронуты"
+  end
+
   # --- состав совета и раскладка городов ---
-  # Доход городов после раскладки типов: пять столиц по 10 000 (Столица) и пять
-  # новых городов по 5 000 — 75 000 на восемь должностей совета. Отсюда раскладка
-  # 10 000 ×7 / 5 000: у Мишинича и Прокшинича по два города вместо столицы,
-  # Овинову достаётся один город.
+  # Владения Новгорода (файл заказчика, раздел «Владения Новгород»): у каждой
+  # семьи ровно одно владение, Ладога и Орлец — «Б/х», без хозяина. Доход:
+  # столица 10 000 у князя и семь владений по 5 000 — 45 000 на восемь
+  # должностей совета.
   council = [
     { name: "Борецкий",    family: "Борецкие",    jobs: [1], cities: ["Великий Новгород"] },
-    { name: "Мишинич",     family: "Мишиничи",    jobs: [2], cities: ["Ладога", "Кемь"] },
+    { name: "Мишинич",     family: "Мишиничи",    jobs: [2], cities: ["Кемь"] },
     { name: "Онцифорович", family: "Онцифоровичи", jobs: [3], cities: ["Нюхча"] },
-    { name: "Прокшинич",   family: "Прокшиничи",  jobs: [4], cities: ["Каргополь", "Орлец"] },
+    { name: "Прокшинич",   family: "Прокшиничи",  jobs: [4], cities: ["Каргополь"] },
     { name: "Своеземцев",  family: "Своеземцевы", jobs: [5], cities: ["Холмогоры"] },
     { name: "Есипов",      family: "Есиповы",     jobs: [6], cities: ["Усогорск"] },
     { name: "Лошинский",   family: "Лошинские",   jobs: [7], cities: ["Псков"] },
     { name: "Овинов",      family: "Овиновы",     jobs: [8], cities: ["Изьма"] }
   ]
+
+  # «Б/х» во владениях Новгорода: города остаются за государством, но без
+  # владельца — сид снимает хозяина, оставшегося от прежней раскладки.
+  ownerless_cities = ["Ладога", "Орлец"]
 
   incomes = []
 
@@ -118,7 +161,47 @@ else
     puts "  #{job&.name}: #{player.name} — доход #{income}"
   end
 
+  # --- «Б/х»: Ладога и Орлец остаются без хозяина ---
+  ownerless_cities.each do |city_name|
+    city = Settlement.find_by(name: city_name)
+    next if city.nil? || city.player_id.nil?
+
+    city.update!(player_id: nil)
+  end
+  puts "  без хозяина: #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }, player_id: nil).order(:name).pluck(:name).join(', ')}"
+
   puts "  городов у знати Новгорода: #{Settlement.joins(:region).where(regions: { country_id: novgorod.id }).where.not(player_id: nil).count}"
   puts "  доход по знати: #{incomes.map { |row| "#{row[0]} #{row[1]}" }.join(', ')}"
   puts "  разброс дохода: #{incomes.map { |row| row[1] }.minmax.join('…')}"
+
+  # --- церковь митрополита и ручная правка ОП ---
+  # Митрополит получает в своём владении церковь 3 уровня («Монастырь», +6 к
+  # общественному порядку земли), а по этой земле ставится ручная правка ОП −6:
+  # эффект церкви гасится, земля стартует с нулевым порядком.
+  metropolitan = Player.where(country_id: novgorod.id).detect do |player|
+    player.jobs.any? { |job| job.name == "Митрополит" }
+  end
+  religious_type = BuildingType.find_by(id: BuildingType::RELIGIOUS) || BuildingType.find_by(name: "Церковь")
+  church_level = BuildingLevel.find_by(building_type_id: religious_type&.id, level: 3)
+  metropolitan_city = metropolitan && Settlement.where(player_id: metropolitan.id).first
+
+  if metropolitan.nil? || metropolitan_city.nil? || church_level.nil?
+    puts "  ! митрополит, его владение или 3 уровень церкви не найдены — церковь не поставлена"
+  else
+    # Церковь во владении одна: прежние религиозные постройки снимаются, чтобы
+    # повторный запуск не копил эффект общественного порядка.
+    metropolitan_city.buildings
+                     .select { |building| building.building_level&.building_type_id == religious_type.id }
+                     .each(&:destroy)
+    Building.create(building_level: church_level, settlement: metropolitan_city)
+
+    region = metropolitan_city.region
+    po_value = -church_level.params["public_order"].to_i
+    unless region.public_order_items.exists?(comment: "Ручная правка", value: po_value)
+      PublicOrderItem.add(po_value, "Ручная правка", region)
+    end
+
+    puts "  церковь митрополита: #{metropolitan.name} — «#{church_level.name}» (3 ур.) в #{metropolitan_city.name} (#{region.name})"
+    puts "  ОП земли «#{region.name}»: церковь #{church_level.params["public_order"]}, ручная правка #{po_value}, итого #{region.show_overall_po(novgorod)}"
+  end
 end

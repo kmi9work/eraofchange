@@ -56,12 +56,19 @@ class BuildingsController < ApplicationController
   end
 
   # DELETE /buildings/1 or /buildings/1.json
+  # ?delete_influence=1 — удалить вместе с постройкой и начисленное за неё
+  # влияние (штрафы за неоплаченную церковь). Без параметра история остаётся:
+  # удаление церкви само по себе её не отзывает.
   def destroy
+    deleted_influence = 0
+    if ActiveModel::Type::Boolean.new.cast(params[:delete_influence])
+      deleted_influence = @building.influence_items.destroy_all.size
+    end
     @building.destroy
 
     respond_to do |format|
       format.html { redirect_to buildings_url, notice: "Building was successfully destroyed." }
-      format.json { head :no_content }
+      format.json { render json: { success: true, deleted_influence: deleted_influence } }
     end
   end
 

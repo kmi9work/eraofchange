@@ -32,22 +32,34 @@ check("все знатные Новгорода — типа «Знать»") do
 end
 
 puts "\n=== п.2 города Новгорода"
-mapping = {
-  "Водская земля" => "Ладога", "Обонежье" => %w[Кемь Каргополь],
-  "Подвинье" => "Орлец", "Канинская земля" => "Изьма"
+# Раскладка владений по файлу заказчика («Владения Новгород»): у каждой семьи
+# одно владение, Ладога и Орлец — «Б/х», без хозяина.
+owned_cities = {
+  "Великий Новгород" => "Борецкий",
+  "Кемь" => "Мишинич",
+  "Нюхча" => "Онцифорович",
+  "Каргополь" => "Прокшинич",
+  "Холмогоры" => "Своеземцев",
+  "Усогорск" => "Есипов",
+  "Псков" => "Лошинский",
+  "Изьма" => "Овинов"
 }
-mapping.each do |region_name, cities|
-  Array(cities).each do |city_name|
-    check("«#{city_name}» в регионе «#{region_name}», тип 1, у знати Новгорода") do
-      city = Settlement.find_by(name: city_name)
-      city && city.region&.name == region_name && city.settlement_type_id == 1 &&
-        city.player_id.present? && city.player.country_id == novgorod.id
-    end
+owned_cities.each do |city_name, owner_name|
+  check("«#{city_name}» — владение #{owner_name}") do
+    city = Settlement.find_by(name: city_name)
+    city && city.player&.name == owner_name && city.player.country_id == novgorod.id
   end
 end
-check("столицы Новгорода — тип 2 («Столица»)") do
-  names = ["Псков", "Великий Новгород", "Нюхча", "Холмогоры", "Усогорск"]
-  names.all? { |name| Settlement.find_by(name: name)&.settlement_type&.name == "Столица" }
+check("Ладога и Орлец — без хозяина (Б/х), но в землях Новгорода") do
+  %w[Ладога Орлец].all? do |name|
+    city = Settlement.find_by(name: name)
+    city && city.player_id.nil? && city.region&.country_id == novgorod.id
+  end
+end
+check("столица Новгорода — Великий Новгород, тип 2 («Столица»)") do
+  names = ["Великий Новгород"]
+  names.all? { |name| Settlement.find_by(name: name)&.settlement_type&.name == "Столица" } &&
+    Settlement.joins(:region).where(regions: { country_id: novgorod.id }, settlement_type_id: 2).count == names.size
 end
 check("остальные поселения Новгорода — тип 1 («Город»)") do
   others = Settlement.joins(:region).where(regions: { country_id: novgorod.id }).to_a
@@ -60,6 +72,37 @@ check("доход по знати Новгорода 5 000…10 000") do
   end
   puts "      доходы: #{incomes.sort.inspect}"
   incomes.min >= 5_000 && incomes.max <= 10_000
+end
+
+puts "\n=== крепости Новгорода"
+# По правилам за Новгород остаются только две крепости: Псков — 2 уровень
+# («Крепость»), Великий Новгород — 1 уровень («Форт»).
+check("крепости только в Пскове (2 ур.) и Великом Новгороде (1 ур.)") do
+  keeps = Settlement.joins(:region).where(regions: { country_id: novgorod.id }).to_a.flat_map do |settlement|
+    settlement.buildings.select { |b| b.building_level&.building_type&.name == "Кремль" }
+              .map { |b| [settlement.name, b.building_level.level] }
+  end
+  puts "      крепости: #{keeps.map { |name, level| "#{name} #{level}" }.join(', ')}"
+  keeps.sort == [["Великий Новгород", 1], ["Псков", 2]].sort
+end
+
+puts "\n=== церковь митрополита и общественный порядок земли"
+# Митрополит получает в своём владении церковь 3 уровня («Монастырь», +6 к
+# общественному порядку земли), а по этой земле — ручная правка ОП −6: эффект
+# церкви гасится, земля стартует с нулевым порядком.
+metropolitan = Player.where(country_id: novgorod.id).detect { |p| p.jobs.any? { |j| j.name == "Митрополит" } }
+metropolitan_city = metropolitan && Settlement.where(player_id: metropolitan.id).first
+metropolitan_region = metropolitan_city&.region
+check("у митрополита Новгорода церковь 3 уровня в его владении") do
+  church = metropolitan_city&.buildings&.map(&:building_level)&.detect { |l| l.building_type_id == BuildingType::RELIGIOUS }
+  puts "      #{metropolitan&.name} — #{metropolitan_city&.name}: #{church&.name} (#{church&.level})"
+  church&.level == 3 && church&.building_type&.name == "Церковь"
+end
+check("ручная правка ОП −6 в земле митрополита гасит эффект церкви") do
+  church_po = metropolitan_region&.inf_buildings_on_po.to_i
+  manual_po = metropolitan_region&.public_order_items&.where(comment: "Ручная правка")&.sum(:value).to_i
+  puts "      #{metropolitan_region&.name}: церковь +#{church_po}, ручная правка #{manual_po}, ОП земли #{metropolitan_region&.show_overall_po(novgorod)}"
+  church_po.positive? && (church_po + manual_po).zero?
 end
 
 puts "\n=== сиды: гильдии, купцы и предприятия Новгорода"
@@ -465,6 +508,15 @@ check("пара по умолчанию: первая — зарубежная �
   pair = ManyTeams::IntelligenceService.new(action).relation_pair
   puts "      пара: #{pair[0].name} / #{pair[1].name}"
   pair[0].id != own_country.id
+end
+
+puts "\n=== названия технологий в модуле"
+# Решение заказчика (many_teams): технология 6 называется «Третий Рим» — в игре
+# за любое государство «Москва» в названии неверна. Id и константа не меняются.
+check("технология 6 называется «Третий Рим» (в ядре — «Москва — Третий Рим»)") do
+  technology = Technology.find_by(id: Technology::MOSCOW_THIRD_ROME)
+  puts "      name=#{technology&.name.inspect}"
+  technology&.name == "Третий Рим"
 end
 
 puts "\n=== итог"

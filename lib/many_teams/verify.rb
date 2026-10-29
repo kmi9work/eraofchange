@@ -45,7 +45,8 @@ puts "=== § 12 п. 5. Работа за второе государство (#{
 Country.current = other
 check("технологии второго государства — свой полный набор",
       other.technology_items.count == tech_count, "строк=#{other.technology_items.count}")
-check("знать чужого государства пуста", Player.nobles.where(country_id: other.id).count.zero?,
+check("знать чужого государства — казначей страны",
+      Player.nobles.where(country_id: other.id).count == 1,
       "знати=#{Player.nobles.where(country_id: other.id).count}")
 check("гильдии чужого государства пусты", Guild.where(country_id: other.id).count.zero?,
       "гильдий=#{Guild.where(country_id: other.id).count}")
@@ -54,7 +55,32 @@ check("экраны второго государства отдают данн�
       "чужих государств=#{Country.except_country(rus).count}, регионов=#{other.regions.count}")
 check("Technology.find(Technology::CRAFTSMEN).is_open(чужая страна) = false",
       Technology.find(Technology::CRAFTSMEN).is_open(other) == 0)
-check("совет второго государства пуст", other.council_player_ids(Job::KAZNACHEI).empty?)
+check("в совете второго государства один казначей",
+      other.council_player_ids(Job::KAZNACHEI).size == 1,
+      "казначеев=#{other.council_player_ids(Job::KAZNACHEI).size}")
+# § 13 (many_teams): владение передаётся знатному игроку, поэтому казначей нужен
+# в КАЖДОМ государстве — иначе передавать владения в чужой стране некому.
+missing_treasurers = Country.order(:id).reject { |c| c.council_players(Job::KAZNACHEI).exists? }
+check("казначей есть в каждом государстве",
+      missing_treasurers.empty?,
+      "без казначея=#{missing_treasurers.map(&:name).inspect}")
+# Имена проверяем только у казначеев, которых создал сид движка: у «Москвы» и
+# «Новгорода» казначеи пришли из сидов ядра и совета, их имена исторические.
+treasurer_job_name = Job.find_by(id: Job::KAZNACHEI)&.name
+seed_name_mismatch = Country.order(:id).filter_map do |c|
+  treasurer = c.council_players(Job::KAZNACHEI).first
+  next if treasurer.nil?
+
+  expected_identificator = Player.generate_identificator(
+    (c.short_name.presence || c.name), nil, nil, treasurer_job_name, "MANY_TEAMS_COUNTRY_#{c.id}"
+  )
+  next unless treasurer.identificator == expected_identificator
+
+  "«#{treasurer.name}» вместо «#{c.short_name.presence || c.name}»" if treasurer.name != (c.short_name.presence || c.name)
+end
+check("казначеи из сида названы коротким названием страны",
+      seed_name_mismatch.empty?,
+      seed_name_mismatch.inspect)
 
 puts "=== § 12 п. 6. Скоупы и методы ==="
 Country.current = rus

@@ -13,6 +13,11 @@ class PoliticalAction < ApplicationRecord
   scope :for_country, ->(country) { country.nil? ? all : where(country_id: country.id) }
   scope :for_year, ->(year) { year.nil? ? all : where(year: year) }
 
+  # Государства, с которыми «Взять мзду» отношения НЕ портит (решение заказчика):
+  # Москва и Новгород. Своё государство дьяка тоже исключается — отношений с самим
+  # собой нет.
+  TAKE_BRIBE_EXCLUDED_COUNTRIES = [Country::RUS, Country::NOVGOROD].freeze
+
   def execute
     action_name = self.political_action_type&.action
     if respond_to?(action_name)
@@ -75,13 +80,15 @@ class PoliticalAction < ApplicationRecord
     end
   end 
 
+  # «Отправить посольство»: посольство уходит в ДВЕ державы (карточка действия —
+  # «улучшение отношений с 2-мя выбранными иностранными державами на 1 пункт»),
+  # отношения с каждой +1. Параметры — два скаляра: `country_id` и `country_id_2`
+  # (Rails `permit(params: {})` пропускает только скаляры, массив молча терялся бы).
+  # Если пришла одна страна (старый клиент) — работает как раньше.
   def send_embassy #Отправить посольство
     if success.to_i == 1
       modify_influence(1)
-      country = Country.find_by_id(params['country_id'])
-      if country
-        country.change_relations(1, self)
-      end
+      embassy_countries.each { |country| country.change_relations(1, self) }
     end
   end
 
@@ -90,8 +97,13 @@ class PoliticalAction < ApplicationRecord
       modify_influence(2)
     else 
       modify_influence(-3)
-      rand_country = Country.find_by_id(params['country_id'])
-      rand_country&.change_relations(-1, self)
+      rand_country = take_bribe_random_country
+      if rand_country
+        rand_country.change_relations(-1, self)
+        # Выбор сервера пишем в params: клиент показывает мастерам, с кем именно
+        # испортились отношения, а история действия остаётся проверяемой.
+        self.params = (params || {}).merge('country_id' => rand_country.id)
+      end
     end
   end
 
@@ -268,5 +280,24 @@ class PoliticalAction < ApplicationRecord
 
     def modify_influence value
       InfluenceItem.add(value, self.political_action_type.name, player, self)
+    end
+
+    # Державы «Отправить посольство»: две выбранные, без повторов. Один параметр
+    # (старый клиент) — одна держава.
+    def embassy_countries
+      ids = [params['country_id'], params['country_id_2']]
+            .map { |value| value.to_i }
+            .reject(&:zero?)
+            .uniq
+      return Country.none if ids.empty?
+
+      Country.where(id: ids)
+    end
+
+    # Случайная держава для провала «Взять мзду»: Москва и Новгород исключены
+    # (решение заказчика), своё государство тоже — отношений с собой нет.
+    def take_bribe_random_country
+      excluded = TAKE_BRIBE_EXCLUDED_COUNTRIES + [country_id].compact
+      Country.where.not(id: excluded).order(:id).to_a.sample
     end
 end

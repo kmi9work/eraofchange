@@ -15,15 +15,16 @@ class RegionsController < ApplicationController
     end
   end
 
+  # PATCH /regions/:id/captured_by.json?country_id=&how=&posol_bonus=1&grand_prince_bonus=1
+  #   &remove_posol_bonus=1&remove_grand_prince_bonus=1
+  #
+  # Влияние за землю (Посольский дьяк +7, Великий князь +5) начисляется только по
+  # решению мастера: клиент спрашивает отдельно по каждой должности «начислить
+  # бонус» или «мастерское действие». Флаги `remove_*` — снятие бонуса у прежнего
+  # государства, когда земля уходит другим игрокам.
   def captured_by
-    @region.captured_by(params[:country_id], params[:how])
-    if params[:grand_prince_bonus] &&
-          params[:country_id].to_i == current_country&.id &&
-          @region.way == 'rus'
-      current_country.council_players(Job::GRAND_PRINCE).each do |player|
-        player.modify_influence(Job::GRAND_PRINCE_BONUS, "Бонус за присоединение земли", @region) 
-      end
-    end
+    result = @region.captured_by(params[:country_id], params[:how], land_bonus_params)
+    render json: result
   end
 
   def modify_public_order
@@ -96,5 +97,17 @@ class RegionsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def region_params
       params.require(:region).permit(:name, :params)
+    end
+
+    # Решение мастера по влиянию за землю: начислить/снять бонус каждой должности
+    # (см. Region#captured_by). Отсутствие параметра = «мастерское действие»,
+    # влияние в системе не меняется.
+    def land_bonus_params
+      {
+        posol: params[:posol_bonus].to_i == 1,
+        grand_prince: params[:grand_prince_bonus].to_i == 1,
+        remove_posol: params[:remove_posol_bonus].to_i == 1,
+        remove_grand_prince: params[:remove_grand_prince_bonus].to_i == 1
+      }
     end
 end

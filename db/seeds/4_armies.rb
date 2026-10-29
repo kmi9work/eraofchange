@@ -1,8 +1,11 @@
+# Стоимость отряда — ТОЛЬКО полная цена постройки с нуля: отряды больше не
+# улучшаются (цепочка «пехота → тяжёлая пехота → кавалерия → пушка» из
+# TroopType.upgrade_paths в найме не используется). Поэтому в buy_cost каждого
+# типа лежит ровно его собственная цена, без удешевления «доплатить за апгрейд».
 TroopType.create(name: "Пехота", params: {
   'power' => 1, 
   'max_health' => 1,
   'buy_cost' => [
-    {"identificator" => "gold", "count" => 500},
     {"identificator" => "meat", "count" => 50}
   ]
 }) #MILITIA = 1
@@ -10,21 +13,16 @@ TroopType.create(name: "Тяжелая пехота", params: {
   'power' => 3,
   'max_health' => 3,
   'buy_cost' => [
-    {"identificator" => "gold", "count" => 1000},
-    {"identificator" => "meat", "count" => 70},
-    {"identificator" => "metal", "count" => 20}
+    {"identificator" => "metal", "count" => 20},
+    {"identificator" => "meat", "count" => 70}
   ]
 }) #HEAVY_MILITIA = 2
 TroopType.create(name: "Кавалерия", params: {
   'power' => 5,
   'max_health' => 5,
   'buy_cost' => [
-    {"identificator" => "gold", "count" => 3000},
-    {"identificator" => "meat", "count" => 0},
-    {"identificator" => "metal", "count" => 0},
-    {"identificator" => "food", "count" => 20}, 
-    {"identificator" => "horses", "count" => 30},
-    {"identificator" => "weapon", "count" => 5}
+    {"identificator" => "weapon", "count" => 5},
+    {"identificator" => "horses", "count" => 30}
   ]
 }) #CAVALRY = 3
 
@@ -32,13 +30,6 @@ TroopType.create(name: "Пушка", params: {
   'power' => 8,
   'max_health' => 8,
   'buy_cost' => [
-    {"identificator" => "gold", "count" => 4000},
-    {"identificator" => "meat", "count" => 0},
-    {"identificator" => "metal", "count" => 0},
-    {"identificator" => "food", "count" => 0}, 
-    {"identificator" => "horses", "count" => 0},
-    {"identificator" => "weapon", "count" => 0},
-    {"identificator" => "armor", "count" => 5},
     {"identificator" => "tools", "count" => 30}
   ]
 }) #CANNON = 4
