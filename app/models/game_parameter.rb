@@ -687,25 +687,84 @@ end
 
 ###Таймер и расписание
 
+  # Время расписания («ЧЧ:ММ» — настенное, в системной зоне сервера) на конкретную дату
+  def self.schedule_time(date, minutes_from_midnight)
+    Time.local(date.year, date.month, date.day,
+               minutes_from_midnight / 60, minutes_from_midnight % 60)
+  end
+
+  # Минуты от полуночи для строки «ЧЧ:ММ»; nil, если разобрать не удалось
+  def self.schedule_minutes(time_stringified)
+    hours, minutes = time_stringified.to_s.strip.split(":").map(&:to_i)
+    return nil unless hours && minutes && hours.between?(0, 23) && minutes.between?(0, 59)
+
+    (hours * 60) + minutes
+  end
+
+  # Раскладывает пункты расписания на реальные даты, начиная с base_date.
+  # Если время пункта меньше времени предыдущего пункта, расписание перешло
+  # через полночь — прибавляем сутки. Без этого пункты после 00:00 получали
+  # прошедшую дату, последний пункт оказывался «вчера», и фронт всю игру
+  # показывал «Перерыв»/«Проверьте расписание».
+  def self.schedule_unix_ranges(params, base_date = Date.today)
+    previous_start = nil
+    day_offset = 0
+
+    params.map do |item|
+      start_minutes = schedule_minutes(item["start"]) || 0
+      finish_minutes = schedule_minutes(item["finish"]) || start_minutes
+
+      day_offset += 1 if previous_start && start_minutes < previous_start
+      previous_start = start_minutes
+
+      # Пункт, который заканчивается «раньше», чем начался (23:50 → 00:50),
+      # заканчивается на следующие сутки
+      finish_offset = finish_minutes <= start_minutes ? day_offset + 1 : day_offset
+
+      {
+        unix_start: schedule_time(base_date + day_offset, start_minutes).to_i,
+        unix_finish: schedule_time(base_date + finish_offset, finish_minutes).to_i
+      }
+    end
+  end
+
+  # Дата, от которой строится расписание: та, в чьё окно [начало, конец] попадает
+  # текущий момент. Ночью, после 00:00, это вчерашняя дата — иначе всё расписание
+  # уезжает на сутки вперёд. Если не подошла ни одна — сегодняшняя.
+  def self.schedule_base_date(params, now = Time.now.to_i)
+    today = Date.today
+    return today if params.empty?
+
+    found = [today, today - 1].find do |date|
+      ranges = schedule_unix_ranges(params, date)
+      now >= ranges.first[:unix_start] && now <= ranges.last[:unix_finish]
+    end
+
+    found || today
+  end
+
   def self.show_schedule
     timer = GameParameter.find_by(identificator: "schedule")
-    schedule_item = {}
+    params = timer&.params || []
+    ranges = schedule_unix_ranges(params, schedule_base_date(params))
+
     id = 0
-    schedule = timer.params.map do |item|
-        id += 1
-        { id: id,
-          identificator: item["identificator"].to_s,
-          start: item["start"],
-          unix_start: GameParameter.modify_date(item["start"]),
-          finish: item["finish"],
-          unix_finish: GameParameter.modify_date(item["finish"]),
-          type: item["type"] || "play"
-        }
+    schedule = params.map do |item|
+      range = ranges[id]
+      id += 1
+      { id: id,
+        identificator: item["identificator"].to_s,
+        start: item["start"],
+        unix_start: range[:unix_start],
+        finish: item["finish"],
+        unix_finish: range[:unix_finish],
+        type: item["type"] || "play"
+      }
     end
-    
+
     return {
-      schedule: schedule, 
-      ticking: timer.value,
+      schedule: schedule,
+      ticking: timer&.value,
       auto_start_next_cycle: self.auto_start_next_cycle
     }
   end
