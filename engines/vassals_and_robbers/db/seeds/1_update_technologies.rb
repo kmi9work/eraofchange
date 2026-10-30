@@ -21,14 +21,14 @@ technologies_to_remove.each do |tech_name|
 end
 
 # Обновляем описание "Москва — Третий Рим"
-moscow_tech = Technology.find_by(name: "Москва — Третий Рим")
+moscow_tech = Technology.find_by(name: "Третий Рим")
 if moscow_tech
   old_description = moscow_tech.description
   new_description = old_description.gsub('+2', '+1')
   moscow_tech.update(description: new_description)
-  puts "Обновлена технология 'Москва — Третий Рим': '#{old_description}' → '#{new_description}'"
+  puts "Обновлена технология 'Третий Рим': '#{old_description}' → '#{new_description}'"
 else
-  puts "Технология 'Москва — Третий Рим' не найдена"
+  puts "Технология 'Третий Рим' не найдена"
 end
 
 puts "=== Технологии обновлены для игры Vassals and Robbers ==="

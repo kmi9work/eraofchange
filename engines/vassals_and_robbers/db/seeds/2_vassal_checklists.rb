@@ -52,7 +52,7 @@ novgorod_checklist = VassalsAndRobbers::Checklist.find_or_create_by(vassal_count
       {
         "type" => "technology",
         "technology_ids" => [Technology::OVERSEAS_TRADE, Technology::MOSCOW_THIRD_ROME],
-        "description" => "Заморская торговля, Москва — Третий Рим"
+        "description" => "Заморская торговля, Третий Рим"
       },
       {
         "type" => "trade_turnover",
