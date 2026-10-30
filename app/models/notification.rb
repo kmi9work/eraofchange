@@ -5,7 +5,12 @@
 # событие, и подтверждение с любого его устройства снимает окно на остальных.
 class Notification < ApplicationRecord
   TECHNOLOGY_OPENED = 'technology_opened'.freeze
-  KINDS = [TECHNOLOGY_OPENED].freeze
+  # Земля перешла другому государству (Region#captured_by).
+  REGION_ANNEXED = 'region_annexed'.freeze
+  # Итог сражения: бой на планшете мастера или 1×1 в веб-админке.
+  BATTLE_RESULT = 'battle_result'.freeze
+
+  KINDS = [TECHNOLOGY_OPENED, REGION_ANNEXED, BATTLE_RESULT].freeze
 
   belongs_to :user
   belongs_to :technology, optional: true

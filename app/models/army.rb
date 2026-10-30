@@ -207,6 +207,7 @@ class Army < ApplicationRecord
       end
       looser.soft_delete!
       self.class.award_victory_influence([winner], [looser])
+      notify_battle_report(winner, looser)
       winner
     else
       false
@@ -274,6 +275,24 @@ class Army < ApplicationRecord
   end
 
   private
+
+  # Уведомление мастерам о результате боя 1×1 из веб-админки (тот же итог, что
+  # присылает клиент мастеров после боя на планшете). Ошибка уведомления не
+  # должна ломать сам бой: он уже посчитан и записан в `battles`.
+  def notify_battle_report(winner, looser)
+    side = winner.id == id ? 'attacker' : 'defender'
+    NotificationRule.battle_reported(
+      attackers: [{ 'label' => "#{name} (#{owner&.name})" }],
+      defenders: [{ 'label' => "#{looser.name} (#{looser.owner&.name})" }],
+      winner_side: side,
+      outcome: side == 'attacker' ? 'defenders_destroyed' : 'attackers_destroyed',
+      place: settlement&.name,
+      fallen_troops: looser.troops.count,
+      winner_country: winner.country
+    )
+  rescue StandardError => e
+    Rails.logger.warn("Уведомление о сражении #{id} не отправлено: #{e.class}: #{e.message}")
+  end
 
   # Владеть армией может государство или игрок-знать (до перехода ограничение
   # держал только интерфейс, в БД его не было)

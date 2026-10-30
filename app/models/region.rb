@@ -78,6 +78,8 @@ class Region < ApplicationRecord
 
     awarded = transferred ? award_land_influence(receiver, previous, bonuses) : []
 
+    notify_annexation(receiver, previous, how) if transferred
+
     {
       result: true,
       msg: "Регион присоединен",
@@ -93,6 +95,15 @@ class Region < ApplicationRecord
   end
 
   private
+
+  # Уведомления мастерам о присоединении земли (экономика и сражения).
+  # Ошибка уведомления не должна ломать саму передачу региона: мастер уже нажал
+  # кнопку, откатывать передачу из-за окна нельзя.
+  def notify_annexation(receiver, previous, how)
+    NotificationRule.region_annexed(self, previous, receiver, how)
+  rescue StandardError => e
+    Rails.logger.warn("Уведомление о присоединении земли #{id} не отправлено: #{e.class}: #{e.message}")
+  end
 
   # Влияние должностей за присоединённую/утраченную землю.
   #

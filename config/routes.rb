@@ -241,6 +241,10 @@ Rails.application.routes.draw do
     patch :acknowledge, on: :member
   end
 
+  # Итог сражения из клиента мастеров: бой считается на планшете, поэтому сервер
+  # узнаёт о нём отдельным запросом (уведомления мастерам сражений и политики).
+  post '/battles/report', to: 'battles#report'
+
 
 
   resources :game_parameters
