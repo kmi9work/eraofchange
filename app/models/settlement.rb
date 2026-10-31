@@ -37,12 +37,22 @@ class Settlement < ApplicationRecord
 
   def build(building_type_id)
     return if building_type_id.blank?
+    # Перечитываем постройки с сервера: `Building.create` ниже не обновляет кэш
+    # ассоциации, и повторный вызов этим же объектом видел пустой список —
+    # создавал дубль постройки и дубль уведомления мастеру сражений.
+    self.buildings.reload
     already_there = self.buildings.any?{|b| b&.building_level&.building_type_id == building_type_id}
     building_level = BuildingLevel.find_by(level: BuildingLevel::FIRST_LEVEL, building_type_id: building_type_id)
     if already_there
       {building: nil, msg: "Во владении уже есть #{building_level&.name}."}
     else
       b = Building.create(settlement_id: self.id, building_level: building_level)
+      # Крепость строят за столом Мастера сражений: и веб-админка (Ownership.vue),
+      # и политдействие вассалов «Возвести форт» идут через этот метод, поэтому
+      # уведомление живёт здесь, а не в контроллере.
+      if building_level&.building_type_id == BuildingType::DEFENCE
+        NotificationRule.fortress_changed(b, :built)
+      end
       {building: b, msg: "Во владении построено #{building_level&.name}."}
     end
   end

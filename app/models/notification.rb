@@ -9,8 +9,10 @@ class Notification < ApplicationRecord
   REGION_ANNEXED = 'region_annexed'.freeze
   # Итог сражения: бой на планшете мастера или 1×1 в веб-админке.
   BATTLE_RESULT = 'battle_result'.freeze
+  # Крепость (постройка «Кремль») в городе построена или улучшена.
+  FORTRESS_CHANGED = 'fortress_changed'.freeze
 
-  KINDS = [TECHNOLOGY_OPENED, REGION_ANNEXED, BATTLE_RESULT].freeze
+  KINDS = [TECHNOLOGY_OPENED, REGION_ANNEXED, BATTLE_RESULT, FORTRESS_CHANGED].freeze
 
   belongs_to :user
   belongs_to :technology, optional: true

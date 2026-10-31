@@ -26,6 +26,12 @@ class Building < ApplicationRecord
             player.modify_influence(Job::ZODCHIY_BONUS, "Бонус за постройки", @building) 
           end
         end
+        # Крепость: об улучшении узнаёт мастер сражений (о постройке — Settlement#build).
+        # Уведомление только в ветке успешного save: на максимальном уровне и при
+        # ошибке сохранения уровень не менялся, событию не место.
+        if self.building_level.building_type_id == BuildingType::DEFENCE
+          NotificationRule.fortress_changed(self, :upgraded, previous_level: level)
+        end
         return {building_level: self.building_level, msg: "Новый уровень постройки: #{self.building_level&.name}"}
       else
         return {building_level: nil, msg: "Внутренняя ошибка. #{self.building_level}, #{self.errors.inspect}"}

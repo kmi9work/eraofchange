@@ -28,6 +28,11 @@ class NotificationRule
   # его последствия (влияние, земли) — окно получают мастера обеих должностей.
   BATTLE_RESULT_JOBS = [BATTLE_JOB, POLICY_JOB].freeze
 
+  # Крепости (постройка типа «Кремль») строят и улучшают за столом Мастера
+  # сражений (dizdoc.md:228), от уровня укрепления зависят сила защищающихся
+  # армий и влияние боярину, — окно адресуется только этой должности.
+  FORTRESS_RECIPIENT_JOBS = [BATTLE_JOB].freeze
+
   ANONYMOUS_NAME = 'Аноним'.freeze
 
   # Латиница, похожая на кириллицу. В сиде должность подмастерья сражений
@@ -118,6 +123,66 @@ class NotificationRule
       )
 
       notifications
+    end
+
+    # Крепость (постройка типа «Кремль», BuildingType::DEFENCE) в городе
+    # построена или улучшена.
+    #
+    # Событие вызывается из Settlement#build (в том числе из политдействия
+    # вассалов «Возвести форт») и из Building#upgrade!, а НЕ из колбэка Building:
+    # сиды движков создают крепости напрямую (`Building.create`), и колбэк
+    # слал бы окна при каждом прогоне сидов.
+    #
+    # `previous_level` — уровень ДО улучшения; при постройке не передаётся.
+    # Возвращает созданные записи (пустой массив, если получателей нет).
+    def fortress_changed(building, action, previous_level: nil)
+      # Только по реально сохранённой постройке: `Building.create` возвращает
+      # несохранённую запись при ошибке валидации (например, поселение не
+      # найдено), и окно без города и уровня было бы мусором.
+      return [] if building.nil? || !building.persisted?
+
+      settlement = building.settlement
+      building_level = building.building_level
+      return [] if settlement.nil? || building_level.nil?
+
+      country = building.country
+      level = building_level.level
+      level_name = building_level.name
+      upgraded = action.to_s == 'upgraded'
+      previous_name = previous_level_name(building, previous_level)
+
+      parts = []
+      parts << "Государство: «#{country.name}»." if country
+      parts << "Земля: «#{settlement.region.name}»." if settlement.region
+      parts << "Прежний уровень: «#{previous_name}» (#{previous_level})." if previous_name
+      parts << if upgraded
+                 'Город защищает крепость более высокого уровня.'
+               else
+                 'В городе появилась крепость — защита города усилена.'
+               end
+
+      Notification.deliver(
+        kind: Notification::FORTRESS_CHANGED,
+        title: "Крепость в городе «#{settlement.name}» #{upgraded ? 'улучшена' : 'построена'}: " \
+               "«#{level_name}» (#{level} уровень)",
+        body: parts.join(' '),
+        users: users_by_jobs(FORTRESS_RECIPIENT_JOBS),
+        country: country,
+        payload: {
+          'action' => upgraded ? 'upgraded' : 'built',
+          'building_id' => building.id,
+          'building_level' => level,
+          'building_level_name' => level_name,
+          'previous_level' => previous_level,
+          'previous_level_name' => previous_name,
+          'settlement_id' => settlement.id,
+          'settlement_name' => settlement.name,
+          'region_id' => settlement.region_id,
+          'region_name' => settlement.region&.name,
+          'country_id' => country&.id,
+          'country_name' => country&.name
+        }
+      )
     end
 
     # Итог сражения. Клиент мастеров считает бой на планшете и присылает итог
@@ -216,6 +281,15 @@ class NotificationRule
                    'fossil_type_name' => type.fossil_type&.name
                  }
                end
+    end
+
+    # Название прежнего уровня крепости: уровни нумерованы в пределах своего типа
+    # постройки (1 «Форт», 2 «Крепость», 3 «Кремль»), поэтому искать по паре
+    # «уровень + тип», а не по номеру уровня вообще.
+    def previous_level_name(building, previous_level)
+      return nil if previous_level.blank?
+
+      BuildingLevel.find_by(level: previous_level, building_type_id: building.building_level&.building_type_id)&.name
     end
 
     def annexation_body(previous_country, how_text, plants)
