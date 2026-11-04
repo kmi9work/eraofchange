@@ -1,6 +1,8 @@
 json.extract! settlement, :id, :name, :settlement_type_id, :settlement_type, :region_id, :income, :buildings, :map_x, :map_y, :created_at, :updated_at
 # Уровень крепости (0 — нет): им клиент красит маркер на карте
 json.fortress_level settlement.fortress_level
+# Ворота открыты (панель города на карте): штурм возможен без осадных орудий
+json.open_gate settlement.params&.dig("open_gate")
 json.player do 
   if settlement.player
     json.partial! "players/player", player: settlement.player
