@@ -9,6 +9,9 @@ class Settlement < ApplicationRecord
   has_many :buildings
   has_many :armies
   validates :name, presence: { message: "Поле Название должно быть заполнено" }
+  # Координаты на карте: нормализованные 0..1, nil — город ещё не размещён
+  # (редактор карты в веб-админке, docs/map/TZ-karta.md).
+  validates :map_x, :map_y, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
 
   # Поселения государства (страна поселения — страна его региона)
   scope :for_country, ->(country) do
@@ -17,6 +20,8 @@ class Settlement < ApplicationRecord
   scope :foreign_to, ->(country) do
     country.nil? ? all : joins(:region).where.not(regions: { country_id: country.id })
   end
+  # Размещённые на карте города
+  scope :placed, -> { where.not(map_x: nil).where.not(map_y: nil) }
 
   # Страна поселения — страна региона
   def country
@@ -25,6 +30,18 @@ class Settlement < ApplicationRecord
 
   def country_id
     region&.country_id
+  end
+
+  # Город размещён на карте
+  def placed?
+    map_x.present? && map_y.present?
+  end
+
+  # Уровень крепости (постройка типа «Кремль»): 0 — крепости нет.
+  # Этим числом клиент красит маркер на карте (0 чёрный, 1 коричневый, 2 синий, 3 красный).
+  def fortress_level
+    building = buildings.find { |b| b.building_level&.building_type_id == BuildingType::DEFENCE }
+    building&.building_level&.level.to_i
   end
 
   def income

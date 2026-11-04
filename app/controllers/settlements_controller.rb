@@ -71,7 +71,7 @@ class SettlementsController < ApplicationController
     end
 
     def settlement_params
-      params.require(:settlement).permit(:name, :settlement_type_id,  :region_id, :player_id, :plant_place_ids => [] )
+      params.require(:settlement).permit(:name, :settlement_type_id,  :region_id, :player_id, :map_x, :map_y, :plant_place_ids => [] )
     end
 
 end

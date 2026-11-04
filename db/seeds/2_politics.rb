@@ -69,7 +69,10 @@ while str = f.gets
   # Файл правят в Excel: сохранение то с запятыми, то с точкой с запятой.
   # Разделитель определяем по строке, иначе поля уезжают в id и сид падает.
   fields = (str.include?(';') ? str.split(';') : str.split(',')).map(&:strip)
-  id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way = fields
+  id, country_name, region_name, city_name, cost_type, player_name, def_level, tra_level, rel_level, relations, embargo, way, map_x, map_y = fields
+  # Координаты на карте (0..1): пустое поле — город не размещён (см. docs/map/TZ-karta.md)
+  map_x = map_x.present? ? map_x.to_f : nil
+  map_y = map_y.present? ? map_y.to_f : nil
   country = Country.find_by_name(country_name)
   if country.blank?
     short_name = short_names_map[country_name] || country_name
@@ -100,7 +103,12 @@ while str = f.gets
     xz
   end
   player = Player.find_by_name(player_name)
-  city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false})
+  city ||= Settlement.create(name: city_name, settlement_type: type, region: region, player: player, params: {"open_gate" => false}, map_x: map_x, map_y: map_y)
+  # Уже существующему городу координаты дописываем, только если их нет:
+  # сид идемпотентен, но чужие правки координат из редактора не затирает.
+  if city.persisted? && !city.placed? && map_x && map_y
+    city.update_columns(map_x: map_x, map_y: map_y)
+  end
   if def_level.to_s.strip.present?
     Building.create(building_level: defs[def_level.to_i - 1], settlement: city)
   end

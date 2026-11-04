@@ -34,6 +34,16 @@ else
     ["Подвинье", "Орлец"],
     ["Канинская земля", "Изьма"]
   ]
+  # Координаты на карте (0..1 от полотна public/images/map/map-base.png):
+  # в countries.csv этих городов нет — их создаёт этот сид, поэтому координаты
+  # ставятся здесь (docs/map/TZ-karta.md).
+  map_positions = {
+    "Ладога" => [0.312565, 0.301978],
+    "Кемь" => [0.306664, 0.090594],
+    "Каргополь" => [0.415654, 0.216591],
+    "Орлец" => [0.517702, 0.108990],
+    "Изьма" => [0.757202, 0.063520]
+  }
 
   new_cities.each do |region_name, city_name|
     region = Region.find_by(name: region_name, country_id: novgorod.id) || Region.find_by(name: region_name)
@@ -44,6 +54,7 @@ else
 
     city = Settlement.find_or_initialize_by(name: city_name, region_id: region.id)
     city.settlement_type = town_type if town_type
+    city.map_x, city.map_y = map_positions[city_name] if map_positions[city_name]
     city.params = (city.params || {}).merge("open_gate" => false)
     city.save!
   end
