@@ -1250,6 +1250,10 @@ end
     current_year.value = next_year.to_s
     current_year.save
 
+    # Начало года: шаги перемещения армий обнуляются у всех армий (правило
+    # заказчика) — армия снова может пройти полный максимум по своему составу.
+    Army.active.find_each(&:reset_steps!)
+
     # Флаг расходов нового года у каждого государства — «не оплачено»
     Country.find_each do |country|
       country.set_state_expenses(next_year, false)
@@ -1267,7 +1271,11 @@ end
       Troop.create(troop_type_id: 2, is_hired: false, army: a, params: {"paid" =>[], 'damage' => 0})
       Troop.create(troop_type_id: 4, is_hired: false, army: a, params: {"paid" =>[], 'damage' => 0})
 
-      a = Army.create(name: 'Орда 3', settlement: Settlement.find_by_name('Сарай-Берке'), owner: Country.find_by_name('Большая Орда'), owner_type: 'Country', params: {"paid" =>[], "palsy" => []})
+      # На карте (05.11.2026) город подписан «Сарай»; в базах, созданных до
+      # переименования, — «Сарай-Берке». Ищем оба имени, иначе армия появится
+      # без места и встанет у столицы как «не размещённая на карте».
+      sarai = Settlement.find_by_name('Сарай') || Settlement.find_by_name('Сарай-Берке')
+      a = Army.create(name: 'Орда 3', settlement: sarai, owner: Country.find_by_name('Большая Орда'), owner_type: 'Country', params: {"paid" =>[], "palsy" => []})
       Troop.create(troop_type_id: 2, is_hired: false, army: a, params: {"paid" =>[], 'damage' => 0})
       Troop.create(troop_type_id: 2, is_hired: false, army: a, params: {"paid" =>[], 'damage' => 0})
       Troop.create(troop_type_id: 2, is_hired: false, army: a, params: {"paid" =>[], 'damage' => 0})

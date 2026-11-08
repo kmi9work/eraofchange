@@ -92,7 +92,12 @@ class ArmiesController < ApplicationController
         format.json { render :show, status: :created, location: @army }
       else
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @army.errors, status: :unprocessable_entity }
+        # Клиент (era_native, карта) показывает `error` одной строкой: «Армия с
+        # таким названием уже существует» полезнее, чем «Сервер отклонил данные (422)».
+        format.json do
+          render json: { success: false, error: localized_army_errors.join(', ') },
+                 status: :unprocessable_entity
+        end
       end
     end
   end
@@ -110,25 +115,7 @@ class ArmiesController < ApplicationController
         format.json { render :show, status: :ok, location: @army }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { 
-          error_messages = @army.errors.full_messages
-          # Переводим стандартные сообщения об ошибках на русский
-          error_messages = error_messages.map do |message|
-            case message
-            when "Name has already been taken"
-              "Армия с таким названием уже существует"
-            when "Name can't be blank"
-              "Название армии не может быть пустым"
-            when "Owner must exist"
-              "Владелец армии должен быть указан"
-            when "Settlement must exist"
-              "Поселение должно быть указано"
-            else
-              message
-            end
-          end
-          render json: { errors: error_messages }, status: :unprocessable_entity 
-        }
+        format.json { render json: { errors: localized_army_errors }, status: :unprocessable_entity }
       end
     end
   end
@@ -143,6 +130,24 @@ class ArmiesController < ApplicationController
   end
 
   private
+    # Русские тексты ошибок армии: их показывают и веб-форма, и планшет мастера.
+    def localized_army_errors
+      @army.errors.full_messages.map do |message|
+        case message
+        when "Name has already been taken"
+          "Армия с таким названием уже существует"
+        when "Name can't be blank"
+          "Название армии не может быть пустым"
+        when "Owner must exist"
+          "Владелец армии должен быть указан"
+        when "Settlement must exist"
+          "Поселение должно быть указано"
+        else
+          message
+        end
+      end
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_army
       @army = Army.active.find(params[:id])
@@ -150,6 +155,6 @@ class ArmiesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def army_params
-      params.require(:army).permit(:name, :hidden, :settlement_id, :owner_id, :owner_type)
+      params.require(:army).permit(:name, :hidden, :settlement_id, :owner_id, :owner_type, :map_x, :map_y, :steps_spent)
     end
 end

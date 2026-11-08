@@ -519,6 +519,35 @@ check("технология 6 называется «Третий Рим» (в �
   technology&.name == "Третий Рим"
 end
 
+puts "\n=== карта (docs/map/TZ-karta.md)"
+# Сиды должны сразу давать заполненную карту: город без координат не рисуется, а
+# армия без города и без полевых координат встаёт у столицы как «не размещённая».
+check("все поселения размещены на карте (map_x/map_y)") do
+  unplaced = Settlement.where(map_x: nil).or(Settlement.where(map_y: nil))
+  puts "      поселений: #{Settlement.count}, без координат: #{unplaced.pluck(:name).inspect}"
+  unplaced.count.zero? && Settlement.count.positive?
+end
+check("города не делят одну точку карты") do
+  dup = Settlement.where.not(map_x: nil).to_a
+                   .group_by { |s| [s.map_x.to_f.round(4), s.map_y.to_f.round(4)] }
+                   .select { |_, list| list.size > 1 }
+  puts "      совпадения: #{dup.map { |key, list| [key, list.map(&:name)] }.inspect}"
+  dup.empty?
+end
+check("у каждой армии есть место (город или полевые координаты)") do
+  lost = Army.active.select { |a| a.settlement.nil? && a.map_x.nil? }
+  puts "      армий: #{Army.active.count}, без места: #{lost.map(&:name).inspect}"
+  lost.empty?
+end
+check("армия стоит в городе своего государства") do
+  wrong = Army.active.select do |a|
+    city = a.settlement
+    city && a.country && city.region&.country_id != a.country.id
+  end
+  puts "      вне своего государства: #{wrong.map { |a| "#{a.name} → #{a.settlement&.name}" }.inspect}"
+  wrong.empty?
+end
+
 puts "\n=== итог"
 if $fails.empty?
   puts "ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ"

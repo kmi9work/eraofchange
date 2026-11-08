@@ -32,6 +32,9 @@ class Army < ApplicationRecord
   
   validates :name, presence: true, uniqueness: { scope: :deleted_at, conditions: -> { where(deleted_at: nil) } }
   validate :owner_is_country_or_noble
+  # Положение армии на карте: нормализованные 0..1, nil — в городе (берётся из
+  # поселения) или полевая армия ещё не поставлена мастером (docs/map/TZ-karta.md).
+  validates :map_x, :map_y, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
 
   NUMBER_OF_SLOTS = 3   # обычные отряды (пехота, тяжёлая пехота, кавалерия)
   CANNON_SLOTS = 1      # пушка — сверх трёх отрядов, не больше одной
@@ -83,6 +86,81 @@ class Army < ApplicationRecord
     end
 
     { troop: troop, msg: "Отряд успешно добавлен в армию" }
+  end
+
+  # ─── Шаги перемещения за год (правила заказчика) ───────────────────────────
+  #
+  # Базовое число шагов: 7, с открытым «Консервированием» — 14. Поправки по
+  # составу: есть тяжёлая пехота −1, есть кавалерия +2, армия ТОЛЬКО из
+  # кавалерии ещё +2 (итого +4), есть пушка −2. Считается на сервере, чтобы
+  # правило жило в одном месте; клиент (era_native, карта) только показывает
+  # числа и присылает потраченные шаги.
+  BASE_STEPS = 7
+  CANNING_STEPS = 14
+  HEAVY_INFANTRY_STEPS = -1
+  CAVALRY_STEPS = 2
+  CAVALRY_ONLY_STEPS = 2
+  CANNON_STEPS = -2
+
+  # Сколько шагов армия потратила в этом году. Хранится в params["steps_spent"]:
+  # отдельной колонки нет, чтобы не гонять миграцию на живую базу.
+  def steps_spent
+    base_params["steps_spent"].to_i
+  end
+
+  def steps_spent=(value)
+    raw = value.to_s.strip
+    spent = raw.empty? ? 0 : raw.to_i
+    self.params = base_params.merge("steps_spent" => [[spent, 0].max, steps_max].min)
+  end
+
+  # Максимум шагов в году по составу и государству армии.
+  def steps_max
+    types = troops.map(&:troop_type_id)
+    steps = canning_open? ? CANNING_STEPS : BASE_STEPS
+    steps += HEAVY_INFANTRY_STEPS if types.include?(TroopType::HEAVY_MILITIA)
+    steps += CAVALRY_STEPS if types.include?(TroopType::CAVALRY)
+    steps += CAVALRY_ONLY_STEPS if !types.empty? && types.uniq == [TroopType::CAVALRY]
+    steps += CANNON_STEPS if types.include?(TroopType::CANNON)
+    [steps, 0].max
+  end
+
+  # Остаток шагов в году (для панели армии на карте).
+  def steps_left
+    [steps_max - steps_spent, 0].max
+  end
+
+  def steps_exhausted?
+    steps_left.zero?
+  end
+
+  # Потратить шаги: больше максимума не накопить — армия просто «выходит» из года.
+  def spend_steps!(count)
+    self.steps_spent = steps_spent + count.to_i
+    save
+  end
+
+  # Армия участвовала в сражении — шаги считаются потраченными полностью.
+  def exhaust_steps!
+    return if steps_exhausted?
+
+    self.steps_spent = steps_max
+    save(validate: false)
+  end
+
+  # Начало года: шаги обнуляются у всех армий.
+  def reset_steps!
+    return if steps_spent.zero?
+
+    self.steps_spent = 0
+    save(validate: false)
+  end
+
+  # Открыта ли технология «Консервирование» в государстве армии.
+  def canning_open?
+    return false if country.nil?
+
+    Technology.find_by(id: Technology::CANNING)&.is_open(country).to_i == 1
   end
 
   def lease_to(country)
@@ -275,6 +353,12 @@ class Army < ApplicationRecord
   end
 
   private
+
+  # params армии как хэш: в старых записях колонка бывает nil, а сиды кладут туда
+  # хэш. Шаги живут в этом же хэше (steps_spent), поэтому нужна безопасная база.
+  def base_params
+    params.is_a?(Hash) ? params : {}
+  end
 
   # Уведомление мастерам о результате боя 1×1 из веб-админки (тот же итог, что
   # присылает клиент мастеров после боя на планшете). Ошибка уведомления не
