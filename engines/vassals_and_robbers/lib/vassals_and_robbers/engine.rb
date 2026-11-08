@@ -49,6 +49,10 @@ module VassalsAndRobbers
         
         # Подключаем concerns к моделям ядра
         ::Plant.include VassalsAndRobbers::Concerns::PlantExtensions if defined?(::Plant) && defined?(VassalsAndRobbers::Concerns::PlantExtensions)
+
+        # Крепость в этой игре одного уровня — улучшение перекрываем (prepend,
+        # потому что метод уже есть в ядре).
+        ::Building.prepend VassalsAndRobbers::Concerns::BuildingExtensions if defined?(::Building) && defined?(VassalsAndRobbers::Concerns::BuildingExtensions)
         
         if defined?(::Country) && defined?(VassalsAndRobbers::Concerns::CountryExtensions)
           ::Country.include VassalsAndRobbers::Concerns::CountryExtensions

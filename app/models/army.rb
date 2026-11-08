@@ -185,30 +185,35 @@ class Army < ApplicationRecord
     current_params["additional"] ||= {}
     current_params["additional"]["active"] = false
     
-    # Присваиваем новый хеш
+    # Присваиваем новый hash
     self.params = current_params
     
     # КРИТИЧНО: Для JSON-полей нужно явно пометить как измененное
     self.params_will_change!
     
     self.save
-    
-    # Поиск армии с активной арендой
-    leased_army = Army.all.find do |army|
-      army.params.dig("additional", "active") == true
-    end
-  
-    # Если активных аренд нет, очищаем параметры игры
-    unless leased_army
-      g_p = GameParameter.find_by(identificator: GameParameter::LINGERING_EFFECTS)
-      if g_p && g_p.params.present?
-        current_g_p_params = g_p.params || []
-        new_params = current_g_p_params.reject { |p| p&.dig("name_of_action") == "transfere_army" }
-        g_p.params = new_params
-        g_p.params_will_change!
-        g_p.save
+
+    # Снимаем «длительные эффекты» передачи армии: записи об этой армии уходят
+    # всегда, а записи про отношения — только когда в аренде не осталось ни одной
+    # армии (иначе ограничение соседа снималось бы вместе с чужой армией).
+    leased_army = Army.all.any? { |army| (army.params || {}).dig("additional", "active") == true }
+    g_p = GameParameter.find_by(identificator: GameParameter::LINGERING_EFFECTS)
+    return unless g_p && g_p.params.present?
+
+    g_p.params = g_p.params.reject do |entry|
+      next false unless entry&.dig("name_of_action") == "transfere_army"
+
+      targets = Array(entry["targets"])
+      touches_this_army = targets.any? do |target|
+        target.is_a?(Hash) && target["type"] == "army" && target["id"].to_i == id
       end
+
+      # Вернули последнюю арендованную армию — записи про отношения снимаются
+      # вместе с ней, иначе сосед навсегда остался бы «не ниже нейтральных».
+      touches_this_army || !leased_army
     end
+    g_p.params_will_change!
+    g_p.save
   end
 
   def goto settlement_id
@@ -248,11 +253,15 @@ class Army < ApplicationRecord
 
   def attack enemy_id, voevoda_bonus
     # Проверяем эффект SINGLE_ARMY_COMPLETE_BLOCK для воеводы
-    # Проверяем только если owner - Player (не Country)
+    # Проверяем только если owner - Player (не Country). Эффект может быть
+    # нацелен на армию (новый клиент выбирает охраняющую армию) или на самого
+    # Воеводу (старые записи) — проверяем оба варианта.
     if self.owner_type == 'Player' && 
        self.owner.respond_to?(:jobs) &&
        self.owner.jobs.map(&:name).include?("Воевода") && 
-       GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name)
+       (GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year, self.owner.name) ||
+        GameParameter.any_lingering_effects?("single_army_complete_block", GameParameter.current_year,
+                                             { "type" => "army", "id" => id, "name" => name }))
       return "НЕЛЬЗЯ - Воевода не может командовать армией (эффект 'Защита каравана')"
     end
     
