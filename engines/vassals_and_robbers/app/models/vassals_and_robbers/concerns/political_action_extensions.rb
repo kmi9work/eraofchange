@@ -26,10 +26,15 @@ module VassalsAndRobbers
 #надо сделать:
 ## # В следующем году нельзя улучшить отношения со странами-импортерами
 
-      def support_export        
-        effects = [HIGHER_SELL_PRICES, INCREASED_TRADE_REVENUE, NO_RELATIONS_IMPROVEMENT]
-        result = GameParameter.register_lingering_effects("support_export", effects, GameParameter.current_year + 1)
-        
+      # Цена продажи и запрет на улучшение отношений действуют в СЛЕДУЮЩЕМ году,
+      # а доля казны считается по итогам текущего: `Player#income` читает эффект
+      # за `year - 1`, поэтому запись на текущий год даёт деньги в следующем.
+      # Раньше все три эффекта писались на current_year + 1, и казна получала
+      # свою долю ещё через год — позже, чем обещает карточка.
+      def support_export
+        GameParameter.register_lingering_effects("support_export", [HIGHER_SELL_PRICES, NO_RELATIONS_IMPROVEMENT], GameParameter.current_year + 1)
+        GameParameter.register_lingering_effects("support_export", [INCREASED_TRADE_REVENUE], GameParameter.current_year)
+
         return {success: true, message: "Эффекты экспорта зарегистрированы"}
       end
 
@@ -56,10 +61,10 @@ module VassalsAndRobbers
         { success: true, message: "Отношения с #{country.name} улучшены на 2" }
       end
 
-# Отношения с выбранным соседом не падают ниже "Нейтральных". 
-# Если отношения были ниже «Нейтральных» - они повышаются до 
-# «Нейтральных». Великий князь не может создавать или улучшать 
-# вою армию, пока она в распоряжении соседа.
+# Отношения с выбранным соседом не падают ниже "Нейтральных".
+# Если отношения были ниже «Нейтральных» - они повышаются до
+# «Нейтральных». Дружина уходит соседу на 2 года; пока она у него,
+# Великий князь не может создавать или улучшать свою армию.
       
       def transfere_army #Передача армии
         target = Country.current&.council_players(Job::GRAND_PRINCE)&.first
@@ -76,16 +81,13 @@ module VassalsAndRobbers
           return {error: "Эта армия уже передана стране: #{leased_to}"}
         end
         
-        # Проверяем силу армии
-        army_power = army.troops.sum{|t| t.power}
-        return {error: "Эту армию нельзя передать, так как ее сила меньше 5 (сейчас: #{army_power})"} if army_power < 5
-        
+        # Карточка больше не требует армию силой выше 5 — порог снят (09.11.2026).
         neighbour = Country.find_by_id(params["country_id"])
         return {error: "Страна не найдена"} unless neighbour
         return {error: "Нельзя передать армию своему же государству"} if neighbour.id == army.country_id
         
-        # Передаем армию
-        army.lease_to(neighbour)
+        # Передаем армию (год хранится в params: по карточке срок — 2 года)
+        army.lease_to(neighbour, GameParameter.current_year)
 
         # Отношения с соседом не падают ниже нейтральных, пока армия у него.
         # Эффект отношения регистрируется на ГОСУДАРСТВО (проверка живёт в
@@ -98,10 +100,10 @@ module VassalsAndRobbers
           effects << NON_NEGATIVE_RELATIONS
         end
 
-        # Эффект держится, пока армия не вернётся (`Army#unlease` снимает записи),
-        # но не дольше конца игры: срок задаётся годами, а не «навсегда».
-        last_year = [GameParameter.get_years_count.to_i, GameParameter.current_year].max
-        years = (GameParameter.current_year..last_year).to_a
+        # Эффекты держатся два года: армия, переданная в текущем году, служит
+        # соседу этот год и следующий, а в начале третьего `increase_year`
+        # возвращает её (`ArmyLeaseRelease` в game_parameter_extensions).
+        years = [GameParameter.current_year, GameParameter.current_year + 1]
         army_target = {
           "type" => "army",
           "id" => army.id,
@@ -111,7 +113,7 @@ module VassalsAndRobbers
         GameParameter.register_lingering_effects("transfere_army", [ARMY_LEASED], years, army_target)
         GameParameter.register_lingering_effects("transfere_army", effects, years, neighbour) if effects.any?
         
-        return {success: true, message: "Армия '#{army.name}' передана стране '#{neighbour.name}'"}
+        return {success: true, message: "Армия '#{army.name}' передана стране '#{neighbour.name}' на 2 года"}
       end
 
       def build_fort #Возвести форт
@@ -188,8 +190,8 @@ module VassalsAndRobbers
 
         #Проповедь
       def sermon_vassals 
-          region = Region.find_by_id(params['region_id'])
-          PublicOrderItem.add(5, self.political_action_type.name, region, self) if region
+          region = Region.find_by_id((params || {})['region_id'])
+          PublicOrderItem.add(3, self.political_action_type.name, region, self) if region
       end
 
         #Принести дары (для Руси)
@@ -199,13 +201,15 @@ module VassalsAndRobbers
       end
 
         #Набрать рекрутов
+        # Отряды добавляет мастер сражений вручную (карточка: суммарно 3 пункта).
+        # Штрафа к общественному порядку больше нет — правка карточки 09.11.2026:
+        # раньше метод снижал ОП во всех регионах государства на 1.
       def recruiting_vassals        
-        regions = Country.current&.regions || Region.none
-        regions.each {|r| PublicOrderItem.add(-1, "Набрать рекрутов", r, self)}
+        { success: true, message: "Армии усилены на 3 пункта (отряды добавляет мастер сражений)" }
       end
 
         #Защита каравана
-        #Воевода не может распоряжаться своей армией в текущем году
+        # Армия, переданная для защиты каравана, не может двигаться в текущем году
       def protect_caravan
         effects = [SINGLE_ARMY_COMPLETE_BLOCK]
         
@@ -217,13 +221,15 @@ module VassalsAndRobbers
         target = Country.current&.council_players(Job::VOEVODA)&.first
         return {error: "Воевода не найден"} unless target
 
-        # Армия, которая охраняет караван: выбирает мастер в диалоге. Это должна
-        # быть армия Воеводы — чужую армию он «передать» не может.
+        # Армия, которая охраняет караван: выбирает мастер в диалоге. Это может
+        # быть ЛЮБАЯ армия государства (решение заказчика): и дружина Воеводы, и
+        # армия знати, и гарнизон страны.
         army_id = params["army_id"].presence
         army = nil
         if army_id
-          army = target.armies.find_by_id(army_id)
-          return {error: "Армия не найдена или не принадлежит Воеводе"} unless army
+          army = Army.active.find_by(id: army_id)
+          return {error: "Армия не найдена"} unless army
+          return {error: "Армия принадлежит другому государству"} unless army.country_id == Country.current&.id
         end
         
         # Обновляем params гильдии (для исторических данных)
@@ -249,7 +255,7 @@ module VassalsAndRobbers
           end
         GameParameter.register_lingering_effects("protect_caravan", effects, GameParameter.current_year, effect_target)
         
-        army_note = army ? "Армия '#{army.name}' охраняет караван." : "Воевода не сможет командовать армией."
+        army_note = army ? "Армия '#{army.name}' охраняет караван и не может двигаться в этом году." : "Армия не выбрана — ограничение записано на Воеводу."
         return {success: true, message: "Караван гильдии '#{guild.name}' защищен. #{army_note}"}
       end
 

@@ -48,7 +48,35 @@ module VassalsAndRobbers
           end
         end
 
+        # «Передача армии»: дружина уходит соседу на 2 года и возвращается сама.
+        # Армия, переданная в году N, служит N и N+1; при переходе на N+2
+        # `increase_year` снимает аренду. Год передачи лежит в
+        # `army.params["additional"]["leased_year"]`; у старых записей его нет —
+        # такие армии автоматически не возвращаются, их снимает мастер.
+        module ArmyLeaseRelease
+          def increase_year(*args)
+            result = super
+
+            if defined?(::Army)
+              ::Army.active.find_each do |army|
+                additional = (army.params || {})["additional"] || {}
+                next unless additional["active"] == true
+
+                # Год 0 — обычный игровой год, поэтому «нет года» проверяем на nil,
+                # а не на ноль.
+                leased_year = additional["leased_year"]
+                next if leased_year.nil?
+
+                army.unlease if current_year.to_i - leased_year.to_i >= 2
+              end
+            end
+
+            result
+          end
+        end
+
         singleton_class.prepend(DefaultScheduleOverride)
+        singleton_class.prepend(ArmyLeaseRelease)
       end
     end
   end

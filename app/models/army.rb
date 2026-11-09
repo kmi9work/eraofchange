@@ -163,12 +163,16 @@ class Army < ApplicationRecord
     Technology.find_by(id: Technology::CANNING)&.is_open(country).to_i == 1
   end
 
-  def lease_to(country)
+  # year — год передачи: по карточке дружина уходит соседу на 2 года, и
+  # `GameParameter.increase_year` возвращает её сама (движок vassals_and_robbers).
+  def lease_to(country, year = nil)
     # Получаем текущие params или создаем пустой хеш
     current_params = self.params || {}
     
     # Создаем новый хеш с данными об аренде
-    current_params["additional"] = {"leased_to" => country.name, "active" => true}
+    additional = {"leased_to" => country.name, "active" => true}
+    additional["leased_year"] = year.to_i if year
+    current_params["additional"] = additional
     
     # Присваиваем новый хеш
     self.params = current_params
@@ -184,6 +188,7 @@ class Army < ApplicationRecord
     current_params = self.params || {}
     current_params["additional"] ||= {}
     current_params["additional"]["active"] = false
+    current_params["additional"].delete("leased_year")
     
     # Присваиваем новый hash
     self.params = current_params

@@ -8,8 +8,16 @@ class Caravan < ApplicationRecord
 
    MAX_TRADE_POINTS = 3
    GRAND_PRINCE_SHARE = 0.10
+
+  # Доля казны от товарооборота. Отдаётся методом, чтобы игра-движок могла
+  # переопределить процент, не меняя константу ядра (vassals_and_robbers: 30%).
+  def self.trade_revenue_share
+    GRAND_PRINCE_SHARE
+  end
   # Подсчет, сколько надо досыпать золота Великому Князю.
-  # Считается как 10% от товарооборота (gold_export + gold_import) за предыдущий год.
+  # Считается как доля от товарооборота (gold_export + gold_import) за предыдущий
+  # год: в ядре 10% (`GRAND_PRINCE_SHARE`), в «Вассалах» движок поднимает долю
+  # до 30% через `trade_revenue_share`.
   # country — государство, чьи гильдии торговали (по умолчанию текущее), чтобы в
   # игре за несколько команд каждое государство считало свой товарооборот.
   def self.count_caravan_revenue(country = nil)
@@ -27,7 +35,7 @@ class Caravan < ApplicationRecord
       .sum("ABS(COALESCE(gold_import, 0)) + ABS(COALESCE(gold_export, 0))")
       .to_i
 
-    (turnover * GRAND_PRINCE_SHARE).floor
+    (turnover * trade_revenue_share).floor
   end
 
   # Публичный метод для проверки ограбления каравана

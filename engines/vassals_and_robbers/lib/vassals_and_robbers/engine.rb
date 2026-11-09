@@ -69,6 +69,16 @@ module VassalsAndRobbers
           ::PlantPlacesController.include VassalsAndRobbers::Concerns::PlantPlacesControllerExtensions
         end
         ::PoliticalAction.include VassalsAndRobbers::Concerns::PoliticalActionExtensions if defined?(::PoliticalAction)
+
+        # «Поддержать экспорт»: 50% к цене продажи и 30% казне вместо ядровых
+        # 20% и 10%. Переопределяются методы, а не общие константы ядра.
+        if defined?(::Resource) && defined?(VassalsAndRobbers::Concerns::ResourceClassExtensions)
+          ::Resource.singleton_class.prepend VassalsAndRobbers::Concerns::ResourceClassExtensions
+        end
+
+        if defined?(::Caravan) && defined?(VassalsAndRobbers::Concerns::CaravanClassExtensions)
+          ::Caravan.singleton_class.prepend VassalsAndRobbers::Concerns::CaravanClassExtensions
+        end
         
         Rails.logger.info "[VassalsAndRobbers] Plugin concerns activated"
         Rails.logger.info "[VassalsAndRobbers] ENV['ACTIVE_GAME'] = #{ENV['ACTIVE_GAME'].inspect}"

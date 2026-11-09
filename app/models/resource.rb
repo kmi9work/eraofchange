@@ -10,6 +10,13 @@ class Resource < ApplicationRecord
 
   TARIFF = 1.20
 
+  # Доля, на которую «Поддержать экспорт» поднимает цену продажи. Отдаётся
+  # методом, чтобы игра-движок могла переопределить процент, не меняя константу
+  # ядра (vassals_and_robbers: 50% вместо 20%).
+  def self.sell_price_tariff
+    TARIFF
+  end
+
   # Artel: ресурсы без страны и особая логика цен.
   # В dev может случиться, что Engine-хук не успевает подмешать concern до первого запроса.
   # Подмешиваем здесь гарантированно, если активна игра Artel.
@@ -180,7 +187,7 @@ class Resource < ApplicationRecord
   private
   def self.increase_prices(hashed_array)
     hashed_array[:to_market].each do |resource|
-      resource[:sell_price] = (resource[:sell_price] * TARIFF).floor
+      resource[:sell_price] = (resource[:sell_price] * sell_price_tariff).floor
     end
     hashed_array
   end
